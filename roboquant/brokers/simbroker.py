@@ -77,7 +77,7 @@ class SimBroker(Broker):
         The default implementation is a fixed slippage percentage based on the configured price_type.
         """
 
-        price = item.get_price(self.price_type)
+        price = item.price(self.price_type)
         correction = self.slippage if order.is_buy else -self.slippage
         return price * (1.0 + correction)
 
@@ -125,7 +125,7 @@ class SimBroker(Broker):
         """track the latest market prices for all open positions"""
         for symbol in self._account.positions.keys():
             if (item := price_items.get(symbol)) is not None:
-                self._prices[symbol] = item.get_price(self.price_type)
+                self._prices[symbol] = item.price(self.price_type)
 
     def place_orders(self, *orders: Order):
         """Place new orders at this broker. The order gets assigned a unique id if it hasn't one already.

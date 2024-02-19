@@ -29,9 +29,9 @@ class CandleFeed(Feed):
                         ohlcv[1] = p  # high
                     if p < ohlcv[2]:
                         ohlcv[2] = p  # low
-                    ohlcv[4] += item.volume
+                    ohlcv[4] += item.trade_volume
                 else:
-                    candles[symbol] = Candle(symbol, array("f", [p, p, p, p, item.volume]))
+                    candles[symbol] = Candle(symbol, array("f", [p, p, p, p, item.trade_volume]))
 
     def play(self, channel: EventChannel):
         src_channel = channel.copy()

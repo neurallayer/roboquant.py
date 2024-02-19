@@ -25,26 +25,27 @@ class TestFeature(Feature):
 
 class PriceFeature(Feature):
 
-    def __init__(self, symbol: str, price_type: str) -> None:
+    def __init__(self, symbol: str, price_type: str = "DEFAULT") -> None:
         self.symbol = symbol
         self.price_type = price_type
         self.name = f"{symbol}-{price_type}-PRICE"
 
     def calc(self, evt):
         item = evt.price_items.get(self.symbol)
-        price = item.get_price(self.price_type) if item else float("nan")
+        price = item.price(self.price_type) if item else float("nan")
         return np.array([price])
 
 
 class VolumeFeature(Feature):
 
-    def __init__(self, symbol) -> None:
+    def __init__(self, symbol, volume_type: str = "DEFAULT") -> None:
         self.symbol = symbol
         self.name = f"{symbol}-VOLUME"
+        self.volume_type = volume_type
 
     def calc(self, evt: Event):
         price_data = evt.price_items.get(self.symbol)
-        volume = price_data.volume if price_data else float("nan")
+        volume = price_data.volume(self.volume_type) if price_data else float("nan")
         return np.array([volume])
 
 

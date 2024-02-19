@@ -55,8 +55,8 @@ def test_priceaction_feed(feed: Feed, symbols: list[str], testCase: TestCase, ti
                         testCase.assertGreaterEqual(ohlcv[1], ohlcv[i])  # High >= OHLC
                         testCase.assertGreaterEqual(ohlcv[i], ohlcv[2])  # OHLC >= Low
                 case Trade():
-                    testCase.assertTrue(math.isfinite(action.price))
-                    testCase.assertTrue(math.isfinite(action.volume))
+                    testCase.assertTrue(math.isfinite(action.trade_price))
+                    testCase.assertTrue(math.isfinite(action.trade_volume))
                 case Quote():
                     for f in action.data:
                         testCase.assertTrue(math.isfinite(f))

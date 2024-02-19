@@ -28,7 +28,7 @@ class CAPMTracker(Tracker):
         return result / cnt
 
     def log(self, event: Event, account, ratings, orders):
-        prices = {item.symbol: item.get_price(self.price_type) for item in event.price_items.values()}
+        prices = {item.symbol: item.price(self.price_type) for item in event.price_items.values()}
         equity = account.equity
         if self.init:
             self.acc_returns.append(equity / self.last_equity - 1.0)

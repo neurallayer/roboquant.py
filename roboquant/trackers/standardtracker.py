@@ -98,7 +98,7 @@ class StandardTracker(Tracker):
 
     def _update_market_returns(self, event: Event):
         for symbol, item in event.price_items.items():
-            price = item.get_price(self.price_type)
+            price = item.price(self.price_type)
             if mr := self.market_returns.get(symbol):
                 mr.end_time = event.time
                 mr.end_price = price

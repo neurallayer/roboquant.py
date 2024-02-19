@@ -86,7 +86,7 @@ class FlexTrader(Trader):
                 logger.debug("rating=%s for symbol=%s discarded because of no price available", rating, symbol)
                 continue
 
-            price = item.get_price(self.price_type)
+            price = item.price(self.price_type)
             pos_size = account.get_position_size(symbol)
 
             change = _PositionChange.get_change(rating, pos_size)

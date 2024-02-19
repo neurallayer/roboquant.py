@@ -8,7 +8,7 @@ from tests.common import get_feed
 class _MyTrader(FlexTrader):
 
     def _get_orders(self, symbol: str, size: Decimal, action: PriceItem, rating: float) -> list[Order]:
-        price = action.get_price("CLOSE")
+        price = action.price("CLOSE")
         if price:
             limit_price = price * 0.99 if size > 0 else price * 1.01
             order = Order(symbol, size, limit_price)

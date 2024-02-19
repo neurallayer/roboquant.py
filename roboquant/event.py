@@ -11,15 +11,14 @@ class PriceItem:
     symbol: str
     """the symbol for this price-item"""
 
-    def get_price(self, price_type: str = "DEFAULT") -> float:
-        """get the price for the provided type. A price_type for example is
+    def price(self, price_type: str = "DEFAULT") -> float:
+        """Returns the price for the provided type. A price_type for example is
         `OPEN` or `CLOSE`. All price-items are expected to return a DEFAULT price
         if the type is unknown.
         """
         ...
 
-    @property
-    def volume(self) -> float:
+    def volume(self, volume_type: str = "DEFAULT") -> float:
         """Return the volume of the price-item"""
         ...
 
@@ -29,7 +28,7 @@ class Quote(PriceItem):
     symbol: str
     data: array
 
-    def get_price(self, price_type: str = "DEFAULT") -> float:
+    def price(self, price_type: str = "DEFAULT") -> float:
         match price_type:
             case "ASK":
                 return self.data[0]
@@ -46,19 +45,27 @@ class Quote(PriceItem):
     def bid_volume(self) -> float:
         return self.data[3]
 
-    @property
-    def volume(self) -> float:
-        return (self.data[1] + self.data[3]) / 2
+    def volume(self, volume_type: str = "DEFAULT") -> float:
+        match volume_type:
+            case "ASK":
+                return self.data[1]
+            case "BID":
+                return self.data[3]
+            case _:
+                return (self.data[1] + self.data[3]) / 2.0
 
 
 @dataclass(slots=True)
 class Trade(PriceItem):
     symbol: str
-    price: float
-    volume: float
+    trade_price: float
+    trade_volume: float
 
-    def get_price(self, price_type: str = "DEFAULT") -> float:
-        return self.price
+    def price(self, price_type: str = "DEFAULT") -> float:
+        return self.trade_price
+
+    def volume(self, volume_type: str = "DEFAULT") -> float:
+        return self.trade_volume
 
 
 @dataclass(slots=True)
@@ -73,7 +80,7 @@ class Candle(PriceItem):
         ohlcv = array("f", [ohlcva[0] * adj, ohlcva[1] * adj, ohlcva[2] * adj, ohlcva[5], ohlcva[4] / adj])
         return cls(symbol, ohlcv, frequency)
 
-    def get_price(self, price_type: str = "DEFAULT") -> float:
+    def price(self, price_type: str = "DEFAULT") -> float:
         match price_type:
             case "OPEN":
                 return self.ohlcv[0]
@@ -84,8 +91,7 @@ class Candle(PriceItem):
             case _:
                 return self.ohlcv[3]
 
-    @property
-    def volume(self) -> float:
+    def volume(self, volume_type: str = "DEFAULT") -> float:
         return self.ohlcv[4]
 
 
@@ -123,7 +129,7 @@ class Event:
         """Return the price for the symbol, or None if not found."""
 
         if item := self.price_items.get(symbol):
-            return item.get_price(price_type)
+            return item.price(price_type)
 
     def __repr__(self) -> str:
         return f"Event(time={self.time} item={len(self.items)})"

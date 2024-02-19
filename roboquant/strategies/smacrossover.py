@@ -37,7 +37,7 @@ class SMACrossover(Strategy):
                 h = collections.deque(maxlen=self.max_period)
                 self._history[symbol] = h
 
-            h.append(item.get_price())
+            h.append(item.price())
             if len(h) == h.maxlen:
                 if rating := self._check_condition(symbol):
                     ratings[symbol] = rating

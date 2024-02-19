@@ -17,7 +17,7 @@ class EMACrossover(Strategy):
         ratings: dict[str, float] = {}
         for symbol, item in event.price_items.items():
 
-            price = item.get_price(self.price_type)
+            price = item.price(self.price_type)
             calculator = self._history.get(symbol)
 
             if calculator is None:
