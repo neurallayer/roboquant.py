@@ -1,0 +1,26 @@
+{
+    "cSpell.words": [
+        "annualize",
+        "dataframe",
+        "dtype",
+        "ohlcv",
+        "optim",
+        "prettytable",
+        "roboquant",
+        "stooq",
+        "Tensorboard",
+        "timeframes"
+    ],
+    "python.testing.unittestArgs": [
+        "-v",
+        "-s",
+        "./tests/unit",
+        "-p",
+        "test_*.py"
+    ],
+    "python.testing.pytestEnabled": false,
+    "python.testing.unittestEnabled": true,
+    "[python]": {
+        "editor.defaultFormatter": "ms-python.black-formatter"
+    }
+}

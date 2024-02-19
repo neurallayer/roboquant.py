@@ -1,0 +1,15 @@
+# Core 
+numpy~=1.26.2
+websocket-client~=1.6.4
+prettytable~=3.9.0
+requests~=2.31.0
+
+# Part of optional 
+yfinance~=0.2.36
+torch>=2.1.0
+tensorboard>=2.15.1
+
+# Build tools
+build~=1.0.3
+twine~=5.0.0
+flake8==7.0.0

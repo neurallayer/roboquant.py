@@ -1,0 +1,10 @@
+__pycache__
+runs/
+.idea/
+*.db
+scratch*.py
+dist/
+roboquant.egg-info/
+build/
+.venv/
+.ipynb_checkpoints/

@@ -1,0 +1,50 @@
+[tool.black]
+line-length = 127
+
+[tool.flake8]
+max-line-length = 127
+
+[build-system]
+requires = ["setuptools>=61.0"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "roboquant"
+version = "0.1.6"
+authors = [ { name="roboquant team", email="info@roboquant.org" },]
+description = "A fast algo-trading platform"
+readme = "README.md"
+requires-python = ">=3.10"
+classifiers = [
+    "Development Status :: 3 - Alpha",
+    "Intended Audience :: Developers",
+    "Programming Language :: Python",
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3 :: Only",
+    "Programming Language :: Python :: 3.10",
+    "Programming Language :: Python :: 3.11",
+    "Programming Language :: Python :: 3.12",
+    "License :: OSI Approved :: Apache Software License",
+    "Operating System :: OS Independent",
+    "Topic :: Office/Business :: Financial",
+    "Topic :: Office/Business :: Financial :: Investment"
+]
+keywords = ["trading", "investment", "finance", "crypto", "stocks", "exchange", "forex"]
+dependencies = [
+  "numpy>=1.25.2",
+  "prettytable~=3.9.0",
+  "websocket-client~=1.7.0",
+  "requests>=2.31.0",
+]
+
+[project.optional-dependencies]
+torch = ["torch>=2.1.0", "tensorboard>=2.15.2"]
+yahoo = ["yfinance~=0.2.36"]
+all = [ "roboquant[torch,yahoo]" ]
+
+
+[project.urls]
+Homepage = "https://roboquant.org"
+Repository = "https://github.com/neurallayer/roboquant.py.git"
+Issues = "https://github.com/neurallayer/roboquant.py/issues"
+
