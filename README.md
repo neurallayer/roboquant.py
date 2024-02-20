@@ -1,5 +1,5 @@
 
-# ![roboquant logo](https://github.com/neurallayer/roboquant.py/raw/main/docs/roboquant_header.png)(https://roboquant.org)
+# ![roboquant logo](https://github.com/neurallayer/roboquant.py/raw/main/docs/roboquant_header.png)
 
 ![PyPI - Version](https://img.shields.io/pypi/v/roboquant)
 ![PyPI - License](https://img.shields.io/pypi/l/roboquant)
