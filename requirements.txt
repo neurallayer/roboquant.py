@@ -8,6 +8,7 @@ requests~=2.31.0
 yfinance~=0.2.36
 torch>=2.1.0
 tensorboard>=2.15.1
+nautilus-ibapi~=10.19.2
 
 # Build tools
 build~=1.0.3

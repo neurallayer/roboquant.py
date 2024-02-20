@@ -1,14 +1,13 @@
 
-# Roboquant
+# ![roboquant logo](https://github.com/neurallayer/roboquant.py/raw/main/docs/roboquant_header.png)
 
 ![PyPI - Version](https://img.shields.io/pypi/v/roboquant)
 ![PyPI - License](https://img.shields.io/pypi/l/roboquant)
 ![PyPI - Python Version](https://img.shields.io/pypi/pyversions/roboquant)
 ![PyPI - Status](https://img.shields.io/pypi/status/roboquant)
+[![discord](https://img.shields.io/discord/954650958300856340?label=discord)](https://discord.com/channels/954650958300856340/954650958300856343)
 
 Roboquant is an open-source algorithmic trading platform. It is flexible, user-friendly and completely free to use. It is designed for anyone serious about algo-trading. So whether you are a beginning retail trader or an established trading firm, roboquant can help you to develop robust and fully automated trading strategies.
-
-![roboquant logo](https://github.com/neurallayer/roboquant.py/raw/main/docs/roboquant_header.png)
 
 ## Usage
 The following code snippet shows the steps required to run a full back-test on a number of stocks.

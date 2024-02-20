@@ -40,7 +40,8 @@ dependencies = [
 [project.optional-dependencies]
 torch = ["torch>=2.1.0", "tensorboard>=2.15.2"]
 yahoo = ["yfinance~=0.2.36"]
-all = [ "roboquant[torch,yahoo]" ]
+ibkr = ["nautilus-ibapi~=10.19.2"]
+all = [ "roboquant[torch,yahoo,ibkr]" ]
 
 
 [project.urls]
