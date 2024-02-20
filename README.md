@@ -1,5 +1,5 @@
 
-# ![roboquant logo](https://github.com/neurallayer/roboquant.py/raw/main/docs/roboquant_header.png)
+# ![roboquant logo](https://github.com/neurallayer/roboquant.py/raw/main/docs/roboquant_header.png)(https://roboquant.org)
 
 ![PyPI - Version](https://img.shields.io/pypi/v/roboquant)
 ![PyPI - License](https://img.shields.io/pypi/l/roboquant)
@@ -7,7 +7,9 @@
 ![PyPI - Status](https://img.shields.io/pypi/status/roboquant)
 [![discord](https://img.shields.io/discord/954650958300856340?label=discord)](https://discord.com/channels/954650958300856340/954650958300856343)
 
-Roboquant is an open-source algorithmic trading platform. It is flexible, user-friendly and completely free to use. It is designed for anyone serious about algo-trading. So whether you are a beginning retail trader or an established trading firm, roboquant can help you to develop robust and fully automated trading strategies.
+Roboquant is an open-source algorithmic trading platform. It is flexible, user-friendly and completely free to use. It is designed for anyone serious about algo-trading. 
+
+So whether you are a beginning retail trader or an established trading firm, roboquant can help you to develop robust and fully automated trading strategies. You can find out more at [roboquant.org](https://roboquant.org).
 
 ## Usage
 The following code snippet shows the steps required to run a full back-test on a number of stocks.
@@ -73,7 +75,7 @@ python -m unittest discover -s tests/unit
 flake8 roboquant tests
 ```
 
-# Kotlin version
+## Kotlin version
 Next to this Python version of `roboquant`, there is also a Kotlin version available. Both (will) share a similar API, just the used computer language is different.
 
 Which one to use, depends very much on personal preference, skills and use-case.

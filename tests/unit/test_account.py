@@ -28,11 +28,11 @@ class TestAccount(unittest.TestCase):
     def test_account_option(self):
         acc = OptionAccount()
         acc.register("DUMMY", 5.0)
-        self.assertEqual(1000.0, acc.get_value("DUMMY", Decimal(1), 200.0))
-        self.assertEqual(200.0, acc.get_value("TSLA", Decimal(1), 200.0))
+        self.assertEqual(1000.0, acc.contract_value("DUMMY", Decimal(1), 200.0))
+        self.assertEqual(200.0, acc.contract_value("TSLA", Decimal(1), 200.0))
 
-        self.assertEqual(20000.0, acc.get_value("AAPL  131101C00470000", Decimal(1), 200.0))
-        self.assertEqual(2000.0, acc.get_value("AAPL7 131101C00470000", Decimal(1), 200.0))
+        self.assertEqual(20000.0, acc.contract_value("AAPL  131101C00470000", Decimal(1), 200.0))
+        self.assertEqual(2000.0, acc.contract_value("AAPL7 131101C00470000", Decimal(1), 200.0))
 
     def test_account_repr(self):
         acc = Account()

@@ -35,22 +35,23 @@ class Account:
         self.last_update: datetime = datetime.fromisoformat("1900-01-01T00:00:00+00:00")
         self.equity = 0.0
 
-    def get_value(self, symbol: str, size: Decimal, price: float) -> float:
+    def contract_value(self, symbol: str, size: Decimal, price: float) -> float:
         """Return the total value of the provided contract size denoted in the base currency of the account.
         The default implementation returns `size * price`.
 
-        The bahavior of this method can be changed for symbols denoted in a different currency and/or contract size by
-        providing a different value_calculator.
+        A subclass can implement different logic to cater for: 
+        - symbols denoted in different currencies
+        - symbols having different contract sizes like option contracts.
         """
         return float(size) * price
 
     def mkt_value(self, prices: dict[str, float]) -> float:
         """Return the the market value of all the open positions in the account using the provided prices."""
-        return sum([self.get_value(symbol, pos.size, prices[symbol]) for symbol, pos in self.positions.items()], 0.0)
+        return sum([self.contract_value(symbol, pos.size, prices[symbol]) for symbol, pos in self.positions.items()], 0.0)
 
     def unrealized_pnl(self, prices: dict[str, float]) -> float:
         return sum(
-            [self.get_value(symbol, pos.size, prices[symbol] - pos.avg_price) for symbol, pos in self.positions.items()],
+            [self.contract_value(symbol, pos.size, prices[symbol] - pos.avg_price) for symbol, pos in self.positions.items()],
             0.0,
         )
 
@@ -96,8 +97,11 @@ class Account:
 
 class OptionAccount(Account):
     """
-    This account handles common option contracts of size 100 and 10. Serves as an example.
-    If no contract size is registered for a symbol, it creates one based on the symbol name.
+    This account handles common option contracts of size 100 and 10 and serves as an example.
+    If no contract size is registered for a symbol, it creates one based on the option symbol name.
+
+    If the symbol is not recognised as an OCC compliant option symbol, it is assumed to have a
+    contract size of 1.0
     """
 
     def __init__(self):
@@ -108,7 +112,7 @@ class OptionAccount(Account):
         """Register a certain contract-size for a symbol"""
         self._contract_sizes[symbol] = contract_size
 
-    def get_value(self, symbol: str, size: Decimal, price: float) -> float:
+    def contract_value(self, symbol: str, size: Decimal, price: float) -> float:
         contract_size = self._contract_sizes.get(symbol)
 
         # If nithng registered we try to defer the contract size from the symbol

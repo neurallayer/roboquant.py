@@ -50,7 +50,7 @@ class SimBroker(Broker):
         """Update a position and cash based on a new transaction"""
         acc = self._account
         symbol = trx.symbol
-        acc.buying_power -= acc.get_value(symbol, trx.size, trx.price)
+        acc.buying_power -= acc.contract_value(symbol, trx.size, trx.price)
 
         size = acc.get_position_size(symbol)
 

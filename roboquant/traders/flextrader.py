@@ -102,10 +102,10 @@ class FlexTrader(Trader):
                 new_orders = self._get_orders(symbol, pos_size * -1, item, rating)
                 orders += new_orders
             else:
-                contract_price = account.get_value(symbol, Decimal(1), price)
+                contract_price = account.contract_value(symbol, Decimal(1), price)
                 order_size = self._get_order_size(rating, contract_price, max_order_value)
 
-                order_value = abs(account.get_value(symbol, order_size, price))
+                order_value = abs(account.contract_value(symbol, order_size, price))
                 if order_value > (buying_power - self.min_buying_power):
                     logger.debug("rating=%s for symbol=%s discarded because of insufficient buying power", rating, symbol)
                     continue
