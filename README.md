@@ -31,12 +31,20 @@ Roboquant can be installed like most other Python packages, using for example pi
 python3 -m pip install --upgrade roboquant
 ```
 
-If you want to use YahooFinance market data or PyTorch based strategies, you can install roboquant including one or more of the optional dependencies:
+The core of roboquant tries to limit the dependencies. But you can install roboquant including one or more of the optional dependencies if you need certain functionality:
 
 ```shell
+# market data from Yahoo Finance using the YahooFeed
 python3 -m pip install --upgrade roboquant[yahoo]
+
+# PyTorch based strategies using RNNStrategy
 python3 -m pip install --upgrade roboquant[torch]
-python3 -m pip install --upgrade roboquant[yahoo,torch]
+
+# Integration with Interactive Brokers using IBKRBroker
+python3 -m pip install --upgrade roboquant[ibkr]
+
+# Install all dependencies
+python3 -m pip install --upgrade roboquant[all]
 ```
 
 ## Building from source
@@ -47,7 +55,7 @@ python3 -m venv .venv
 source .venv/bin/activate
 ```
 
-You should now be in the virtual environment. Ready to install the required packages and build and install roboquant:
+You should now be in the virtual environment. Ready to install the required packages and build/install roboquant:
 
 ```shell
 pip install -r requirements.txt
@@ -58,16 +66,12 @@ pip install .
 Some other useful commands:
 
 ```shell
-# run unit tests
+# run the unit tests
 python -m unittest discover -s tests/unit 
 
-# validate code
+# validate the code
 flake8 roboquant tests
 ```
-
-
-## Interactive Brokers
-Unfortunately, Interactive Brokers doesn't allow their Python client library to be redistributed by third parties. However it is freely available to be downloaded and installed. Please follow the instructions found [here](https://ibkrcampus.com/ibkr-quant-news/interactive-brokers-python-api-native-a-step-by-step-guide/) (download and install version 10.19).  
 
 # Kotlin version
 Next to this Python version of `roboquant`, there is also a Kotlin version available. Both (will) share a similar API, just the used computer language is different.
