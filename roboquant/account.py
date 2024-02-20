@@ -39,7 +39,7 @@ class Account:
         """Return the total value of the provided contract size denoted in the base currency of the account.
         The default implementation returns `size * price`.
 
-        A subclass can implement different logic to cater for: 
+        A subclass can implement different logic to cater for:
         - symbols denoted in different currencies
         - symbols having different contract sizes like option contracts.
         """
