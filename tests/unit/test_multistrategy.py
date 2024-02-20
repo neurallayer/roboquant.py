@@ -1,7 +1,7 @@
 import unittest
 from roboquant import EMACrossover
 from roboquant.strategies.multistrategy import MultiStrategy
-from tests.common import test_strategy
+from tests.common import run_strategy
 
 
 class TestMultiStrategy(unittest.TestCase):
@@ -12,7 +12,7 @@ class TestMultiStrategy(unittest.TestCase):
             EMACrossover(5, 12),
             EMACrossover(2, 10),
         )
-        test_strategy(strategy, self)
+        run_strategy(strategy, self)
 
 
 if __name__ == "__main__":

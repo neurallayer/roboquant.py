@@ -1,6 +1,6 @@
 import unittest
 from roboquant import CandleStrategy, OHLCVBuffer
-from tests.common import test_strategy
+from tests.common import run_strategy
 
 
 class _MyStrategy(CandleStrategy):
@@ -22,7 +22,7 @@ class TestCandleStrategy(unittest.TestCase):
         # ensure there is enough history available
         strategy = _MyStrategy(27)
 
-        test_strategy(strategy, self)
+        run_strategy(strategy, self)
 
 
 if __name__ == "__main__":

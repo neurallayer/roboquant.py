@@ -13,7 +13,7 @@ class Feature(Protocol):
     def calc(self, evt: Event) -> NDArray: ...
 
 
-class TestFeature(Feature):
+class FixedValueFeature(Feature):
 
     def __init__(self, name, value: NDArray) -> None:
         self.name = name

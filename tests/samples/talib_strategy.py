@@ -1,7 +1,7 @@
 import unittest
 import talib.stream as ta
 from roboquant import CandleStrategy, OHLCVBuffer
-from tests.common import test_strategy
+from tests.common import run_strategy
 
 
 class MyTaLibStrategy(CandleStrategy):
@@ -23,7 +23,7 @@ class TestOHLCVStrategy(unittest.TestCase):
         # ensure there is enough history available
         # for the used talib indicators
         strategy = MyTaLibStrategy(27)
-        test_strategy(strategy, self)
+        run_strategy(strategy, self)
 
 
 if __name__ == "__main__":

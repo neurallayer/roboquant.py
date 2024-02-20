@@ -5,7 +5,7 @@ from roboquant.strategies.featureset import (
     SMAFeature,
     ReturnsFeature,
     VolumeFeature,
-    TestFeature,
+    FixedValueFeature,
     DayOfWeekFeature,
 )
 from roboquant.feeds.feedutil import play_background
@@ -26,11 +26,11 @@ class TestFeatureSet(unittest.TestCase):
         fs = FeatureSet(10_000, warmup=warmup)
         fs.add(PriceFeature(symbol1, "CLOSE"))
         fs.add(PriceFeature(symbol1, "OPEN"))
-        fs.add(SMAFeature(TestFeature("DUMMY", np.zeros((3,))), 8))
+        fs.add(SMAFeature(FixedValueFeature("DUMMY", np.zeros((3,))), 8))
         fs.add(SMAFeature(PriceFeature(symbol2, "CLOSE"), 10))
         fs.add(ReturnsFeature(PriceFeature(symbol1, "OPEN")))
         fs.add(VolumeFeature(symbol2))
-        fs.add(TestFeature("DUMMY", np.zeros((3,))))
+        fs.add(FixedValueFeature("DUMMY", np.zeros((3,))))
         fs.add(DayOfWeekFeature())
 
         channel = EventChannel()

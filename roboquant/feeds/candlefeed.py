@@ -20,7 +20,7 @@ class CandleFeed(Feed):
         for item in evt.items:
             if isinstance(item, Trade):
                 symbol = item.symbol
-                p = item.price
+                p = item.trade_price
                 candle = candles.get(symbol)
                 if candle:
                     ohlcv = candle.ohlcv

@@ -15,14 +15,14 @@ class CSVFeed(HistoricFeed):
     """Parse CSV files with historic data"""
 
     def __init__(
-            self,
-            path: str | pathlib.Path,
-            columns=None,
-            adj_close=False,
-            time_offset: str | None = None,
-            datetime_fmt: str | None = None,
-            endswith=".csv",
-            frequency="",
+        self,
+        path: str | pathlib.Path,
+        columns=None,
+        adj_close=False,
+        time_offset: str | None = None,
+        datetime_fmt: str | None = None,
+        endswith=".csv",
+        frequency="",
     ):
         super().__init__()
         self.columns = columns
@@ -84,8 +84,9 @@ class CSVFeed(HistoricFeed):
 
         class StooqCSVFeed(CSVFeed):
             def __init__(self):
-                super().__init__(path, columns=columns, time_offset="21:00:00+00:00", datetime_fmt="%Y%M%D", endswith=".txt",
-                                 frequency="1d")
+                super().__init__(
+                    path, columns=columns, time_offset="21:00:00+00:00", datetime_fmt="%Y%m%d", endswith=".txt", frequency="1d"
+                )
 
             def _get_symbol(self, filename: str):
                 base = pathlib.Path(filename).stem.upper()

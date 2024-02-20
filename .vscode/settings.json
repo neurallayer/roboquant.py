@@ -9,14 +9,23 @@
         "roboquant",
         "stooq",
         "Tensorboard",
+        "Tiingo",
         "timeframes"
     ],
     "python.testing.unittestArgs": [
+        "-v",
+        "-p",
+        "test_*.py"
+    ],
+    "__python.testing.unittestArgs": [
         "-v",
         "-s",
         "./tests/unit",
         "-p",
         "test_*.py"
+    ],
+    "python.testing.pytestArgs": [
+        "--ignore=tests/integration",
     ],
     "python.testing.pytestEnabled": false,
     "python.testing.unittestEnabled": true,

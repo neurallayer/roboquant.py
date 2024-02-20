@@ -48,31 +48,29 @@ python3 -m venv .venv
 source .venv/bin/activate
 ```
 
-You should now be in the virtual environment. Ready to install the required packages and build roboquant:
+You should now be in the virtual environment. Ready to install the required packages and build and install roboquant:
 
 ```shell
 pip install -r requirements.txt
 python -m build
+pip install .
 ```
 
 Some other useful commands:
 
 ```shell
-# run unittests
+# run unit tests
 python -m unittest discover -s tests/unit 
 
 # validate code
 flake8 roboquant tests
-
-# install locally
-pip install .
 ```
 
 
 ## Interactive Brokers
-Unfortunatly Interactive Brokers doesn't allow their Python client library to be redistributed by third parties. However it is freely available to be downloaded and installed. Please follow the instructions found [here](https://ibkrcampus.com/ibkr-quant-news/interactive-brokers-python-api-native-a-step-by-step-guide/) (download and install version 10.19).  
+Unfortunately, Interactive Brokers doesn't allow their Python client library to be redistributed by third parties. However it is freely available to be downloaded and installed. Please follow the instructions found [here](https://ibkrcampus.com/ibkr-quant-news/interactive-brokers-python-api-native-a-step-by-step-guide/) (download and install version 10.19).  
 
 # Kotlin version
-Next to this Python version of `roboquant`, there is also a Koltin version available. Both (will) share a similar API, just the used computer language is different.
+Next to this Python version of `roboquant`, there is also a Kotlin version available. Both (will) share a similar API, just the used computer language is different.
 
 Which one to use, depends very much on personal preference, skills and use-case.

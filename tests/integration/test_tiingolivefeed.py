@@ -2,7 +2,7 @@ from roboquant import Timeframe, TiingoLiveFeed, Config
 import logging
 import unittest
 
-from tests.common import test_priceaction_feed
+from tests.common import run_priceaction_feed
 
 
 class TestTiingo(unittest.TestCase):
@@ -15,19 +15,19 @@ class TestTiingo(unittest.TestCase):
     def test_tiingo_cryptolivefeed(self):
         feed = TiingoLiveFeed(self.key)
         feed.subscribe("btcusdt", "ethusdt")
-        test_priceaction_feed(feed, ["BTCUSDT", "ETHUSDT"], self, Timeframe.next(minutes=1))
+        run_priceaction_feed(feed, ["BTCUSDT", "ETHUSDT"], self, Timeframe.next(minutes=1))
         feed.close()
 
     def test_tiingo_fxlivefeed(self):
         feed = TiingoLiveFeed(self.key, "fx")
         feed.subscribe("eurusd")
-        test_priceaction_feed(feed, ["EURUSD"], self, Timeframe.next(minutes=1))
+        run_priceaction_feed(feed, ["EURUSD"], self, Timeframe.next(minutes=1))
         feed.close()
 
     def test_tiingo_iexlivefeed(self):
         feed = TiingoLiveFeed(self.key, "iex")
         feed.subscribe("IBM", "TSLA")
-        test_priceaction_feed(feed, ["IBM", "TSLA"], self, Timeframe.next(minutes=1))
+        run_priceaction_feed(feed, ["IBM", "TSLA"], self, Timeframe.next(minutes=1))
         feed.close()
 
 

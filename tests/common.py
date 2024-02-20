@@ -25,7 +25,7 @@ def get_output(filename) -> str:
         return content
 
 
-def test_priceaction_feed(feed: Feed, symbols: list[str], testCase: TestCase, timeframe=None):
+def run_priceaction_feed(feed: Feed, symbols: list[str], testCase: TestCase, timeframe=None):
     """Common test for all feeds that produce price-bars"""
 
     channel = EventChannel(timeframe)
@@ -62,7 +62,7 @@ def test_priceaction_feed(feed: Feed, symbols: list[str], testCase: TestCase, ti
                         testCase.assertTrue(math.isfinite(f))
 
 
-def test_strategy(strategy: Strategy, testCase: TestCase):
+def run_strategy(strategy: Strategy, testCase: TestCase):
     feed = get_feed()
     channel = EventChannel()
     play_background(feed, channel)
