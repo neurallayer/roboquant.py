@@ -1,5 +1,6 @@
 from abc import abstractmethod, ABC
 from typing import Dict
+from roboquant.signal import Signal
 
 from roboquant.strategies.strategy import Strategy
 from roboquant.event import Candle
@@ -16,8 +17,8 @@ class CandleStrategy(Strategy, ABC):
         self._data: Dict[str, OHLCVBuffer] = {}
         self.size = size
 
-    def give_ratings(self, event):
-        ratings = {}
+    def create_signals(self, event) -> Dict[str, Signal]:
+        signals = {}
         for item in event.items:
             if isinstance(item, Candle):
                 symbol = item.symbol
@@ -26,14 +27,14 @@ class CandleStrategy(Strategy, ABC):
                 ohlcv = self._data[symbol]
                 ohlcv.append(item.ohlcv)
                 if ohlcv.is_full():
-                    rating = self._give_rating(symbol, ohlcv)
-                    if rating is not None:
-                        ratings[symbol] = rating
-        return ratings
+                    signal = self._create_signal(symbol, ohlcv)
+                    if signal is not None:
+                        signals[symbol] = signal
+        return signals
 
     @abstractmethod
-    def _give_rating(self, symbol: str, ohlcv: OHLCVBuffer) -> float | None:
+    def _create_signal(self, symbol: str, ohlcv: OHLCVBuffer) -> Signal | None:
         """
-        Subclasses should implement this method and return a rating or None for the provided symbol and ohlcv data.
+        Subclasses should implement this method and return a signal or None for the provided symbol and ohlcv data.
         """
         ...

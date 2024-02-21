@@ -1,5 +1,7 @@
 from decimal import Decimal
 import logging
+
+from roboquant.signal import Signal
 from ..event import PriceItem
 from roboquant.event import Event
 from .trader import Trader
@@ -67,53 +69,53 @@ class FlexTrader(Trader):
         rounded_size = round(size, self.size_ndigits)
         return rounded_size
 
-    def create_orders(self, ratings: dict[str, float], event: Event, account: Account) -> list[Order]:
-        if not ratings:
+    def create_orders(self, signals: dict[str, Signal], event: Event, account: Account) -> list[Order]:
+        if not signals:
             return []
 
         orders: list[Order] = []
         buying_power = account.buying_power
         max_order_value = account.equity * self.max_order_perc
         min_order_value = account.equity * self.min_order_perc
-        for symbol, rating in ratings.items():
+        for symbol, signal in signals.items():
 
             if self.one_order_only and account.has_open_order(symbol):
-                logger.debug("rating=%s for symbol=%s discarded because of one order rule", rating, symbol)
+                logger.debug("rating=%s for symbol=%s discarded because of one order rule", signal, symbol)
                 continue
 
             item = event.price_items.get(symbol)
             if item is None:
-                logger.debug("rating=%s for symbol=%s discarded because of no price available", rating, symbol)
+                logger.debug("rating=%s for symbol=%s discarded because of no price available", signal, symbol)
                 continue
 
             price = item.price(self.price_type)
             pos_size = account.get_position_size(symbol)
 
-            change = _PositionChange.get_change(rating, pos_size)
+            change = _PositionChange.get_change(signal.rating, pos_size)
             if not self.shorting and change == _PositionChange.OPEN_SHORT:
-                logger.debug("rating=%s for symbol=%s discarded because of shorting rule", rating, symbol)
+                logger.debug("signal=%s for symbol=%s discarded because of shorting rule", signal, symbol)
                 continue
             if not self.increase_position and change == _PositionChange.INCREASE:
-                logger.debug("rating=%s for symbol=%s discarded because of increase position rule", rating, symbol)
+                logger.debug("signal=%s for symbol=%s discarded because of increase position rule", signal, symbol)
                 continue
 
             if change == _PositionChange.CLOSE:
                 # Closing orders don't require or use buying power
-                new_orders = self._get_orders(symbol, pos_size * -1, item, rating)
+                new_orders = self._get_orders(symbol, pos_size * -1, item, signal.rating)
                 orders += new_orders
             else:
                 contract_price = account.contract_value(symbol, Decimal(1), price)
-                order_size = self._get_order_size(rating, contract_price, max_order_value)
+                order_size = self._get_order_size(signal.rating, contract_price, max_order_value)
 
                 order_value = abs(account.contract_value(symbol, order_size, price))
                 if order_value > (buying_power - self.min_buying_power):
-                    logger.debug("rating=%s for symbol=%s discarded because of insufficient buying power", rating, symbol)
+                    logger.debug("signal=%s for symbol=%s discarded because of insufficient buying power", signal, symbol)
                     continue
                 if order_value < min_order_value:
-                    logger.debug("rating=%s for symbol=%s discarded because of minimum order value", rating, symbol)
+                    logger.debug("signal=%s for symbol=%s discarded because of minimum order value", signal, symbol)
                     continue
 
-                new_orders = self._get_orders(symbol, order_size, item, rating)
+                new_orders = self._get_orders(symbol, order_size, item, signal.rating)
                 if new_orders:
                     orders += new_orders
                     buying_power -= order_value

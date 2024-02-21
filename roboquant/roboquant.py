@@ -61,11 +61,11 @@ class Roboquant:
         play_background(feed, channel)
 
         while event := channel.get(heartbeat_timeout):
-            ratings = self.strategy.give_ratings(event)
+            signals = self.strategy.create_signals(event)
             account = self.broker.sync(event)
-            orders = self.trader.create_orders(ratings, event, account)
+            orders = self.trader.create_orders(signals, event, account)
             self.broker.place_orders(*orders)
             if tracker:
-                tracker.log(event, account, ratings, orders)
+                tracker.log(event, account, signals, orders)
 
         return self.broker.sync()

@@ -3,6 +3,7 @@ from .roboquant import Roboquant
 
 from .event import Event, PriceItem, Candle, Trade, Quote
 from .order import Order, OrderStatus
+from .signal import Signal, SignalType
 from .timeframe import Timeframe
 from .config import Config
 

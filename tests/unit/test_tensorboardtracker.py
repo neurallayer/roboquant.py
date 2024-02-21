@@ -20,7 +20,7 @@ class TestTensorboardTracker(unittest.TestCase):
         tracker = TensorboardTracker(writer)
         rq.run(feed, tracker=tracker)
         self.assertGreater(tracker.items, 0)
-        self.assertGreater(tracker.ratings, 0)
+        self.assertGreater(tracker.signals, 0)
         self.assertGreater(tracker.orders, 0)
         tracker.close()
 

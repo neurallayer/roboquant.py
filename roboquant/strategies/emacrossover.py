@@ -1,3 +1,4 @@
+from roboquant.signal import Signal
 from roboquant.strategies.strategy import Strategy
 from roboquant.event import Event
 
@@ -13,8 +14,8 @@ class EMACrossover(Strategy):
         self.price_type = price_type
         self.min_steps = max(fast_period, slow_period)
 
-    def give_ratings(self, event: Event) -> dict[str, float]:
-        ratings: dict[str, float] = {}
+    def create_signals(self, event: Event) -> dict[str, Signal]:
+        signals: dict[str, Signal] = {}
         for symbol, item in event.price_items.items():
 
             price = item.price(self.price_type)
@@ -29,9 +30,9 @@ class EMACrossover(Strategy):
                 calculator.add_price(price)
                 new_direction = calculator.get_direction()
                 if old_direction != new_direction:
-                    ratings[symbol] = new_direction
+                    signals[symbol] = Signal(new_direction)
 
-        return ratings
+        return signals
 
     def reset(self):
         self._history = {}

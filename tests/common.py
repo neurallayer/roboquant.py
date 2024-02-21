@@ -2,6 +2,7 @@ from datetime import date, datetime, timedelta
 import pathlib
 from unittest import TestCase
 from roboquant import Feed, PriceItem, Candle, Quote, Trade, EventChannel, CSVFeed
+from roboquant.signal import Signal
 from roboquant.strategies.strategy import Strategy
 
 from roboquant.feeds.feedutil import play_background
@@ -68,13 +69,13 @@ def run_strategy(strategy: Strategy, testCase: TestCase):
     play_background(feed, channel)
     tot_ratings = 0
     while event := channel.get():
-        ratings = strategy.give_ratings(event)
-        for symbol, rating in ratings.items():
-            testCase.assertEqual(type(rating), float)
+        signals = strategy.create_signals(event)
+        for symbol, signal in signals.items():
+            testCase.assertEqual(type(signal), Signal)
             testCase.assertEqual(type(symbol), str)
             testCase.assertEqual(symbol, symbol.upper())
-            testCase.assertTrue(-1.0 <= rating <= 1.0)
+            testCase.assertTrue(-1.0 <= signal.rating <= 1.0)
             testCase.assertIn(symbol, feed.symbols)
-        tot_ratings += len(ratings)
+        tot_ratings += len(signals)
 
     testCase.assertGreater(tot_ratings, 0)

@@ -1,19 +1,20 @@
 import unittest
 from roboquant import CandleStrategy, OHLCVBuffer
+from roboquant.signal import Signal
 from tests.common import run_strategy
 
 
 class _MyStrategy(CandleStrategy):
     """Example using talib to create a strategy"""
 
-    def _give_rating(self, _, ohlcv: OHLCVBuffer) -> float | None:
+    def _create_signal(self, _, ohlcv: OHLCVBuffer) -> Signal | None:
         close = ohlcv.close()
         sma12 = close[-12:].mean()
         sma26 = close[-26:].mean()  # type: ignore
         if sma12 > sma26:
-            return 1.0
+            return Signal.BUY()
         if sma12 < sma26:
-            return -1.0
+            return Signal.SELL()
 
 
 class TestCandleStrategy(unittest.TestCase):

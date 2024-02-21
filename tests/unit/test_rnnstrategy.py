@@ -42,7 +42,7 @@ class TestRNNStrategy(unittest.TestCase):
         tf = Timeframe.fromisoformat("2020-01-01", "2023-12-31")
         tracker = BasicTracker()
         rq.run(feed, tracker, tf)
-        self.assertGreater(tracker.ratings, 0)
+        self.assertGreater(tracker.signals, 0)
         # print(tracker)
 
 

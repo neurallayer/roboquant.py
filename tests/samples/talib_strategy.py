@@ -7,7 +7,7 @@ from tests.common import run_strategy
 class MyTaLibStrategy(CandleStrategy):
     """Example using talib to create a strategy"""
 
-    def _give_rating(self, _, ohlcv: OHLCVBuffer) -> float | None:
+    def _create_signal(self, _, ohlcv: OHLCVBuffer) -> float | None:
         close = ohlcv.close()
         ema12 = ta.EMA(close, 12)  # type: ignore
         ema26 = ta.EMA(close, 26)  # type: ignore

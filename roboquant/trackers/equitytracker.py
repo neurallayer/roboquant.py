@@ -12,7 +12,7 @@ class EquityTracker(Tracker):
         self.equity = []
         self.last = datetime.fromisoformat("1900-01-01T00:00:00+00:00")
 
-    def log(self, event, account, ratings, orders):
+    def log(self, event, account, signals, orders):
         if event.time > self.last:
             self.timeline.append(event.time)
             self.equity.append(account.equity)

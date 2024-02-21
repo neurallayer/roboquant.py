@@ -1,6 +1,7 @@
 import logging
 import torch
 from torch.utils.data import Dataset, DataLoader
+from roboquant.signal import Signal
 
 from roboquant.strategies.strategy import Strategy
 from roboquant.feeds.eventchannel import EventChannel
@@ -129,13 +130,13 @@ class RNNStrategy(Strategy):
                 if isinstance(item, Candle) and item.symbol == symbol:
                     h.append(item.ohlcv)
 
-    def give_ratings(self, event: Event) -> dict[str, float]:
+    def create_signals(self, event: Event) -> dict[str, Signal]:
         item = event.price_items.get(self.symbol)
         if isinstance(item, Candle):
             self.ohlcv.append(item.ohlcv)
             rating = self.predict_rating()
             if rating:
-                return {self.symbol: rating}
+                return {self.symbol: Signal(rating)}
         return {}
 
     def fit(

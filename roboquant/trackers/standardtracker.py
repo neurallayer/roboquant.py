@@ -78,7 +78,7 @@ class _EquityCalculator:
 
 class StandardTracker(Tracker):
     """Tracks a number of key metrics:
-    - total, min and max of events, items, ratings, orders and equity
+    - total, min and max of events, items, signals, orders and equity
     - drawdown and gain
     - annual performance
     - market performance
@@ -88,7 +88,7 @@ class StandardTracker(Tracker):
         self.properties = {
             "event": _PropertyCalculator(),
             "item": _PropertyCalculator(),
-            "rating": _PropertyCalculator(),
+            "signal": _PropertyCalculator(),
             "order": _PropertyCalculator(),
         }
         self.market_returns: dict[str, _MarketReturn] = dict()
@@ -116,13 +116,13 @@ class StandardTracker(Tracker):
         else:
             return 0.0
 
-    def log(self, event, account, ratings, orders):
+    def log(self, event, account, signals, orders):
         t = event.time
         prop = self.properties
 
         prop["event"].add(1, t)
         prop["item"].add(len(event.items), t)
-        prop["rating"].add(len(ratings), t)
+        prop["signal"].add(len(signals), t)
         prop["order"].add(len(orders), t)
 
         if (npositions := len(account.positions)) > self.max_positions:
