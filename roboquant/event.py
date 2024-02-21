@@ -25,7 +25,7 @@ class PriceItem:
 
 @dataclass(slots=True)
 class Quote(PriceItem):
-    symbol: str
+    # symbol: str
     data: array
 
     def price(self, price_type: str = "DEFAULT") -> float:
@@ -35,6 +35,7 @@ class Quote(PriceItem):
             case "BID":
                 return self.data[2]
             case _:
+                # Default is the mid-point price
                 return (self.data[0] + self.data[2]) / 2.0
 
     @property
@@ -52,12 +53,13 @@ class Quote(PriceItem):
             case "BID":
                 return self.data[3]
             case _:
+                # Default is the average volume
                 return (self.data[1] + self.data[3]) / 2.0
 
 
 @dataclass(slots=True)
 class Trade(PriceItem):
-    symbol: str
+    # symbol: str
     trade_price: float
     trade_volume: float
 
@@ -70,7 +72,7 @@ class Trade(PriceItem):
 
 @dataclass(slots=True)
 class Candle(PriceItem):
-    symbol: str
+    # symbol: str
     ohlcv: array
     frequency: str = ""  # f.e 1s , 15m, 4h, 1d
 
@@ -99,6 +101,7 @@ class Event:
     """
     An event represents zero of items of information happening at a certain moment in time.
     An item can contain any type of information, but a common use-case are price-items like candles.
+    Time is always a datetime object with UTC timezone.
     """
 
     def __init__(self, time: datetime, items: list):
@@ -114,7 +117,7 @@ class Event:
         return Event(time, [])
 
     def is_empty(self) -> bool:
-        """return True if this is an empty event, False otherwise"""
+        """return True if this is an empty event without any items, False otherwise"""
         return len(self.items) == 0
 
     @cached_property

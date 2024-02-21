@@ -57,7 +57,7 @@ python3 -m venv .venv
 source .venv/bin/activate
 ```
 
-You should now be in the virtual environment. Ready to install the required packages and build/install roboquant:
+You should now be in the virtual environment and ready to install the required packages and build/install roboquant:
 
 ```shell
 pip install -r requirements.txt

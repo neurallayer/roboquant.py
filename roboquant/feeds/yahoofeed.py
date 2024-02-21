@@ -34,13 +34,13 @@ class YahooFeed(HistoricFeed):
                 logger.warning("no data retrieved for symbol=%s", symbol)
                 continue
 
-            # yFinance one doesn't correct volume, so use this one instead
+            # yFinance one doesn't correct the volume, so we use this one instead
             self.__auto_adjust(df)
             for t in df.itertuples(index=True):
                 dt = t[0].to_pydatetime().astimezone(timezone.utc)
                 prices = t[1:6]
-                pb = Candle(symbol, array("f", prices), interval)
-                self._add_item(dt, pb)
+                candle = Candle(symbol, array("f", prices), interval)
+                self._add_item(dt, candle)
 
             logger.info("retrieved symbol=%s items=%s", symbol, len(df))
 
