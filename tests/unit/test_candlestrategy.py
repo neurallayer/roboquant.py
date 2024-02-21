@@ -5,12 +5,12 @@ from tests.common import run_strategy
 
 
 class _MyStrategy(CandleStrategy):
-    """Example using talib to create a strategy"""
+    """Example using CandleStrategy to create a custom strategy"""
 
-    def _create_signal(self, _, ohlcv: OHLCVBuffer) -> Signal | None:
+    def _create_signal(self, symbol, ohlcv: OHLCVBuffer) -> Signal | None:
         close = ohlcv.close()
         sma12 = close[-12:].mean()
-        sma26 = close[-26:].mean()  # type: ignore
+        sma26 = close[-26:].mean()
         if sma12 > sma26:
             return Signal.buy()
         if sma12 < sma26:

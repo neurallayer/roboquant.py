@@ -1,4 +1,3 @@
-
 __version__ = "0.2.1"
 
 from .account import Account, OptionAccount, Position
@@ -34,5 +33,3 @@ from roboquant.feeds import (
     EventChannel,
     feedutil,
 )
-
-
