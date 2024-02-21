@@ -10,7 +10,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "roboquant"
-version = "0.2.0"
+dynamic = ["version"]
 authors = [ { name="roboquant team", email="info@roboquant.org" },]
 description = "A fast algo-trading platform"
 readme = "README.md"
@@ -36,6 +36,9 @@ dependencies = [
   "websocket-client~=1.7.0",
   "requests>=2.31.0",
 ]
+
+[tool.setuptools.dynamic]
+version = {attr = "roboquant.__version__"}
 
 [project.optional-dependencies]
 torch = ["torch>=2.1.0", "tensorboard>=2.15.2"]

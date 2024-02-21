@@ -29,5 +29,7 @@ from roboquant.feeds import (
     TiingoHistoricFeed,
     CandleFeed,
     EventChannel,
-    feedutil
+    feedutil,
 )
+
+__version__ = "0.2.1"

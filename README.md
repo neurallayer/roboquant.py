@@ -37,16 +37,16 @@ The core of roboquant tries to limit the dependencies. But you can install roboq
 
 ```shell
 # market data from Yahoo Finance using the YahooFeed
-python3 -m pip install --upgrade roboquant[yahoo]
+python3 -m pip install --upgrade "roboquant[yahoo]"
 
 # PyTorch based strategies using RNNStrategy
-python3 -m pip install --upgrade roboquant[torch]
+python3 -m pip install --upgrade "roboquant[torch]"
 
 # Integration with Interactive Brokers using IBKRBroker
-python3 -m pip install --upgrade roboquant[ibkr]
+python3 -m pip install --upgrade "roboquant[ibkr]"
 
 # Install all dependencies
-python3 -m pip install --upgrade roboquant[all]
+python3 -m pip install --upgrade "roboquant[all]"
 ```
 
 ## Building from source
