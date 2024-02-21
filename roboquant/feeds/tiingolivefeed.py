@@ -37,7 +37,7 @@ class TiingoLiveFeed(Feed):
         wst.daemon = True
         wst.start()
         time.sleep(3)
-        self.last_time = datetime.fromisoformat("1900-01-01T00:00:00+00:00")
+        self._last_time = datetime.fromisoformat("1900-01-01T00:00:00+00:00")
 
     def play(self, channel: EventChannel):
         self.channel = channel
@@ -50,10 +50,10 @@ class TiingoLiveFeed(Feed):
             t = now.astimezone(timezone.utc)
 
             # required for crypto times
-            if t < self.last_time:
-                t = self.last_time
+            if t < self._last_time:
+                t = self._last_time
             else:
-                self.last_time = t
+                self._last_time = t
 
             event = Event(t, [price])
             self.channel.put(event)
@@ -112,7 +112,7 @@ class TiingoLiveFeed(Feed):
         logger.error(msg)
 
     def _handle_close(self, ws, close_status_code, close_msg):
-        logger.info(f"Webchannel closed code={close_status_code} msg={close_msg}")
+        logger.info("Webchannel closed code=%s msg=%s", close_status_code, close_msg)
 
     def subscribe(self, *symbols: str, threshold_level=5):
         logger.info("Subscribing to %s", symbols or "all symbols")
@@ -125,5 +125,5 @@ class TiingoLiveFeed(Feed):
         self.ws.send(json_str)
 
     def close(self):
-        self.last_time = datetime.fromisoformat("1900-01-01").astimezone(timezone.utc)
+        self._last_time = datetime.fromisoformat("1900-01-01").astimezone(timezone.utc)
         self.ws.close()

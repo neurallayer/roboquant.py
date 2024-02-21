@@ -31,7 +31,7 @@ class YahooFeed(HistoricFeed):
             df.dropna(inplace=True)
 
             if len(df) == 0:
-                logger.warning(f"no data retrieved for symbol={symbol}")
+                logger.warning("no data retrieved for symbol=%s", symbol)
                 continue
 
             # yFinance one doesn't correct volume, so use this one instead

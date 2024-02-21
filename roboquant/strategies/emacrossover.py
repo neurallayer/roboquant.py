@@ -26,11 +26,11 @@ class EMACrossover(Strategy):
             elif not calculator.step >= self.min_steps:
                 calculator.add_price(price)
             else:
-                old_direction = calculator.get_direction()
+                old_rating = calculator.get_rating()
                 calculator.add_price(price)
-                new_direction = calculator.get_direction()
-                if old_direction != new_direction:
-                    signals[symbol] = Signal(new_direction)
+                new_rating = calculator.get_rating()
+                if old_rating != new_rating:
+                    signals[symbol] = Signal(new_rating)
 
         return signals
 
@@ -54,5 +54,5 @@ class EMACrossover(Strategy):
             self.emaSlow = self.emaSlow * slow + (1.0 - slow) * price
             self.step += 1
 
-        def get_direction(self) -> float:
+        def get_rating(self) -> float:
             return 1.0 if self.emaFast > self.emaSlow else -1.0

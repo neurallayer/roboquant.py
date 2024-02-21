@@ -7,7 +7,7 @@ from datetime import datetime, timedelta, timezone
 
 
 class RandomWalk(HistoricFeed):
-    """Randomwalk of stock prices"""
+    """This feed simulates the random-walk of stock prices."""
 
     def __init__(
         self,

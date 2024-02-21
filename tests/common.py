@@ -33,14 +33,14 @@ def run_priceaction_feed(feed: Feed, symbols: list[str], testCase: TestCase, tim
     play_background(feed, channel)
 
     last = None
-    while event := channel.get(10.0):
+    while event := channel.get(30.0):
 
         testCase.assertIsInstance(event.time, datetime)
         testCase.assertEqual("UTC", event.time.tzname())
 
         if last is not None:
             # testCase.assertLessEqual(event.time - last, timedelta(minutes=1))
-            testCase.assertGreaterEqual(event.time, last)
+            testCase.assertGreaterEqual(event.time, last, f"{event} < {last}, items={event.items}")
 
         last = event.time
 

@@ -10,16 +10,16 @@ Measure the average delay receiving prices from IEX. This includes the following
 import logging
 import time
 
-from roboquant import Config, EventChannel, Timeframe, TiingoLiveFeed, feedutil
+from roboquant import EventChannel, Timeframe, TiingoLiveFeed, feedutil
 from statistics import mean, stdev
 
 if __name__ == "__main__":
-    config = Config()
-    key = config.get("tiingo.key")
 
     logging.basicConfig(level=logging.INFO)
 
-    feed = TiingoLiveFeed(key, "iex")
+    feed = TiingoLiveFeed(market="iex")
+
+    # subscribe to all IEX stocks for TOP of order book changes and Trades.
     feed.subscribe(threshold_level=5)
 
     timeframe = Timeframe.next(minutes=1)

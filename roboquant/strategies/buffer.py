@@ -5,7 +5,7 @@ from numpy.typing import NDArray
 
 class NumpyBuffer:
     """A FIFO (first-in-first-out) buffer of a fixed capacity.
-    It uses a single Numpy array to store the data.
+    It uses a single Numpy array to store its data.
     """
 
     __slots__ = "_data", "_idx", "capacity"
@@ -50,7 +50,6 @@ class NumpyBuffer:
 
 class OHLCVBuffer(NumpyBuffer):
     """A OHLCV buffer (first-in-first-out) of a fixed capacity.
-    It uses NumpyBuffer to store the data.
     """
 
     def __init__(self, capacity: int, dtype="float64") -> None:

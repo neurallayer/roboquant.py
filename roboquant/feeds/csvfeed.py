@@ -12,7 +12,7 @@ logger = logging.getLogger(__name__)
 
 
 class CSVFeed(HistoricFeed):
-    """Parse CSV files with historic data"""
+    """Use CSV files with historic data as a feed."""
 
     def __init__(
         self,
@@ -50,6 +50,7 @@ class CSVFeed(HistoricFeed):
         return files
 
     def _get_symbol(self, filename: str):
+        """Return the symbol based on the filename"""
         return pathlib.Path(filename).stem.upper()
 
     def _parse_csvfile(self, filename: str):

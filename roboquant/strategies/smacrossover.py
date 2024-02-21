@@ -11,7 +11,7 @@ class SMACrossover(Strategy):
     def __init__(self, min_period: int = 13, max_period: int = 26):
         super().__init__()
         self._history: dict[str, collections.deque] = {}
-        self._last_rating: dict[str, bool] = {}
+        self._prev_ratings: dict[str, bool] = {}
         self.min_period = min_period
         self.max_period = max_period
 
@@ -21,12 +21,12 @@ class SMACrossover(Strategy):
         # SMA(MIN) > SMA(MAX)
         new_rating: bool = prices[-self.min_period:].mean() > prices[-self.max_period:].mean()
         result = None
-        if symbol in self._last_rating:
-            last_rating = self._last_rating[symbol]
-            if last_rating != new_rating:
-                result = Signal.BUY() if last_rating else Signal.SELL()
+        if symbol in self._prev_ratings:
+            prev_rating = self._prev_ratings[symbol]
+            if prev_rating != new_rating:
+                result = Signal.buy() if new_rating else Signal.sell()
 
-        self._last_rating[symbol] = new_rating
+        self._prev_ratings[symbol] = new_rating
         return result
 
     def create_signals(self, event: Event) -> dict[str, Signal]:

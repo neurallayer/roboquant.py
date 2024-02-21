@@ -12,9 +12,9 @@ class _MyStrategy(CandleStrategy):
         sma12 = close[-12:].mean()
         sma26 = close[-26:].mean()  # type: ignore
         if sma12 > sma26:
-            return Signal.BUY()
+            return Signal.buy()
         if sma12 < sma26:
-            return Signal.SELL()
+            return Signal.sell()
 
 
 class TestCandleStrategy(unittest.TestCase):
