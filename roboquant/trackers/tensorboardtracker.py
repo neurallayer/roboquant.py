@@ -1,3 +1,7 @@
+from roboquant.account import Account
+from roboquant.event import Event
+from roboquant.order import Order
+from roboquant.signal import Signal
 from roboquant.trackers import Tracker
 
 
@@ -15,7 +19,7 @@ class TensorboardTracker(Tracker):
         self.writer = summary_writer
         self._step = 0
 
-    def log(self, event, account, signals, orders):
+    def log(self, event: Event, account: Account, signals: dict[str, Signal], orders: list[Order]):
         self.items += len(event.items)
         self.signals += len(signals)
         self.orders += len(orders)

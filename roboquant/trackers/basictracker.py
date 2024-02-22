@@ -1,6 +1,10 @@
 from datetime import datetime
 import logging
 from .tracker import Tracker
+from roboquant.account import Account
+from roboquant.event import Event
+from roboquant.order import Order
+from roboquant.signal import Signal
 from prettytable import PrettyTable
 
 logger = logging.getLogger(__name__)
@@ -25,7 +29,7 @@ class BasicTracker(Tracker):
         self.equity = None
         self.buying_power = 0.0
 
-    def log(self, event, account, signals, orders):
+    def log(self, event: Event, account: Account, signals: dict[str, Signal], orders: list[Order]):
 
         if self.start_time is None:
             self.start_time = event.time
@@ -40,12 +44,14 @@ class BasicTracker(Tracker):
 
         if logger.isEnabledFor(logging.INFO):
             logger.info(
-                "time=%s events=%s items=%s  signals=%s orders=%s",
+                "time=%s events=%s items=%s  signals=%s orders=%s equity=%s, buying-power=%s",
                 self.end_time,
                 self.events,
                 self.items,
                 self.signals,
                 self.orders,
+                self.equity,
+                self.buying_power
             )
 
     def __repr__(self) -> str:
@@ -61,5 +67,4 @@ class BasicTracker(Tracker):
         p.add_row(["items", self.items])
         p.add_row(["signals", self.signals])
         p.add_row(["orders", self.orders])
-
         return p.get_string()

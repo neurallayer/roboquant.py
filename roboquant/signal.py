@@ -42,3 +42,10 @@ class Signal:
     @property
     def is_exit(self):
         return SignalType.EXIT in self.type
+
+
+BUY = Signal.buy(SignalType.BOTH)
+"""Basic BUY signal with a rating of 1.0 and valid for both entry and exit"""
+
+SELL = Signal.sell(SignalType.BOTH)
+"""Basic SELL signal with a rating of -1.0 and valid for both entry and exit"""
