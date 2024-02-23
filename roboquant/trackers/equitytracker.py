@@ -4,7 +4,7 @@ from roboquant.trackers.tracker import Tracker
 
 class EquityTracker(Tracker):
     """Tracks the time of an event and the equity at that moment.
-    If multiple events happen at the same time, only the equity for first one will be registered.
+    If multiple events happen at the same time, only the equity for the first one will be registered.
     """
 
     def __init__(self):
@@ -22,7 +22,7 @@ class EquityTracker(Tracker):
         return Timeframe(self.timeline[0], self.timeline[-1], True)
 
     def pnl(self, annualized=False):
-        """Return the profit & loss percentage, optionally annualized from the recorded durtion"""
+        """Return the profit & loss percentage, optionally annualized from the recorded duration"""
         pnl = self.equities[-1]/self.equities[0] - 1
         if annualized:
             return self.timeframe().annualize(pnl)

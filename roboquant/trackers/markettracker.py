@@ -1,7 +1,9 @@
 from roboquant.timeframe import Timeframe
+from roboquant.trackers.tracker import Tracker
 
 
-class MarketTracker:
+class MarketTracker(Tracker):
+    """Tracks the return of the market using the price-items found in the event"""
 
     class __Entry:
         """Keeps track of the market returns of a single symbol"""
@@ -22,9 +24,9 @@ class MarketTracker:
         def duration(self):
             return (self.end_time - self.start_time).total_seconds()
 
-    def __init__(self):
+    def __init__(self, price_type="DEFAULT"):
         self.market_returns = {}
-        self.price_type = "DEFAULT"
+        self.price_type = price_type
 
     def trace(self, event, account, signals, orders):
         for symbol, item in event.price_items.items():

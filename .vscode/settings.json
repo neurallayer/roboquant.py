@@ -12,12 +12,12 @@
         "Tiingo",
         "timeframes"
     ],
-    "__python.testing.unittestArgs": [
+    "python.testing.unittestArgs": [
         "-v",
         "-p",
         "test_*.py"
     ],
-    "python.testing.unittestArgs": [
+    "__python.testing.unittestArgs": [
         "-v",
         "-s",
         "./tests/unit",

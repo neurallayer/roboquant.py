@@ -51,7 +51,7 @@ class Account:
         return float(size) * price
 
     def mkt_value(self, prices: dict[str, float]) -> float:
-        """Return the the market value of all the open positions in the account using the provided prices."""
+        """Return the market value of all the open positions in the account using the provided prices."""
         return sum([self.contract_value(symbol, pos.size, prices[symbol]) for symbol, pos in self.positions.items()], 0.0)
 
     def unrealized_pnl(self, prices: dict[str, float]) -> float:
@@ -62,7 +62,7 @@ class Account:
         )
 
     def has_open_order(self, symbol: str) -> bool:
-        """Return True if there an open order for the symbol, False otherwise"""
+        """Return True if there is an open order for the symbol, False otherwise"""
 
         for order in self.orders:
             if order.symbol == symbol and not order.closed:
@@ -80,10 +80,10 @@ class Account:
 
     def __repr__(self) -> str:
         p = [f"{v.size}@{k}" for k, v in self.positions.items()]
-        p_str = ", ".join(p)
+        p_str = ", ".join(p) or "none"
 
         o = [f"{o.size}@{o.symbol}" for o in self.open_orders()]
-        o_str = ", ".join(o)
+        o_str = ", ".join(o) or "none"
 
         return f"""
         buying power : {self.buying_power:_.2f}
@@ -99,7 +99,7 @@ class OptionAccount(Account):
     This account handles common option contracts of size 100 and 10 and serves as an example.
     If no contract size is registered for a symbol, it creates one based on the option symbol name.
 
-    If the symbol is not recognised as an OCC compliant option symbol, it is assumed to have a
+    If the symbol is not recognized as an OCC compliant option symbol, it is assumed to have a
     contract size of 1.0
     """
 
@@ -114,7 +114,7 @@ class OptionAccount(Account):
     def contract_value(self, symbol: str, size: Decimal, price: float) -> float:
         contract_size = self._contract_sizes.get(symbol)
 
-        # If nithng registered we try to defer the contract size from the symbol
+        # If no contract has been registered, we try to defer the contract size from the symbol
         if contract_size is None:
             if len(symbol) == 21:
                 # OCC compliant option symbol

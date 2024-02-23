@@ -97,7 +97,7 @@ class Timeframe:
 
     def split(self, n: int | timedelta) -> list["Timeframe"]:
         """Split the timeframe in sequential parts and return the resulting list of timeframes.
-        n can be a number or a timedelta instance.
+        The parameter `n` can be a number or a timedelta instance.
         """
 
         period = n if isinstance(n, timedelta) else self.duration / n
@@ -120,7 +120,7 @@ class Timeframe:
         result = []
         end = self.end - duration
         if end < self.start:
-            raise ValueError("sample duration is too large fro this tiemframe")
+            raise ValueError("sample duration is too large for this timeframe")
         while len(result) < n:
             start = random.uniform(self.start.timestamp(), end.timestamp())
             start_dt = datetime.fromtimestamp(start, timezone.utc)

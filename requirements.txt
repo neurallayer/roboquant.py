@@ -1,7 +1,6 @@
 # Core 
 numpy~=1.26.2
-websocket-client~=1.6.4
-prettytable~=3.9.0
+websocket-client~=1.7.0
 requests~=2.31.0
 
 # Part of optional 
