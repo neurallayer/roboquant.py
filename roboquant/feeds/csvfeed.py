@@ -36,7 +36,7 @@ class CSVFeed(HistoricFeed):
         logger.info("located %s files in path %s", len(files), path)
 
         for file in files:
-            self._parse_csvfile(file)
+            self._parse_csvfile(file)  # type: ignore
 
     def _get_files(self, path):
         if pathlib.Path(path).is_file():
@@ -67,9 +67,9 @@ class CSVFeed(HistoricFeed):
 
             for row in reader:
                 dt = (
-                    datetime.fromisoformat(row[date_column])
+                    datetime.fromisoformat(row[date_column])  # type: ignore
                     if datetime_fmt is None
-                    else datetime.strptime(row[date_column], datetime_fmt)
+                    else datetime.strptime(row[date_column], datetime_fmt)  # type: ignore
                 )
                 if t:
                     dt = datetime.combine(dt, t)

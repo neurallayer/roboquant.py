@@ -60,7 +60,6 @@ class SQLFeed(Feed):
             if t != t_old:
                 if items:
                     dt = datetime.fromisoformat(t_old)
-                    # dt = datetime.fromtimestamp(t_old, timezone.utc)
                     event = Event(dt, items)
                     channel.put(event)
                     items = []

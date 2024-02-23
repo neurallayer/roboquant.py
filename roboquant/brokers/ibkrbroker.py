@@ -21,7 +21,7 @@ try:
 
     assert VERSION["major"] == 10 and VERSION["minor"] == 19, "Wrong version of the IBAPI found"
 except ImportError:
-    logger.fatal("Couldn't import IBAPI package, you need to manually install this")
+    logger.fatal("Couldn't import IBAPI package, you need to install this")
     pass
 
 

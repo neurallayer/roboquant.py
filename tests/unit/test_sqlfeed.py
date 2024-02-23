@@ -8,7 +8,7 @@ import tempfile
 
 class TestSQLFeed(unittest.TestCase):
 
-    def test_sqlfeed(self):
+    def test_sql_feed(self):
         path = tempfile.gettempdir()
         db_file = Path(path).joinpath("tmp.db")
         db_file.unlink(missing_ok=True)

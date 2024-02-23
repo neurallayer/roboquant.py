@@ -12,5 +12,6 @@ if __name__ == "__main__":
         rq = Roboquant(EMACrossover(13, 26))
         tracker = EquityTracker()
         rq.run(feed, tracker, timeframe)
-        pnl = tracker.pnl(annualized=True) * 100
-        print(f"{timeframe}  portfolio-pnl = {pnl:5.2f}%")
+        pnl = tracker.pnl() * 100
+        mdd = tracker.max_drawdown() * 100
+        print(f"{timeframe}  pnl={pnl:5.2f}%  mdd={mdd:5.2f}%")
