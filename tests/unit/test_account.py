@@ -1,8 +1,7 @@
 import unittest
 from decimal import Decimal
 
-from roboquant import Account, Position, OptionAccount, Order
-from tests.common import get_output
+from roboquant import Account, Position, OptionAccount
 
 
 class TestAccount(unittest.TestCase):
@@ -33,20 +32,6 @@ class TestAccount(unittest.TestCase):
 
         self.assertEqual(20000.0, acc.contract_value("AAPL  131101C00470000", Decimal(1), 200.0))
         self.assertEqual(2000.0, acc.contract_value("AAPL7 131101C00470000", Decimal(1), 200.0))
-
-    def test_account_repr(self):
-        acc = Account()
-        acc.buying_power = 1_000_000.0
-        acc.equity = 1_000_000.0
-
-        for i in range(3):
-            acc.positions[f"STOCK{i}"] = Position(Decimal(10), 100.0)
-
-        for i in range(2):
-            acc.orders.append(Order(f"STOCK{i}", 100))
-
-        self.maxDiff = None
-        self.assertEqual(acc.__repr__(), get_output("account_repr.txt"))
 
 
 if __name__ == "__main__":

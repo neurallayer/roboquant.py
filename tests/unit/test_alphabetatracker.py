@@ -1,7 +1,7 @@
 import unittest
 from roboquant import Roboquant
 from roboquant.strategies import EMACrossover
-from roboquant.trackers import CAPMTracker
+from roboquant.trackers import AlphaBetaTracker
 from tests.common import get_feed
 
 
@@ -10,7 +10,7 @@ class TestCAPMTracker(unittest.TestCase):
     def test_capmtracker(self):
         rq = Roboquant(EMACrossover())
         feed = get_feed()
-        tracker = CAPMTracker()
+        tracker = AlphaBetaTracker()
         rq.run(feed, tracker=tracker)
         alpha, beta = tracker.alpha_beta()
         self.assertGreater(alpha, -1)

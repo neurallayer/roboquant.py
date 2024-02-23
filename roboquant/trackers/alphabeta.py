@@ -1,13 +1,14 @@
 from typing import Tuple
 import numpy as np
-from prettytable import PrettyTable
 
 from roboquant.event import Event
 from roboquant.timeframe import Timeframe
 from .tracker import Tracker
 
 
-class CAPMTracker(Tracker):
+class AlphaBetaTracker(Tracker):
+    """Tracks the Alpha and Beta"""
+
     def __init__(self, price_type="DEFAULT"):
         self.mkt_returns = []
         self.acc_returns = []
@@ -27,7 +28,7 @@ class CAPMTracker(Tracker):
                 result += prices[symbol] / self.last_prices[symbol] - 1.0
         return result / cnt
 
-    def log(self, event: Event, account, signals, orders):
+    def trace(self, event: Event, account, signals, orders):
         prices = {item.symbol: item.price(self.price_type) for item in event.price_items.values()}
         equity = account.equity
         if self.init:
@@ -40,13 +41,6 @@ class CAPMTracker(Tracker):
         self.last_prices.update(prices)
         self.last_equity = equity
         self.init = True
-
-    def __repr__(self) -> str:
-        alpha, beta = self.alpha_beta()
-        table = PrettyTable(["Metric", "Value"], float_format=".2", align="r")
-        table.add_row(["alpha %", alpha * 100])
-        table.add_row(["beta", beta])
-        return table.get_string()
 
     def alpha_beta(self, risk_free_return=0.0) -> Tuple[float, float]:
         if not self.start_time or not self.end_time:

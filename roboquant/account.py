@@ -2,7 +2,6 @@ from dataclasses import dataclass
 from datetime import datetime
 from decimal import Decimal
 from roboquant.order import Order
-from prettytable import PrettyTable
 
 
 @dataclass(slots=True, frozen=True)
@@ -28,12 +27,18 @@ class Account:
     Only the broker updates the state of the account and does this only during its `sync` method.
     """
 
+    buying_power: float
+    positions: dict[str, Position]
+    orders: list[Order]
+    last_update: datetime
+    equity: float
+
     def __init__(self):
         self.buying_power: float = 0.0
         self.positions: dict[str, Position] = {}
         self.orders: list[Order] = []
         self.last_update: datetime = datetime.fromisoformat("1900-01-01T00:00:00+00:00")
-        self.equity = 0.0
+        self.equity: float = 0.0
 
     def contract_value(self, symbol: str, size: Decimal, price: float) -> float:
         """Return the total value of the provided contract size denoted in the base currency of the account.
@@ -50,6 +55,7 @@ class Account:
         return sum([self.contract_value(symbol, pos.size, prices[symbol]) for symbol, pos in self.positions.items()], 0.0)
 
     def unrealized_pnl(self, prices: dict[str, float]) -> float:
+        """Return the unrealized profit and loss for the open position given the provided market prices"""
         return sum(
             [self.contract_value(symbol, pos.size, prices[symbol] - pos.avg_price) for symbol, pos in self.positions.items()],
             0.0,
@@ -64,6 +70,7 @@ class Account:
         return False
 
     def get_position_size(self, symbol) -> Decimal:
+        """Return the position size for the symbol"""
         pos = self.positions.get(symbol)
         return pos.size if pos else Decimal(0)
 
@@ -72,27 +79,19 @@ class Account:
         return [order for order in self.orders if not order.closed]
 
     def __repr__(self) -> str:
-        p = PrettyTable(["account", "value"], align="r", float_format="12.2")
-        p.add_row(["buying power", self.buying_power])
-        p.add_row(["equity", self.equity])
-        p.add_row(["positions", len(self.positions)])
-        p.add_row(["orders", len(self.orders)])
-        p.add_row(["last update", self.last_update.strftime("%Y-%m-%d %H:%M:%S")])
-        result = p.get_string() + "\n\n"
+        p = [f"{v.size}@{k}" for k, v in self.positions.items()]
+        p_str = ", ".join(p)
 
-        if self.positions:
-            p = PrettyTable(["symbol", "position size", "avg price"], align="r", float_format="12.2")
-            for symbol, pos in self.positions.items():
-                p.add_row([symbol, pos.size, pos.avg_price])
-            result += p.get_string() + "\n\n"
+        o = [f"{o.size}@{o.symbol}" for o in self.open_orders()]
+        o_str = ", ".join(o)
 
-        if self.orders:
-            p = PrettyTable(["symbol", "order size", "order id", "limit", "status", "closed"], align="r", float_format="12.2")
-            for order in self.orders:
-                p.add_row([order.symbol, order.size, order.id, order.limit, order.status.name, order.closed])
-            result += p.get_string() + "\n"
-
-        return result
+        return f"""
+        buying power : {self.buying_power:_.2f}
+        equity       : {self.equity:_.2f}
+        positions    : {p_str}
+        open orders  : {o_str}
+        last update  : {self.last_update}
+        """
 
 
 class OptionAccount(Account):

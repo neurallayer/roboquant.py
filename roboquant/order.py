@@ -1,3 +1,4 @@
+from dataclasses import dataclass
 from decimal import Decimal
 from enum import Flag, auto
 from copy import copy
@@ -31,12 +32,24 @@ class OrderStatus(Flag):
         """Return True is the status is closed, False otherwise"""
         return self in OrderStatus._CLOSE
 
+    def __repr__(self) -> str:
+        return self.name
 
+
+@dataclass
 class Order:
     """
     A trading order. Default is a market order when only the size th specified. But optional a limit can be specified,
-    making it a limit order. The id is automatically assigned by the broker and should not be set manually.
+    making it a limit order.
+
+    The id is automatically assigned by the broker and should not be set manually.
     """
+
+    symbol: str
+    size: Decimal
+    limit: float | None
+    id: str | None
+    status: OrderStatus
 
     def __init__(self, symbol: str, size: Decimal | str | int | float, limit: float | None = None):
         self.symbol = symbol
@@ -58,7 +71,7 @@ class Order:
         return self.status.closed
 
     def cancel(self) -> "Order":
-        """Cancel this order. You can only cancel orders that are still open and have an id.
+        """Create a cancellation order. You can only cancel orders that are still open and have an id.
         The returned order looks like a regular order, but with its size set to zero.
         """
         assert self.id is not None, "Can only cancel orders with an id"
@@ -69,8 +82,10 @@ class Order:
         return result
 
     def update(self, size: Decimal | str | int | float | None = None, limit: float | None = None) -> "Order":
-        """Update this order. You can only update orders that are still open and have an id.
-        You can update the size and/or limit of an order. The id of the order stays the same as the original order.
+        """Create an update-order. You can update the size and/or limit of an order. The returned order has the same id
+        as the original order.
+
+        You can only update existing orders that are still open and have an id.
         """
 
         assert self.id is not None, "Can only update orders with an id"
@@ -100,8 +115,10 @@ class Order:
 
     @property
     def is_buy(self):
+        """Return True if this is a BUY order, False otherwise"""
         return self.size > 0
 
     @property
     def is_sell(self):
+        """Return True if this is a SELL order, False otherwise"""
         return self.size < 0

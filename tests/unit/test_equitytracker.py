@@ -11,7 +11,7 @@ class TestCAPMTracker(unittest.TestCase):
         tracker = EquityTracker()
         rq.run(feed, tracker=tracker)
 
-        timeline, equity = tracker.timeline, tracker.equity
+        timeline, equity = tracker.timeline, tracker.equities
 
         self.assertEqual(len(timeline), len(equity))
         self.assertEqual(feed.timeframe().start, timeline[0])

@@ -1,20 +1,20 @@
 import unittest
 import talib.stream as ta
-from roboquant import CandleStrategy, OHLCVBuffer
+from roboquant import CandleStrategy, OHLCVBuffer, BUY, SELL, Signal
 from tests.common import run_strategy
 
 
 class MyTaLibStrategy(CandleStrategy):
     """Example using talib to create a strategy"""
 
-    def _create_signal(self, _, ohlcv: OHLCVBuffer) -> float | None:
+    def _create_signal(self, _, ohlcv: OHLCVBuffer) -> Signal | None:
         close = ohlcv.close()
         ema12 = ta.EMA(close, 12)  # type: ignore
         ema26 = ta.EMA(close, 26)  # type: ignore
         if ema12 > ema26:
-            return 1.0
+            return BUY
         if ema12 < ema26:
-            return -1.0
+            return SELL
 
 
 class TestOHLCVStrategy(unittest.TestCase):

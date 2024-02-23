@@ -19,7 +19,7 @@ class TensorboardTracker(Tracker):
         self.writer = summary_writer
         self._step = 0
 
-    def log(self, event: Event, account: Account, signals: dict[str, Signal], orders: list[Order]):
+    def trace(self, event: Event, account: Account, signals: dict[str, Signal], orders: list[Order]):
         self.items += len(event.items)
         self.signals += len(signals)
         self.orders += len(orders)

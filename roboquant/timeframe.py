@@ -103,7 +103,7 @@ class Timeframe:
         period = n if isinstance(n, timedelta) else self.duration / n
         end = self.start
         result = []
-        while end in self:
+        while end < self.end:
             start = end
             end = start + period
             result.append(Timeframe(start, end, False))

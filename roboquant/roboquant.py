@@ -66,6 +66,6 @@ class Roboquant:
             orders = self.trader.create_orders(signals, event, account)
             self.broker.place_orders(*orders)
             if tracker:
-                tracker.log(event, account, signals, orders)
+                tracker.trace(event, account, signals, orders)
 
         return self.broker.sync()
