@@ -5,6 +5,7 @@
 ![PyPI - License](https://img.shields.io/pypi/l/roboquant)
 ![PyPI - Python Version](https://img.shields.io/pypi/pyversions/roboquant)
 ![PyPI - Status](https://img.shields.io/pypi/status/roboquant)
+![GitHub Actions Workflow Status](https://img.shields.io/github/actions/workflow/status/neurallayer/roboquant.py/python-package.yml)
 [![discord](https://img.shields.io/discord/954650958300856340?label=discord)](https://discord.com/channels/954650958300856340/954650958300856343)
 
 Roboquant is an open-source algorithmic trading platform. It is flexible, user-friendly and completely free to use. It is designed for anyone serious about algo-trading. 
@@ -20,10 +21,9 @@ from roboquant import *
 feed = YahooFeed("TSLA", "AMZN", "IBM")
 strategy = EMACrossover()
 roboquant = Roboquant(strategy)
-tracker = StandardTracker()
 
-roboquant.run(feed, tracker)
-print(tracker)
+account = roboquant.run(feed)
+print(account)
 ```
 
 ## Install
