@@ -30,7 +30,7 @@ class FlexTrader(Trader):
     """Implementation of a Trader that has configurable rules to modify its behavior. This implementation will not
     generate orders if there is not a price in the event for the underlying symbol.
 
-    The configurable paramters include:
+    The configurable parameters include:
     - one_order_only: don't create new orders for a symbol if there is already an open orders for that same symbol
     - size_fractions: enable fractional order sizes (if size_fractions is larger than 0), default is 0
     - min_buying_power: the minimal buying power that should remain available (to avoid margin calls), default is 0.0

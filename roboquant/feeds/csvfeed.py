@@ -31,7 +31,6 @@ class CSVFeed(HistoricFeed):
         self.adj_close = adj_close
         self.endswith = endswith
         self.freq = frequency
-        logger = logging.getLogger(__name__)
 
         files = self._get_files(path)
         logger.info("located %s files in path %s", len(files), path)

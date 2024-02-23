@@ -37,20 +37,20 @@ class CandleFeed(Feed):
         src_channel = channel.copy()
         candles: dict[str, Candle] = {}
         play_background(self.feed, src_channel)
-        next = None
+        next_time = None
         while event := src_channel.get():
-            if not next:
-                next = event.time + self.freq
-            elif event.time >= next:
+            if not next_time:
+                next_time = event.time + self.freq
+            elif event.time >= next_time:
                 items = list(candles.values())
-                evt = Event(next, items)
+                evt = Event(next_time, items)
                 channel.put(evt)
                 candles = {}
-                next += self.freq
+                next_time += self.freq
 
             self.__aggr_trade2candle(event, candles)
 
-        if candles and self.send_remaining and next:
+        if candles and self.send_remaining and next_time:
             items = list(candles.values())
-            evt = Event(next, items)
+            evt = Event(next_time, items)
             channel.put(evt)

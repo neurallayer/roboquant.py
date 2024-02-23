@@ -52,7 +52,7 @@ class TiingoHistoricFeed(HistoricFeed):
             logger.debug("eod stock url is %s", url)
             response = requests.get(url)
             if not response.ok:
-                logger.warn(f"error symbol={symbol} {response.reason}")
+                logger.warning(f"error symbol={symbol} {response.reason}")
                 continue
 
             rows = self.__get_csv_iter(response)
@@ -79,7 +79,7 @@ class TiingoHistoricFeed(HistoricFeed):
             logger.debug("intraday iex is %s", url)
             response = requests.get(url)
             if not response.ok:
-                logger.warn(f"error symbol={symbol} {response.reason}")
+                logger.warning(f"error symbol={symbol} {response.reason}")
                 continue
 
             rows = self.__get_csv_iter(response)

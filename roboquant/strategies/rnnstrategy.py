@@ -146,7 +146,7 @@ class RNNStrategy(Strategy):
         epochs: int = 10,
         batch_size: int = 32,
         validation_split: float = 0.2,
-        summaryWriter=None,
+        summary_writer=None,
     ):
         """
         Trains the model for a fixed number of epochs (dataset iterations).
@@ -155,7 +155,7 @@ class RNNStrategy(Strategy):
 
         self._fill_replay_buffer(feed, timeframe)
 
-        writer = summaryWriter
+        writer = summary_writer
 
         # make the data stationary
         x_data = self.pct_change(1)

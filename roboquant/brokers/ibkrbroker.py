@@ -71,7 +71,7 @@ class _IBApi(EWrapper, EClient):
         rq_order.id = str(orderId)
         self.orders[rq_order.id] = rq_order
 
-    def reqAccountSummary(self):
+    def request_account(self):
         buyingpower_tag = AccountSummaryTags.BuyingPower
         equity_tag = AccountSummaryTags.NetLiquidation
         with self.__account_end:
@@ -101,9 +101,9 @@ class _IBApi(EWrapper, EClient):
         mktCapPrice,
     ):
         logger.debug("order status orderId=%s status=%s", orderId, status)
-        id = str(orderId)
+        orderId = str(orderId)
         if id in self.orders:
-            order = self.orders[id]
+            order = self.orders[orderId]
             match status:
                 case "Submitted":
                     order.status = OrderStatus.ACTIVE
@@ -112,12 +112,12 @@ class _IBApi(EWrapper, EClient):
                 case "Filled":
                     order.status = OrderStatus.FILLED
         else:
-            logger.warn("recieved status for unknown order id=%s status=%s", orderId, status)
+            logger.warning("received status for unknown order id=%s status=%s", orderId, status)
 
 
 class IBKRBroker(Broker):
     """
-    Atttributes
+    Attributes
     ==========
     contract_mapping
         store how symbols map to IBKR contracts. If a symbol is not found, the symbol is assumed to represent a US stock
@@ -158,7 +158,7 @@ class IBKRBroker(Broker):
 
             api.reqPositions()
             api.reqOpenOrders()
-            api.reqAccountSummary()
+            api.request_account()
 
             acc.positions = {k: v for k, v in api.positions.items() if not v.size.is_zero()}
             acc.orders = [order for order in api.orders.values()]
@@ -181,9 +181,9 @@ class IBKRBroker(Broker):
                 if order.id is None:
                     order.id = self.__api.get_next_order_id()
                     self.__api.orders[order.id] = order
-                ibkrorder = self._get_order(order)
+                ibkr_order = self._get_order(order)
                 contract = self.contract_mapping.get(order.symbol) or self._get_default_contract(order.symbol)
-                self.__api.placeOrder(int(order.id), contract, ibkrorder)
+                self.__api.placeOrder(int(order.id), contract, ibkr_order)
 
     def _get_default_contract(self, symbol: str) -> Contract:
         """If no contract can be found in the `contract_mapping` dict, this method is called to get a default IBKR contract

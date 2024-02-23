@@ -44,15 +44,15 @@ class RandomWalk(HistoricFeed):
         symbol_len,
     ):
         symbols = set()
-        ALPHABET = np.array(list(string.ascii_uppercase))
+        alphabet = np.array(list(string.ascii_uppercase))
         while len(symbols) < n_symbols:
-            symbol = "".join(rnd.choice(ALPHABET, size=symbol_len))
+            symbol = "".join(rnd.choice(alphabet, size=symbol_len))
             symbols.add(symbol)
         return symbols
 
     @staticmethod
-    def __price_path(rnd, n, scale, min, max):
+    def __price_path(rnd, n, scale, min_price, max_price):
         change = rnd.normal(loc=1.0, scale=scale, size=(n,))
-        change[0] = rnd.uniform(min, max)
+        change[0] = rnd.uniform(min_price, max_price)
         price = change.cumprod()
         return price

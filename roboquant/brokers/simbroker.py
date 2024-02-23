@@ -180,7 +180,7 @@ class SimBroker(Broker):
         prices = event.price_items if event else {}
 
         if self.clean_up_orders:
-            self._orders = {id: state for id, state in self._orders.items() if not state.order.closed}
+            self._orders = {order_id: state for order_id, state in self._orders.items() if not state.order.closed}
 
         self._process_modify_order()
         self._process_create_orders(prices)

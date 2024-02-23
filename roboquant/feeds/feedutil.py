@@ -65,7 +65,7 @@ def get_symbol_dataframe(feed: Feed, symbol: str, timeframe: Timeframe | None = 
 
 def print_feed_items(feed: Feed, timeframe: Timeframe | None = None, timeout: float | None = None):
     """Print the items in a feed to the console.
-    This is mostly usefull for debugging purposes to see what events a feed generates
+    This is mostly useful for debugging purposes to see what events a feed generates
     """
 
     channel = EventChannel(timeframe)

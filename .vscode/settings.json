@@ -25,7 +25,7 @@
         "test_*.py"
     ],
     "python.testing.pytestArgs": [
-        "--ignore=tests/integration",
+        "--ignore=tests/integration"
     ],
     "python.testing.pytestEnabled": false,
     "python.testing.unittestEnabled": true,

@@ -43,10 +43,10 @@ class EventChannel:
             self.close()
 
     def get(self, timeout=None) -> Event | None:
-        """returns the next event or None if this channel is just closed
+        """Returns the next event or None if this channel is just closed
 
-        - timeout: the timeout in seconds to send a hearthbeat in case no other events were available, default is None.
-        A hearthbeat is an empty event.
+        - timeout: the timeout in seconds to send a heartbeat in case no other events were available, default is None.
+        A heartbeat is an empty event.
         """
         try:
             return self._queue.get(timeout=timeout)
