@@ -55,7 +55,7 @@ class FlexTrader(Trader):
     ) -> None:
         super().__init__()
         self.one_order_only = one_order_only
-        self.size_ndigits: int = size_fractions
+        self.size_digits: int = size_fractions
         self.min_buying_power: float = min_buying_power
         self.increase_position = increase_position
         self.shorting = shorting
@@ -66,7 +66,7 @@ class FlexTrader(Trader):
     def _get_order_size(self, rating: float, contract_price: float, max_order_value: float) -> Decimal:
         """Return the order size"""
         size = Decimal(rating * max_order_value / contract_price)
-        rounded_size = round(size, self.size_ndigits)
+        rounded_size = round(size, self.size_digits)
         return rounded_size
 
     def create_orders(self, signals: dict[str, Signal], event: Event, account: Account) -> list[Order]:

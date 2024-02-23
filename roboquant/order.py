@@ -33,7 +33,7 @@ class OrderStatus(Flag):
         return self in OrderStatus._CLOSE
 
     def __repr__(self) -> str:
-        return self.name
+        return self.name  # type: ignore
 
 
 @dataclass
