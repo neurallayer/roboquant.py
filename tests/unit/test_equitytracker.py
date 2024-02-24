@@ -27,5 +27,6 @@ class TestEquityTracker(unittest.TestCase):
         pnl = tracker.pnl(True)
         self.assertTrue(-1 < pnl < 1)
 
+
 if __name__ == "__main__":
     unittest.main()
