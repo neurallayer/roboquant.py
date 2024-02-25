@@ -3,7 +3,7 @@ from roboquant.strategies.strategy import Strategy
 from roboquant.brokers.broker import Broker
 from roboquant.feeds.feed import Feed
 from roboquant.traders.trader import Trader
-from roboquant.trackers.tracker import Tracker
+from roboquant.journals.journal import Journal
 from roboquant.feeds.eventchannel import EventChannel
 from .timeframe import Timeframe
 from roboquant.brokers.simbroker import SimBroker
@@ -39,7 +39,7 @@ class Roboquant:
     def run(
         self,
         feed: Feed,
-        tracker: Tracker | None = None,
+        journal: Journal | None = None,
         timeframe: Timeframe | None = None,
         capacity: int = 10,
         heartbeat_timeout: float | None = None,
@@ -49,7 +49,7 @@ class Roboquant:
         Args:
 
         - feed: the feed to use for this run. This is the only mandatory argument.
-        - tracker: tracker to use to log and/or store progress and metrics, default is None.
+        - journal: journal to use to log and/or store progress and metrics, default is None.
         - timeframe: optionally limit the run to events within this timeframe. The default is None, resulting in all
         events in the feed being delivered.
         - capacity: the buffer capacity of the event channel before it starts blocking new events. Default is 10 events.
@@ -65,7 +65,7 @@ class Roboquant:
             account = self.broker.sync(event)
             orders = self.trader.create_orders(signals, event, account)
             self.broker.place_orders(*orders)
-            if tracker:
-                tracker.track(event, account, signals, orders)
+            if journal:
+                journal.track(event, account, signals, orders)
 
         return self.broker.sync()

@@ -1,13 +1,13 @@
-from roboquant.trackers.tracker import Tracker
+from roboquant.journals.journal import Journal
 import inspect
 
 
-class BasicTracker(Tracker):
+class BasicJournal(Journal):
     """Tracks a number of basic metrics:
     - total number of events, items, signals and orders until that time
     - total pnl percentage
 
-    This tracker adds little overhead to a run, both CPU and memory wise.
+    This journal adds little overhead to a run, both CPU and memory wise.
     """
 
     def __init__(self):

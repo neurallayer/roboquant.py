@@ -1,4 +1,4 @@
-from roboquant.trackers.metric import Metric
+from roboquant.journals.metric import Metric
 
 
 class PriceItemMetric(Metric):

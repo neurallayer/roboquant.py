@@ -10,8 +10,10 @@ Measure the average delay receiving prices from IEX. This includes the following
 import logging
 import time
 
-from roboquant import EventChannel, Timeframe, TiingoLiveFeed, feedutil
+from roboquant import Timeframe
+from roboquant.feeds import EventChannel, TiingoLiveFeed, feedutil
 from statistics import mean, stdev
+
 
 if __name__ == "__main__":
 

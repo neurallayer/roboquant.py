@@ -3,7 +3,7 @@ from decimal import Decimal
 
 from roboquant import Roboquant, Order, PriceItem
 from roboquant.strategies import EMACrossover
-from roboquant.trackers import BasicTracker
+from roboquant.journals import BasicJournal
 from roboquant.traders import FlexTrader
 from tests.common import get_feed
 
@@ -24,16 +24,16 @@ class TestFlexTrader(unittest.TestCase):
     def test_default_flextrader(self):
         feed = get_feed()
         rq = Roboquant(EMACrossover(13, 26), trader=FlexTrader())
-        tracker = BasicTracker()
-        rq.run(feed, tracker=tracker)
-        self.assertGreater(tracker.orders, 0)
+        journal = BasicJournal()
+        rq.run(feed, journal=journal)
+        self.assertGreater(journal.orders, 0)
 
     def test_custom_flextrader(self):
         feed = get_feed()
         rq = Roboquant(EMACrossover(13, 26), trader=_MyTrader())
-        tracker = BasicTracker()
-        rq.run(feed, tracker=tracker)
-        self.assertGreater(tracker.orders, 0)
+        journal = BasicJournal()
+        rq.run(feed, journal=journal)
+        self.assertGreater(journal.orders, 0)
 
 
 if __name__ == "__main__":

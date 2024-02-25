@@ -6,12 +6,12 @@ from roboquant.order import Order
 from roboquant.signal import Signal
 
 
-class Tracker(Protocol):
+class Journal(Protocol):
     """
-    A tracker allows for the tracking and/or logging of one or more metrics during a run.
+    A journal allows for the tracking and/or logging of one or more metrics during a run.
     """
 
     def track(self, event: Event, account: Account, signals: dict[str, Signal], orders: list[Order]):
-        """invoked at each step of a run that provides the tracker with the opportunity to
+        """invoked at each step of a run that provides the journal with the opportunity to
         track and log various metrics."""
         ...

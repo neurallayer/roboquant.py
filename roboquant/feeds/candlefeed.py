@@ -8,7 +8,7 @@ from datetime import timedelta
 
 
 class CandleFeed(Feed):
-    """Aggregates Trades of another feed into Candles"""
+    """Aggregates Trades of another feed into candles"""
 
     def __init__(self, feed: Feed, frequency: timedelta, send_remaining=False):
         super().__init__()

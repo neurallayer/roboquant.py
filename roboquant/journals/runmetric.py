@@ -1,11 +1,9 @@
-from roboquant.trackers.metric import Metric
+from roboquant.journals.metric import Metric
 
 
 class RunMetric(Metric):
-    """Tracks a number of basic progress metrics:
+    """Calculates a number of basic metrics during a run:
     - total number of events, items, signals and orders
-
-    This tracker adds little overhead to a run, both CPU and memory wise.
     """
 
     def __init__(self):

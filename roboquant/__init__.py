@@ -10,6 +10,6 @@ from .config import Config
 
 from roboquant import brokers
 from roboquant import traders
-from roboquant import trackers
+from roboquant import journals
 from roboquant import strategies
 from roboquant import feeds

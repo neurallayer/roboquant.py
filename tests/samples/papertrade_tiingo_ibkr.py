@@ -21,10 +21,10 @@ if __name__ == "__main__":
     # Lets run our EMACrossover strategy for 15 minutes
     roboquant = rq.Roboquant(rq.strategies.EMACrossover(3, 5), broker=ibkr)
     timeframe = rq.Timeframe.next(minutes=15)
-    tracker = rq.trackers.BasicTracker()
-    account = roboquant.run(feed, tracker, timeframe)
+    journal = rq.journals.BasicJournal()
+    account = roboquant.run(feed, journal, timeframe)
     src_feed.close()
 
     print(account)
-    print(tracker)
+    print(journal)
     sys.exit(0)

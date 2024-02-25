@@ -3,14 +3,14 @@ import tempfile
 import unittest
 from roboquant import Roboquant
 from roboquant.strategies import EMACrossover
-from roboquant.trackers import RunMetric, EquityMetric, TensorboardTracker
+from roboquant.journals import RunMetric, EquityMetric, TensorboardJournal
 from tests.common import get_feed
 from tensorboard.summary import Writer
 
 
-class TestTensorboardTracker(unittest.TestCase):
+class TestTensorboard(unittest.TestCase):
 
-    def test_tensorboardtracker(self):
+    def test_tensorboard_journal(self):
         rq = Roboquant(EMACrossover())
         feed = get_feed()
 
@@ -18,8 +18,8 @@ class TestTensorboardTracker(unittest.TestCase):
 
         output = Path(tmpdir).joinpath("runs")
         writer = Writer(str(output))
-        tracker = TensorboardTracker(writer, RunMetric(), EquityMetric())
-        rq.run(feed, tracker=tracker)
+        journal = TensorboardJournal(writer, RunMetric(), EquityMetric())
+        rq.run(feed, journal=journal)
         writer.close()
 
 

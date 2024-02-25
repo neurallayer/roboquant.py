@@ -1,7 +1,7 @@
 from roboquant import Roboquant
 from roboquant.feeds import YahooFeed
 from roboquant.strategies import EMACrossover
-from roboquant.trackers import TensorboardTracker, EquityMetric, RunMetric, FeedMetric, PriceItemMetric, AlphaBeta
+from roboquant.journals import TensorboardJournal, EquityMetric, RunMetric, FeedMetric, PriceItemMetric, AlphaBeta
 from tensorboard.summary import Writer
 
 if __name__ == "__main__":
@@ -15,6 +15,6 @@ if __name__ == "__main__":
         rq = Roboquant(EMACrossover(p1, p2))
         log_dir = f"""runs/ema_{p1}_{p2}"""
         writer = Writer(log_dir)
-        tracker = TensorboardTracker(writer, EquityMetric(), RunMetric(), FeedMetric(), PriceItemMetric("JPM"), AlphaBeta(200))
-        account = rq.run(feed, tracker)
+        journal = TensorboardJournal(writer, EquityMetric(), RunMetric(), FeedMetric(), PriceItemMetric("JPM"), AlphaBeta(200))
+        account = rq.run(feed, journal)
         writer.close()

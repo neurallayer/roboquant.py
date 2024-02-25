@@ -1,8 +1,8 @@
-from roboquant.trackers import Tracker
-from roboquant.trackers.metric import Metric
+from roboquant.journals import Journal
+from roboquant.journals.metric import Metric
 
 
-class TensorboardTracker(Tracker):
+class TensorboardJournal(Journal):
     """Record metrics to a Tensorboard compatible file.
 
     This can be used outside the realm of machine learning, but requires tensorboard to be installed.

@@ -1,7 +1,7 @@
 import unittest
 from roboquant import Roboquant, Timeframe
 from roboquant.traders import FlexTrader
-from roboquant.trackers import BasicTracker
+from roboquant.journals import BasicJournal
 
 from roboquant.strategies.rnnstrategy import RNNStrategy
 import torch.nn as nn
@@ -43,10 +43,10 @@ class TestRNNStrategy(unittest.TestCase):
         # Run the trained model with the last 4 years of data
         rq = Roboquant(strategy, FlexTrader(max_order_perc=0.8))
         tf = Timeframe.fromisoformat("2020-01-01", "2023-12-31")
-        tracker = BasicTracker()
-        rq.run(feed, tracker, tf)
-        self.assertGreater(tracker.signals, 0)
-        # print(tracker)
+        journal = BasicJournal()
+        rq.run(feed, journal, tf)
+        self.assertGreater(journal.signals, 0)
+        # print(journal)
 
 
 if __name__ == "__main__":

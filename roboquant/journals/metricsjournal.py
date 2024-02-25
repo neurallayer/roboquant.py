@@ -1,9 +1,9 @@
-from roboquant.trackers.metric import Metric
-from roboquant.trackers.tracker import Tracker
+from roboquant.journals.metric import Metric
+from roboquant.journals.journal import Journal
 from datetime import datetime
 
 
-class MetricsTracker(Tracker):
+class MetricsJournal(Journal):
     """
     A journal that allows for metrics to be added and calculated at each step. It will store
     the results in memory.
