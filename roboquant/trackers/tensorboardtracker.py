@@ -4,11 +4,18 @@ from roboquant.trackers.metric import Metric
 
 class TensorboardTracker(Tracker):
     """Record metrics to a Tensorboard compatible file.
-    This can be used outside the realm of machine learning, but requires torch to be installed.
+
+    This can be used outside the realm of machine learning, but requires tensorboard to be installed.
     """
 
-    def __init__(self, summary_writer, *metrics: Metric):
-        self.writer = summary_writer
+    def __init__(self, writer, *metrics: Metric):
+        """
+        Params:
+
+        - writer: a tensorboard writer instance (`tensorboard.summary.Writer`)
+        - metrics: the metrics that should be calculated and be added to the tensorboard writer
+        """
+        self.__writer = writer
         self._step = 0
         self.metrics = metrics
 
@@ -17,10 +24,6 @@ class TensorboardTracker(Tracker):
         for metric in self.metrics:
             result = metric.calc(event, account, signals, orders)
             for name, value in result.items():
-                self.writer.add_scalar(name, value, self._step, time)
+                self.__writer.add_scalar(name, value, self._step, wall_time=time)
 
         self._step += 1
-
-    def close(self):
-        self.writer.flush()
-        self.writer.close()

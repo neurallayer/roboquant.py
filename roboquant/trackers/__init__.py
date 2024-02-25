@@ -1,5 +1,5 @@
 from roboquant.trackers.tracker import Tracker
-from roboquant.trackers.alphabeta import AlphaBetaTracker
+from roboquant.trackers.alphabeta import AlphaBeta
 from roboquant.trackers.basictracker import BasicTracker
 from roboquant.trackers.tensorboardtracker import TensorboardTracker
 from roboquant.trackers.runmetric import RunMetric

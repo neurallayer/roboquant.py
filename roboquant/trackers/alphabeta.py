@@ -1,60 +1,63 @@
 from typing import Tuple
 import numpy as np
-
-from roboquant.event import Event
-from roboquant.timeframe import Timeframe
-from .tracker import Tracker
+from .metric import Metric
 
 
-class AlphaBetaTracker(Tracker):
-    """Tracks the Alpha and Beta"""
+class AlphaBeta(Metric):
+    """
+    Calculate the alpha and beta.
+    """
 
-    def __init__(self, price_type="DEFAULT"):
-        self.mkt_returns = []
-        self.acc_returns = []
-        self.last_prices = {}
-        self.last_equity = 0.0
-        self.init = False
+    def __init__(self, window_size, price_type="DEFAULT", risk_free_return=0.0):
+        """
+        window_size: the rolling window_size to use. The alpha and beta are only calculated once the window is filled.
+        price_type: the type of price to use to calculate the market returns, default is "DEFAULT"
+        risk_free_return: the risk free return rate, default is 0.0
+        """
+
+        # data stores both portfolio return and market return
+        self._data = np.ones((2, window_size))
+        self.__cnt = 0
+        self.__last_prices = {}
+        self.__last_equity = None
+        self.risk_free_return = risk_free_return
         self.price_type = price_type
-        self.start_time = None
-        self.end_time = None
 
-    def _get_market_returns(self, prices: dict[str, float]):
+    def __get_market_value(self, prices: dict[str, float]):
         cnt = 0
         result = 0.0
         for symbol in prices.keys():
-            if symbol in self.last_prices:
+            if symbol in self.__last_prices:
                 cnt += 1
-                result += prices[symbol] / self.last_prices[symbol] - 1.0
-        return result / cnt
+                result += prices[symbol] / self.__last_prices[symbol]
+        return 1.0 if cnt == 0 else result / cnt
 
-    def track(self, event: Event, account, signals, orders):
-        prices = {item.symbol: item.price(self.price_type) for item in event.price_items.values()}
+    def __update(self, equity, prices):
+        self.__last_equity = equity
+        self.__last_prices.update(prices)
+
+    def calc(self, event, account, signals, orders):
+        prices = {symbol: item.price(self.price_type) for symbol, item in event.price_items.items()}
         equity = account.equity
-        if self.init:
-            self.acc_returns.append(equity / self.last_equity - 1.0)
-            self.mkt_returns.append(self._get_market_returns(prices))
+        if self.__last_equity is None:
+            self.__update(equity, prices)
+            return {}
+
+        idx = self.__cnt % len(self._data)
+        self._data[0, idx] = equity / self.__last_equity
+        self._data[1, idx] = self.__get_market_value(prices)
+        self.__update(equity, prices)
+        self.__cnt += 1
+
+        if self.__cnt <= self._data.shape[-1]:
+            return {}
         else:
-            self.start_time = event.time
+            alpha, beta = self.alpha_beta()
+            return {"perf/alpha": alpha, "perf/beta": beta}
 
-        self.end_time = event.time
-        self.last_prices.update(prices)
-        self.last_equity = equity
-        self.init = True
+    def alpha_beta(self) -> Tuple[float, float]:
+        ar_total, mr_total = np.cumprod(self._data, axis=1)[:, -1]
 
-    def alpha_beta(self, risk_free_return=0.0) -> Tuple[float, float]:
-        if not self.start_time or not self.end_time:
-            return float("nan"), float("nan")
-
-        tf = Timeframe(self.start_time, self.end_time, True)
-        mr = np.asarray(self.mkt_returns)
-        mr_total = np.cumprod(mr + 1.0)[-1]
-        mr_total = tf.annualize(mr_total.item())
-
-        ar = np.asarray(self.acc_returns)
-        ar_total = np.cumprod(ar + 1.0)[-1]
-        ar_total = tf.annualize(ar_total.item())
-
-        beta = np.cov(mr, ar)[0][1] / np.var(mr)
-        alpha = ar_total - risk_free_return - beta * (mr_total - risk_free_return)
+        beta = np.cov(self._data)[0][1] / np.var(self._data[1])
+        alpha = ar_total - self.risk_free_return - beta * (mr_total - self.risk_free_return)
         return alpha, beta

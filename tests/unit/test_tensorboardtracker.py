@@ -5,7 +5,7 @@ from roboquant import Roboquant
 from roboquant.strategies import EMACrossover
 from roboquant.trackers import RunMetric, EquityMetric, TensorboardTracker
 from tests.common import get_feed
-from torch.utils.tensorboard.writer import SummaryWriter
+from tensorboard.summary import Writer
 
 
 class TestTensorboardTracker(unittest.TestCase):
@@ -16,11 +16,11 @@ class TestTensorboardTracker(unittest.TestCase):
 
         tmpdir = tempfile.gettempdir()
 
-        log_dir = Path(tmpdir).joinpath("runs")
-        writer = SummaryWriter(log_dir)
+        output = Path(tmpdir).joinpath("runs")
+        writer = Writer(str(output))
         tracker = TensorboardTracker(writer, RunMetric(), EquityMetric())
         rq.run(feed, tracker=tracker)
-        tracker.close()
+        writer.close()
 
 
 if __name__ == "__main__":

@@ -1,8 +1,8 @@
 from roboquant import Roboquant
 from roboquant.feeds import YahooFeed
 from roboquant.strategies import EMACrossover
-from roboquant.trackers import TensorboardTracker, EquityMetric, RunMetric, FeedMetric, PriceItemMetric
-from torch.utils.tensorboard.writer import SummaryWriter
+from roboquant.trackers import TensorboardTracker, EquityMetric, RunMetric, FeedMetric, PriceItemMetric, AlphaBeta
+from tensorboard.summary import Writer
 
 if __name__ == "__main__":
     """Compare 3 runs with different parameters using tensorboard"""
@@ -14,6 +14,7 @@ if __name__ == "__main__":
     for p1, p2 in params:
         rq = Roboquant(EMACrossover(p1, p2))
         log_dir = f"""runs/ema_{p1}_{p2}"""
-        writer = SummaryWriter(log_dir)
-        tracker = TensorboardTracker(writer, EquityMetric(), RunMetric(), FeedMetric(), PriceItemMetric("JPM"))
+        writer = Writer(log_dir)
+        tracker = TensorboardTracker(writer, EquityMetric(), RunMetric(), FeedMetric(), PriceItemMetric("JPM"), AlphaBeta(200))
         account = rq.run(feed, tracker)
+        writer.close()

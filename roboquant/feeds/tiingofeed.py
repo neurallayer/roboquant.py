@@ -153,8 +153,8 @@ class TiingoLiveFeed(Feed):
 
         url = f"wss://api.tiingo.com/{market}"
         logger.info(f"Opening websocket {url}")
-        self.ws = websocket.WebSocketApp(  # type: ignore
-            url, on_message=self._handle_message, on_error=self._handle_error, on_close=self._handle_close
+        self.ws = websocket.WebSocketApp(   # type: ignore
+            url, on_message=self._handle_message, on_error=self._handle_error, on_close=self._handle_close  # type: ignore
         )
         kwargs = {"sslopt": {"cert_reqs": ssl.CERT_NONE}}
         wst = threading.Thread(target=self.ws.run_forever, kwargs=kwargs)
