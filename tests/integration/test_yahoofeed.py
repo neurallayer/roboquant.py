@@ -1,7 +1,7 @@
 import unittest
 from datetime import datetime
 from roboquant.feeds import YahooFeed
-from tests.common import run_priceaction_feed
+from tests.common import run_priceitem_feed
 
 
 class TestYahooFeed(unittest.TestCase):
@@ -14,7 +14,7 @@ class TestYahooFeed(unittest.TestCase):
         self.assertTrue(feed.timeframe().end == datetime.fromisoformat("2019-12-31T05:00:00+00:00"))
         self.assertEqual(503, len(feed.timeline()))
 
-        run_priceaction_feed(feed, ["MSFT", "JPM"], self)
+        run_priceitem_feed(feed, ["MSFT", "JPM"], self)
 
     def test_yahoofeed_wrong_symbol(self):
         # expect some error logging due to parsing an invalid symbol

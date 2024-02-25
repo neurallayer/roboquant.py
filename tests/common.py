@@ -2,11 +2,10 @@ from datetime import date, datetime, timedelta
 import pathlib
 from unittest import TestCase
 from roboquant import PriceItem, Candle, Quote, Trade
-from roboquant.feeds import CSVFeed, EventChannel
+from roboquant.feeds import CSVFeed, EventChannel, feedutil
 from roboquant.signal import Signal
 from roboquant.strategies.strategy import Strategy
 
-from roboquant.feeds.feedutil import play_background
 import math
 
 
@@ -27,11 +26,11 @@ def get_output(filename) -> str:
         return content
 
 
-def run_priceaction_feed(feed, symbols: list[str], testCase: TestCase, timeframe=None):
-    """Common test for all feeds that produce price-bars"""
+def run_priceitem_feed(feed, symbols: list[str], testCase: TestCase, timeframe=None):
+    """Common test for all feeds that produce price-items"""
 
     channel = EventChannel(timeframe)
-    play_background(feed, channel)
+    feedutil.play_background(feed, channel)
 
     last = None
     while event := channel.get(30.0):
@@ -67,7 +66,7 @@ def run_priceaction_feed(feed, symbols: list[str], testCase: TestCase, timeframe
 def run_strategy(strategy: Strategy, testCase: TestCase):
     feed = get_feed()
     channel = EventChannel()
-    play_background(feed, channel)
+    feedutil.play_background(feed, channel)
     tot_ratings = 0
     while event := channel.get():
         signals = strategy.create_signals(event)
