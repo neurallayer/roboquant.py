@@ -28,7 +28,7 @@ class AlphaBetaTracker(Tracker):
                 result += prices[symbol] / self.last_prices[symbol] - 1.0
         return result / cnt
 
-    def trace(self, event: Event, account, signals, orders):
+    def track(self, event: Event, account, signals, orders):
         prices = {item.symbol: item.price(self.price_type) for item in event.price_items.values()}
         equity = account.equity
         if self.init:

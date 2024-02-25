@@ -2,6 +2,7 @@ from datetime import datetime, timezone
 from functools import cached_property
 from dataclasses import dataclass
 from array import array
+from typing import Any
 
 
 @dataclass(slots=True)
@@ -12,7 +13,7 @@ class PriceItem:
     """the symbol for this price-item"""
 
     def price(self, price_type: str = "DEFAULT") -> float:
-        """Returns the price for the provided type. A price_type for example is
+        """Returns the price for the provided price_type. A price_type for example is
         `OPEN` or `CLOSE`. All price-items are expected to return a DEFAULT price
         if the type is unknown.
         """
@@ -25,7 +26,6 @@ class PriceItem:
 
 @dataclass(slots=True)
 class Quote(PriceItem):
-    # symbol: str
     data: array
 
     def price(self, price_type: str = "DEFAULT") -> float:
@@ -59,7 +59,6 @@ class Quote(PriceItem):
 
 @dataclass(slots=True)
 class Trade(PriceItem):
-    # symbol: str
     trade_price: float
     trade_volume: float
 
@@ -72,7 +71,6 @@ class Trade(PriceItem):
 
 @dataclass(slots=True)
 class Candle(PriceItem):
-    # symbol: str
     ohlcv: array
     frequency: str = ""  # f.e 1s , 15m, 4h, 1d
 
@@ -104,7 +102,7 @@ class Event:
     Time is always a datetime object with UTC timezone.
     """
 
-    def __init__(self, time: datetime, items: list):
+    def __init__(self, time: datetime, items: list[Any]):
         assert time.tzname() == "UTC", time.tzname()
         self.time = time
         self.items = items

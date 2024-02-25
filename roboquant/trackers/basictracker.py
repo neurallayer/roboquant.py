@@ -1,44 +1,39 @@
-from dataclasses import dataclass
-from datetime import datetime
-import logging
-
 from roboquant.trackers.tracker import Tracker
-from roboquant.account import Account
-from roboquant.event import Event
-from roboquant.order import Order
-from roboquant.signal import Signal
-
-logger = logging.getLogger(__name__)
+import inspect
 
 
-@dataclass
 class BasicTracker(Tracker):
     """Tracks a number of basic metrics:
-    - last time
     - total number of events, items, signals and orders until that time
+    - total pnl percentage
 
     This tracker adds little overhead to a run, both CPU and memory wise.
     """
-    time: datetime | None
-    items: int
-    orders: int
-    signals: int
-    events: int
 
-    def __init__(self, output=False):
-        self.time = None
+    def __init__(self):
         self.items = 0
         self.orders = 0
         self.signals = 0
         self.events = 0
-        self.__output = output
+        self.pnl = 0.0
+        self.__first_equity = None
 
-    def trace(self, event: Event, account: Account, signals: dict[str, Signal], orders: list[Order]):
-        self.time = event.time
+    def track(self, event, account, signals, orders):
+        if self.__first_equity is None:
+            self.__first_equity = account.equity
+
         self.items += len(event.items)
         self.orders += len(orders)
         self.events += 1
         self.signals += len(signals)
+        self.pnl = account.equity / self.__first_equity - 1.0
 
-        if self.__output:
-            print(self.__repr__() + "\n")
+    def __repr__(self) -> str:
+        result = f"""
+            events : {self.events}
+            items  : {self.items}
+            signals: {self.signals}
+            orders : {self.orders}
+            pnl    : {self.pnl*100:_.2f}%
+        """
+        return inspect.cleandoc(result)

@@ -12,7 +12,7 @@ class EquityTracker(Tracker):
         self.equities = []
         self.__last = None
 
-    def trace(self, event, account, signals, orders):
+    def track(self, event, account, signals, orders):
         if self.__last is None or event.time > self.__last:
             self.timeline.append(event.time)
             self.equities.append(account.equity)

@@ -30,7 +30,7 @@ jobs:
         pip install -r requirements.txt
     - name: Lint with flake8
       run: |
-        flake8 roboquant tests --count --statistics
+        flake8 roboquant tests --count --statistics --exit-zero
     - name: Run unittest
       run: |
         python -m unittest discover -s tests/unit

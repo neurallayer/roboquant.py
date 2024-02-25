@@ -11,7 +11,19 @@ from .config import Config
 
 from roboquant.brokers import Broker, SimBroker
 from roboquant.traders import Trader, FlexTrader
-from roboquant.trackers import Tracker, BasicTracker, AlphaBetaTracker, EquityTracker, TensorboardTracker, MarketTracker
+from roboquant.trackers import (
+    Tracker,
+    BasicTracker,
+    AlphaBetaTracker,
+    EquityTracker,
+    TensorboardTracker,
+    FeedMetric,
+    Metric,
+    EquityMetric,
+    FeedMetric,
+    RunMetric,
+    PriceItemMetric
+)
 from roboquant.strategies import (
     Strategy,
     EMACrossover,

@@ -1,6 +1,7 @@
 from dataclasses import dataclass
 from datetime import datetime
 from decimal import Decimal
+import inspect
 from roboquant.order import Order
 
 
@@ -85,13 +86,14 @@ class Account:
         o = [f"{o.size}@{o.symbol}" for o in self.open_orders()]
         o_str = ", ".join(o) or "none"
 
-        return f"""
-        buying power : {self.buying_power:_.2f}
-        equity       : {self.equity:_.2f}
-        positions    : {p_str}
-        open orders  : {o_str}
-        last update  : {self.last_update}
+        result = f"""
+            buying power : {self.buying_power:_.2f}
+            equity       : {self.equity:_.2f}
+            positions    : {p_str}
+            open orders  : {o_str}
+            last update  : {self.last_update}
         """
+        return inspect.cleandoc(result)
 
 
 class OptionAccount(Account):

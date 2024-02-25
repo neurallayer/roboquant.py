@@ -3,4 +3,8 @@ from roboquant.trackers.alphabeta import AlphaBetaTracker
 from roboquant.trackers.basictracker import BasicTracker
 from roboquant.trackers.equitytracker import EquityTracker
 from roboquant.trackers.tensorboardtracker import TensorboardTracker
-from roboquant.trackers.markettracker import MarketTracker
+from roboquant.trackers.runmetric import RunMetric
+from roboquant.trackers.equitymetric import EquityMetric
+from roboquant.trackers.metric import Metric
+from roboquant.trackers.feedmetric import FeedMetric
+from roboquant.trackers.pricemetric import PriceItemMetric

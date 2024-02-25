@@ -1,8 +1,8 @@
 from pathlib import Path
 import tempfile
 import unittest
-from roboquant import Roboquant, EMACrossover
-from roboquant.trackers.tensorboardtracker import TensorboardTracker
+from roboquant import Roboquant, EMACrossover, TensorboardTracker
+from roboquant.trackers import RunMetric, EquityMetric
 from tests.common import get_feed
 from torch.utils.tensorboard.writer import SummaryWriter
 
@@ -17,11 +17,8 @@ class TestTensorboardTracker(unittest.TestCase):
 
         log_dir = Path(tmpdir).joinpath("runs")
         writer = SummaryWriter(log_dir)
-        tracker = TensorboardTracker(writer)
+        tracker = TensorboardTracker(writer, RunMetric(), EquityMetric())
         rq.run(feed, tracker=tracker)
-        self.assertGreater(tracker.items, 0)
-        self.assertGreater(tracker.signals, 0)
-        self.assertGreater(tracker.orders, 0)
         tracker.close()
 
 

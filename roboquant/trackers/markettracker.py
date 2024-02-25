@@ -28,7 +28,7 @@ class MarketTracker(Tracker):
         self.market_returns = {}
         self.price_type = price_type
 
-    def trace(self, event, account, signals, orders):
+    def track(self, event, account, signals, orders):
         for symbol, item in event.price_items.items():
             price = item.price(self.price_type)
             if mr := self.market_returns.get(symbol):
