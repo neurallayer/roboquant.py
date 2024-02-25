@@ -1,13 +1,7 @@
-from roboquant import (
-    Roboquant,
-    EMACrossover,
-    YahooFeed,
-    TensorboardTracker,
-    EquityMetric,
-    RunMetric,
-    FeedMetric,
-    PriceItemMetric,
-)
+from roboquant import Roboquant
+from roboquant.feeds import YahooFeed
+from roboquant.strategies import EMACrossover
+from roboquant.trackers import TensorboardTracker, EquityMetric, RunMetric, FeedMetric, PriceItemMetric
 from torch.utils.tensorboard.writer import SummaryWriter
 
 if __name__ == "__main__":

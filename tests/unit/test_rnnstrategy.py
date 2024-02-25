@@ -1,5 +1,8 @@
 import unittest
-from roboquant import FlexTrader, Roboquant, Timeframe, BasicTracker
+from roboquant import Roboquant, Timeframe
+from roboquant.traders import FlexTrader
+from roboquant.trackers import BasicTracker
+
 from roboquant.strategies.rnnstrategy import RNNStrategy
 import torch.nn as nn
 import torch.nn.functional as F

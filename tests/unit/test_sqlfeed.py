@@ -1,7 +1,7 @@
 from pathlib import Path
 import unittest
 
-from roboquant import SQLFeed
+from roboquant.feeds import SQLFeed
 from tests.common import get_feed, run_priceaction_feed
 import tempfile
 

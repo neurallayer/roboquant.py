@@ -1,16 +1,17 @@
 import os
 import time
-from roboquant import Roboquant, BasicTracker, CSVFeed, EMACrossover
+import roboquant as rq
+
 
 if __name__ == "__main__":
     start = time.time()
     path = os.path.expanduser("~/data/nyse_stocks/")
-    feed = CSVFeed.stooq_us_daily(path)
+    feed = rq.feeds.CSVFeed.stooq_us_daily(path)
     loadtime = time.time() - start
-    rq = Roboquant(EMACrossover(13, 26))
-    tracker = BasicTracker()
+    roboquant = rq.Roboquant(rq.strategies.EMACrossover(13, 26))
+    tracker = rq.trackers.BasicTracker()
     start = time.time()
-    account = rq.run(feed, tracker=tracker)
+    account = roboquant.run(feed, tracker=tracker)
     runtime = time.time() - start
 
     print(account)

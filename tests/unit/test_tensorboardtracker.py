@@ -1,8 +1,9 @@
 from pathlib import Path
 import tempfile
 import unittest
-from roboquant import Roboquant, EMACrossover, TensorboardTracker
-from roboquant.trackers import RunMetric, EquityMetric
+from roboquant import Roboquant
+from roboquant.strategies import EMACrossover
+from roboquant.trackers import RunMetric, EquityMetric, TensorboardTracker
 from tests.common import get_feed
 from torch.utils.tensorboard.writer import SummaryWriter
 

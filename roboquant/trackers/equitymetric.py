@@ -1,4 +1,3 @@
-
 from roboquant.trackers.metric import Metric
 
 
@@ -43,7 +42,7 @@ class EquityMetric(Metric):
             self.max_drawdown = drawdown
 
         return self.max_drawdown
-    
+
     def __get_max_gain(self, equity) -> float:
         if equity < self.min_equity:
             self.min_equity = equity

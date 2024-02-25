@@ -8,8 +8,7 @@ from roboquant.strategies.featureset import (
     FixedValueFeature,
     DayOfWeekFeature,
 )
-from roboquant.feeds.feedutil import play_background
-from roboquant import EventChannel
+from roboquant.feeds import EventChannel, feedutil
 from tests.common import get_feed
 import numpy as np
 
@@ -34,7 +33,7 @@ class TestFeatureSet(unittest.TestCase):
         fs.add(DayOfWeekFeature())
 
         channel = EventChannel()
-        play_background(feed, channel)
+        feedutil.play_background(feed, channel)
 
         cnt = 0
         while evt := channel.get():

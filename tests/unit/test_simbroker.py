@@ -1,7 +1,8 @@
 from datetime import datetime, timezone
 import decimal
 import unittest
-from roboquant import Event, Order, Trade, SimBroker
+from roboquant import Event, Order, Trade
+from roboquant.brokers import SimBroker
 
 
 class TestSimbroker(unittest.TestCase):

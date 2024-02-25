@@ -1,5 +1,5 @@
 import unittest
-from roboquant import CandleStrategy, OHLCVBuffer
+from roboquant.strategies import CandleStrategy, OHLCVBuffer
 from roboquant.signal import Signal
 from tests.common import run_strategy
 

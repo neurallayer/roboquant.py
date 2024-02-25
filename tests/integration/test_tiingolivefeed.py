@@ -1,4 +1,5 @@
-from roboquant import Timeframe, TiingoLiveFeed, Config
+from roboquant import Timeframe, Config
+from roboquant.feeds import TiingoLiveFeed
 import logging
 import unittest
 

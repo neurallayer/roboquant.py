@@ -1,7 +1,10 @@
 import unittest
 from decimal import Decimal
 
-from roboquant import Roboquant, Order, PriceItem, FlexTrader, EMACrossover, BasicTracker
+from roboquant import Roboquant, Order, PriceItem
+from roboquant.strategies import EMACrossover
+from roboquant.trackers import BasicTracker
+from roboquant.traders import FlexTrader
 from tests.common import get_feed
 
 

@@ -16,11 +16,11 @@ So whether you are a beginning retail trader or an established trading firm, rob
 The following code snippet shows the steps required to run a full back-test on a number of stocks.
 
 ```python
-from roboquant import *
+import roboquant as rq
 
-feed = YahooFeed("TSLA", "AMZN", "IBM")
-strategy = EMACrossover()
-roboquant = Roboquant(strategy)
+feed = rq.feeds.YahooFeed("TSLA", "AMZN", "IBM")
+strategy = rq.strategies.EMACrossover()
+roboquant = rq.Roboquant(strategy)
 
 account = roboquant.run(feed)
 print(account)

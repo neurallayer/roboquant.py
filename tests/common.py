@@ -1,7 +1,8 @@
 from datetime import date, datetime, timedelta
 import pathlib
 from unittest import TestCase
-from roboquant import Feed, PriceItem, Candle, Quote, Trade, EventChannel, CSVFeed
+from roboquant import PriceItem, Candle, Quote, Trade
+from roboquant.feeds import CSVFeed, EventChannel
 from roboquant.signal import Signal
 from roboquant.strategies.strategy import Strategy
 
@@ -26,7 +27,7 @@ def get_output(filename) -> str:
         return content
 
 
-def run_priceaction_feed(feed: Feed, symbols: list[str], testCase: TestCase, timeframe=None):
+def run_priceaction_feed(feed, symbols: list[str], testCase: TestCase, timeframe=None):
     """Common test for all feeds that produce price-bars"""
 
     channel = EventChannel(timeframe)

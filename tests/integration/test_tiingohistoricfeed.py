@@ -1,7 +1,8 @@
 import logging
 import unittest
 
-from roboquant import Config, TiingoHistoricFeed
+from roboquant import Config
+from roboquant.feeds import TiingoHistoricFeed
 from tests.common import get_recent_start_date, run_priceaction_feed
 
 
