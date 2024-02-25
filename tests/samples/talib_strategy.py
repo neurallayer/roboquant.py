@@ -1,13 +1,14 @@
 import unittest
 import talib.stream as ta
-from roboquant import CandleStrategy, OHLCVBuffer, BUY, SELL, Signal
+from roboquant import BUY, SELL, Signal
+from roboquant.strategies import CandleStrategy
 from tests.common import run_strategy
 
 
-class MyTaLibStrategy(CandleStrategy):
-    """Example using talib to create a strategy"""
+class EMAStrategy(CandleStrategy):
+    """Example using talib to create an EMA crossover strategy"""
 
-    def _create_signal(self, _, ohlcv: OHLCVBuffer) -> Signal | None:
+    def _create_signal(self, symbol, ohlcv) -> Signal | None:
         close = ohlcv.close()
         ema12 = ta.EMA(close, 12)  # type: ignore
         ema26 = ta.EMA(close, 26)  # type: ignore
@@ -17,12 +18,30 @@ class MyTaLibStrategy(CandleStrategy):
             return SELL
 
 
+class RSIStrategy(CandleStrategy):
+    """Example using talib to create a RSI strategy"""
+
+    def __init__(self, period):
+        super().__init__(period + 1)
+
+    def _create_signal(self, symbol, ohlcv) -> Signal | None:
+        close = ohlcv.close()
+        rsi = ta.RSI(close, self.size - 1)  # type: ignore
+        if rsi < 30:
+            return BUY
+        if rsi < 70:
+            return SELL
+
+
 class TestOHLCVStrategy(unittest.TestCase):
 
     def test_ohlcv_strategy(self):
         # ensure there is enough history available
         # for the used talib indicators
-        strategy = MyTaLibStrategy(27)
+        strategy = EMAStrategy(27)
+        run_strategy(strategy, self)
+
+        strategy = RSIStrategy(14)
         run_strategy(strategy, self)
 
 
