@@ -3,6 +3,7 @@
         "annualize",
         "dataframe",
         "dtype",
+        "ibkr",
         "ohlcv",
         "optim",
         "prettytable",

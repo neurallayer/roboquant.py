@@ -9,8 +9,6 @@ if __name__ == "__main__":
 
     # run a back-test on each timeframe
     for timeframe in timeframes:
-        roboquant = rq.Roboquant(rq.strategies.EMACrossover(13, 26))
-        journal = rq.journals.BasicJournal()
-        roboquant.run(feed, journal, timeframe)
-        pnl = journal.pnl * 100.0
-        print(f"{timeframe}  pnl={pnl:5.2f}%")
+        strategy = rq.strategies.EMACrossover(13, 26)
+        account = rq.run(feed, strategy, timeframe=timeframe)
+        print(f"{timeframe}  equity={account.equity:7_.2f}")

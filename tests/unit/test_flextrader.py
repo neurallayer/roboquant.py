@@ -1,7 +1,6 @@
 import unittest
-from decimal import Decimal
 
-from roboquant import Roboquant, Order, PriceItem
+import roboquant as rq
 from roboquant.strategies import EMACrossover
 from roboquant.journals import BasicJournal
 from roboquant.traders import FlexTrader
@@ -10,11 +9,11 @@ from tests.common import get_feed
 
 class _MyTrader(FlexTrader):
 
-    def _get_orders(self, symbol: str, size: Decimal, action: PriceItem, rating: float) -> list[Order]:
+    def _get_orders(self, symbol, size, action, rating):
         price = action.price("CLOSE")
         if price:
             limit_price = price * 0.99 if size > 0 else price * 1.01
-            order = Order(symbol, size, limit_price)
+            order = rq.Order(symbol, size, limit_price)
             return [order]
         return []
 
@@ -23,16 +22,14 @@ class TestFlexTrader(unittest.TestCase):
 
     def test_default_flextrader(self):
         feed = get_feed()
-        rq = Roboquant(EMACrossover(13, 26), trader=FlexTrader())
         journal = BasicJournal()
-        rq.run(feed, journal=journal)
+        rq.run(feed, EMACrossover(), journal=journal)
         self.assertGreater(journal.orders, 0)
 
     def test_custom_flextrader(self):
         feed = get_feed()
-        rq = Roboquant(EMACrossover(13, 26), trader=_MyTrader())
         journal = BasicJournal()
-        rq.run(feed, journal=journal)
+        rq.run(feed, EMACrossover(), trader=_MyTrader(), journal=journal)
         self.assertGreater(journal.orders, 0)
 
 

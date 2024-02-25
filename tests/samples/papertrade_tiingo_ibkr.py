@@ -19,10 +19,10 @@ if __name__ == "__main__":
     feed = rq.feeds.CandleFeed(src_feed, timedelta(seconds=15))
 
     # Lets run our EMACrossover strategy for 15 minutes
-    roboquant = rq.Roboquant(rq.strategies.EMACrossover(3, 5), broker=ibkr)
+    strategy = rq.strategies.EMACrossover(3, 5)
     timeframe = rq.Timeframe.next(minutes=15)
     journal = rq.journals.BasicJournal()
-    account = roboquant.run(feed, journal, timeframe)
+    account = rq.run(feed, strategy, broker=ibkr, journal=journal, timeframe=timeframe)
     src_feed.close()
 
     print(account)

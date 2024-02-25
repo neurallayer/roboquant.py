@@ -1,8 +1,7 @@
 from pathlib import Path
 import tempfile
 import unittest
-from roboquant import Roboquant
-from roboquant.strategies import EMACrossover
+import roboquant as rq
 from roboquant.journals import RunMetric, EquityMetric, TensorboardJournal
 from tests.common import get_feed
 from tensorboard.summary import Writer
@@ -11,7 +10,6 @@ from tensorboard.summary import Writer
 class TestTensorboard(unittest.TestCase):
 
     def test_tensorboard_journal(self):
-        rq = Roboquant(EMACrossover())
         feed = get_feed()
 
         tmpdir = tempfile.gettempdir()
@@ -19,7 +17,7 @@ class TestTensorboard(unittest.TestCase):
         output = Path(tmpdir).joinpath("runs")
         writer = Writer(str(output))
         journal = TensorboardJournal(writer, RunMetric(), EquityMetric())
-        rq.run(feed, journal=journal)
+        rq.run(feed, rq.strategies.EMACrossover(), journal=journal)
         writer.close()
 
 

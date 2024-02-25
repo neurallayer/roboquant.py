@@ -8,10 +8,10 @@ if __name__ == "__main__":
     path = os.path.expanduser("~/data/nyse_stocks/")
     feed = rq.feeds.CSVFeed.stooq_us_daily(path)
     loadtime = time.time() - start
-    roboquant = rq.Roboquant(rq.strategies.EMACrossover(13, 26))
+    strategy = rq.strategies.EMACrossover(13, 26)
     journal = rq.journals.BasicJournal()
     start = time.time()
-    account = roboquant.run(feed, journal=journal)
+    account = rq.run(feed, strategy, journal=journal)
     runtime = time.time() - start
 
     print(account)

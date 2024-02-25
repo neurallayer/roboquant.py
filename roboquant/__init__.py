@@ -1,7 +1,7 @@
 __version__ = "0.2.1"
 
 from .account import Account, OptionAccount, Position
-from .roboquant import Roboquant
+from .run import run
 from .event import Event, PriceItem, Candle, Trade, Quote
 from .order import Order, OrderStatus
 from .signal import SignalType, Signal, BUY, SELL

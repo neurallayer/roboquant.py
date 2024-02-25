@@ -1,6 +1,5 @@
 import unittest
-from roboquant import Roboquant, Timeframe
-from roboquant.traders import FlexTrader
+import roboquant as rq
 from roboquant.journals import BasicJournal
 
 from roboquant.strategies.rnnstrategy import RNNStrategy
@@ -37,14 +36,13 @@ class TestRNNStrategy(unittest.TestCase):
         strategy = RNNStrategy(model, symbol, 10_000, 0.001, predict_steps=5, sequences=20)
 
         # Train the model with 20 years of data
-        tf = Timeframe.fromisoformat("2010-01-01", "2019-12-31")
+        tf = rq.Timeframe.fromisoformat("2010-01-01", "2019-12-31")
         strategy.fit(feed, tf, epochs=10, validation_split=0.25)
 
         # Run the trained model with the last 4 years of data
-        rq = Roboquant(strategy, FlexTrader(max_order_perc=0.8))
-        tf = Timeframe.fromisoformat("2020-01-01", "2023-12-31")
+        tf = rq.Timeframe.fromisoformat("2020-01-01", "2023-12-31")
         journal = BasicJournal()
-        rq.run(feed, journal, tf)
+        rq.run(feed, strategy, journal=journal, timeframe=tf)
         self.assertGreater(journal.signals, 0)
         # print(journal)
 
