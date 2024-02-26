@@ -126,6 +126,10 @@ class Event:
         """
         return {item.symbol: item for item in self.items if isinstance(item, PriceItem)}
 
+    def get_prices(self, price_type: str = "DEFAULT") -> dict[str, float]:
+        """Return all the prices of a certain price_type"""
+        return {k: v.price(price_type) for k, v in self.price_items.items()}
+
     def get_price(self, symbol: str, price_type: str = "DEFAULT") -> float | None:
         """Return the price for the symbol, or None if not found."""
 

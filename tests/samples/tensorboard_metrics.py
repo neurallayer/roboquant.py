@@ -1,5 +1,5 @@
 import roboquant as rq
-from roboquant.journals import TensorboardJournal, EquityMetric, RunMetric, FeedMetric, PriceItemMetric, AlphaBeta
+from roboquant.journals import TensorboardJournal, PNLMetric, RunMetric, FeedMetric, PriceItemMetric, AlphaBeta
 from tensorboard.summary import Writer
 
 if __name__ == "__main__":
@@ -13,6 +13,6 @@ if __name__ == "__main__":
         s = rq.strategies.EMACrossover(p1, p2)
         log_dir = f"""runs/ema_{p1}_{p2}"""
         writer = Writer(log_dir)
-        journal = TensorboardJournal(writer, EquityMetric(), RunMetric(), FeedMetric(), PriceItemMetric("JPM"), AlphaBeta(200))
+        journal = TensorboardJournal(writer, PNLMetric(), RunMetric(), FeedMetric(), PriceItemMetric("JPM"), AlphaBeta(200))
         account = rq.run(feed, s, journal=journal)
         writer.close()

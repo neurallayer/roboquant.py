@@ -52,13 +52,27 @@ class Account:
         return float(size) * price
 
     def mkt_value(self, prices: dict[str, float]) -> float:
-        """Return the market value of all the open positions in the account using the provided prices."""
-        return sum([self.contract_value(symbol, pos.size, prices[symbol]) for symbol, pos in self.positions.items()], 0.0)
+        """Return the market value of all the open positions in the account using the provided prices.
+        If there is no known price provided for a position, the average price paid will be used instead
+        """
+        return sum(
+            [
+                self.contract_value(symbol, pos.size, prices[symbol] if symbol in prices else pos.avg_price)
+                for symbol, pos in self.positions.items()
+            ],
+            0.0,
+        )
 
     def unrealized_pnl(self, prices: dict[str, float]) -> float:
-        """Return the unrealized profit and loss for the open position given the provided market prices"""
+        """Return the unrealized profit and loss for the open position given the provided market prices
+        Positions that don't have a known price, will be ignored.
+        """
         return sum(
-            [self.contract_value(symbol, pos.size, prices[symbol] - pos.avg_price) for symbol, pos in self.positions.items()],
+            [
+                self.contract_value(symbol, pos.size, prices[symbol] - pos.avg_price)
+                for symbol, pos in self.positions.items()
+                if symbol in prices
+            ],
             0.0,
         )
 

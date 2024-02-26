@@ -2,7 +2,7 @@ from pathlib import Path
 import tempfile
 import unittest
 import roboquant as rq
-from roboquant.journals import RunMetric, EquityMetric, TensorboardJournal
+from roboquant.journals import RunMetric, PNLMetric, TensorboardJournal
 from tests.common import get_feed
 from tensorboard.summary import Writer
 
@@ -16,7 +16,7 @@ class TestTensorboard(unittest.TestCase):
 
         output = Path(tmpdir).joinpath("runs")
         writer = Writer(str(output))
-        journal = TensorboardJournal(writer, RunMetric(), EquityMetric())
+        journal = TensorboardJournal(writer, RunMetric(), PNLMetric())
         rq.run(feed, rq.strategies.EMACrossover(), journal=journal)
         writer.close()
 
