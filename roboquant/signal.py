@@ -19,12 +19,12 @@ class Signal:
 
     @staticmethod
     def buy(signal_type=SignalType.BOTH):
-        """Create a BUY signal with rating of 1.0"""
+        """Create a BUY signal with a rating of 1.0"""
         return Signal(1.0, signal_type)
 
     @staticmethod
     def sell(signal_type=SignalType.BOTH):
-        """Create a SELL signal with rating of -1.0"""
+        """Create a SELL signal with a rating of -1.0"""
         return Signal(-1.0, signal_type)
 
     @property

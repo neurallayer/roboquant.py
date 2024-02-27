@@ -10,6 +10,7 @@ from .eventchannel import EventChannel
 from .feed import Feed
 
 
+# noinspection Annotator
 class SQLFeed(Feed):
     # Used SQL statements in this class
     _sql_select = "SELECT * from prices order by Date"

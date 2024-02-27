@@ -25,7 +25,7 @@ class MetricsJournal(Journal):
         self._history.append((event.time, result))
 
     def get_timeseries(self, metric_name: str) -> tuple[list[datetime], list[float]]:
-        """Return the calculated values of a metric as tuple of datetimes and float values"""
+        """Return the calculated values of a metric as tuple of date-times and float values"""
         timeline = []
         values = []
         for time, metrics in self._history:

@@ -89,7 +89,7 @@ class TiingoHistoricFeed(HistoricFeed):
             logger.debug("intraday iex is %s", url)
             response = requests.get(url)
             if not response.ok:
-                logger.warning("error symbol=%s reson=%s", symbol, response.reason)
+                logger.warning("error symbol=%s reason=%s", symbol, response.reason)
                 continue
 
             rows = self.__get_csv_iter(response)
@@ -108,7 +108,7 @@ class TiingoHistoricFeed(HistoricFeed):
         logger.debug("intraday crypto url is %s", url)
         response = requests.get(url)
         if not response.ok:
-            logger.warning("error reson=%s", response.reason)
+            logger.warning("error reason=%s", response.reason)
             return
 
         json_resp = response.json()
@@ -129,7 +129,7 @@ class TiingoHistoricFeed(HistoricFeed):
         response = requests.get(url)
         logger.debug("intraday fx url is %s", url)
         if not response.ok:
-            logger.warning("error reson=%s", response.reason)
+            logger.warning("error reason=%s", response.reason)
             return
 
         rows = self.__get_csv_iter(response)
@@ -185,7 +185,7 @@ class TiingoLiveFeed(Feed):
             self.channel.put(event)
 
     def _handle_message_iex(self, arr):
-        if arr[13] == 1:  # intermarket sweep order
+        if arr[13] == 1:  # inter-market sweep order
             return
 
         now = datetime.fromisoformat(arr[1])

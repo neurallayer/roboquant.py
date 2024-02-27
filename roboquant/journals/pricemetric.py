@@ -2,7 +2,7 @@ from roboquant.journals.metric import Metric
 
 
 class PriceItemMetric(Metric):
-    """Tracks a price and volume of individual price-items.
+    """Tracks the price and volume of individual price-items.
     """
 
     def __init__(self, *symbols: str, price_type="DEFAULT", volume_type="DEFAULT"):

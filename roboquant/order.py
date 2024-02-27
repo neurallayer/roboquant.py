@@ -39,8 +39,9 @@ class OrderStatus(Flag):
 @dataclass
 class Order:
     """
-    A trading order. Default is a market order when only the size th specified. But optional a limit can be specified,
-    making it a limit order.
+    A trading order.
+    Default is a market order when only the size is specified.
+    But optionally, a limit can be specified, making it a limit order.
 
     The id is automatically assigned by the broker and should not be set manually.
     """

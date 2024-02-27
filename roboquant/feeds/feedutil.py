@@ -57,6 +57,7 @@ def get_symbol_ohlcv(feed: Feed, symbol: str, timeframe: Timeframe | None = None
 def get_symbol_dataframe(feed: Feed, symbol: str, timeframe: Timeframe | None = None):
     """Get prices for a single symbol from a feed as a pandas dataframe"""
 
+    # noinspection PyPackageRequirements
     import pandas as pd
 
     ohlcv = get_symbol_ohlcv(feed, symbol, timeframe)

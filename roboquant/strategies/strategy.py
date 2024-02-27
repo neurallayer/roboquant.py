@@ -7,7 +7,7 @@ from roboquant.signal import Signal
 class Strategy(Protocol):
     """A strategy creates signals based on incoming events and the items these events contain.
 
-    Often these items represent market data, but other type of items are also possible.
+    Often these items represent market data, but other types of items are also possible.
     """
 
     def create_signals(self, event: Event) -> dict[str, Signal]:

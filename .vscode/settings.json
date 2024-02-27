@@ -27,7 +27,7 @@
     ],
     "__python.testing.pytestArgs": [
         "--ignore=tests/integration",
-        "--ignore=tests/performance",  
+        "--ignore=tests/performance"
     ],
     "python.testing.pytestEnabled": true,
     "python.testing.unittestEnabled": false,

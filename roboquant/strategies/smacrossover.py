@@ -2,7 +2,6 @@ import collections
 
 import numpy as np
 
-from roboquant.event import Event
 from roboquant.signal import Signal
 from roboquant.strategies.strategy import Strategy
 
@@ -31,7 +30,7 @@ class SMACrossover(Strategy):
         self._prev_ratings[symbol] = new_rating
         return result
 
-    def create_signals(self, event: Event) -> dict[str, Signal]:
+    def create_signals(self, event):
         signals: dict[str, Signal] = {}
         for (symbol, item) in event.price_items.items():
             h = self._history.get(symbol)
