@@ -46,9 +46,10 @@ class TestIBKRBroker(unittest.TestCase):
         time.sleep(5)
         account = broker.sync()
         self.assertEqual(len(account.orders), 1)
-        self.assertTrue(account.orders[0].closed)
-        self.assertEqual(OrderStatus.CANCELLED, account.orders[0].status)
-
+        order = account.orders[0]
+        self.assertTrue(order.closed)
+        self.assertEqual(OrderStatus.CANCELLED, order.status)
+        print()
         print(account)
 
 

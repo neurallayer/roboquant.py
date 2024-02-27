@@ -99,7 +99,7 @@ class _IBApi(EWrapper, EClient):
     ):
         logger.debug("order status orderId=%s status=%s fill=%s", orderId, status, filled)
         orderId = str(orderId)
-        if id in self.orders:
+        if orderId in self.orders:
             order = self.orders[orderId]
             order.fill = filled
             match status:
