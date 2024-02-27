@@ -1,6 +1,7 @@
-from array import array
 import logging
+from array import array
 from datetime import datetime, timezone
+
 from roboquant.event import Candle
 from roboquant.feeds.historicfeed import HistoricFeed
 

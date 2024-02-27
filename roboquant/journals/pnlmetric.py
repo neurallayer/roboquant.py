@@ -22,7 +22,7 @@ class PNLMetric(Metric):
 
     def calc(self, event, account, signals, orders) -> dict[str, float]:
         equity = account.equity
-        
+
         total, realized, unrealized = self.__get_pnls(equity, event, account)
 
         return {
@@ -54,21 +54,13 @@ class PNLMetric(Metric):
         return result
 
     def __get_max_drawdown(self, equity) -> float:
-        if equity > self.max_equity:
-            self.max_equity = equity
-
+        self.max_equity = max(equity, self.max_equity)
         drawdown = equity / self.max_equity - 1.0
-        if drawdown < self.max_drawdown:
-            self.max_drawdown = drawdown
-
+        self.max_drawdown = min(drawdown, self.max_drawdown)
         return self.max_drawdown
 
     def __get_max_gain(self, equity) -> float:
-        if equity < self.min_equity:
-            self.min_equity = equity
-
+        self.min_equity = max(equity, self.min_equity)
         gain = equity / self.min_equity - 1.0
-        if gain > self.max_gain:
-            self.max_gain = gain
-
+        self.max_gain = max(gain, self.max_gain)
         return self.max_gain

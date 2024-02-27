@@ -1,12 +1,13 @@
 import os
 import time
 import unittest
+
 import roboquant as rq
 
 
 class TestBigFeed(unittest.TestCase):
 
-    def test_bigfeed(self):
+    def test_big_feed(self):
         start = time.time()
         path = os.path.expanduser("~/data/nyse_stocks/")
         feed = rq.feeds.CSVFeed.stooq_us_daily(path)
@@ -23,7 +24,7 @@ class TestBigFeed(unittest.TestCase):
         self.assertTrue(journal.events > 10_000)
 
         print("", account, journal, sep="\n\n")
-      
+
         # Print statistics
         print()
         print(f"load time  = {load_time:.1f}s")

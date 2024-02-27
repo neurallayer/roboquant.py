@@ -22,7 +22,8 @@ class TestFeatureSet(unittest.TestCase):
         symbol2 = symbols[1]
 
         warmup = 20
-        fs = FeatureSet(100, warmup=warmup)
+        history_size = 100
+        fs = FeatureSet(history_size, warmup=warmup)
         fs.add(PriceFeature(symbol1, "CLOSE"))
         fs.add(PriceFeature(symbol1, "OPEN"))
         fs.add(SMAFeature(FixedValueFeature("DUMMY", np.ones((3,))), 8))
@@ -39,8 +40,35 @@ class TestFeatureSet(unittest.TestCase):
             fs.process(evt)
             cnt += 1
 
-        self.assertEqual(100, len(fs._data))
-        print(fs._data._data[50])
+        self.assertEqual(history_size, len(fs._buffer))
+
+    def test_fs_data(self):
+        feed = get_feed()
+        symbol1 = feed.symbols[0]
+
+        warmup = 20
+        history_size = 300
+        fs = FeatureSet(history_size, warmup=warmup)
+        fs.add(PriceFeature(symbol1, "CLOSE"))
+        fs.add(PriceFeature(symbol1, "OPEN"))
+        fs.add(VolumeFeature(symbol1))
+
+        channel = EventChannel()
+        feedutil.play_background(feed, channel)
+
+        cnt = 0
+        while evt := channel.get():
+            fs.process(evt)
+            cnt += 1
+
+        data = fs.data()
+        self.assertTrue(~np.isnan(data).all())
+
+        corr = np.corrcoef(data, rowvar=False)
+        self.assertTrue(~np.isnan(corr).all())
+
+        diff = np.diff(data, axis=0)
+        self.assertEqual(history_size - 1, diff.shape[0])
 
 
 if __name__ == "__main__":

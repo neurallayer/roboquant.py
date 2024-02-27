@@ -1,20 +1,22 @@
-from datetime import date, datetime, time, timezone
 import csv
-from array import array
-import logging
-from typing import Literal
-import websocket
-import ssl
 import json
+import logging
+import ssl
 import threading
+from array import array
+from datetime import date, datetime, time, timezone
 from time import sleep
-from roboquant.config import Config
-from roboquant.event import Trade, Quote, Event
-from roboquant.feeds.feed import Feed
-from roboquant.feeds.eventchannel import EventChannel
-from roboquant.event import Candle
-from roboquant.feeds.historicfeed import HistoricFeed
+from typing import Literal
+
 import requests
+import websocket
+
+from roboquant.config import Config
+from roboquant.event import Candle
+from roboquant.event import Trade, Quote, Event
+from roboquant.feeds.eventchannel import EventChannel
+from roboquant.feeds.feed import Feed
+from roboquant.feeds.historicfeed import HistoricFeed
 
 logger = logging.getLogger(__name__)
 
@@ -46,7 +48,7 @@ class TiingoHistoricFeed(HistoricFeed):
         return result
 
     def retrieve_eod_stocks(
-        self, *symbols: str, start_date="2010-01-01", end_date: str | None = None, closing_time="21:00:00+00:00"
+            self, *symbols: str, start_date="2010-01-01", end_date: str | None = None, closing_time="21:00:00+00:00"
     ):
         """Retrieve stock EOD historic stock prices for the provided symbols"""
 
@@ -60,7 +62,7 @@ class TiingoHistoricFeed(HistoricFeed):
             logger.debug("eod stock url is %s", url)
             response = requests.get(url)
             if not response.ok:
-                logger.warning(f"error symbol={symbol} {response.reason}")
+                logger.warning("error symbol=%s reason=%s", symbol, response.reason)
                 continue
 
             rows = self.__get_csv_iter(response)
@@ -74,7 +76,7 @@ class TiingoHistoricFeed(HistoricFeed):
                 found = True
 
             if not found:
-                logger.warning(f"no data retrieved for symbol={symbol}")
+                logger.warning("no data retrieved for symbol=%s", symbol)
 
     def retrieve_intraday_iex(self, *symbols: str, start_date="2023-01-01", end_date: str | None = None, frequency="5min"):
         end_date = self.__get_end_date(end_date)
@@ -87,7 +89,7 @@ class TiingoHistoricFeed(HistoricFeed):
             logger.debug("intraday iex is %s", url)
             response = requests.get(url)
             if not response.ok:
-                logger.warning(f"error symbol={symbol} {response.reason}")
+                logger.warning("error symbol=%s reson=%s", symbol, response.reason)
                 continue
 
             rows = self.__get_csv_iter(response)
@@ -106,11 +108,11 @@ class TiingoHistoricFeed(HistoricFeed):
         logger.debug("intraday crypto url is %s", url)
         response = requests.get(url)
         if not response.ok:
-            logger.warning(f"error {response.reason}")
+            logger.warning("error reson=%s", response.reason)
             return
 
-        json = response.json()
-        for row in json:
+        json_resp = response.json()
+        for row in json_resp:
             symbol = row["ticker"].upper()
             for e in row["priceData"]:
                 dt = datetime.fromisoformat(e["date"]).astimezone(timezone.utc)
@@ -127,7 +129,7 @@ class TiingoHistoricFeed(HistoricFeed):
         response = requests.get(url)
         logger.debug("intraday fx url is %s", url)
         if not response.ok:
-            logger.warning(f"error {response.reason}")
+            logger.warning("error reson=%s", response.reason)
             return
 
         rows = self.__get_csv_iter(response)
@@ -153,7 +155,7 @@ class TiingoLiveFeed(Feed):
 
         url = f"wss://api.tiingo.com/{market}"
         logger.info(f"Opening websocket {url}")
-        self.ws = websocket.WebSocketApp(   # type: ignore
+        self.ws = websocket.WebSocketApp(  # type: ignore
             url, on_message=self._handle_message, on_error=self._handle_error, on_close=self._handle_close  # type: ignore
         )
         kwargs = {"sslopt": {"cert_reqs": ssl.CERT_NONE}}
@@ -232,10 +234,12 @@ class TiingoLiveFeed(Feed):
             case "fx":
                 self._handle_message_fx(arr)
 
-    def _handle_error(self, ws, msg):
+    @staticmethod
+    def _handle_error(_, msg):
         logger.error(msg)
 
-    def _handle_close(self, ws, close_status_code, close_msg):
+    @staticmethod
+    def _handle_close(_, close_status_code, close_msg):
         logger.info("Webchannel closed code=%s msg=%s", close_status_code, close_msg)
 
     def subscribe(self, *symbols: str, threshold_level=5):

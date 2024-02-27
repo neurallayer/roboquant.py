@@ -1,7 +1,8 @@
 from datetime import datetime, timezone
-from roboquant.timeframe import Timeframe
 from queue import Empty, Queue
+
 from roboquant.event import Event
+from roboquant.timeframe import Timeframe
 
 
 class ChannelClosed(Exception):
@@ -54,9 +55,8 @@ class EventChannel:
             now = datetime.now(timezone.utc)
             if self.timeframe is None or now in self.timeframe:
                 return Event.empty(now)
-            else:
-                self._closed = True
-                return None
+
+            self._closed = True
 
     def close(self):
         """close this channel and put a None message on the channel to indicate to consumers it is closed"""

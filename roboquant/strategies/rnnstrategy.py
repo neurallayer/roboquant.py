@@ -1,13 +1,14 @@
 import logging
+
 import torch
 from torch.utils.data import Dataset, DataLoader
-from roboquant.signal import Signal
 
-from roboquant.strategies.strategy import Strategy
-from roboquant.feeds.eventchannel import EventChannel
 from roboquant.event import Candle, Event
-from roboquant.strategies.buffer import OHLCVBuffer
+from roboquant.feeds.eventchannel import EventChannel
 from roboquant.feeds.feedutil import play_background
+from roboquant.signal import Signal
+from roboquant.strategies.buffer import OHLCVBuffer
+from roboquant.strategies.strategy import Strategy
 
 logger = logging.getLogger(__name__)
 
@@ -24,7 +25,7 @@ class _RNNDataset(Dataset):
     def __getitem__(self, idx):
         end = idx + self.sequences
         inputs = self.x_data[idx:end]
-        labels = self.y_data[end-1: end]
+        labels = self.y_data[end - 1: end]
         return inputs, labels
 
 
@@ -35,15 +36,15 @@ class RNNStrategy(Strategy):
     """
 
     def __init__(
-        self,
-        model: torch.nn.Module,
-        symbol: str,
-        capacity: int = 1_000,
-        pct: float = 0.01,
-        predict_steps: int = 5,
-        sequences: int = 20,
-        optimizer: torch.optim.Optimizer | None = None,
-        criterion: torch.nn.Module | None = None,
+            self,
+            model: torch.nn.Module,
+            symbol: str,
+            capacity: int = 1_000,
+            pct: float = 0.01,
+            predict_steps: int = 5,
+            sequences: int = 20,
+            optimizer: torch.optim.Optimizer | None = None,
+            criterion: torch.nn.Module | None = None,
     ):
         """
         Args:
@@ -140,13 +141,13 @@ class RNNStrategy(Strategy):
         return {}
 
     def fit(
-        self,
-        feed,
-        timeframe=None,
-        epochs: int = 10,
-        batch_size: int = 32,
-        validation_split: float = 0.2,
-        summary_writer=None,
+            self,
+            feed,
+            timeframe=None,
+            epochs: int = 10,
+            batch_size: int = 32,
+            validation_split: float = 0.2,
+            summary_writer=None,
     ):
         """
         Trains the model for a fixed number of epochs (dataset iterations).

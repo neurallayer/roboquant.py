@@ -26,7 +26,7 @@ def get_output(filename) -> str:
         return content
 
 
-def run_priceitem_feed(feed, symbols: list[str], testCase: TestCase, timeframe=None):
+def run_priceitem_feed(feed, symbols: list[str], test_case: TestCase, timeframe=None):
     """Common test for all feeds that produce price-items"""
 
     channel = EventChannel(timeframe)
@@ -35,35 +35,35 @@ def run_priceitem_feed(feed, symbols: list[str], testCase: TestCase, timeframe=N
     last = None
     while event := channel.get(30.0):
 
-        testCase.assertIsInstance(event.time, datetime)
-        testCase.assertEqual("UTC", event.time.tzname())
+        test_case.assertIsInstance(event.time, datetime)
+        test_case.assertEqual("UTC", event.time.tzname())
 
         if last is not None:
             # testCase.assertLessEqual(event.time - last, timedelta(minutes=1))
-            testCase.assertGreaterEqual(event.time, last, f"{event} < {last}, items={event.items}")
+            test_case.assertGreaterEqual(event.time, last, f"{event} < {last}, items={event.items}")
 
         last = event.time
 
         for action in event.items:
-            testCase.assertIsInstance(action, PriceItem)
-            testCase.assertIn(action.symbol, symbols)
-            testCase.assertEqual(action.symbol.upper(), action.symbol)
+            test_case.assertIsInstance(action, PriceItem)
+            test_case.assertIn(action.symbol, symbols)
+            test_case.assertEqual(action.symbol.upper(), action.symbol)
 
             match action:
                 case Candle():
                     ohlcv = action.ohlcv
                     for i in range(0, 4):
-                        testCase.assertGreaterEqual(ohlcv[1], ohlcv[i])  # High >= OHLC
-                        testCase.assertGreaterEqual(ohlcv[i], ohlcv[2])  # OHLC >= Low
+                        test_case.assertGreaterEqual(ohlcv[1], ohlcv[i])  # High >= OHLC
+                        test_case.assertGreaterEqual(ohlcv[i], ohlcv[2])  # OHLC >= Low
                 case Trade():
-                    testCase.assertTrue(math.isfinite(action.trade_price))
-                    testCase.assertTrue(math.isfinite(action.trade_volume))
+                    test_case.assertTrue(math.isfinite(action.trade_price))
+                    test_case.assertTrue(math.isfinite(action.trade_volume))
                 case Quote():
                     for f in action.data:
-                        testCase.assertTrue(math.isfinite(f))
+                        test_case.assertTrue(math.isfinite(f))
 
 
-def run_strategy(strategy: Strategy, testCase: TestCase):
+def run_strategy(strategy: Strategy, test_case: TestCase):
     feed = get_feed()
     channel = EventChannel()
     feedutil.play_background(feed, channel)
@@ -71,11 +71,11 @@ def run_strategy(strategy: Strategy, testCase: TestCase):
     while event := channel.get():
         signals = strategy.create_signals(event)
         for symbol, signal in signals.items():
-            testCase.assertEqual(type(signal), Signal)
-            testCase.assertEqual(type(symbol), str)
-            testCase.assertEqual(symbol, symbol.upper())
-            testCase.assertTrue(-1.0 <= signal.rating <= 1.0)
-            testCase.assertIn(symbol, feed.symbols)
+            test_case.assertEqual(type(signal), Signal)
+            test_case.assertEqual(type(symbol), str)
+            test_case.assertEqual(symbol, symbol.upper())
+            test_case.assertTrue(-1.0 <= signal.rating <= 1.0)
+            test_case.assertIn(symbol, feed.symbols)
         tot_ratings += len(signals)
 
-    testCase.assertGreater(tot_ratings, 0)
+    test_case.assertGreater(tot_ratings, 0)

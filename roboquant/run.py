@@ -1,27 +1,28 @@
 from roboquant.account import Account
-from roboquant.strategies.strategy import Strategy
 from roboquant.brokers.broker import Broker
-from roboquant.feeds.feed import Feed
-from roboquant.traders.trader import Trader
-from roboquant.journals.journal import Journal
-from roboquant.feeds.eventchannel import EventChannel
-from .timeframe import Timeframe
 from roboquant.brokers.simbroker import SimBroker
-from roboquant.traders.flextrader import FlexTrader
+from roboquant.feeds.eventchannel import EventChannel
+from roboquant.feeds.feed import Feed
 from roboquant.feeds.feedutil import play_background
+from roboquant.journals.journal import Journal
+from roboquant.strategies.strategy import Strategy
+from roboquant.traders.flextrader import FlexTrader
+from roboquant.traders.trader import Trader
+from .timeframe import Timeframe
 
 
 def run(
-    feed: Feed,
-    strategy: Strategy,
-    trader: Trader | None = None,
-    broker: Broker | None = None,
-    journal: Journal | None = None,
-    timeframe: Timeframe | None = None,
-    capacity: int = 10,
-    heartbeat_timeout: float | None = None,
+        feed: Feed,
+        strategy: Strategy,
+        trader: Trader | None = None,
+        broker: Broker | None = None,
+        journal: Journal | None = None,
+        timeframe: Timeframe | None = None,
+        capacity: int = 10,
+        heartbeat_timeout: float | None = None,
 ) -> Account:
-    """Start a new run. Only the first two parameters, the feed and strategy, are mandatory. The other parameters are optional.
+    """Start a new run. Only the first two parameters, the feed and strategy, are mandatory.
+    The other parameters are optional.
 
     Args:
     - feed: the feed to use for this run
@@ -35,7 +36,7 @@ def run(
     timeout in seconds. The default is None.
 
     Returns:
-    The last version of the account
+    The latest version of the account
     """
 
     trader = trader or FlexTrader()

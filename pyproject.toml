@@ -4,6 +4,17 @@ line-length = 127
 [tool.flake8]
 max-line-length = 127
 
+[tool.pytest.ini_options]
+minversion = "8.0"
+addopts = "-ra -q"
+testpaths = [
+    "tests/unit"
+]
+
+[tool.pylint.'MESSAGES CONTROL']
+max-line-length = 127
+disable = "too-few-public-methods,missing-module-docstring,missing-class-docstring,missing-function-docstring,unnecessary-ellipsis"
+
 [build-system]
 requires = ["setuptools>=61.0"]
 build-backend = "setuptools.build_meta"

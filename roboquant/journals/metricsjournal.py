@@ -1,6 +1,7 @@
-from roboquant.journals.metric import Metric
-from roboquant.journals.journal import Journal
 from datetime import datetime
+
+from roboquant.journals.journal import Journal
+from roboquant.journals.metric import Metric
 
 
 class MetricsJournal(Journal):

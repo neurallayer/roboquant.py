@@ -1,10 +1,10 @@
 from abc import abstractmethod, ABC
 from typing import Dict
-from roboquant.signal import Signal
 
-from roboquant.strategies.strategy import Strategy
 from roboquant.event import Candle
+from roboquant.signal import Signal
 from roboquant.strategies.buffer import OHLCVBuffer
+from roboquant.strategies.strategy import Strategy
 
 
 class CandleStrategy(Strategy, ABC):

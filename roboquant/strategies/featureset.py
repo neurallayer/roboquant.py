@@ -1,10 +1,11 @@
-import numpy as np
 from datetime import datetime, timezone
 from typing import Protocol
+
+import numpy as np
 from numpy.typing import NDArray
 
-from roboquant.strategies.buffer import NumpyBuffer
 from roboquant.event import Event
+from roboquant.strategies.buffer import NumpyBuffer
 
 
 class Feature(Protocol):
@@ -12,8 +13,8 @@ class Feature(Protocol):
 
     def calc(self, evt: Event) -> NDArray:
         """
-        return the result as a 1-dimensional NDArray. The result should always
-        be the same size.
+        Return the result as a 1-dimensional NDArray.
+        The result should always be the same size.
         """
         ...
 
@@ -118,19 +119,22 @@ class FeatureSet:
         self.size = size
         self.features: list[Feature] = []
         self.warmup = warmup
-        self._data: NumpyBuffer = None  # type: ignore
+        self._buffer: NumpyBuffer = None  # type: ignore
 
     def add(self, feature: Feature):
         self.features.append(feature)
+
+    def data(self) -> NDArray:
+        return self._buffer.get_all()
 
     def process(self, evt: Event):
         data = [feature.calc(evt) for feature in self.features]
         row = np.hstack(data)
 
-        if self._data is None:
-            self._data = NumpyBuffer(row.size, self.size, "float32")
+        if self._buffer is None:
+            self._buffer = NumpyBuffer(row.size, self.size, "float32")
 
         if not self.warmup:
-            self._data.append(row)
+            self._buffer.append(row)
         else:
             self.warmup -= 1

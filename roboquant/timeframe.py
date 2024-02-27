@@ -1,11 +1,11 @@
-from datetime import datetime, timedelta, timezone
 import random
+from datetime import datetime, timedelta, timezone
 
 
 class Timeframe:
-    """A timeframe represents a period in time with a specific start and end time.
+    """A timeframe represents a period in time with a specific start- and end-datetime.
 
-    Internally it stores the start and end times as Python datetime objects in the UTC timezone.
+    Internally it stores the start and end times as Python datetime objects with the timezone set to UTC.
     """
 
     __slots__ = "start", "end", "inclusive"
@@ -19,16 +19,16 @@ class Timeframe:
         - end: end time
         - inclusive: should the end time be inclusive, default is False
         """
-        self.start: datetime = start
-        self.end: datetime = end
+        self.start: datetime = start.astimezone(timezone.utc)
+        self.end: datetime = end.astimezone(timezone.utc)
         self.inclusive: bool = inclusive
 
         assert self.start <= self.end, "start > end"
 
     @classmethod
     def fromisoformat(cls, start: str, end: str, inclusive=False):
-        s = datetime.fromisoformat(start).astimezone(timezone.utc)
-        e = datetime.fromisoformat(end).astimezone(timezone.utc)
+        s = datetime.fromisoformat(start)
+        e = datetime.fromisoformat(end)
         return cls(s, e, inclusive)
 
     @staticmethod

@@ -1,5 +1,7 @@
 from typing import Tuple
+
 import numpy as np
+
 from .metric import Metric
 
 
@@ -12,7 +14,7 @@ class AlphaBeta(Metric):
         """
         window_size: the rolling window_size to use. The alpha and beta are only calculated once the window is filled.
         price_type: the type of price to use to calculate the market returns, default is "DEFAULT"
-        risk_free_return: the risk free return rate, default is 0.0
+        risk_free_return: the risk-free return rate, default is 0.0
         """
 
         # data stores both portfolio return and market return

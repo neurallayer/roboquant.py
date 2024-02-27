@@ -1,6 +1,6 @@
-from configparser import ConfigParser
-import os.path
 import os
+import os.path
+from configparser import ConfigParser
 
 
 class Config:

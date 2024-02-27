@@ -1,5 +1,7 @@
 import collections
+
 import numpy as np
+
 from roboquant.event import Event
 from roboquant.signal import Signal
 from roboquant.strategies.strategy import Strategy
@@ -15,7 +17,7 @@ class SMACrossover(Strategy):
         self.min_period = min_period
         self.max_period = max_period
 
-    def _get_signal(self, symbol: str) -> None | Signal:
+    def __get_signal(self, symbol: str) -> None | Signal:
         prices = np.asarray(self._history[symbol])
 
         # SMA(MIN) > SMA(MAX)
@@ -40,7 +42,7 @@ class SMACrossover(Strategy):
 
             h.append(item.price())
             if len(h) == h.maxlen:
-                if signal := self._get_signal(symbol):
+                if signal := self.__get_signal(symbol):
                     signals[symbol] = signal
 
         return signals

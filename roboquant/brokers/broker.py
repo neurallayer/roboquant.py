@@ -1,4 +1,5 @@
 from typing import Protocol
+
 from roboquant.account import Account
 from roboquant.event import Event
 from roboquant.order import Order

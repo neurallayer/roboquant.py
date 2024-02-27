@@ -1,11 +1,11 @@
-from array import array
 import csv
-from datetime import datetime, time, timezone
 import logging
 import os
 import pathlib
-from roboquant.event import Candle
+from array import array
+from datetime import datetime, time, timezone
 
+from roboquant.event import Candle
 from roboquant.feeds.historicfeed import HistoricFeed
 
 logger = logging.getLogger(__name__)
@@ -15,14 +15,14 @@ class CSVFeed(HistoricFeed):
     """Use CSV files with historic data as a feed."""
 
     def __init__(
-        self,
-        path: str | pathlib.Path,
-        columns=None,
-        adj_close=False,
-        time_offset: str | None = None,
-        datetime_fmt: str | None = None,
-        endswith=".csv",
-        frequency="",
+            self,
+            path: str | pathlib.Path,
+            columns=None,
+            adj_close=False,
+            time_offset: str | None = None,
+            datetime_fmt: str | None = None,
+            endswith=".csv",
+            frequency="",
     ):
         super().__init__()
         self.columns = columns

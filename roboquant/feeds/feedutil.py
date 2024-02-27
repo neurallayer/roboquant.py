@@ -1,10 +1,10 @@
-from datetime import datetime
 import threading
+from datetime import datetime
 
 from roboquant.event import Candle
-from ..timeframe import Timeframe
-from .feed import Feed
+from roboquant.timeframe import Timeframe
 from .eventchannel import EventChannel, ChannelClosed
+from .feed import Feed
 
 
 def play_background(feed: Feed, channel: EventChannel):
@@ -25,7 +25,7 @@ def play_background(feed: Feed, channel: EventChannel):
 
 
 def get_symbol_prices(
-    feed: Feed, symbol: str, price_type="DEFAULT", timeframe: Timeframe | None = None
+        feed: Feed, symbol: str, price_type="DEFAULT", timeframe: Timeframe | None = None
 ) -> tuple[list[datetime], list[float]]:
     """Get prices for a single symbol from a feed"""
 
@@ -65,7 +65,7 @@ def get_symbol_dataframe(feed: Feed, symbol: str, timeframe: Timeframe | None = 
 
 def print_feed_items(feed: Feed, timeframe: Timeframe | None = None, timeout: float | None = None):
     """Print the items in a feed to the console.
-    This is mostly useful for debugging purposes to see what events a feed generates
+    This is mostly useful for debugging purposes to see what events a feed generates.
     """
 
     channel = EventChannel(timeframe)

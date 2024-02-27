@@ -1,12 +1,12 @@
+import logging
+import threading
+import time
 from datetime import datetime, timezone, timedelta
 from decimal import Decimal
-import logging
-import time
-import threading
 
 from roboquant.account import Account, Position
-from roboquant.order import Order, OrderStatus
 from roboquant.event import Event
+from roboquant.order import Order, OrderStatus
 from .broker import Broker
 
 logger = logging.getLogger(__name__)
@@ -25,6 +25,7 @@ except ImportError:
     pass
 
 
+# noinspection PyPep8Naming
 class _IBApi(EWrapper, EClient):
 
     def __init__(self):
@@ -87,18 +88,18 @@ class _IBApi(EWrapper, EClient):
         return self.account[equity_tag] or 0.0
 
     def orderStatus(
-        self,
-        orderId,
-        status,
-        filled,
-        remaining,
-        avgFillPrice,
-        permId,
-        parentId,
-        lastFillPrice,
-        clientId,
-        whyHeld,
-        mktCapPrice,
+            self,
+            orderId,
+            status,
+            filled,
+            remaining,
+            avgFillPrice,
+            permId,
+            parentId,
+            lastFillPrice,
+            clientId,
+            whyHeld,
+            mktCapPrice,
     ):
         logger.debug("order status orderId=%s status=%s fill=%s", orderId, status, filled)
         orderId = str(orderId)
@@ -146,7 +147,7 @@ class IBKRBroker(Broker):
         now = datetime.now(timezone.utc)
 
         if event:
-            # Lets make sure we don't use IBKRBroker by mistake during a back-test.
+            # Let make sure we don't use IBKRBroker by mistake during a back-test.
             if now - event.time > timedelta(minutes=30):
                 logger.critical("received event from the past, now=%s event-time=%s", now, event.time)
                 raise ValueError(f"received event to far in the past now={now} event-time={event.time}")

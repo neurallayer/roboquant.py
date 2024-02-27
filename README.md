@@ -25,13 +25,15 @@ print(account)
 ```
 
 ## Install
-Roboquant can be installed like most other Python packages, using for example pip or conda. Just make sure you have Python version 3.10 or higher installed.
+Roboquant can be installed like most other Python packages, using pip or conda.
+Make sure you have Python version 3.10 or higher installed.
 
 ```shell
 python3 -m pip install --upgrade roboquant
 ```
 
-The core of roboquant tries to limit the dependencies. But you can install roboquant including one or more of the optional dependencies if you need certain functionality:
+The core of roboquant limits the dependencies. 
+But you can install roboquant including one or more of the optional dependencies if you need certain functionality:
 
 ```shell
 # market data from Yahoo Finance using the YahooFeed
@@ -48,7 +50,8 @@ python3 -m pip install --upgrade "roboquant[all]"
 ```
 
 ## Building from source
-Although this first step isn't required, it is recommended to create a virtual environment. Go to directory where you have downloaded the source code and run the following commands:
+Although this first step isn't required, it is recommended to create a virtual environment.
+Go to the directory where you have downloaded the source code and run the following commands:
 
 ```shell
 python3 -m venv .venv
@@ -74,6 +77,7 @@ flake8 roboquant tests
 ```
 
 ## Kotlin version
-Next to this Python version of `roboquant`, there is also a Kotlin version available. Both (will) share a similar API, just the used computer language is different.
+Next to this Python version of `roboquant`, there is also a Kotlin version available.
+Both (will) share a similar API, just the used computer language is different.
 
-Which one to use, depends very much on personal preference, skills and use-case.
+Which one to use depends very much on personal preference, skills and the use-case.

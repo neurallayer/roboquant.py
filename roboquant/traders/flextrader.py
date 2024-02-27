@@ -1,13 +1,13 @@
-from decimal import Decimal
 import logging
+from decimal import Decimal
+from enum import Enum
 
-from roboquant.signal import Signal
-from ..event import PriceItem
 from roboquant.event import Event
+from roboquant.order import Order
+from roboquant.signal import Signal
 from .trader import Trader
 from ..account import Account
-from enum import Enum
-from roboquant.order import Order
+from ..event import PriceItem
 
 logger = logging.getLogger(__name__)
 
@@ -43,15 +43,15 @@ class FlexTrader(Trader):
     """
 
     def __init__(
-        self,
-        one_order_only=True,
-        size_fractions=0,
-        min_buying_power=0.0,
-        increase_position=False,
-        shorting=False,
-        max_order_perc=0.05,
-        min_order_perc=0.02,
-        price_type="DEFAULT",
+            self,
+            one_order_only=True,
+            size_fractions=0,
+            min_buying_power=0.0,
+            increase_position=False,
+            shorting=False,
+            max_order_perc=0.05,
+            min_order_perc=0.02,
+            price_type="DEFAULT",
     ) -> None:
         super().__init__()
         self.one_order_only = one_order_only
@@ -123,8 +123,8 @@ class FlexTrader(Trader):
         return orders
 
     def _get_orders(self, symbol: str, size: Decimal, item: PriceItem, rating: float) -> list[Order]:
-        """Return zero or more orders for the provided symbol and size, default is single a Market Order.
+        """Return zero or more orders for the provided symbol and size, default is a single a Market Order.
 
-        Overwrite this method to create different order types.
+        Overwrite this method to create different order(s).
         """
         return [Order(symbol, size)]

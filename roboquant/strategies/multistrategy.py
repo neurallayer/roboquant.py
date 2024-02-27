@@ -1,7 +1,8 @@
 from typing import Literal
+
+from roboquant.event import Event
 from roboquant.signal import Signal
 from roboquant.strategies.strategy import Strategy
-from roboquant.event import Event
 
 
 class MultiStrategy(Strategy):

@@ -1,8 +1,9 @@
-from cProfile import Profile
 import os
-from pstats import Stats, SortKey
-import roboquant as rq
 import unittest
+from cProfile import Profile
+from pstats import Stats, SortKey
+
+import roboquant as rq
 
 
 class TestProfile(unittest.TestCase):

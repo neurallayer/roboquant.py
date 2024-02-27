@@ -2,10 +2,10 @@ from dataclasses import dataclass
 from datetime import datetime, timedelta
 from decimal import Decimal
 
+from roboquant.account import Account, Position
+from roboquant.brokers.broker import Broker
+from roboquant.event import Event
 from roboquant.order import Order, OrderStatus
-from ..event import Event
-from ..account import Account, Position
-from .broker import Broker
 
 
 @dataclass(slots=True, frozen=True)
@@ -15,7 +15,6 @@ class _Trx:
     symbol: str
     size: Decimal
     price: float  # is denoted in the currency of the symbol
-    fee: float = 0.0  # is denoted in base currency of the account
 
 
 @dataclass
@@ -30,8 +29,6 @@ class SimBroker(Broker):
     This class can be extended to support different types of use-cases, like margin trading.
     """
 
-    __order_id = 0
-
     def __init__(
             self, initial_deposit=1000000.0, account=None, price_type="DEFAULT", slippage=0.001, clean_up_orders=True
     ):
@@ -45,6 +42,8 @@ class SimBroker(Broker):
         self._prices: dict[str, float] = {}
         self._orders: dict[str, _OrderState] = {}
         self.clean_up_orders = clean_up_orders
+        self.clean_up_orders = clean_up_orders
+        self.__order_id = 0
 
     def _update_account(self, trx: _Trx):
         """Update a position and cash based on a new transaction"""
@@ -71,7 +70,7 @@ class SimBroker(Broker):
                 avg_price = (old_price * float(size) + trx.price * float(trx.size)) / (float(size + trx.size))
                 acc.positions[symbol] = Position(new_size, avg_price)
 
-    def get_execution_price(self, order, item) -> float:
+    def _get_execution_price(self, order, item) -> float:
         """Return the execution price to use for an order based on the price item.
 
         The default implementation is a fixed slippage percentage based on the configured price_type.
@@ -81,25 +80,16 @@ class SimBroker(Broker):
         correction = self.slippage if order.is_buy else -self.slippage
         return price * (1.0 + correction)
 
-    def get_fee(self, order) -> float:
-        """Return the fee (or rebate) for the execution of an order. The fee is denoted in the base
-        currency of the account.
-
-        The default implementation returns 0.0, so no fee is used.
-        """
-        return 0.0
-
     def _simulate_market(self, order: Order, item) -> _Trx | None:
         """Simulate a market for the three order types"""
 
-        price = self.get_execution_price(order, item)
-        if self.is_executable(order, price):
-            fee = self.get_fee(order)
-            return _Trx(order.symbol, order.size, price, fee)
+        price = self._get_execution_price(order, item)
+        if self._is_executable(order, price):
+            return _Trx(order.symbol, order.size, price)
 
-    def next_order_id(self):
-        result = str(SimBroker.__order_id)
-        SimBroker.__order_id += 1
+    def __next_order_id(self):
+        result = str(self.__order_id)
+        self.__order_id += 1
         return result
 
     def _has_expired(self, state: _OrderState) -> bool:
@@ -108,8 +98,8 @@ class SimBroker(Broker):
         else:
             return self._account.last_update - state.accepted > timedelta(days=180)
 
-    def is_executable(self, order, price) -> bool:
-        """Is this order executable given the provided price.
+    def _is_executable(self, order, price) -> bool:
+        """Is this order executable given the provided execution price.
         A market order is always executable, a limit order only when the limit is below the BUY price or
         above the SELL price"""
         if order.limit is None:
@@ -121,10 +111,10 @@ class SimBroker(Broker):
 
         return False
 
-    def _update_mkt_prices(self, price_items):
+    def __update_mkt_prices(self, price_items):
         """track the latest market prices for all open positions"""
         for symbol in self._account.positions.keys():
-            if (item := price_items.get(symbol)) is not None:
+            if item := price_items.get(symbol):
                 self._prices[symbol] = item.price(self.price_type)
 
     def place_orders(self, *orders: Order):
@@ -136,7 +126,7 @@ class SimBroker(Broker):
         for order in orders:
             assert not order.closed, "cannot place closed orders"
             if order.id is None:
-                order.id = self.next_order_id()
+                order.id = self.__next_order_id()
                 assert order.id not in self._orders
                 self._orders[order.id] = _OrderState(order)
             else:
@@ -185,7 +175,7 @@ class SimBroker(Broker):
 
         self._process_modify_order()
         self._process_create_orders(prices)
-        self._update_mkt_prices(prices)
+        self.__update_mkt_prices(prices)
 
         acc.equity = acc.mkt_value(self._prices) + acc.buying_power
         acc.orders = [state.order for state in self._orders.values()]

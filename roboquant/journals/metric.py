@@ -1,10 +1,9 @@
+from typing import Protocol
+
 from roboquant.account import Account
 from roboquant.event import Event
 from roboquant.order import Order
 from roboquant.signal import Signal
-
-
-from typing import Protocol
 
 
 class Metric(Protocol):

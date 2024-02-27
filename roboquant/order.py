@@ -1,7 +1,7 @@
+from copy import copy
 from dataclasses import dataclass
 from decimal import Decimal
 from enum import Flag, auto
-from copy import copy
 
 
 class OrderStatus(Flag):
@@ -64,12 +64,12 @@ class Order:
 
     @property
     def open(self) -> bool:
-        """Return True is this order is open, False otherwise"""
+        """Return True is the order is open, False otherwise"""
         return self.status.open
 
     @property
     def closed(self) -> bool:
-        """Return True is this order is closed, False otherwise"""
+        """Return True is the order is closed, False otherwise"""
         return self.status.closed
 
     def cancel(self) -> "Order":

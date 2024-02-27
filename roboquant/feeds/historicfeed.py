@@ -1,11 +1,12 @@
+from abc import ABC
 from datetime import datetime
-from .feed import Feed
+from itertools import chain
+from typing import List
+
 from roboquant.event import Event, PriceItem
 from roboquant.timeframe import Timeframe
-from typing import List
-from abc import ABC
 from .eventchannel import EventChannel
-from itertools import chain
+from .feed import Feed
 
 
 class HistoricFeed(Feed, ABC):
@@ -20,7 +21,7 @@ class HistoricFeed(Feed, ABC):
         self.__symbols = []
 
     def _add_item(self, time: datetime, item: PriceItem):
-        """Add an price-item at a moment in time to this feed"""
+        """Add a price-item at a moment in time to this feed"""
 
         self.__modified = True
 
@@ -32,14 +33,17 @@ class HistoricFeed(Feed, ABC):
 
     @property
     def symbols(self):
+        """Return all the symbols available in this feed"""
         self.__update()
         return self.__symbols
 
     def timeline(self) -> List[datetime]:
+        """Return the timeline of this feed"""
         self.__update()
         return list(self.__data.keys())
 
     def timeframe(self):
+        """Return the timeframe of this feed"""
         tl = self.timeline()
         if len(tl) == 0:
             return Timeframe.empty()

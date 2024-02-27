@@ -1,13 +1,13 @@
+import sqlite3
 from array import array
 from datetime import datetime
-import sqlite3
 
-from .feed import Feed
 from roboquant.event import Candle
 from roboquant.event import Event
-from roboquant.timeframe import Timeframe
 from roboquant.feeds.feedutil import play_background
+from roboquant.timeframe import Timeframe
 from .eventchannel import EventChannel
+from .feed import Feed
 
 
 class SQLFeed(Feed):

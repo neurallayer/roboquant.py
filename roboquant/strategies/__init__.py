@@ -1,7 +1,7 @@
-from .strategy import Strategy
-from .smacrossover import SMACrossover
-from .emacrossover import EMACrossover
-from .candlestrategy import CandleStrategy
-from .nopstrategy import NOPStrategy
 from .buffer import NumpyBuffer, OHLCVBuffer
+from .candlestrategy import CandleStrategy
+from .emacrossover import EMACrossover
 from .multistrategy import MultiStrategy
+from .nopstrategy import NOPStrategy
+from .smacrossover import SMACrossover
+from .strategy import Strategy

@@ -1,7 +1,7 @@
+from array import array
+from dataclasses import dataclass
 from datetime import datetime, timezone
 from functools import cached_property
-from dataclasses import dataclass
-from array import array
 from typing import Any
 
 
@@ -13,9 +13,10 @@ class PriceItem:
     """the symbol for this price-item"""
 
     def price(self, price_type: str = "DEFAULT") -> float:
-        """Returns the price for the provided price_type. A price_type for example is
-        `OPEN` or `CLOSE`. All price-items are expected to return a DEFAULT price
-        if the type is unknown.
+        """Returns the price for the provided price_type.
+        A price_type, for example, is `OPEN` or `CLOSE`.
+
+        All price-items are expected to return a DEFAULT price if the type is unknown.
         """
         ...
 

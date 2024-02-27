@@ -1,10 +1,10 @@
 from array import array
-from .feed import Feed
+from datetime import timedelta
+
 from roboquant.event import Event, Candle, Trade
 from roboquant.feeds.feedutil import play_background
 from .eventchannel import EventChannel
-
-from datetime import timedelta
+from .feed import Feed
 
 
 class CandleFeed(Feed):
@@ -16,7 +16,8 @@ class CandleFeed(Feed):
         self.freq = frequency
         self.send_remaining = send_remaining
 
-    def __aggr_trade2candle(self, evt: Event, candles: dict[str, Candle]):
+    @staticmethod
+    def __aggr_trade2candle(evt: Event, candles: dict[str, Candle]):
         for item in evt.items:
             if isinstance(item, Trade):
                 symbol = item.symbol

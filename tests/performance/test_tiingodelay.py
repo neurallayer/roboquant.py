@@ -9,7 +9,7 @@ import unittest
 
 class TestTiingoDelay(unittest.TestCase):
 
-    def test_tiingodelay(self):
+    def test_tiingo_delay(self):
         """
         Measure the average delay receiving prices from IEX using Tiingo.
         This includes the following paths if you run it from home:

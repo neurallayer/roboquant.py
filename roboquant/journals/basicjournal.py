@@ -1,5 +1,6 @@
-from roboquant.journals.journal import Journal
 import inspect
+
+from roboquant.journals.journal import Journal
 
 
 class BasicJournal(Journal):
@@ -34,6 +35,6 @@ class BasicJournal(Journal):
             items  : {self.items}
             signals: {self.signals}
             orders : {self.orders}
-            pnl    : {self.pnl*100:_.2f}%
+            pnl    : {self.pnl * 100:_.2f}%
         """
         return inspect.cleandoc(result)

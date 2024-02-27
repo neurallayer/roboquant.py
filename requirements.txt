@@ -11,5 +11,6 @@ nautilus-ibapi~=10.19.2
 
 # Build tools
 build~=1.0.3
-twine~=5.0.0
-flake8==7.0.0
+twine>=5.0.0
+flake8>=7.0.0
+

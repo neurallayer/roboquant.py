@@ -1,26 +1,27 @@
 import string
-import numpy as np
-from roboquant.event import Trade
-
-from .historicfeed import HistoricFeed
 from datetime import datetime, timedelta, timezone
+
+import numpy as np
+
+from roboquant.event import Trade
+from .historicfeed import HistoricFeed
 
 
 class RandomWalk(HistoricFeed):
     """This feed simulates the random-walk of stock prices."""
 
     def __init__(
-        self,
-        n_symbols=10,
-        n_prices=1_000,
-        start_date: str | datetime = "2020-01-01T00:00:00+00:00",
-        frequency=timedelta(days=1),
-        start_price_min=50.0,
-        start_price_max=200.0,
-        volume=1000.0,
-        stdev=0.01,
-        seed=None,
-        symbol_len=4,
+            self,
+            n_symbols=10,
+            n_prices=1_000,
+            start_date: str | datetime = "2020-01-01T00:00:00+00:00",
+            frequency=timedelta(days=1),
+            start_price_min=50.0,
+            start_price_max=200.0,
+            volume=1000.0,
+            stdev=0.01,
+            seed=None,
+            symbol_len=4,
     ):
         super().__init__()
         rnd = np.random.default_rng(seed)
@@ -39,9 +40,9 @@ class RandomWalk(HistoricFeed):
 
     @staticmethod
     def __get_symbols(
-        rnd,
-        n_symbols,
-        symbol_len,
+            rnd,
+            n_symbols,
+            symbol_len,
     ):
         symbols = set()
         alphabet = np.array(list(string.ascii_uppercase))
