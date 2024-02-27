@@ -2,6 +2,8 @@ import logging
 from array import array
 from datetime import datetime, timezone
 
+import yfinance
+
 from roboquant.event import Candle
 from roboquant.feeds.historicfeed import HistoricFeed
 
@@ -17,12 +19,6 @@ class YahooFeed(HistoricFeed):
         end_date = end_date or datetime.now().strftime("%Y-%m-%d")
 
         columns = ["Open", "High", "Low", "Close", "Volume", "Adj Close"]
-
-        try:
-            import yfinance
-        except ImportError:
-            logger.fatal("Couldn't import yfinance package")
-            return
 
         for symbol in symbols:
             logger.debug("requesting symbol=%s", symbol)

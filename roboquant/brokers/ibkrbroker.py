@@ -4,25 +4,21 @@ import time
 from datetime import datetime, timezone, timedelta
 from decimal import Decimal
 
+from ibapi import VERSION
+from ibapi.account_summary_tags import AccountSummaryTags
+from ibapi.client import EClient
+from ibapi.contract import Contract
+from ibapi.order import Order as IBKROrder
+from ibapi.wrapper import EWrapper
+
 from roboquant.account import Account, Position
 from roboquant.event import Event
 from roboquant.order import Order, OrderStatus
 from .broker import Broker
 
+assert VERSION["major"] == 10 and VERSION["minor"] == 19, "Wrong version of the IBAPI found"
+
 logger = logging.getLogger(__name__)
-
-try:
-    from ibapi.client import EClient
-    from ibapi.wrapper import EWrapper
-    from ibapi.contract import Contract
-    from ibapi.order import Order as IBKROrder
-    from ibapi.account_summary_tags import AccountSummaryTags
-    from ibapi import VERSION
-
-    assert VERSION["major"] == 10 and VERSION["minor"] == 19, "Wrong version of the IBAPI found"
-except ImportError:
-    logger.fatal("Couldn't import IBAPI package, you need to install this")
-    pass
 
 
 # noinspection PyPep8Naming
@@ -183,7 +179,7 @@ class IBKRBroker(Broker):
                 if order.id is None:
                     order.id = self.__api.get_next_order_id()
                     self.__api.orders[order.id] = order
-                ibkr_order = self._get_order(order)
+                ibkr_order = self.__get_order(order)
                 contract = self.contract_mapping.get(order.symbol) or self._get_default_contract(order.symbol)
                 self.__api.placeOrder(int(order.id), contract, ibkr_order)
 
@@ -201,7 +197,8 @@ class IBKRBroker(Broker):
         c.exchange = "SMART"  # use smart routing by default
         return c
 
-    def _get_order(self, order: Order):
+    @staticmethod
+    def __get_order(order: Order):
         o = IBKROrder()
         o.action = "BUY" if order.is_buy else "SELL"
         o.totalQuantity = abs(order.size)

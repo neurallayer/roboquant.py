@@ -6,7 +6,7 @@ from tests.common import run_priceitem_feed
 
 class TestYahooFeed(unittest.TestCase):
 
-    def test_yahoofeed(self):
+    def test_yahoo_feed(self):
         feed = YahooFeed("MSFT", "JPM", start_date="2018-01-01", end_date="2020-01-01")
         self.assertEqual(2, len(feed.symbols))
         self.assertEqual({"MSFT", "JPM"}, set(feed.symbols))
@@ -16,7 +16,7 @@ class TestYahooFeed(unittest.TestCase):
 
         run_priceitem_feed(feed, ["MSFT", "JPM"], self)
 
-    def test_yahoofeed_wrong_symbol(self):
+    def test_yahoo_feed_wrong_symbol(self):
         # expect some error logging due to parsing an invalid symbol
         feed = YahooFeed("INVALID_TICKER_NAME", start_date="2010-01-01", end_date="2020-01-01")
         self.assertEqual(0, len(feed.symbols))

@@ -7,4 +7,8 @@ from .historicfeed import HistoricFeed
 from .randomwalk import RandomWalk
 from .sqllitefeed import SQLFeed
 from .tiingofeed import TiingoLiveFeed, TiingoHistoricFeed
-from .yahoofeed import YahooFeed
+
+try:
+    from .yahoofeed import YahooFeed
+except ImportError:
+    pass

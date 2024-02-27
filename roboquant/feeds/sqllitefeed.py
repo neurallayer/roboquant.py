@@ -21,17 +21,17 @@ class SQLFeed(Feed):
     _sql_insert_row = "INSERT into prices VALUES(?,?,?,?,?,?,?,?)"
     _sql_create_index = "CREATE INDEX IF NOT EXISTS date_idx ON prices(date)"
 
-    def __init__(self, file) -> None:
+    def __init__(self, db_file) -> None:
         super().__init__()
-        self.file = file
+        self.db_file = db_file
 
     def create_index(self):
-        con = sqlite3.connect(self.file)
+        con = sqlite3.connect(self.db_file)
         con.execute(SQLFeed._sql_create_index)
         con.commit()
 
     def timeframe(self):
-        con = sqlite3.connect(self.file)
+        con = sqlite3.connect(self.db_file)
         result = con.execute(SQLFeed._sql_select_timeframe).fetchall()
         con.commit()
         row = result[0]
@@ -39,14 +39,14 @@ class SQLFeed(Feed):
         return tf
 
     def symbols(self):
-        con = sqlite3.connect(self.file)
+        con = sqlite3.connect(self.db_file)
         result = con.execute(SQLFeed._sql_select_symbols).fetchall()
         con.commit()
         symbols = [columns[0] for columns in result]
         return symbols
 
     def play(self, channel: EventChannel):
-        con = sqlite3.connect(self.file)
+        con = sqlite3.connect(self.db_file)
         cur = con.cursor()
         cnt = 0
         t_old = ""
@@ -75,7 +75,7 @@ class SQLFeed(Feed):
 
     def record(self, feed, timeframe=None, append=False):
         """Record another feed to this SQLite database"""
-        con = sqlite3.connect(self.file)
+        con = sqlite3.connect(self.db_file)
         cur = con.cursor()
 
         if not append:
