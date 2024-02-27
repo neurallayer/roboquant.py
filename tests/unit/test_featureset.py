@@ -22,14 +22,13 @@ class TestFeatureSet(unittest.TestCase):
         symbol2 = symbols[1]
 
         warmup = 20
-        fs = FeatureSet(10_000, warmup=warmup)
+        fs = FeatureSet(100, warmup=warmup)
         fs.add(PriceFeature(symbol1, "CLOSE"))
         fs.add(PriceFeature(symbol1, "OPEN"))
-        fs.add(SMAFeature(FixedValueFeature("DUMMY", np.zeros((3,))), 8))
+        fs.add(SMAFeature(FixedValueFeature("DUMMY", np.ones((3,))), 8))
         fs.add(SMAFeature(PriceFeature(symbol2, "CLOSE"), 10))
         fs.add(ReturnsFeature(PriceFeature(symbol1, "OPEN")))
         fs.add(VolumeFeature(symbol2))
-        fs.add(FixedValueFeature("DUMMY", np.zeros((3,))))
         fs.add(DayOfWeekFeature())
 
         channel = EventChannel()
@@ -40,7 +39,8 @@ class TestFeatureSet(unittest.TestCase):
             fs.process(evt)
             cnt += 1
 
-        self.assertEqual(cnt - warmup, len(fs._data))
+        self.assertEqual(100, len(fs._data))
+        print(fs._data._data[50])
 
 
 if __name__ == "__main__":

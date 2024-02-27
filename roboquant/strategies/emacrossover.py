@@ -8,10 +8,11 @@ class EMACrossover(Strategy):
 
     def __init__(self, fast_period=13, slow_period=26, smoothing=2.0, price_type="DEFAULT"):
         super().__init__()
-        self._history: dict[str, EMACrossover.__EMACalculator] = {}
+        self._history = {}
         self.fast = 1.0 - (smoothing / (fast_period + 1))
         self.slow = 1.0 - (smoothing / (slow_period + 1))
         self.price_type = price_type
+        self.step = 0
         self.min_steps = max(fast_period, slow_period)
 
     def create_signals(self, event: Event) -> dict[str, Signal]:
@@ -19,40 +20,30 @@ class EMACrossover(Strategy):
         for symbol, item in event.price_items.items():
 
             price = item.price(self.price_type)
-            calculator = self._history.get(symbol)
+            calculators = self._history.get(symbol)
 
-            if calculator is None:
-                self._history[symbol] = self.__EMACalculator(self.fast, self.slow, price)
-            elif not calculator.step >= self.min_steps:
-                calculator.add_price(price)
+            if calculators is None:
+                self._history[symbol] = self.__EMACalculator(self.fast, price), self.__EMACalculator(self.slow, price)
             else:
-                old_rating = calculator.get_rating()
-                calculator.add_price(price)
-                new_rating = calculator.get_rating()
-                if old_rating != new_rating:
-                    signals[symbol] = Signal(new_rating)
+                old_rating = calculators[0].price > calculators[1].price
+                calculators[0].add_price(price)
+                calculators[1].add_price(price)
 
+                if self.step > self.min_steps:
+                    new_rating = calculators[0].price > calculators[1].price
+                    if old_rating != new_rating:
+                        signals[symbol] = Signal.buy() if new_rating else Signal.sell()
+
+        self.step += 1
         return signals
-
-    def reset(self):
-        self._history = {}
 
     class __EMACalculator:
 
-        __slots__ = "fast", "slow", "emaFast", "emaSlow", "step"
+        __slots__ = "momentum", "price", "step"
 
-        def __init__(self, fast, slow, price):
-            self.fast = fast
-            self.slow = slow
-            self.emaFast = price
-            self.emaSlow = price
-            self.step = 1
+        def __init__(self, momentum, price):
+            self.momentum = momentum
+            self.price = price
 
         def add_price(self, price: float):
-            fast, slow = self.fast, self.slow
-            self.emaFast = self.emaFast * fast + (1.0 - fast) * price
-            self.emaSlow = self.emaSlow * slow + (1.0 - slow) * price
-            self.step += 1
-
-        def get_rating(self) -> float:
-            return 1.0 if self.emaFast > self.emaSlow else -1.0
+            self.price = self.momentum * self.price + (1.0 - self.momentum) * price

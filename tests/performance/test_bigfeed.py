@@ -10,7 +10,7 @@ class TestBigFeed(unittest.TestCase):
         start = time.time()
         path = os.path.expanduser("~/data/nyse_stocks/")
         feed = rq.feeds.CSVFeed.stooq_us_daily(path)
-        loadtime = time.time() - start
+        load_time = time.time() - start
         strategy = rq.strategies.EMACrossover(13, 26)
         journal = rq.journals.BasicJournal()
         start = time.time()
@@ -22,18 +22,17 @@ class TestBigFeed(unittest.TestCase):
         self.assertTrue(journal.orders > 10_000)
         self.assertTrue(journal.events > 10_000)
 
-        print(account)
-        print(journal)
-
+        print("", account, journal, sep="\n\n")
+      
         # Print statistics
         print()
-        print(f"load time  = {loadtime:.1f}s")
+        print(f"load time  = {load_time:.1f}s")
         print("files      =", len(feed.symbols))
-        print(f"throughput = {len(feed.symbols) / loadtime:.0f} files/s")
+        print(f"throughput = {len(feed.symbols) / load_time:.0f} files/s")
         print(f"run time   = {runtime:.1f}s")
-        candles = journal.items
-        print(f"candles    = {(candles / 1_000_000):.1f}M")
-        throughput = candles / (runtime * 1_000_000)
+        candles = journal.items / 1_000_000.0
+        print(f"candles    = {candles:.1f}M")
+        throughput = candles / runtime
         print(f"throughput = {throughput:.1f}M candles/s")
         print()
 

@@ -15,7 +15,7 @@ class SMACrossover(Strategy):
         self.min_period = min_period
         self.max_period = max_period
 
-    def _check_condition(self, symbol: str) -> None | Signal:
+    def _get_signal(self, symbol: str) -> None | Signal:
         prices = np.asarray(self._history[symbol])
 
         # SMA(MIN) > SMA(MAX)
@@ -40,7 +40,7 @@ class SMACrossover(Strategy):
 
             h.append(item.price())
             if len(h) == h.maxlen:
-                if rating := self._check_condition(symbol):
-                    signals[symbol] = rating
+                if signal := self._get_signal(symbol):
+                    signals[symbol] = signal
 
         return signals

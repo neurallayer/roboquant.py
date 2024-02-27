@@ -169,6 +169,7 @@ class SimBroker(Broker):
                     if trx is not None:
                         self._update_account(trx)
                         order.status = OrderStatus.FILLED
+                        order.fill = order.size
 
     def sync(self, event: Event | None = None) -> Account:
         """This will perform the trading simulation for open orders and update the account accordingly."""

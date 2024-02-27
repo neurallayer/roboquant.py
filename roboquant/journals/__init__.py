@@ -7,3 +7,4 @@ from roboquant.journals.pnlmetric import PNLMetric
 from roboquant.journals.metric import Metric
 from roboquant.journals.feedmetric import FeedMetric
 from roboquant.journals.pricemetric import PriceItemMetric
+from roboquant.journals.metricsjournal import MetricsJournal

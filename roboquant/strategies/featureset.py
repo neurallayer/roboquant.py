@@ -10,7 +10,12 @@ from roboquant.event import Event
 class Feature(Protocol):
     name: str
 
-    def calc(self, evt: Event) -> NDArray: ...
+    def calc(self, evt: Event) -> NDArray:
+        """
+        return the result as a 1-dimensional NDArray. The result should always
+        be the same size.
+        """
+        ...
 
 
 class FixedValueFeature(Feature):
@@ -51,7 +56,7 @@ class VolumeFeature(Feature):
 
 class ReturnsFeature(Feature):
 
-    def __init__(self, feature) -> None:
+    def __init__(self, feature: Feature) -> None:
         self.history = None
         self.feature: Feature = feature
         self.name = f"{feature.name}-RETURNS"

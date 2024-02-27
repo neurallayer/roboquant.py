@@ -12,7 +12,7 @@ class TestTiingoDelay(unittest.TestCase):
     def test_tiingodelay(self):
         """
         Measure the average delay receiving prices from IEX using Tiingo.
-        This includes the following paths:
+        This includes the following paths if you run it from home:
 
         - From IEX to Tiingo (New York)
         - Tiingo holds it for 15ms (requirement from IEX)
@@ -38,7 +38,7 @@ class TestTiingoDelay(unittest.TestCase):
 
         if delays:
             t = (
-                f"mean={mean(delays):.3f} stdev={stdev(delays):.3f}"
+                f"mean={mean(delays):.3f} stdev={stdev(delays):.3f} "
                 + f"max={max(delays):.3f} min={min(delays):.3f} n={len(delays)}"
             )
             print(t)

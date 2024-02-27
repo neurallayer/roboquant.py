@@ -1,5 +1,5 @@
 from datetime import datetime, timezone
-import decimal
+from decimal import Decimal
 import unittest
 from roboquant import Event, Order, Trade
 from roboquant.brokers import SimBroker
@@ -28,6 +28,7 @@ class TestSimbroker(unittest.TestCase):
         order = account.orders[0]
         self.assertTrue(order.id is not None)
         self.assertTrue(order.open)
+        self.assertEqual(Decimal(0), order.fill)
 
         event = self._create_event()
         account = broker.sync(event)
@@ -37,7 +38,8 @@ class TestSimbroker(unittest.TestCase):
         order = account.orders[0]
         self.assertTrue(order.id is not None)
         self.assertTrue(order.closed)
-        self.assertEqual(decimal.Decimal(100), account.positions["AAPL"].size)
+        self.assertEqual(order.size, order.fill)
+        self.assertEqual(Decimal(100), account.positions["AAPL"].size)
 
         order = Order("AAPL", -50)
         broker.place_orders(order)
@@ -45,7 +47,7 @@ class TestSimbroker(unittest.TestCase):
         self.assertEqual(len(account.orders), 2)
         self.assertEqual(len(account.open_orders()), 0)
         self.assertEqual(len(account.positions), 1)
-        self.assertEqual(decimal.Decimal(50), account.positions["AAPL"].size)
+        self.assertEqual(Decimal(50), account.positions["AAPL"].size)
 
     def test_simbroker_safeguards(self):
         broker = SimBroker()

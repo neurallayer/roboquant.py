@@ -50,6 +50,7 @@ class Order:
     limit: float | None
     id: str | None
     status: OrderStatus
+    fill: Decimal
 
     def __init__(self, symbol: str, size: Decimal | str | int | float, limit: float | None = None):
         self.symbol = symbol
@@ -59,6 +60,7 @@ class Order:
         self.limit = limit
         self.id: str | None = None
         self.status: OrderStatus = OrderStatus.INITIAL
+        self.fill = Decimal(0)
 
     @property
     def open(self) -> bool:
@@ -106,6 +108,7 @@ class Order:
         result = Order(self.symbol, self.size, self.limit)
         result.id = self.id
         result.status = self.status
+        result.fill = self.fill
         return result
 
     @property

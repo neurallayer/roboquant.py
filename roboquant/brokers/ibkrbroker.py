@@ -100,10 +100,11 @@ class _IBApi(EWrapper, EClient):
         whyHeld,
         mktCapPrice,
     ):
-        logger.debug("order status orderId=%s status=%s", orderId, status)
+        logger.debug("order status orderId=%s status=%s fill=%s", orderId, status, filled)
         orderId = str(orderId)
         if id in self.orders:
             order = self.orders[orderId]
+            order.fill = filled
             match status:
                 case "Submitted":
                     order.status = OrderStatus.ACTIVE
