@@ -6,19 +6,31 @@ from roboquant.order import Order
 
 
 class Broker(Protocol):
-    """A broker handles the placed orders and communicates its state through the account object"""
+    """A broker accepts orders and communicates its state through the account object"""
 
-    def place_orders(self, *orders: Order):
+    def place_orders(self, orders: list[Order]):
         """
         Place zero or more orders at this broker.
 
         The following logic applies:
-        - if the order doesn't yet have an `id`, it is a new order
-        - if the order has an `id` and its `size` is zero, it is a cancellation order
-        - if the order has an `id` and its `size` is non-zero, it is an update order
+
+        - If the order doesn't yet have an `id`, it is considered to be a new order and will get assigned a new id.
+        - If the order has an `id` and its `size` is zero, it is a cancellation order of an existing order with the same id.
+        - If the order has an `id` and its `size` is non-zero, it is an update order of an existing order with the same id.
+
+        Args:
+            orders: The orders to be placed.
         """
         ...
 
     def sync(self, event: Event | None = None) -> Account:
-        """Sync the state, and return an updated account to reflect the latest state."""
+        """Sync the state, and return an updated account to reflect the latest state.
+
+        Args:
+            event: optional the latest event.
+
+        Returns:
+            The latest account object.
+
+        """
         ...

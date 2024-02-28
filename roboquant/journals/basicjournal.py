@@ -1,8 +1,12 @@
-import inspect
+import logging
+from dataclasses import dataclass
 
 from roboquant.journals.journal import Journal
 
+logger = logging.getLogger(__name__)
 
+
+@dataclass
 class BasicJournal(Journal):
     """Tracks a number of basic metrics:
     - total number of events, items, signals and orders until that time
@@ -10,6 +14,11 @@ class BasicJournal(Journal):
 
     This journal adds little overhead to a run, both CPU and memory wise.
     """
+    items: int
+    orders: int
+    signals: int
+    events: int
+    pnl: float
 
     def __init__(self):
         self.items = 0
@@ -29,12 +38,4 @@ class BasicJournal(Journal):
         self.signals += len(signals)
         self.pnl = account.equity / self.__first_equity - 1.0
 
-    def __repr__(self) -> str:
-        result = f"""
-            events : {self.events}
-            items  : {self.items}
-            signals: {self.signals}
-            orders : {self.orders}
-            pnl    : {self.pnl * 100:_.2f}%
-        """
-        return inspect.cleandoc(result)
+        logger.info("time=%s info=%s", event.time, self)

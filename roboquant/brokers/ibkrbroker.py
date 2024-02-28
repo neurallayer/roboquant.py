@@ -69,6 +69,7 @@ class _IBApi(EWrapper, EClient):
         self.orders[rq_order.id] = rq_order
 
     def request_account(self):
+        """blocking call till account summary has been received"""
         buyingpower_tag = AccountSummaryTags.BuyingPower
         equity_tag = AccountSummaryTags.NetLiquidation
         with self.__account_end:
@@ -118,7 +119,8 @@ class IBKRBroker(Broker):
     Attributes
     ==========
     contract_mapping
-        store how symbols map to IBKR contracts. If a symbol is not found, the symbol is assumed to represent a US stock
+        Map symbols to IBKR contracts.
+        If a symbol is not found, the symbol is assumed to represent a US stock
 
     """
 
@@ -128,17 +130,21 @@ class IBKRBroker(Broker):
         api = _IBApi()
         api.connect(host, port, client_id)
         self.__api = api
-        self._has_new_orders_since_sync = False
+        self.__has_new_orders_since_sync = False
 
         # Start the handling in a thread
         self.__api_thread = threading.Thread(target=api.run, daemon=False)
         self.__api_thread.start()
         time.sleep(3.0)
 
-    def _should_sync(self, now):
-        return self._has_new_orders_since_sync or now - self.__account.last_update > timedelta(seconds=30)
+    def _should_sync(self, now: datetime):
+        """Avoid too many API calls"""
+        return self.__has_new_orders_since_sync or now - self.__account.last_update > timedelta(seconds=30)
 
     def sync(self, event: Event | None = None) -> Account:
+        """Sync with the IBKR account
+        """
+
         logger.debug("start sync")
         now = datetime.now(timezone.utc)
 
@@ -152,7 +158,7 @@ class IBKRBroker(Broker):
         acc = self.__account
         if self._should_sync(now):
             acc.last_update = now
-            self._has_new_orders_since_sync = False
+            self.__has_new_orders_since_sync = False
 
             api.reqPositions()
             api.reqOpenOrders()
@@ -166,9 +172,9 @@ class IBKRBroker(Broker):
         logger.debug("end sync")
         return acc
 
-    def place_orders(self, *orders: Order):
+    def place_orders(self, orders):
 
-        self._has_new_orders_since_sync = len(orders) > 0
+        self.__has_new_orders_since_sync = len(orders) > 0
 
         for order in orders:
             assert not order.closed, "cannot place a closed order"

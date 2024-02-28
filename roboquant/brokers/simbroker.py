@@ -14,7 +14,7 @@ class _Trx:
 
     symbol: str
     size: Decimal
-    price: float  # is denoted in the currency of the symbol
+    price: float  # denoted in the currency of the symbol
 
 
 @dataclass
@@ -30,7 +30,7 @@ class SimBroker(Broker):
     """
 
     def __init__(
-            self, initial_deposit=1000000.0, account=None, price_type="DEFAULT", slippage=0.001, clean_up_orders=True
+            self, initial_deposit=1_000_000.0, account=None, price_type="DEFAULT", slippage=0.001, clean_up_orders=True
     ):
         super().__init__()
         self.initial_deposit = initial_deposit
@@ -41,7 +41,6 @@ class SimBroker(Broker):
         self.price_type = price_type
         self._prices: dict[str, float] = {}
         self._orders: dict[str, _OrderState] = {}
-        self.clean_up_orders = clean_up_orders
         self.clean_up_orders = clean_up_orders
         self.__order_id = 0
 
@@ -117,7 +116,7 @@ class SimBroker(Broker):
             if item := price_items.get(symbol):
                 self._prices[symbol] = item.price(self.price_type)
 
-    def place_orders(self, *orders: Order):
+    def place_orders(self, orders):
         """Place new orders at this broker. The order gets assigned a unique id if it hasn't one already.
 
         There is no trading simulation yet performed or account updated. Orders placed at time `t`, will be
@@ -171,6 +170,7 @@ class SimBroker(Broker):
         prices = event.price_items if event else {}
 
         if self.clean_up_orders:
+            # remove all the closed orders from the previous step
             self._orders = {order_id: state for order_id, state in self._orders.items() if not state.order.closed}
 
         self._process_modify_order()

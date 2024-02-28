@@ -8,7 +8,7 @@ from roboquant.brokers.ibkrbroker import IBKRBroker
 
 class TestIBKRBroker(unittest.TestCase):
 
-    def test_ibkrbroker(self):
+    def test_ibkr_order(self):
         logging.basicConfig(level=logging.DEBUG)
         logging.getLogger("ibapi").setLevel(logging.WARNING)
         symbol = "JPM"

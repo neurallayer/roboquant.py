@@ -19,7 +19,7 @@ class TestSimbroker(unittest.TestCase):
         self.assertEqual(1_000_000.0, account.buying_power)
 
         order = Order("AAPL", 100)
-        broker.place_orders(order)
+        broker.place_orders([order])
         self.assertEqual(len(account.orders), 0)
 
         account = broker.sync()
@@ -42,7 +42,7 @@ class TestSimbroker(unittest.TestCase):
         self.assertEqual(Decimal(100), account.positions["AAPL"].size)
 
         order = Order("AAPL", -50)
-        broker.place_orders(order)
+        broker.place_orders([order])
         account = broker.sync(event)
         self.assertEqual(len(account.orders), 2)
         self.assertEqual(len(account.open_orders()), 0)
@@ -54,7 +54,7 @@ class TestSimbroker(unittest.TestCase):
         order = Order("AAPL", -50)
         order.id = "NON_EXISTING"
         with self.assertRaises(AssertionError):
-            broker.place_orders(order)
+            broker.place_orders([order])
 
 
 if __name__ == "__main__":

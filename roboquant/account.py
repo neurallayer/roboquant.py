@@ -20,13 +20,13 @@ class Position:
 class Account:
     """The account maintains the following state during a run:
 
-    - Available cash for trading (also sometimes referred to as buying power)
-    - Open positions
-    - Open orders
-    - Total equity value of the account
-    - Last time the account was updated
+    - Available buying power for orders in the base currency of the account
+    - All the open positions
+    - Orders
+    - Total equity value of the account in the base currency of the account
+    - The last time the account was updated
 
-    Only the broker updates the state of the account and does this only during its `sync` method.
+    Only the broker updates the account and does this only during its `sync` method.
     """
 
     buying_power: float
@@ -54,7 +54,10 @@ class Account:
 
     def mkt_value(self, prices: dict[str, float]) -> float:
         """Return the market value of all the open positions in the account using the provided prices.
-        If there is no known price provided for a position, the average price paid will be used instead
+        If there is no known price provided for a position, the average price paid will be used instead.
+
+        Args:
+            prices: The prices to use to calculate the market value.
         """
         return sum(
             [
@@ -66,7 +69,10 @@ class Account:
 
     def unrealized_pnl(self, prices: dict[str, float]) -> float:
         """Return the unrealized profit and loss for the open position given the provided market prices
-        Positions that don't have a known price, will be ignored.
+        If there is no known price provided for a position, it will be ignored.
+
+        Args:
+            prices: The prices to use to calculate the unrealized PNL.
         """
         return sum(
             [

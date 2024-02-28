@@ -49,7 +49,7 @@ def run(
         signals = strategy.create_signals(event)
         account = broker.sync(event)
         orders = trader.create_orders(signals, event, account)
-        broker.place_orders(*orders)
+        broker.place_orders(orders)
         if journal:
             journal.track(event, account, signals, orders)
 

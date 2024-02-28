@@ -10,11 +10,12 @@ from .feed import Feed
 class CandleFeed(Feed):
     """Aggregates Trades of another feed into candles"""
 
-    def __init__(self, feed: Feed, frequency: timedelta, send_remaining=False):
+    def __init__(self, feed: Feed, frequency: timedelta, send_remaining=False, continuation=True):
         super().__init__()
         self.feed = feed
         self.freq = frequency
         self.send_remaining = send_remaining
+        self.continuation = continuation
 
     @staticmethod
     def __aggr_trade2candle(evt: Event, candles: dict[str, Candle]):
@@ -34,6 +35,15 @@ class CandleFeed(Feed):
                 else:
                     candles[symbol] = Candle(symbol, array("f", [p, p, p, p, item.trade_volume]))
 
+    @staticmethod
+    def __get_continued_candles(candles: dict[str, Candle]) -> dict[str, Candle]:
+        result = {}
+        for symbol, item in candles.items():
+            p = item.price("CLOSE")
+            candle = Candle(symbol, array("f", [p, p, p, p, 0.0]))
+            result[symbol] = candle
+        return result
+
     def play(self, channel: EventChannel):
         src_channel = channel.copy()
         candles: dict[str, Candle] = {}
@@ -46,7 +56,7 @@ class CandleFeed(Feed):
                 items = list(candles.values())
                 evt = Event(next_time, items)
                 channel.put(evt)
-                candles = {}
+                candles = {} if not self.continuation else self.__get_continued_candles(candles)
                 next_time += self.freq
 
             self.__aggr_trade2candle(event, candles)
