@@ -21,7 +21,7 @@ class TestIBKRBroker(unittest.TestCase):
 
         # Place an order
         order = Order(symbol, 10, 150.0)
-        broker.place_orders(order)
+        broker.place_orders([order])
         time.sleep(5)
         self.assertEqual(len(account.orders), 0)
         account = broker.sync()
@@ -32,7 +32,7 @@ class TestIBKRBroker(unittest.TestCase):
 
         # Update an order
         update_order = order.update(size=5, limit=160.0)
-        broker.place_orders(update_order)
+        broker.place_orders([update_order])
         time.sleep(5)
         account = broker.sync()
         self.assertEqual(len(account.orders), 1)
@@ -42,7 +42,7 @@ class TestIBKRBroker(unittest.TestCase):
 
         # Cancel an order
         cancel_order = update_order.cancel()
-        broker.place_orders(cancel_order)
+        broker.place_orders([cancel_order])
         time.sleep(5)
         account = broker.sync()
         self.assertEqual(len(account.orders), 1)
