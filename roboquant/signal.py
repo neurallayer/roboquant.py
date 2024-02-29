@@ -12,7 +12,9 @@ class SignalType(Flag):
 
 @dataclass(slots=True, frozen=True)
 class Signal:
-    """Signal that a strategy can create"""
+    """Signal that a strategy can create.
+    It contains both a rating between -1.0 and 1.0 and a type.
+    """
 
     rating: float
     type: SignalType = SignalType.BOTH

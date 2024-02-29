@@ -129,4 +129,8 @@ class Order:
 
     @property
     def remaining(self):
+        """Return the remaining to be filled.
+
+        In case of a sell order, the remaining can be a negative number.
+        """
         return self.size - self.fill

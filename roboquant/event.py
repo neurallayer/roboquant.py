@@ -92,10 +92,6 @@ class Candle(PriceItem):
             case _:
                 return self.ohlcv[3]
 
-    @property
-    def close(self):
-        return self.ohlcv[3]
-
     def volume(self, volume_type: str = "DEFAULT") -> float:
         return self.ohlcv[4]
 
