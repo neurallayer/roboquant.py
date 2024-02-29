@@ -80,6 +80,7 @@ class CSVFeed(HistoricFeed):
 
     @classmethod
     def stooq_us_daily(cls, path):
+        """Parse one or more CSV files that meet the stooq format"""
         columns = ["<DATE>", "<OPEN>", "<HIGH>", "<LOW>", "<CLOSE>", "<VOL>"]
 
         class StooqCSVFeed(CSVFeed):
@@ -96,5 +97,6 @@ class CSVFeed(HistoricFeed):
 
     @classmethod
     def yahoo(cls, path, frequency="1d"):
+        """Parse one or more CSV files that meet the Yahoo Finance format"""
         columns = ["Date", "Open", "High", "Low", "Close", "Volume", "Adj Close"]
         return cls(path, columns=columns, adj_close=True, time_offset="21:00:00+00:00", frequency=frequency)
