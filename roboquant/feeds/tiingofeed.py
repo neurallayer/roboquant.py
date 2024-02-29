@@ -160,7 +160,7 @@ class TiingoLiveFeed(Feed):
             url, on_message=self._handle_message, on_error=self._handle_error, on_close=self._handle_close  # type: ignore
         )
         kwargs = {"sslopt": {"cert_reqs": ssl.CERT_NONE}}
-        wst = threading.Thread(target=self.ws.run_forever, kwargs=kwargs)
+        wst = threading.Thread(target=self.ws.run_forever, kwargs=kwargs, daemon=True)
         wst.daemon = True
         wst.start()
         sleep(3)

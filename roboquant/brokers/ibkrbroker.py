@@ -133,13 +133,16 @@ class IBKRBroker(Broker):
         self.__has_new_orders_since_sync = False
 
         # Start the handling in a thread
-        self.__api_thread = threading.Thread(target=api.run, daemon=False)
+        self.__api_thread = threading.Thread(target=api.run, daemon=True)
         self.__api_thread.start()
         time.sleep(3.0)
 
+    def disconnect(self):
+        self.__api.reader.conn.disconnect()
+
     def _should_sync(self, now: datetime):
         """Avoid too many API calls"""
-        return self.__has_new_orders_since_sync or now - self.__account.last_update > timedelta(seconds=30)
+        return self.__has_new_orders_since_sync or now - self.__account.last_update > timedelta(seconds=1)
 
     def sync(self, event: Event | None = None) -> Account:
         """Sync with the IBKR account

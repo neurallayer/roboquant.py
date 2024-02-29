@@ -2,7 +2,8 @@ from datetime import timedelta
 import logging
 import roboquant as rq
 from roboquant.brokers.ibkrbroker import IBKRBroker
-import sys
+
+from roboquant.feeds.feedutil import get_sp500_symbols
 
 if __name__ == "__main__":
     logging.basicConfig()
@@ -11,15 +12,16 @@ if __name__ == "__main__":
     # Connect to local running TWS or IB Gateway
     ibkr = IBKRBroker()
 
-    # Connect to Tiingo and subscribe to all stocks
+    # Connect to Tiingo and subscribe to S&P-500 stocks
     src_feed = rq.feeds.TiingoLiveFeed(market="iex")
-    src_feed.subscribe()
+    sp500 = get_sp500_symbols()
+    src_feed.subscribe(*sp500)
 
     # Convert the trades into 15-second candles
-    feed = rq.feeds.CandleFeed(src_feed, timedelta(seconds=60))
+    feed = rq.feeds.CandleFeed(src_feed, timedelta(seconds=15))
 
-    # Let run our EMACrossover strategy for 10 minutes
-    strategy = rq.strategies.EMACrossover(3, 5)
+    # Let run an EMACrossover strategy
+    strategy = rq.strategies.EMACrossover(13, 26)
     timeframe = rq.Timeframe.next(minutes=10)
     journal = rq.journals.BasicJournal()
     account = rq.run(feed, strategy, broker=ibkr, journal=journal, timeframe=timeframe)
@@ -27,4 +29,4 @@ if __name__ == "__main__":
 
     print(account)
     print(journal)
-    sys.exit(0)
+    ibkr.disconnect()

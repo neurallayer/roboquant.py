@@ -2,7 +2,7 @@ from time import sleep
 import logging
 from roboquant import Order
 from roboquant.brokers.ibkrbroker import IBKRBroker
-import sys
+
 
 if __name__ == "__main__":
     logging.basicConfig()
@@ -13,11 +13,13 @@ if __name__ == "__main__":
     print(account)
 
     orders = [Order(symbol, - pos.size) for symbol, pos in account.positions.items()]
-    ibkr.place_orders(orders)
-    for _ in range(60):
-        sleep(3)
+
+    # close all but the first 10 positions
+    ibkr.place_orders(orders[10:])
+    for _ in range(10):
+        sleep(1)
         account = ibkr.sync()
         print()
         print(account)
 
-    sys.exit(0)
+    ibkr.disconnect()

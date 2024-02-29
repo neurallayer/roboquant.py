@@ -1,10 +1,12 @@
+import json
+import pathlib
 import threading
 from datetime import datetime
 
 from roboquant.event import Candle
 from roboquant.timeframe import Timeframe
-from .eventchannel import EventChannel, ChannelClosed
-from .feed import Feed
+from roboquant.feeds.eventchannel import EventChannel, ChannelClosed
+from roboquant.feeds.feed import Feed
 
 
 def play_background(feed: Feed, channel: EventChannel):
@@ -21,7 +23,7 @@ def play_background(feed: Feed, channel: EventChannel):
         finally:
             channel.close()
 
-    thread = threading.Thread(None, __background, daemon=False)
+    thread = threading.Thread(None, __background, daemon=True)
     thread.start()
 
 
@@ -63,6 +65,15 @@ def get_symbol_dataframe(feed: Feed, symbol: str, timeframe: Timeframe | None = 
 
     ohlcv = get_symbol_ohlcv(feed, symbol, timeframe)
     return pd.DataFrame(ohlcv, columns=["Date", "Open", "High", "Low", "Close", "Volume"]).set_index("Date")
+
+
+def get_sp500_symbols():
+    full_path = pathlib.Path(__file__).parent.resolve().joinpath("sp500.json")
+    with open(full_path) as f:
+        content = f.read()
+        j = json.loads(content)
+        symbols = [elem["Symbol"] for elem in j]
+        return symbols
 
 
 def print_feed_items(feed: Feed, timeframe: Timeframe | None = None, timeout: float | None = None):

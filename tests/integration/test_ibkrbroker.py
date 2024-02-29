@@ -51,6 +51,7 @@ class TestIBKRBroker(unittest.TestCase):
         self.assertEqual(OrderStatus.CANCELLED, order.status)
         print()
         print(account)
+        broker.disconnect()
 
 
 if __name__ == "__main__":

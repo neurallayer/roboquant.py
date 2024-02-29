@@ -9,6 +9,9 @@ class SignalType(Flag):
     EXIT = auto()
     BOTH = ENTRY | EXIT
 
+    def __repr__(self):
+        return self.name
+
 
 @dataclass(slots=True, frozen=True)
 class Signal:
