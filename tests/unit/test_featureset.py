@@ -15,7 +15,7 @@ import numpy as np
 
 class TestFeatureSet(unittest.TestCase):
 
-    def test_featureset(self):
+    def test_feature_set(self):
         feed = get_feed()
         symbols = feed.symbols
         symbol1 = symbols[0]

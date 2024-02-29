@@ -5,7 +5,7 @@ from tests.common import run_strategy
 
 class TestMultiStrategy(unittest.TestCase):
 
-    def test_multistrategies(self):
+    def test_multi_strategies(self):
         strategy = MultiStrategy(
             EMACrossover(13, 26),
             EMACrossover(5, 12),

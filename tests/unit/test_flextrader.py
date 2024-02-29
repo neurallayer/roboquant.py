@@ -20,13 +20,13 @@ class _MyTrader(FlexTrader):
 
 class TestFlexTrader(unittest.TestCase):
 
-    def test_default_flextrader(self):
+    def test_default_flex_trader(self):
         feed = get_feed()
         journal = BasicJournal()
         rq.run(feed, EMACrossover(), journal=journal)
         self.assertGreater(journal.orders, 0)
 
-    def test_custom_flextrader(self):
+    def test_custom_flex_trader(self):
         feed = get_feed()
         journal = BasicJournal()
         rq.run(feed, EMACrossover(), trader=_MyTrader(), journal=journal)

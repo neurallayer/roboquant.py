@@ -72,8 +72,7 @@ class Timeframe:
     def __contains__(self, time):
         if self.inclusive:
             return self.start <= time <= self.end
-        else:
-            return self.start <= time < self.end
+        return self.start <= time < self.end
 
     def __repr__(self):
         last_char = "]" if self.inclusive else ">"

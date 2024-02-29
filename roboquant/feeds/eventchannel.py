@@ -38,7 +38,7 @@ class EventChannel:
 
         if self.timeframe is None or event.time in self.timeframe:
             self._queue.put(event)
-        elif not (event.time < self.timeframe.start):
+        elif not event.time < self.timeframe.start:
             # we get in this branch when timeframe is not None and
             # the event is past the provided timeframe.
             self.close()
@@ -57,6 +57,7 @@ class EventChannel:
                 return Event.empty(now)
 
             self._closed = True
+        return None
 
     def close(self):
         """close this channel and put a None message on the channel to indicate to consumers it is closed"""

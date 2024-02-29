@@ -47,8 +47,8 @@ class HistoricFeed(Feed, ABC):
         tl = self.timeline()
         if len(tl) == 0:
             return Timeframe.empty()
-        else:
-            return Timeframe(tl[0], tl[-1], inclusive=True)
+
+        return Timeframe(tl[0], tl[-1], inclusive=True)
 
     def __update(self):
         if self.__modified:

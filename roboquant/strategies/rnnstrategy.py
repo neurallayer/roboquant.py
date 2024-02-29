@@ -86,10 +86,10 @@ class RNNStrategy(Strategy):
             p = output.item()
             if p > self.pct:
                 return 1.0
-            elif p < -self.pct:
+            if p < -self.pct:
                 return -1.0
-            else:
-                return None
+
+        return None
 
     def _train_epoch(self, data_loader):
         model, opt, crit = self.model, self.optimizer, self.criterion

@@ -53,9 +53,9 @@ class AlphaBeta(Metric):
 
         if self.__cnt <= self._data.shape[-1]:
             return {}
-        else:
-            alpha, beta = self.alpha_beta()
-            return {"perf/alpha": alpha, "perf/beta": beta}
+
+        alpha, beta = self.alpha_beta()
+        return {"perf/alpha": alpha, "perf/beta": beta}
 
     def alpha_beta(self) -> Tuple[float, float]:
         ar_total, mr_total = np.cumprod(self._data, axis=1)[:, -1]

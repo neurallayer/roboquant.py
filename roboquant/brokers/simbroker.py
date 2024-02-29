@@ -11,7 +11,6 @@ from roboquant.order import Order, OrderStatus
 @dataclass(slots=True, frozen=True)
 class _Trx:
     """transaction for an executed trade"""
-
     symbol: str
     size: Decimal
     price: float  # denoted in the currency of the symbol
@@ -20,7 +19,7 @@ class _Trx:
 @dataclass
 class _OrderState:
     order: Order
-    accepted: datetime | None = None
+    expires_at: datetime | None = None
 
 
 class SimBroker(Broker):
@@ -83,8 +82,10 @@ class SimBroker(Broker):
         """Simulate a market for the three order types"""
 
         price = self._get_execution_price(order, item)
-        if self._is_executable(order, price):
-            return _Trx(order.symbol, order.size, price)
+        fill = self._get_fill(order, price)
+        if fill:
+            return _Trx(order.symbol, fill, price)
+        return None
 
     def __next_order_id(self):
         result = str(self.__order_id)
@@ -92,23 +93,28 @@ class SimBroker(Broker):
         return result
 
     def _has_expired(self, state: _OrderState) -> bool:
-        if state.accepted is None:
+        """Returns true if the order has expired, false otherwise"""
+        if state.expires_at is None:
             return False
-        else:
-            return self._account.last_update - state.accepted > timedelta(days=180)
 
-    def _is_executable(self, order, price) -> bool:
-        """Is this order executable given the provided execution price.
-        A market order is always executable, a limit order only when the limit is below the BUY price or
-        above the SELL price"""
+        return self._account.last_update >= state.expires_at
+
+    def _get_fill(self, order, price) -> Decimal:
+        """Return the fill for the order given the provided price.
+
+        The default implementation is:
+
+        - A market order is always fully filled,
+        - A limit order only when the limit is below the BUY price or
+        above the SELL price."""
         if order.limit is None:
-            return True
+            return order.remaining
         if order.is_buy and price <= order.limit:
-            return True
+            return order.remaining
         if order.is_sell and price >= order.limit:
-            return True
+            return order.remaining
 
-        return False
+        return Decimal(0)
 
     def __update_mkt_prices(self, price_items):
         """track the latest market prices for all open positions"""
@@ -123,13 +129,13 @@ class SimBroker(Broker):
         processed during time `t+1`. This protects against future bias.
         """
         for order in orders:
-            assert not order.closed, "cannot place closed orders"
+            assert not order.closed, "cannot place a closed order"
             if order.id is None:
                 order.id = self.__next_order_id()
                 assert order.id not in self._orders
                 self._orders[order.id] = _OrderState(order)
             else:
-                assert order.id in self._orders, "existing order id not found"
+                assert order.id in self._orders, "existing order id is not found"
                 self._modify_orders.append(order)
 
     def _process_modify_order(self):
@@ -137,7 +143,7 @@ class SimBroker(Broker):
             state = self._orders[order.id]  # type: ignore
             if state.order.closed:
                 continue
-            elif order.is_cancellation:
+            if order.is_cancellation:
                 state.order.status = OrderStatus.CANCELLED
             else:
                 state.order.size = order.size or state.order.size
@@ -153,12 +159,13 @@ class SimBroker(Broker):
                 order.status = OrderStatus.EXPIRED
             else:
                 if (item := prices.get(order.symbol)) is not None:
-                    state.accepted = state.accepted or self._account.last_update
+                    state.expires_at = state.expires_at or self._account.last_update + timedelta(days=90)
                     trx = self._simulate_market(order, item)
                     if trx is not None:
                         self._update_account(trx)
-                        order.status = OrderStatus.FILLED
-                        order.fill = order.size
+                        order.fill += trx.size
+                        if order.fill == order.size:
+                            order.status = OrderStatus.FILLED
 
     def sync(self, event: Event | None = None) -> Account:
         """This will perform the trading simulation for open orders and update the account accordingly."""

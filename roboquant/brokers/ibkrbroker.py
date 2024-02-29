@@ -165,7 +165,7 @@ class IBKRBroker(Broker):
             api.request_account()
 
             acc.positions = {k: v for k, v in api.positions.items() if not v.size.is_zero()}
-            acc.orders = [order for order in api.orders.values()]
+            acc.orders = list(api.orders.values())
             acc.buying_power = api.get_buying_power()
             acc.equity = api.get_equity()
 

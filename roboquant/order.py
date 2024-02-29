@@ -126,3 +126,7 @@ class Order:
     def is_sell(self):
         """Return True if this is a SELL order, False otherwise"""
         return self.size < 0
+
+    @property
+    def remaining(self):
+        return self.size - self.fill

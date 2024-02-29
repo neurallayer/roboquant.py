@@ -16,7 +16,8 @@ def play_background(feed: Feed, channel: EventChannel):
         try:
             feed.play(channel)
         except ChannelClosed:
-            """this exception we can expect"""
+            # this exception we can expect
+            pass
         finally:
             channel.close()
 

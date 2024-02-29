@@ -5,11 +5,11 @@ from tests.common import run_strategy
 
 class TestCrossover(unittest.TestCase):
 
-    def test_smacrossover(self):
+    def test_sma_crossover(self):
         strategy = SMACrossover(13, 26)
         run_strategy(strategy, self)
 
-    def test_emacrossover(self):
+    def test_ema_crossover(self):
         strategy = SMACrossover(13, 26)
         run_strategy(strategy, self)
 

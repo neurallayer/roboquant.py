@@ -66,13 +66,12 @@ class ReturnsFeature(Feature):
         values = self.feature.calc(evt)
 
         if not self.history:
-            nan = float("nan")
             self.history = values
-            return np.full(values.shape, [nan])
-        else:
-            r = values / self.history - 1.0
-            self.history = values
-            return r
+            return np.full(values.shape, float("nan"))
+
+        r = values / self.history - 1.0
+        self.history = values
+        return r
 
 
 class SMAFeature(Feature):
@@ -95,8 +94,8 @@ class SMAFeature(Feature):
 
         if self._cnt < self.period:
             return np.full((values.size,), np.nan)
-        else:
-            return np.mean(self.history, axis=0)
+
+        return np.mean(self.history, axis=0)
 
 
 class DayOfWeekFeature(Feature):

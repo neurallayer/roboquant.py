@@ -34,6 +34,7 @@ class TiingoHistoricFeed(HistoricFeed):
         super().__init__()
         self.key = key or Config().get("tiingo.key")
         assert self.key, "no Tiingo key found"
+        self.timeout = 10
 
     @staticmethod
     def __get_csv_iter(response: requests.Response):
@@ -60,7 +61,7 @@ class TiingoHistoricFeed(HistoricFeed):
         for symbol in symbols:
             url = f"https://api.tiingo.com/tiingo/daily/{symbol}/prices?{query}"
             logger.debug("eod stock url is %s", url)
-            response = requests.get(url)
+            response = requests.get(url, timeout=self.timeout)
             if not response.ok:
                 logger.warning("error symbol=%s reason=%s", symbol, response.reason)
                 continue
@@ -87,7 +88,7 @@ class TiingoHistoricFeed(HistoricFeed):
         for symbol in symbols:
             url = f"https://api.tiingo.com/iex/{symbol}/prices?{query}"
             logger.debug("intraday iex is %s", url)
-            response = requests.get(url)
+            response = requests.get(url, timeout=self.timeout)
             if not response.ok:
                 logger.warning("error symbol=%s reason=%s", symbol, response.reason)
                 continue
@@ -106,7 +107,7 @@ class TiingoHistoricFeed(HistoricFeed):
 
         url = f"https://api.tiingo.com/tiingo/crypto/prices?{query}"
         logger.debug("intraday crypto url is %s", url)
-        response = requests.get(url)
+        response = requests.get(url, timeout=self.timeout)
         if not response.ok:
             logger.warning("error reason=%s", response.reason)
             return
@@ -126,7 +127,7 @@ class TiingoHistoricFeed(HistoricFeed):
         query = f"startDate={start_date}&endDate={end_date}&format=csv&resampleFreq={frequency}&token={self.key}"
         url = f"https://api.tiingo.com/tiingo/fx/{symbols_str}/prices?{query}"
 
-        response = requests.get(url)
+        response = requests.get(url, timeout=self.timeout)
         logger.debug("intraday fx url is %s", url)
         if not response.ok:
             logger.warning("error reason=%s", response.reason)
@@ -154,7 +155,7 @@ class TiingoLiveFeed(Feed):
         self.channel = None
 
         url = f"wss://api.tiingo.com/{market}"
-        logger.info(f"Opening websocket {url}")
+        logger.info("Opening websocket url=%s", url)
         self.ws = websocket.WebSocketApp(  # type: ignore
             url, on_message=self._handle_message, on_error=self._handle_error, on_close=self._handle_close  # type: ignore
         )

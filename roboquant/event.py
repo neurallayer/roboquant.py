@@ -140,6 +140,7 @@ class Event:
 
         if item := self.price_items.get(symbol):
             return item.price(price_type)
+        return None
 
     def __repr__(self) -> str:
         return f"Event(time={self.time} item={len(self.items)})"
