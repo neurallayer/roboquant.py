@@ -62,7 +62,7 @@ class CSVFeed(HistoricFeed):
         freq = self.freq
         t = time.fromisoformat(self.time_offset) if self.time_offset is not None else None
 
-        with open(filename) as csvfile:
+        with open(filename, encoding="utf8") as csvfile:
             reader = csv.DictReader(csvfile)
 
             for row in reader:

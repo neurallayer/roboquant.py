@@ -13,7 +13,7 @@ class SignalType(Flag):
 @dataclass(slots=True, frozen=True)
 class Signal:
     """Signal that a strategy can create.
-    It contains both a rating between -1.0 and 1.0 and a type.
+    It contains both a rating between -1.0 and 1.0 and the type of signal.
     """
 
     rating: float

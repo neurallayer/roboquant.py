@@ -176,7 +176,11 @@ class IBKRBroker(Broker):
 
         self.__has_new_orders_since_sync = len(orders) > 0
 
-        for order in orders:
+        for idx, order in enumerate(orders, start=1):
+            if idx % 25 == 0:
+                # avoid to many API calls
+                time.sleep(1)
+
             assert not order.closed, "cannot place a closed order"
             if order.size.is_zero():
                 assert order.id is not None

@@ -26,6 +26,11 @@ class _PositionChange(Enum):
         return _PositionChange.CLOSE if float(pos_size) * rating < 0.0 else _PositionChange.INCREASE
 
 
+def _log_rule(rule: str, signal: Signal, symbol: str, position: Decimal):
+    if logger.isEnabledFor(logging.INFO):
+        logger.info("signal=%s symbol=%s position=%s discarded because of %s", signal, symbol, position, rule)
+
+
 class FlexTrader(Trader):
     """Implementation of a Trader that has configurable rules to modify its behavior. This implementation will not
     generate orders if there is not a price in the event for the underlying symbol.
@@ -41,13 +46,16 @@ class FlexTrader(Trader):
     - shorting: allow orders that could result in a short position, default is false
     - price_type: the price type to use when determining order value
 
+    It might be sometimes challenging to understand wby a signal isn't converted into an order. The flex-trader logs
+    at INFO level when certain rules have been fired.
+
     """
 
     def __init__(
             self,
             one_order_only=True,
             size_fractions=0,
-            min_buying_power=0.0,
+            min_buying_power_perc=0.05,  # don't use this buying power expressed as a percentage of the equity
             increase_position=False,
             shorting=False,
             max_order_perc=0.05,
@@ -57,7 +65,7 @@ class FlexTrader(Trader):
         super().__init__()
         self.one_order_only = one_order_only
         self.size_digits: int = size_fractions
-        self.min_buying_power: float = min_buying_power
+        self.min_buying_power_perc: float = min_buying_power_perc
         self.increase_position = increase_position
         self.shorting = shorting
         self.max_order_perc = max_order_perc
@@ -75,51 +83,69 @@ class FlexTrader(Trader):
             return []
 
         orders: list[Order] = []
-        buying_power = account.buying_power
-        max_order_value = account.equity * self.max_order_perc
-        min_order_value = account.equity * self.min_order_perc
+        equity = account.equity
+        max_order_value = equity * self.max_order_perc
+        min_order_value = equity * self.min_order_perc
+        available = account.buying_power - self.min_buying_power_perc * equity
+
         for symbol, signal in signals.items():
+            pos_size = account.get_position_size(symbol)
 
             if self.one_order_only and account.has_open_order(symbol):
-                logger.debug("rating=%s for symbol=%s discarded because of one order rule", signal, symbol)
+                _log_rule("one order only", signal, symbol, pos_size)
                 continue
 
             item = event.price_items.get(symbol)
             if item is None:
-                logger.debug("rating=%s for symbol=%s discarded because of no price available", signal, symbol)
+                _log_rule("no price is available", signal, symbol, pos_size)
                 continue
 
             price = item.price(self.price_type)
-            pos_size = account.get_position_size(symbol)
-
             change = _PositionChange.get_change(signal.rating, pos_size)
+
             if not self.shorting and change == _PositionChange.OPEN_SHORT:
-                logger.debug("signal=%s for symbol=%s discarded because of shorting rule", signal, symbol)
+                _log_rule("no shorting", signal, symbol, pos_size)
                 continue
             if not self.increase_position and change == _PositionChange.INCREASE:
-                logger.debug("signal=%s for symbol=%s discarded because of increase position rule", signal, symbol)
+                _log_rule("no increase position sizing", signal, symbol, pos_size)
                 continue
 
             if change == _PositionChange.CLOSE:
                 # Closing orders don't require or use buying power
+                if not signal.is_exit:
+                    _log_rule("no exit signal", signal, symbol, pos_size)
+                    continue
                 new_orders = self._get_orders(symbol, pos_size * -1, item, signal.rating)
                 orders += new_orders
             else:
+                if not signal.is_entry:
+                    _log_rule("no entry signal", signal, symbol, pos_size)
+                    continue
+
+                if available < min_order_value:
+                    _log_rule("available buying power below minimum order value", signal, symbol, pos_size)
+                    continue
+
+                available_order_value = min(available, max_order_value)
                 contract_price = account.contract_value(symbol, Decimal(1), price)
-                order_size = self._get_order_size(signal.rating, contract_price, max_order_value)
+                order_size = self._get_order_size(signal.rating, contract_price, available_order_value)
+
+                if order_size.is_zero():
+                    _log_rule("calculated order size is zero", signal, symbol, pos_size)
+                    continue
 
                 order_value = abs(account.contract_value(symbol, order_size, price))
-                if order_value > (buying_power - self.min_buying_power):
-                    logger.debug("signal=%s for symbol=%s discarded because of insufficient buying power", signal, symbol)
+                if order_value > available:
+                    _log_rule("order value above available buying power", signal, symbol, pos_size)
                     continue
                 if order_value < min_order_value:
-                    logger.debug("signal=%s for symbol=%s discarded because of minimum order value", signal, symbol)
+                    _log_rule("order value below minimum order value", signal, symbol, pos_size)
                     continue
 
                 new_orders = self._get_orders(symbol, order_size, item, signal.rating)
                 if new_orders:
                     orders += new_orders
-                    buying_power -= order_value
+                    available -= order_value
 
         return orders
 
