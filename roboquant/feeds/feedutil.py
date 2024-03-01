@@ -69,7 +69,7 @@ def get_symbol_dataframe(feed: Feed, symbol: str, timeframe: Timeframe | None = 
 
 def get_sp500_symbols():
     full_path = pathlib.Path(__file__).parent.resolve().joinpath("sp500.json")
-    with open(full_path) as f:
+    with open(full_path, encoding="utf8") as f:
         content = f.read()
         j = json.loads(content)
         symbols = [elem["Symbol"] for elem in j]

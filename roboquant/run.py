@@ -25,18 +25,18 @@ def run(
     The other parameters are optional.
 
     Args:
-    - feed: the feed to use for this run
-    - strategy: your strategy that you want to use
-    - trader: the trader you want to use. If None is specified, the `FlexTrader` will be used with its default settings
-    - broker: the broker you want to use. If None is specified, the `SimBroker` will be used with its default settings
-    - journal: journal to use to log and/or store progress and metrics, default is None.
-    - timeframe: optionally limit the run to events within this timeframe. The default is None
-    - capacity: the buffer capacity of the event channel. Default is 10 events.
-    - heartbeat_timeout: optionally, a heartbeat will be generated if no other events are received within the specified
-    timeout in seconds. The default is None.
+        feed: The feed to use for this run
+        strategy: Your strategy that you want to use
+        trader: The trader you want to use. If None is specified, the `FlexTrader` will be used with its default settings
+        broker: The broker you want to use. If None is specified, the `SimBroker` will be used with its default settings
+        journal: Journal to use to log and/or store progress and metrics, default is None.
+        timeframe: Optionally limit the run to events within this timeframe. The default is None
+        capacity: The buffer capacity of the event channel. Default is 10 events.
+        heartbeat_timeout: Optionally, a heartbeat will be generated if no other events are received within the specified
+            timeout in seconds. The default is None.
 
     Returns:
-    The latest version of the account
+        The latest version of the account
     """
 
     trader = trader or FlexTrader()

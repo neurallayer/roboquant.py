@@ -32,8 +32,8 @@ class OrderStatus(Flag):
         """Return True is the status is closed, False otherwise"""
         return self in OrderStatus._CLOSE
 
-    def __repr__(self) -> str:
-        return self.name  # type: ignore
+    def __repr__(self):
+        return self.name
 
 
 @dataclass
@@ -43,7 +43,8 @@ class Order:
     Default is a market order when only the size is specified.
     But optionally, a limit can be specified, making it a limit order.
 
-    The id is automatically assigned by the broker and should not be set manually.
+    The `id` is automatically assigned by the broker and should not be set manually.
+    Also, the `status` and `fill` are managed by the broker and should not be manually set.
     """
 
     symbol: str

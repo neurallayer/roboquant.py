@@ -4,11 +4,11 @@ from configparser import ConfigParser
 
 
 class Config:
-    """Access to roboquant configuration file"""
+    """Access to the roboquant configuration file"""
 
     def __init__(self, path=None):
         path = path or os.path.expanduser("~/.roboquant/.env")
-        with open(path, "r") as f:
+        with open(path, "r", encoding="utf8") as f:
             config_string = "[default]\n" + f.read()
         self.config = ConfigParser()
         self.config.read_string(config_string)
