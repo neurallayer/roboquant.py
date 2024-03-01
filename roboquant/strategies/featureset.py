@@ -4,7 +4,7 @@ from typing import Protocol
 import numpy as np
 from numpy.typing import NDArray
 
-from roboquant.event import Event
+from roboquant.event import Event, Candle
 from roboquant.strategies.buffer import NumpyBuffer
 
 
@@ -40,6 +40,20 @@ class PriceFeature(Feature):
         item = evt.price_items.get(self.symbol)
         price = item.price(self.price_type) if item else float("nan")
         return np.array([price])
+
+
+class CandleFeature(Feature):
+
+    def __init__(self, symbol: str) -> None:
+        self.symbol = symbol
+        self.name = f"{symbol}-CANDLE"
+
+    def calc(self, evt):
+        item = evt.price_items.get(self.symbol)
+        if isinstance(item, Candle):
+            return np.array(item.ohlcv)
+
+        return np.full((5,), float("nan"))
 
 
 class VolumeFeature(Feature):
@@ -119,12 +133,25 @@ class FeatureSet:
         self.features: list[Feature] = []
         self.warmup = warmup
         self._buffer: NumpyBuffer = None  # type: ignore
+        self._norm = None
 
     def add(self, feature: Feature):
         self.features.append(feature)
 
     def data(self) -> NDArray:
         return self._buffer.get_all()
+
+    def calc_norm(self):
+        data = self.data()
+        self._norm = np.zeros((data.shape[-1], 2))
+        self._norm[:, 0] = data.mean(axis=0)
+        self._norm[:, 1] = data.std(axis=0)
+
+    def normalize(self, data=None) -> NDArray:
+        assert self._norm is not None, "normalization values are not yet calculated, invoke calc_norm first"
+        data = data or self.data()
+        norm = self._norm
+        return (data - norm[:, 0]) / norm[:, 1]
 
     def process(self, evt: Event):
         data = [feature.calc(evt) for feature in self.features]

@@ -23,7 +23,7 @@ class EMACrossover(Strategy):
             calculators = self._history.get(symbol)
 
             if calculators is None:
-                self._history[symbol] = self.__EMACalculator(self.fast, price), self.__EMACalculator(self.slow, price)
+                self._history[symbol] = self._Calculator(self.fast, price), self._Calculator(self.slow, price)
             else:
                 old_rating = calculators[0].price > calculators[1].price
                 calculators[0].add_price(price)
@@ -37,7 +37,7 @@ class EMACrossover(Strategy):
         self.step += 1
         return signals
 
-    class __EMACalculator:
+    class _Calculator:
 
         __slots__ = "momentum", "price", "step"
 

@@ -79,6 +79,7 @@ class FlexTrader(Trader):
         return rounded_size
 
     def create_orders(self, signals: dict[str, Signal], event: Event, account: Account) -> list[Order]:
+        # pylint: disable=too-many-branches,too-many-statements
         if not signals:
             return []
 
@@ -150,6 +151,7 @@ class FlexTrader(Trader):
         return orders
 
     def _get_orders(self, symbol: str, size: Decimal, item: PriceItem, rating: float) -> list[Order]:
+        # pylint: disable=unused-argument
         """Return zero or more orders for the provided symbol and size, default is a single a Market Order.
 
         Overwrite this method to create different order(s).

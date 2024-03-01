@@ -70,6 +70,14 @@ class TestFeatureSet(unittest.TestCase):
         diff = np.diff(data, axis=0)
         self.assertEqual(history_size - 1, diff.shape[0])
 
+        self.assertTrue(fs._norm is None)
+        fs.calc_norm()
+        self.assertEqual((3, 2), fs._norm.shape)
+
+        norm_data = fs.normalize()
+        self.assertEqual(data.shape, norm_data.shape)
+        self.assertAlmostEqual(0.0, norm_data.mean(), places=2)
+
 
 if __name__ == "__main__":
     unittest.main()

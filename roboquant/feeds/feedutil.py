@@ -58,6 +58,7 @@ def get_symbol_ohlcv(feed: Feed, symbol: str, timeframe: Timeframe | None = None
 
 
 def get_symbol_dataframe(feed: Feed, symbol: str, timeframe: Timeframe | None = None):
+    # pylint: disable=import-outside-toplevel
     """Get prices for a single symbol from a feed as a pandas dataframe"""
 
     # noinspection PyPackageRequirements

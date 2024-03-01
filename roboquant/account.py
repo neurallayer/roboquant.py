@@ -43,6 +43,7 @@ class Account:
         self.equity: float = 0.0
 
     def contract_value(self, symbol: str, size: Decimal, price: float) -> float:
+        # pylint: disable=unused-argument
         """Return the total value of the provided contract size denoted in the base currency of the account.
         The default implementation returns `size * price`.
 

@@ -18,11 +18,10 @@ class PriceItem:
 
         All price-items are expected to return a DEFAULT price if the type is unknown.
         """
-        ...
 
     def volume(self, volume_type: str = "DEFAULT") -> float:
         """Return the volume of the price-item"""
-        ...
+
 
 
 @dataclass(slots=True)
