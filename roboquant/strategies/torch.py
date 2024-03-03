@@ -13,30 +13,30 @@ logger = logging.getLogger(__name__)
 
 class RNNStrategy(FeatureStrategy):
 
-    def __init__(self, model, symbol, sequences: int = 20, pct: float = 0.01):
+    def __init__(self, model: torch.nn.Module, symbol: str, sequences: int = 20, pct: float = 0.01):
         super().__init__(sequences)
-        self.model = None
         self.sequences = sequences
         self.model = model
         self.pct = pct
         self.symbol = symbol
         self._norm_x = None
         self._norm_y = None
-        self._results = []
+        self._prediction_results = []
 
     def predict(self, x) -> dict[str, Signal]:
-        x = (x - self._norm_x[0]) / self._norm_x[1]
+        if self._norm_x is not None:
+            x = (x - self._norm_x[0]) / self._norm_x[1]
         x = torch.asarray(x)
         x = torch.unsqueeze(x, dim=0)  # add the batch dimension
-
+ 
         self.model.eval()
         with torch.no_grad():
             output = self.model(x)
             p = output.item()
-            p = self._norm_y[1] * p + self._norm_y[0]
-            p = p[0]
-            print(p)
-            self._results.append(p)
+            if self._norm_y is not None:
+                p = self._norm_y[1] * p + self._norm_y[0]
+                p = p[0]
+            self._prediction_results.append(p)
             if p > self.pct:
                 print("BUY")
                 return {self.symbol: BUY}

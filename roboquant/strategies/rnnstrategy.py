@@ -12,7 +12,7 @@ from roboquant.strategies.strategy import Strategy
 logger = logging.getLogger(__name__)
 
 
-class Normalize(object):
+class Normalize:
 
     def __init__(self, norm):
         self.mean, self.stdev = norm
