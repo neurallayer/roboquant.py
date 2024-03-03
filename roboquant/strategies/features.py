@@ -154,7 +154,7 @@ class DayOfWeekFeature(Feature):
 
 
 class FeatureStrategy(Strategy, ABC):
-    """Abstract base class for strategies based on one or mroe features"""
+    """Abstract base class for strategies based on one or more features"""
 
     def __init__(self, history: int, dtype="float32"):
         self._features_x = []

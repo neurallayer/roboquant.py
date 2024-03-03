@@ -60,7 +60,7 @@ class PNLMetric(Metric):
         return self.max_drawdown
 
     def __get_max_gain(self, equity) -> float:
-        self.min_equity = max(equity, self.min_equity)
+        self.min_equity = min(equity, self.min_equity)
         gain = equity / self.min_equity - 1.0
         self.max_gain = max(gain, self.max_gain)
         return self.max_gain
