@@ -13,20 +13,34 @@ from roboquant.strategies.strategy import Strategy
 logger = logging.getLogger(__name__)
 
 
+class Normalize(object):
+
+    def __init__(self, norm):
+        self.mean, self.stdev = norm
+
+    def __call__(self, sample):
+        return (sample - self.mean) / self.stdev
+
 class _RNNDataset(Dataset):
-    def __init__(self, x_data, y_data, sequences=20):
+    def __init__(self, x_data, y_data, sequences=20, transform=None, target_transform=None):
         self.sequences = sequences
         self.x_data = x_data
         self.y_data = y_data
+        self.transform = transform
+        self.target_transform = target_transform
 
     def __len__(self):
         return len(self.y_data) - self.sequences
 
     def __getitem__(self, idx):
         end = idx + self.sequences
-        inputs = self.x_data[idx:end]
+        features = self.x_data[idx:end]
         labels = self.y_data[end - 1: end]
-        return inputs, labels
+        if self.transform:
+            features = self.transform(features)
+        if self.target_transform:
+            labels = self.target_transform(labels)
+        return features, labels
 
 
 class RNNStrategy(Strategy):

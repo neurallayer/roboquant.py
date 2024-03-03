@@ -13,7 +13,7 @@ Roboquant is an open-source algorithmic trading platform. It is flexible, user-f
 So whether you are a beginning retail trader or an established trading firm, roboquant can help you to develop robust and fully automated trading strategies. You can find out more at [roboquant.org](https://roboquant.org).
 
 ## Usage
-The following code snippet shows the steps required to run a full back-test on a number of stocks.
+The following code snippet shows the steps to run a full back-test on a number of stocks.
 
 ```python
 import roboquant as rq
@@ -32,8 +32,8 @@ Make sure you have Python version 3.10 or higher installed.
 python3 -m pip install --upgrade roboquant
 ```
 
-The core of roboquant limits the dependencies. 
-But you can install roboquant including one or more of the optional dependencies if you need certain functionality:
+The core of roboquant limits the number of dependencies. 
+But you can install roboquant including one or more of the optional dependencies if you require certain functionality:
 
 ```shell
 # market data from Yahoo Finance using the YahooFeed
@@ -80,4 +80,4 @@ flake8 roboquant tests
 Next to this Python version of `roboquant`, there is also a Kotlin version available.
 Both (will) share a similar API, just the used computer language is different.
 
-Which one to use depends very much on personal preference, skills and the use-case.
+Which one to use depends very much on personal preferences, skills and the use-case.

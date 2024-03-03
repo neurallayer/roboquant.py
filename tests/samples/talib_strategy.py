@@ -19,7 +19,7 @@ class EMAStrategy(CandleStrategy):
 
 
 class RSIStrategy(CandleStrategy):
-    """Example using talib to create a RSI strategy"""
+    """Example using talib to create an RSI strategy"""
 
     def __init__(self, period):
         super().__init__(period + 1)
@@ -29,7 +29,7 @@ class RSIStrategy(CandleStrategy):
         rsi = ta.RSI(close, self.size - 1)  # type: ignore
         if rsi < 30:
             return BUY
-        if rsi < 70:
+        if rsi > 70:
             return SELL
 
 

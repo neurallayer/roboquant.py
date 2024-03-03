@@ -23,7 +23,6 @@ class PriceItem:
         """Return the volume of the price-item"""
 
 
-
 @dataclass(slots=True)
 class Quote(PriceItem):
     data: array

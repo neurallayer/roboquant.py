@@ -1,5 +1,5 @@
 import unittest
-from roboquant.strategies.featureset import (
+from roboquant.strategies.features import (
     FeatureSet,
     PriceFeature,
     SMAFeature,

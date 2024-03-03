@@ -1,4 +1,5 @@
 from array import array
+from typing import Any
 
 import numpy as np
 from numpy.typing import NDArray
@@ -9,18 +10,28 @@ class NumpyBuffer:
     It uses a single Numpy array to store its data.
     """
 
-    __slots__ = "_data", "_idx", "capacity"
+    __slots__ = "_data", "_idx"
 
-    def __init__(self, columns: int, capacity: int, dtype="float32") -> None:
+    def __init__(self, columns: int, capacity: int, dtype: Any = "float32") -> None:
         """Create a new Numpy buffer"""
         self._data: NDArray = np.full((capacity, columns), np.nan, dtype=dtype)
         self._idx = 0
-        self.capacity = capacity
+
+    @classmethod
+    def _from_data(cls, data):
+        result = cls(0, 0)
+        result._data = data
+        result._idx = len(data)
+        return result
 
     def append(self, data: array | NDArray):
         idx = self._idx % self.capacity
         self._data[idx] = data
         self._idx += 1
+
+    @property
+    def capacity(self):
+        return len(self._data)
 
     def _get(self, column):
         if self._idx < self.capacity:
