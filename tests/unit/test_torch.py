@@ -44,11 +44,11 @@ class TestTorch(unittest.TestCase):
         strategy.fit(feed, timeframe=tf, epochs=2, validation_split=0.25, prediction=prediction)
 
         # Run the trained model with the last 4 years of data
-        tf = rq.Timeframe.fromisoformat("2020-01-01", "2023-12-31")
-        account = rq.run(feed, strategy, timeframe=tf)
-        print(account)
-        preds = strategy._prediction_results
-        print("avg-prediction=", sum(preds)/len(preds), "   max-prediction=", max(preds))
+        tf = rq.Timeframe.fromisoformat("2020-01-01", "2024-01-01")
+        rq.run(feed, strategy, timeframe=tf)
+        predictions = strategy._prediction_results
+        self.assertEquals(760, len(predictions))
+        self.assertNotEqual(max(predictions), min(predictions))
 
 
 if __name__ == "__main__":

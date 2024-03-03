@@ -39,12 +39,19 @@ class MetricsJournal(Journal):
                 values.append(metrics[metric_name])
         return timeline, values
 
-    def plot(self, plt, metric_name: str):
+    def plot(self, plt, metric_name: str, plot_x: bool = True, **kwargs):
         """Plot a metric"""
         x, y = self.get_timeseries(metric_name)
-        plt.plot(x, y)
-        plt.title(metric_name)
-        plt.show()
+        if plot_x:
+            plt.plot(x, y, **kwargs)
+        else:
+            plt.plot(y, **kwargs)
+
+        if hasattr(plt, "set_title"):
+            # assume we are in a subplot
+            plt.set_title(metric_name)
+        else:
+            plt.title(metric_name)
 
     def get_metric_names(self) -> set[str]:
         """return the available metric names in this journal"""

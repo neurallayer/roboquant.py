@@ -32,7 +32,7 @@ class Feed(ABC):
         thread.start()
         return channel
 
-    def plot(self, plt, *symbols: str, price_type: str = "DEFAULT", timeframe: Timeframe | None = None):
+    def plot(self, plt, *symbols: str, price_type: str = "DEFAULT", timeframe: Timeframe | None = None, **kwargs):
         """Plot the prices of one or more symbols"""
         channel = self.play_background(timeframe)
         result = {}
@@ -47,6 +47,12 @@ class Feed(ABC):
                 data[1].append(price)
 
         for symbol, data in result.items():
-            plt.plot(data[0], data[1])
-            plt.title(symbol)
-            plt.show()
+            plt.plot(data[0], data[1], **kwargs)
+            if hasattr(plt, "set_title"):
+                # assume we are in a subplot
+                plt.set_title(symbol)
+            else:
+                plt.title(symbol)
+                plt.show()
+
+
