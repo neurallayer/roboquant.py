@@ -35,12 +35,12 @@ class _RNNDataset(Dataset):
     def __getitem__(self, idx):
         end = idx + self.sequences
         features = self.x_data[idx:end]
-        labels = self.y_data[end - 1: end]
+        label = self.y_data[end]
         if self.transform:
             features = self.transform(features)
         if self.target_transform:
-            labels = self.target_transform(labels)
-        return features, labels
+            label = self.target_transform(label)
+        return features, label
 
 
 class RNNStrategy(Strategy):

@@ -28,7 +28,7 @@ class RNNStrategy(FeatureStrategy):
             x = (x - self._norm_x[0]) / self._norm_x[1]
         x = torch.asarray(x)
         x = torch.unsqueeze(x, dim=0)  # add the batch dimension
- 
+
         self.model.eval()
         with torch.no_grad():
             output = self.model(x)
@@ -38,7 +38,6 @@ class RNNStrategy(FeatureStrategy):
                 p = p[0]
             self._prediction_results.append(p)
             if p > self.pct:
-                print("BUY")
                 return {self.symbol: BUY}
             if p < -self.pct:
                 return {self.symbol: SELL}
