@@ -7,8 +7,8 @@ from numpy.typing import NDArray
 
 from roboquant import Signal
 from roboquant.event import Event, Candle
-from roboquant.feeds import EventChannel, feedutil
-from roboquant.strategies import Strategy
+from roboquant.feeds.feed import Feed
+from roboquant.strategies.strategy import Strategy
 from roboquant.strategies.buffer import NumpyBuffer
 
 
@@ -236,9 +236,8 @@ class FeatureStrategy(Strategy, ABC):
         data = [feature.calc(evt) for feature in features]
         return np.hstack(data, dtype=self._dtype)
 
-    def _get_xy(self, feed, timeframe=None, warmup=0) -> tuple[NDArray, NDArray]:
-        channel = EventChannel(timeframe)
-        feedutil.play_background(feed, channel)
+    def _get_xy(self, feed: Feed, timeframe=None, warmup=0) -> tuple[NDArray, NDArray]:
+        channel = feed.play_background(timeframe)
         x = []
         y = []
         while evt := channel.get():

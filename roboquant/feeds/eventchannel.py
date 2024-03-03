@@ -26,6 +26,10 @@ class EventChannel:
         self._queue = Queue(maxsize)
         self._closed = False
 
+    @property
+    def maxsize(self):
+        return self._queue.maxsize
+
     def put(self, event: Event):
         """Put an event on this channel.
 

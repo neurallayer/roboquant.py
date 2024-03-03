@@ -1,9 +1,7 @@
 from roboquant.account import Account
 from roboquant.brokers.broker import Broker
 from roboquant.brokers.simbroker import SimBroker
-from roboquant.feeds.eventchannel import EventChannel
 from roboquant.feeds.feed import Feed
-from roboquant.feeds.feedutil import play_background
 from roboquant.journals.journal import Journal
 from roboquant.strategies.strategy import Strategy
 from roboquant.traders.flextrader import FlexTrader
@@ -31,7 +29,7 @@ def run(
         broker: The broker you want to use. If None is specified, the `SimBroker` will be used with its default settings
         journal: Journal to use to log and/or store progress and metrics, default is None.
         timeframe: Optionally limit the run to events within this timeframe. The default is None
-        capacity: The buffer capacity of the event channel. Default is 10 events.
+        capacity: The max capacity of the event channel. Default is 10 events.
         heartbeat_timeout: Optionally, a heartbeat will be generated if no other events are received within the specified
             timeout in seconds. The default is None.
 
@@ -41,9 +39,7 @@ def run(
 
     trader = trader or FlexTrader()
     broker = broker or SimBroker()
-
-    channel = EventChannel(timeframe, capacity)
-    play_background(feed, channel)
+    channel = feed.play_background(timeframe, capacity)
 
     while event := channel.get(heartbeat_timeout):
         signals = strategy.create_signals(event)

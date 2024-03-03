@@ -4,7 +4,6 @@ from datetime import datetime
 
 from roboquant.event import Candle
 from roboquant.event import Event
-from roboquant.feeds.feedutil import play_background
 from roboquant.timeframe import Timeframe
 from .eventchannel import EventChannel
 from .feed import Feed
@@ -73,7 +72,7 @@ class SQLFeed(Feed):
             cnt += 1
         con.commit()
 
-    def record(self, feed, timeframe=None, append=False):
+    def record(self, feed: Feed, timeframe=None, append=False):
         """Record another feed to this SQLite database"""
         con = sqlite3.connect(self.db_file)
         cur = con.cursor()
@@ -83,8 +82,7 @@ class SQLFeed(Feed):
 
         cur.execute(SQLFeed._sql_create_table)
 
-        channel = EventChannel(timeframe)
-        play_background(feed, channel)
+        channel = feed.play_background(timeframe)
         data = []
         while event := channel.get():
             t = event.time

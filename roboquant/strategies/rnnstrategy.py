@@ -4,8 +4,7 @@ import torch
 from torch.utils.data import Dataset, DataLoader
 
 from roboquant.event import Candle, Event
-from roboquant.feeds.eventchannel import EventChannel
-from roboquant.feeds.feedutil import play_background
+from roboquant.feeds import Feed
 from roboquant.signal import Signal
 from roboquant.strategies.buffer import OHLCVBuffer
 from roboquant.strategies.strategy import Strategy
@@ -20,6 +19,7 @@ class Normalize(object):
 
     def __call__(self, sample):
         return (sample - self.mean) / self.stdev
+
 
 class _RNNDataset(Dataset):
     def __init__(self, x_data, y_data, sequences=20, transform=None, target_transform=None):
@@ -134,9 +134,8 @@ class RNNStrategy(Strategy):
 
         return (total_loss / b).item()
 
-    def _fill_replay_buffer(self, feed, timeframe):
-        channel = EventChannel(timeframe)
-        play_background(feed, channel)
+    def _fill_replay_buffer(self, feed: Feed, timeframe):
+        channel = feed.play_background(timeframe)
         h = self.ohlcv
         symbol = self.symbol
 

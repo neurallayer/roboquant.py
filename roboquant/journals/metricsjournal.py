@@ -2,6 +2,7 @@ from datetime import datetime
 
 from roboquant.journals.journal import Journal
 from roboquant.journals.metric import Metric
+from roboquant.journals.pnlmetric import PNLMetric
 
 
 class MetricsJournal(Journal):
@@ -15,6 +16,10 @@ class MetricsJournal(Journal):
     def __init__(self, *metrics: Metric):
         self.metrics = metrics
         self._history: list[tuple[datetime, dict]] = []
+
+    @classmethod
+    def pnl(cls):
+        return cls(PNLMetric())
 
     def track(self, event, account, signals, orders):
         result = {}
@@ -33,6 +38,13 @@ class MetricsJournal(Journal):
                 timeline.append(time)
                 values.append(metrics[metric_name])
         return timeline, values
+
+    def plot(self, plt, metric_name: str):
+        """Plot a metric"""
+        x, y = self.get_timeseries(metric_name)
+        plt.plot(x, y)
+        plt.title(metric_name)
+        plt.show()
 
     def get_metric_names(self) -> set[str]:
         """return the available metric names in this journal"""

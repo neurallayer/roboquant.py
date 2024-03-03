@@ -2,7 +2,6 @@ from array import array
 from datetime import timedelta
 
 from roboquant.event import Event, Candle, Trade
-from roboquant.feeds.feedutil import play_background
 from .eventchannel import EventChannel
 from .feed import Feed
 
@@ -45,9 +44,8 @@ class CandleFeed(Feed):
         return result
 
     def play(self, channel: EventChannel):
-        src_channel = channel.copy()
         candles: dict[str, Candle] = {}
-        play_background(self.feed, src_channel)
+        src_channel = self.feed.play_background(channel.timeframe, channel.maxsize)
         next_time = None
         while event := src_channel.get():
             if not next_time:

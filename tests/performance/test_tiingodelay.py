@@ -1,10 +1,10 @@
 import logging
 import time
+import unittest
+from statistics import mean, stdev
 
 from roboquant import Timeframe
-from roboquant.feeds import EventChannel, TiingoLiveFeed, feedutil
-from statistics import mean, stdev
-import unittest
+from roboquant.feeds import TiingoLiveFeed
 
 
 class TestTiingoDelay(unittest.TestCase):
@@ -28,8 +28,7 @@ class TestTiingoDelay(unittest.TestCase):
         feed.subscribe(threshold_level=5)
 
         timeframe = Timeframe.next(minutes=1)
-        channel = EventChannel(timeframe, maxsize=10_000)
-        feedutil.play_background(feed, channel)
+        channel = feed.play_background(timeframe, 10_000)
 
         delays = []
         while event := channel.get():

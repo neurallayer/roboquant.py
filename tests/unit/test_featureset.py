@@ -1,4 +1,7 @@
 import unittest
+
+import numpy as np
+
 from roboquant.strategies.features import (
     FeatureSet,
     PriceFeature,
@@ -8,9 +11,7 @@ from roboquant.strategies.features import (
     FixedValueFeature,
     DayOfWeekFeature,
 )
-from roboquant.feeds import EventChannel, feedutil
 from tests.common import get_feed
-import numpy as np
 
 
 class TestFeatureSet(unittest.TestCase):
@@ -32,9 +33,7 @@ class TestFeatureSet(unittest.TestCase):
         fs.add(VolumeFeature(symbol2))
         fs.add(DayOfWeekFeature())
 
-        channel = EventChannel()
-        feedutil.play_background(feed, channel)
-
+        channel = feed.play_background()
         cnt = 0
         while evt := channel.get():
             fs.process(evt)
@@ -53,9 +52,7 @@ class TestFeatureSet(unittest.TestCase):
         fs.add(PriceFeature(symbol1, "OPEN"))
         fs.add(VolumeFeature(symbol1))
 
-        channel = EventChannel()
-        feedutil.play_background(feed, channel)
-
+        channel = feed.play_background()
         cnt = 0
         while evt := channel.get():
             fs.process(evt)

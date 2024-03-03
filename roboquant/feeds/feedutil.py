@@ -1,30 +1,10 @@
 import json
 import pathlib
-import threading
 from datetime import datetime
 
 from roboquant.event import Candle
-from roboquant.timeframe import Timeframe
-from roboquant.feeds.eventchannel import EventChannel, ChannelClosed
 from roboquant.feeds.feed import Feed
-
-
-def play_background(feed: Feed, channel: EventChannel):
-    """Play a feed in the background on its own thread.
-    The provided channel will be closed after the playing has finished.
-    """
-
-    def __background():
-        try:
-            feed.play(channel)
-        except ChannelClosed:
-            # this exception we can expect
-            pass
-        finally:
-            channel.close()
-
-    thread = threading.Thread(None, __background, daemon=True)
-    thread.start()
+from roboquant.timeframe import Timeframe
 
 
 def get_symbol_prices(
@@ -34,8 +14,7 @@ def get_symbol_prices(
 
     x = []
     y = []
-    channel = EventChannel(timeframe)
-    play_background(feed, channel)
+    channel = feed.play_background(timeframe)
     while event := channel.get():
         price = event.get_price(symbol, price_type)
         if price:
@@ -48,8 +27,7 @@ def get_symbol_ohlcv(feed: Feed, symbol: str, timeframe: Timeframe | None = None
     """Get the candles for a single symbol from a feed"""
 
     result = []
-    channel = EventChannel(timeframe)
-    play_background(feed, channel)
+    channel = feed.play_background(timeframe)
     while event := channel.get():
         item = event.price_items.get(symbol)
         if item and isinstance(item, Candle):
@@ -82,8 +60,7 @@ def print_feed_items(feed: Feed, timeframe: Timeframe | None = None, timeout: fl
     This is mostly useful for debugging purposes to see what events a feed generates.
     """
 
-    channel = EventChannel(timeframe)
-    play_background(feed, channel)
+    channel = feed.play_background(timeframe)
     while event := channel.get(timeout):
         print(event.time)
         for item in event.items:
