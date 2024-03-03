@@ -13,42 +13,42 @@ from tests.common import get_feed
 class _MyModel(nn.Module):
     def __init__(self) -> None:
         super().__init__()
-        self.lstm = nn.LSTM(6, 128, batch_first=True, num_layers=2, dropout=0.2)
+        self.lstm = nn.LSTM(6, 8, batch_first=True, num_layers=2, dropout=0.5)
         self.flatten = nn.Flatten()
-        self.linear1 = nn.Linear(128, 4)
-        self.linear2 = nn.Linear(4, 1)
+        self.linear = nn.Linear(8, 1)
 
     def forward(self, inputs):
         output, _ = self.lstm(inputs)
         output = F.relu(self.flatten(output[:, -1, :]))
-        output = F.relu(self.linear1(output))
-        output = self.linear2(output)
+        output = self.linear(output)
         return output
 
 
-class TestRNNStrategy(unittest.TestCase):
+class TestTorch(unittest.TestCase):
 
     def test_lstm_model(self):
         logging.basicConfig()
-        logging.getLogger("roboquant").setLevel(level=logging.INFO)
+        logging.getLogger("roboquant.strategies").setLevel(level=logging.INFO)
         # Setup
         symbol = "AAPL"
+        prediction = 10
         feed = get_feed()
         model = _MyModel()
         strategy = RNNStrategy(model, symbol, sequences=20, pct=0.01)
         strategy.add_x(CandleFeature(symbol).returns())
         strategy.add_x(SMAFeature(PriceFeature(symbol, "HIGH"), 10).returns())
-        strategy.add_y(PriceFeature(symbol, "CLOSE").returns(10))
+        strategy.add_y(PriceFeature(symbol, "CLOSE").returns(prediction))
 
-        # Train the model with 20 years of data
+        # Train the model with 10 years of data
         tf = rq.Timeframe.fromisoformat("2010-01-01", "2020-01-01")
-        strategy.fit(feed, timeframe=tf, epochs=200, validation_split=0.25, prediction=10)
+        strategy.fit(feed, timeframe=tf, epochs=2, validation_split=0.25, prediction=prediction)
 
         # Run the trained model with the last 4 years of data
         tf = rq.Timeframe.fromisoformat("2020-01-01", "2023-12-31")
         account = rq.run(feed, strategy, timeframe=tf)
         print(account)
-        print(max(strategy._prediction_results))
+        preds = strategy._prediction_results
+        print("avg-prediction=", sum(preds)/len(preds), "   max-prediction=", max(preds))
 
 
 if __name__ == "__main__":

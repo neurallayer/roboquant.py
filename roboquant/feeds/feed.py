@@ -13,7 +13,7 @@ class Feed(ABC):
         """(re-)play the events in the feed and put them on the provided event channel"""
         ...
 
-    def play_background(self, timeframe: Timeframe = None, channel_capacity: int = 10) -> EventChannel:
+    def play_background(self, timeframe: Timeframe | None = None, channel_capacity: int = 10) -> EventChannel:
         """Play this feed in the background on its own thread.
         The returned event-channel will be closed after the playing has finished.
         """
@@ -32,7 +32,7 @@ class Feed(ABC):
         thread.start()
         return channel
 
-    def plot(self, plt, *symbols: str, price_type: str = "DEFAULT", timeframe: Timeframe = None):
+    def plot(self, plt, *symbols: str, price_type: str = "DEFAULT", timeframe: Timeframe | None = None):
         """Plot the prices of one or more symbols"""
         channel = self.play_background(timeframe)
         result = {}

@@ -9,7 +9,6 @@ from roboquant import Signal
 from roboquant.event import Event, Candle
 from roboquant.feeds.feed import Feed
 from roboquant.strategies.strategy import Strategy
-from roboquant.strategies.buffer import NumpyBuffer
 
 
 class Feature(ABC):
@@ -29,9 +28,8 @@ class Feature(ABC):
 
 class FixedValueFeature(Feature):
 
-    def __init__(self, name, value: NDArray) -> None:
+    def __init__(self, value: NDArray) -> None:
         super().__init__()
-        self.name = name
         self.value = value
 
     def calc(self, evt):
@@ -109,7 +107,7 @@ class LongReturnsFeature(Feature):
         values = self.feature.calc(evt)
         h = self.history
 
-        if len(h) < h.maxlen:
+        if len(h) < h.maxlen:  # type: ignore
             h.append(values)
             return np.full(values.shape, float("nan"))
 
@@ -155,57 +153,8 @@ class DayOfWeekFeature(Feature):
         return result
 
 
-class FeatureSet:
-
-    def __init__(self, size=1_000, warmup=0) -> None:
-        self.size = size
-        self.features: list[Feature] = []
-        self.warmup = warmup
-        self._buffer: NumpyBuffer = None  # type: ignore
-        self._norm = None
-
-    def add(self, feature: Feature):
-        self.features.append(feature)
-
-    def data(self) -> NDArray:
-        return self._buffer.get_all()
-
-    def calc_norm(self):
-        data = self.data()
-        self._norm = np.zeros((data.shape[-1], 2))
-        self._norm[:, 0] = data.mean(axis=0)
-        self._norm[:, 1] = data.std(axis=0)
-
-    def normalize(self, data=None) -> NDArray:
-        assert self._norm is not None, "normalization values are not yet calculated, invoke calc_norm first"
-        data = data or self.data()
-        norm = self._norm
-        return (data - norm[:, 0]) / norm[:, 1]
-
-    def get_row(self, evt: Event):
-        if self.warmup:
-            for feature in self.features:
-                feature.calc(evt)
-            self.warmup -= 1
-            return None
-
-        data = [feature.calc(evt) for feature in self.features]
-        return np.hstack(data)
-
-    def process(self, evt: Event):
-        if self.warmup:
-            for feature in self.features:
-                feature.calc(evt)
-            self.warmup -= 1
-        else:
-            data = [feature.calc(evt) for feature in self.features]
-            row = np.hstack(data)
-            if self._buffer is None:
-                self._buffer = NumpyBuffer(row.size, self.size, "float32")
-            self._buffer.append(row)
-
-
 class FeatureStrategy(Strategy, ABC):
+    """Abstract base class for strategies based on one or mroe features"""
 
     def __init__(self, history: int, dtype="float32"):
         self._features_x = []
@@ -229,8 +178,7 @@ class FeatureStrategy(Strategy, ABC):
         return {}
 
     @abstractmethod
-    def predict(self, x: NDArray) -> dict[str, Signal]:
-        ...
+    def predict(self, x: NDArray) -> dict[str, Signal]: ...
 
     def __get_row(self, evt, features) -> NDArray:
         data = [feature.calc(evt) for feature in features]

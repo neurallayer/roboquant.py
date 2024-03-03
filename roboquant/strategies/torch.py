@@ -2,13 +2,46 @@ import logging
 
 import numpy as np
 import torch
-from torch.utils.data import DataLoader
+from torch.utils.data import DataLoader, Dataset
 
 from roboquant import Signal, BUY, SELL
 from roboquant.strategies.features import FeatureStrategy
-from roboquant.strategies.rnnstrategy import _RNNDataset, Normalize
 
 logger = logging.getLogger(__name__)
+
+
+class Normalize:
+    """Normalize transform function"""
+
+    def __init__(self, norm):
+        self.mean, self.stdev = norm
+
+    def __call__(self, sample):
+        return (sample - self.mean) / self.stdev
+
+
+class SequenceDataset(Dataset):
+    """Sequence Dataset"""
+
+    def __init__(self, x_data, y_data, sequences=20, transform=None, target_transform=None):
+        self.sequences = sequences
+        self.x_data = x_data
+        self.y_data = y_data
+        self.transform = transform
+        self.target_transform = target_transform
+
+    def __len__(self):
+        return len(self.y_data) - self.sequences
+
+    def __getitem__(self, idx):
+        end = idx + self.sequences
+        features = self.x_data[idx:end]
+        target = self.y_data[end - 1]
+        if self.transform:
+            features = self.transform(features)
+        if self.target_transform:
+            target = self.target_transform(target)
+        return features, target
 
 
 class RNNStrategy(FeatureStrategy):
@@ -52,7 +85,7 @@ class RNNStrategy(FeatureStrategy):
         # what is the border between train- and validation-data
         border = round(len(y) * (1.0 - validation_split))
 
-        x_train = x[:border - prediction]
+        x_train = x[: border - prediction]
         y_train = y[prediction:border]
 
         self._norm_x = self.calc_norm(x_train)
@@ -61,14 +94,14 @@ class RNNStrategy(FeatureStrategy):
         transform_x = Normalize(self._norm_x)
         transform_y = Normalize(self._norm_y)
 
-        train_dataset = _RNNDataset(x_train, y_train, self.sequences, transform_x, transform_y)
+        train_dataset = SequenceDataset(x_train, y_train, self.sequences, transform_x, transform_y)
         train_dataloader = DataLoader(train_dataset, batch_size=batch_size, shuffle=True)
 
         valid_dataloader = None
         if validation_split > 0.0:
-            x_valid = x[border - prediction:-prediction]
+            x_valid = x[border - prediction: -prediction]
             y_valid = y[border:]
-            valid_dataset = _RNNDataset(x_valid, y_valid, self.sequences, transform_x, transform_y)
+            valid_dataset = SequenceDataset(x_valid, y_valid, self.sequences, transform_x, transform_y)
             valid_dataloader = DataLoader(valid_dataset, batch_size=batch_size, shuffle=False)
 
         return train_dataloader, valid_dataloader
@@ -78,27 +111,37 @@ class RNNStrategy(FeatureStrategy):
         print("shape=", x.shape, "min=", np.min(x, axis=0), "max=", np.max(x, axis=0), "mean=", np.mean(x, axis=0))
 
     def fit(
-            self,
-            feed,
-            optimizer=None,
-            criterion=None,
-            prediction=1,
-            timeframe=None,
-            epochs: int = 10,
-            batch_size: int = 32,
-            validation_split: float = 0.2,
-            writer=None,
+        self,
+        feed,
+        optimizer=None,
+        criterion=None,
+        prediction=1,
+        timeframe=None,
+        epochs: int = 10,
+        batch_size: int = 32,
+        validation_split: float = 0.2,
+        writer=None,
     ):
         """
         Train the model for a fixed number of epochs (dataset iterations).
+
+        Args:
+            feed: The dtaa feed to use.
+            optimizer: The torch optimzier to use. If None is specified, Adam will be used.
+            criterion: The torch loss function to use. If None is specified, MESLoss will be used.
+            prediction: The steps in the future to predict, default is 1.
+            timeframe: The timeframe to limit the training and valition to.
+            epochs: The total number of epochs to train the model, default is 10.
+            batch_size: The batch size to use, default is 32.
+            validation_split: the percentage to use for validation, default is 0.20 (20%).
+            writer: the tensorboard writer to use to log losses, default is None.
         """
         optimizer = optimizer or torch.optim.Adam(self.model.parameters(), lr=0.001)
         criterion = criterion or torch.nn.MSELoss()
 
         x, y = self._get_xy(feed, timeframe, warmup=50)
-        print()
-        self.describe(x)
-        self.describe(y)
+        logger.info("x-shape=%s", x.shape)
+        logger.info("y-shapee=%s", y.shape)
 
         train_dataloader, valid_dataloader = self._get_dataloaders(x, y, prediction, validation_split, batch_size)
 
