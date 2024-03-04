@@ -1,9 +1,11 @@
-import roboquant as rq
-from roboquant.journals import TensorboardJournal, PNLMetric, RunMetric, FeedMetric, PriceItemMetric, AlphaBeta
 from tensorboard.summary import Writer
 
+import roboquant as rq
+from roboquant.journals import TensorboardJournal, PNLMetric, RunMetric, FeedMetric, PriceItemMetric, AlphaBeta
+
+
 if __name__ == "__main__":
-    """Compare 3 runs with different parameters using tensorboard"""
+    # Compare 3 runs with different parameters using tensorboard
 
     feed = rq.feeds.YahooFeed("JPM", "IBM", "F", start_date="2000-01-01")
 

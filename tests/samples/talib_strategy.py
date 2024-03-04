@@ -10,12 +10,13 @@ class EMAStrategy(CandleStrategy):
 
     def _create_signal(self, symbol, ohlcv) -> Signal | None:
         close = ohlcv.close()
-        ema12 = ta.EMA(close, 12)  # type: ignore
-        ema26 = ta.EMA(close, 26)  # type: ignore
+        ema12 = ta.EMA(close, 12)  # type: ignore pylint: disable=no-member
+        ema26 = ta.EMA(close, 26)  # type: ignore pylint: disable=no-member
         if ema12 > ema26:
             return BUY
         if ema12 < ema26:
             return SELL
+        return None
 
 
 class RSIStrategy(CandleStrategy):
@@ -26,11 +27,12 @@ class RSIStrategy(CandleStrategy):
 
     def _create_signal(self, symbol, ohlcv) -> Signal | None:
         close = ohlcv.close()
-        rsi = ta.RSI(close, self.size - 1)  # type: ignore
+        rsi = ta.RSI(close, self.size - 1)  # type: ignore pylint: disable=no-member
         if rsi < 30:
             return BUY
         if rsi > 70:
             return SELL
+        return None
 
 
 class TestOHLCVStrategy(unittest.TestCase):

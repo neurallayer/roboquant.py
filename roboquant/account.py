@@ -1,4 +1,3 @@
-import inspect
 from dataclasses import dataclass
 from datetime import datetime
 from decimal import Decimal
@@ -108,14 +107,14 @@ class Account:
         o = [f"{o.size}@{o.symbol}" for o in self.open_orders()]
         o_str = ", ".join(o) or "none"
 
-        result = f"""
-            buying power : {self.buying_power:_.2f}
-            equity       : {self.equity:_.2f}
-            positions    : {p_str}
-            open orders  : {o_str}
-            last update  : {self.last_update}
-        """
-        return inspect.cleandoc(result)
+        result = (
+            f"""buying power : {self.buying_power:_.2f}\n"""
+            f"""equity       : {self.equity:_.2f}\n"""
+            f"""positions    : {p_str}\n"""
+            f"""open orders  : {o_str}\n"""
+            f"""last update  : {self.last_update}"""
+        )
+        return result
 
 
 class OptionAccount(Account):
