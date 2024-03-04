@@ -10,8 +10,8 @@ class TestSimbroker(unittest.TestCase):
 
     @staticmethod
     def _create_event(price=100.0):
-        action = Trade("AAPL", price, 1000)
-        event = Event(datetime.now(timezone.utc), [action])
+        item = Trade("AAPL", price, 1000)
+        event = Event(datetime.now(timezone.utc), [item])
         return event
 
     def test_simbroker(self):

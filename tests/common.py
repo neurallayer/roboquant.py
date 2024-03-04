@@ -36,22 +36,22 @@ def run_priceitem_feed(feed, symbols: list[str], test_case: TestCase, timeframe=
 
         last = event.time
 
-        for action in event.items:
-            test_case.assertIsInstance(action, PriceItem)
-            test_case.assertIn(action.symbol, symbols)
-            test_case.assertEqual(action.symbol.upper(), action.symbol)
+        for item in event.items:
+            test_case.assertIsInstance(item, PriceItem)
+            test_case.assertIn(item.symbol, symbols)
+            test_case.assertEqual(item.symbol.upper(), item.symbol)
 
-            match action:
+            match item:
                 case Candle():
-                    ohlcv = action.ohlcv
+                    ohlcv = item.ohlcv
                     for i in range(0, 4):
                         test_case.assertGreaterEqual(ohlcv[1], ohlcv[i])  # High >= OHLC
                         test_case.assertGreaterEqual(ohlcv[i], ohlcv[2])  # OHLC >= Low
                 case Trade():
-                    test_case.assertTrue(math.isfinite(action.trade_price))
-                    test_case.assertTrue(math.isfinite(action.trade_volume))
+                    test_case.assertTrue(math.isfinite(item.trade_price))
+                    test_case.assertTrue(math.isfinite(item.trade_volume))
                 case Quote():
-                    for f in action.data:
+                    for f in item.data:
                         test_case.assertTrue(math.isfinite(f))
 
 

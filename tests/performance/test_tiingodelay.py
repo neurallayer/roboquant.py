@@ -42,7 +42,7 @@ class TestTiingoDelay(unittest.TestCase):
             )
             print(t)
         else:
-            print("didn't receive any actions, is it perhaps outside trading hours?")
+            print("didn't receive any items, is it perhaps outside trading hours?")
 
         feed.close()
 
