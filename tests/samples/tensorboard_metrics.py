@@ -14,5 +14,5 @@ if __name__ == "__main__":
         log_dir = f"""runs/ema_{p1}_{p2}"""
         writer = Writer(log_dir)
         journal = TensorboardJournal(writer, PNLMetric(), RunMetric(), FeedMetric(), PriceItemMetric("JPM"), AlphaBeta(200))
-        account = rq.run(feed, s, journal=journal)
+        rq.run(feed, s, journal=journal)
         writer.close()
