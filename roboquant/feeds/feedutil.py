@@ -23,27 +23,21 @@ def get_symbol_prices(
     return x, y
 
 
-def get_symbol_ohlcv(feed: Feed, symbol: str, timeframe: Timeframe | None = None) -> list[tuple]:
+def get_symbol_ohlcv(feed: Feed, symbol: str, timeframe: Timeframe | None = None) -> dict[str, list]:
     """Get the candles for a single symbol from a feed"""
 
-    result = []
+    result = {column: [] for column in ["Date", "Open", "High", "Low", "Close", "Volume"]}
     channel = feed.play_background(timeframe)
     while event := channel.get():
         item = event.price_items.get(symbol)
         if item and isinstance(item, Candle):
-            result.append((event.time, *item.ohlcv))
+            result["Date"].append(event.time)
+            result["Open"].append(item.ohlcv[0])
+            result["High"].append(item.ohlcv[1])
+            result["Low"].append(item.ohlcv[2])
+            result["Close"].append(item.ohlcv[3])
+            result["Volume"].append(item.ohlcv[4])
     return result
-
-
-def get_symbol_dataframe(feed: Feed, symbol: str, timeframe: Timeframe | None = None):
-    # pylint: disable=import-outside-toplevel
-    """Get prices for a single symbol from a feed as a pandas dataframe"""
-
-    # noinspection PyPackageRequirements
-    import pandas as pd
-
-    ohlcv = get_symbol_ohlcv(feed, symbol, timeframe)
-    return pd.DataFrame(ohlcv, columns=["Date", "Open", "High", "Low", "Close", "Volume"]).set_index("Date")
 
 
 def get_sp500_symbols():

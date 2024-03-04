@@ -1,4 +1,4 @@
-import roboquant.feeds.feedutil
+from roboquant.feeds import feedutil
 from .candlefeed import CandleFeed
 from .csvfeed import CSVFeed
 from .eventchannel import EventChannel
