@@ -1,16 +1,16 @@
 import unittest
 
 import roboquant as rq
-from roboquant.strategies import EMACrossover
 from roboquant.journals import BasicJournal
+from roboquant.strategies import EMACrossover
 from roboquant.traders import FlexTrader
 from tests.common import get_feed
 
 
 class _MyTrader(FlexTrader):
 
-    def _get_orders(self, symbol, size, action, rating):
-        price = action.price("CLOSE")
+    def _get_orders(self, symbol, size, item, rating):
+        price = item.price("CLOSE")
         if price:
             limit_price = price * 0.99 if size > 0 else price * 1.01
             order = rq.Order(symbol, size, limit_price)

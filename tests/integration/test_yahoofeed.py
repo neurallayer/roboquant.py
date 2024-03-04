@@ -1,5 +1,6 @@
 import unittest
 from datetime import datetime
+
 from roboquant.feeds import YahooFeed
 from tests.common import run_priceitem_feed
 

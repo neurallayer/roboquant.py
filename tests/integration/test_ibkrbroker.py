@@ -1,7 +1,8 @@
-from decimal import Decimal
 import logging
 import time
 import unittest
+from decimal import Decimal
+
 from roboquant import OrderStatus, Order
 from roboquant.brokers.ibkrbroker import IBKRBroker
 

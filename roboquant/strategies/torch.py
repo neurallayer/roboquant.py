@@ -54,7 +54,7 @@ class RNNStrategy(FeatureStrategy):
         self.symbol = symbol
         self._norm_x = None
         self._norm_y = None
-        self._prediction_results = []
+        self.prediction_results = []
 
     def predict(self, x) -> dict[str, Signal]:
         if self._norm_x is not None:
@@ -69,7 +69,7 @@ class RNNStrategy(FeatureStrategy):
             if self._norm_y is not None:
                 p = self._norm_y[1] * p + self._norm_y[0]
                 p = p[0]
-            self._prediction_results.append(p)
+            self.prediction_results.append(p)
             if p > self.pct:
                 return {self.symbol: BUY}
             if p < -self.pct:
@@ -126,11 +126,12 @@ class RNNStrategy(FeatureStrategy):
         Train the model for a fixed number of epochs (dataset iterations).
 
         Args:
-            feed: The dtaa feed to use.
-            optimizer: The torch optimzier to use. If None is specified, Adam will be used.
+            feed: The data feed to use.
+            optimizer: The torch optimizer to use.
+            If None is specified, Adam will be used.
             criterion: The torch loss function to use. If None is specified, MESLoss will be used.
             prediction: The steps in the future to predict, default is 1.
-            timeframe: The timeframe to limit the training and valition to.
+            timeframe: The timeframe to limit the training and validation to.
             epochs: The total number of epochs to train the model, default is 10.
             batch_size: The batch size to use, default is 32.
             validation_split: the percentage to use for validation, default is 0.20 (20%).
@@ -141,7 +142,7 @@ class RNNStrategy(FeatureStrategy):
 
         x, y = self._get_xy(feed, timeframe, warmup=50)
         logger.info("x-shape=%s", x.shape)
-        logger.info("y-shapee=%s", y.shape)
+        logger.info("y-shape=%s", y.shape)
 
         train_dataloader, valid_dataloader = self._get_dataloaders(x, y, prediction, validation_split, batch_size)
 

@@ -1,5 +1,6 @@
-from datetime import timedelta
 import unittest
+from datetime import timedelta
+
 from roboquant.feeds.candlefeed import CandleFeed
 from roboquant.feeds.randomwalk import RandomWalk
 from tests.common import run_priceitem_feed

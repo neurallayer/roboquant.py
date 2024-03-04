@@ -1,4 +1,5 @@
 import unittest
+
 from roboquant.strategies import SMACrossover
 from tests.common import run_strategy
 

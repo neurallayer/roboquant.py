@@ -1,9 +1,9 @@
-from pathlib import Path
+import tempfile
 import unittest
+from pathlib import Path
 
 from roboquant.feeds import SQLFeed
 from tests.common import get_feed, run_priceitem_feed
-import tempfile
 
 
 class TestSQLFeed(unittest.TestCase):

@@ -80,4 +80,4 @@ flake8 roboquant tests
 Next to this Python version of `roboquant`, there is also a Kotlin version available.
 Both (will) share a similar API, just the used computer language is different.
 
-Which one to use depends very much on personal preferences, skills and the use-case.
+Which one to use depends very much on personal preferences, skills and usage.

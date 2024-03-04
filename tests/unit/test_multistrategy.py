@@ -1,4 +1,5 @@
 import unittest
+
 from roboquant.strategies import EMACrossover, MultiStrategy
 from tests.common import run_strategy
 

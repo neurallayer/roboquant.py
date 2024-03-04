@@ -1,10 +1,12 @@
-from pathlib import Path
 import tempfile
 import unittest
+from pathlib import Path
+
+from tensorboard.summary import Writer
+
 import roboquant as rq
 from roboquant.journals import RunMetric, PNLMetric, TensorboardJournal
 from tests.common import get_feed
-from tensorboard.summary import Writer
 
 
 class TestTensorboard(unittest.TestCase):

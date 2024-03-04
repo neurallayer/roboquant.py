@@ -1,4 +1,5 @@
 import unittest
+
 from roboquant.feeds.randomwalk import RandomWalk
 from tests.common import run_priceitem_feed
 

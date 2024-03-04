@@ -19,13 +19,6 @@ def get_recent_start_date(days=10):
     return start.strftime("%Y-%m-%d")
 
 
-def get_output(filename) -> str:
-    full_path = pathlib.Path(__file__).parent.resolve().joinpath("data", "output", filename)
-    with open(full_path) as f:
-        content = f.read()
-        return content
-
-
 def run_priceitem_feed(feed, symbols: list[str], test_case: TestCase, timeframe=None):
     """Common test for all feeds that produce price-items"""
 

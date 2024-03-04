@@ -1,12 +1,12 @@
 import logging
 import unittest
-import roboquant as rq
 
-from roboquant.strategies.features import CandleFeature, PriceFeature, SMAFeature
-from roboquant.strategies.torch import RNNStrategy
-import torch.nn as nn
+from torch import nn
 import torch.nn.functional as F
 
+import roboquant as rq
+from roboquant.strategies.features import CandleFeature, PriceFeature, SMAFeature
+from roboquant.strategies.torch import RNNStrategy
 from tests.common import get_feed
 
 
@@ -46,8 +46,8 @@ class TestTorch(unittest.TestCase):
         # Run the trained model with the last 4 years of data
         tf = rq.Timeframe.fromisoformat("2020-01-01", "2024-01-01")
         rq.run(feed, strategy, timeframe=tf)
-        predictions = strategy._prediction_results
-        self.assertEquals(760, len(predictions))
+        predictions = strategy.prediction_results
+        self.assertEqual(760, len(predictions))
         self.assertNotEqual(max(predictions), min(predictions))
 
 

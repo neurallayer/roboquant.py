@@ -1,8 +1,8 @@
-from roboquant import Timeframe, Config
-from roboquant.feeds import TiingoLiveFeed
 import logging
 import unittest
 
+from roboquant import Timeframe, Config
+from roboquant.feeds import TiingoLiveFeed
 from tests.common import run_priceitem_feed
 
 

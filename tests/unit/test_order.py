@@ -1,5 +1,6 @@
-from decimal import Decimal
 import unittest
+from decimal import Decimal
+
 from roboquant import Order
 
 

@@ -21,14 +21,14 @@ class TestFeatures(unittest.TestCase):
         symbol1 = symbols[0]
         symbol2 = symbols[1]
 
-        fs = []
-        fs.append(PriceFeature(symbol1, "CLOSE"))
-        fs.append(PriceFeature(symbol1, "OPEN"))
-        fs.append(SMAFeature(FixedValueFeature(np.ones((3,))), 8))
-        fs.append(SMAFeature(PriceFeature(symbol2, "CLOSE"), 10))
-        fs.append(ReturnsFeature(PriceFeature(symbol1, "OPEN")))
-        fs.append(VolumeFeature(symbol2))
-        fs.append(DayOfWeekFeature())
+        fs = [
+            PriceFeature(symbol1, "CLOSE"),
+            PriceFeature(symbol1, "OPEN"),
+            SMAFeature(FixedValueFeature(np.ones((3,))), 8),
+            SMAFeature(PriceFeature(symbol2, "CLOSE"), 10),
+            ReturnsFeature(PriceFeature(symbol1, "OPEN")),
+            VolumeFeature(symbol2), DayOfWeekFeature()
+        ]
 
         channel = feed.play_background()
         while evt := channel.get():

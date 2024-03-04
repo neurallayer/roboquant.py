@@ -1,5 +1,6 @@
 import unittest
 from datetime import timedelta
+
 import roboquant as rq
 from tests.common import get_feed
 

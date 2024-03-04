@@ -1,4 +1,5 @@
 import unittest
+
 from roboquant import Signal, BUY, SELL, SignalType
 
 

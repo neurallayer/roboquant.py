@@ -1,6 +1,7 @@
 import unittest
-from roboquant.strategies import CandleStrategy, OHLCVBuffer
+
 from roboquant.signal import Signal
+from roboquant.strategies import CandleStrategy, OHLCVBuffer
 from tests.common import run_strategy
 
 
@@ -15,6 +16,7 @@ class _MyStrategy(CandleStrategy):
             return Signal.buy()
         if sma12 < sma26:
             return Signal.sell()
+        return None
 
 
 class TestCandleStrategy(unittest.TestCase):
