@@ -31,14 +31,40 @@ class Feature(ABC):
 
 class SlicedFeature(Feature):
 
-    def __init__(self, feature: Feature, args: tuple) -> None:
+    def __init__(self, feature: Feature, args) -> None:
         super().__init__()
         self.args = args
         self.feature = feature
 
     def calc(self, evt):
         values = self.feature.calc(evt)
-        return values[*self.args]
+        return values[self.args]
+
+
+class TrueRangeFeature(Feature):
+    """Calculates the true range value for a symbol"""
+
+    def __init__(self, symbol: str) -> None:
+        super().__init__()
+        self.prev_close = None
+        self.symbol = symbol
+
+    def calc(self, evt):
+        item = evt.price_items.get(self.symbol)
+        if item is None or not isinstance(item, Candle):
+            return np.array([float("nan")])
+
+        ohlcv = item.ohlcv
+        high = ohlcv[1]
+        low = ohlcv[2]
+        close = ohlcv[3]
+
+        prev_close = self.prev_close if self.prev_close is not None else low
+        self.prev_close = close
+
+        result = max(high - low, abs(high - prev_close), abs(low - prev_close))
+
+        return np.array([result])
 
 
 class FixedValueFeature(Feature):
@@ -158,6 +184,7 @@ class MaxReturnFeature(Feature):
     """Calculate the maximum return over a certain period.
     This will only work on features that return a single value.
     """
+
     def __init__(self, feature: Feature, period: int) -> None:
         super().__init__()
         self.history = deque(maxlen=period)
@@ -180,6 +207,7 @@ class MinReturnFeature(Feature):
     """Calculate the minimum return over a certain period.
     This will only work on features that return a single value.
     """
+
     def __init__(self, feature: Feature, period: int) -> None:
         super().__init__()
         self.history = deque(maxlen=period)
