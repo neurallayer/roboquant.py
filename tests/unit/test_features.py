@@ -1,6 +1,7 @@
 import unittest
 
 import numpy as np
+from roboquant.event import Event
 
 from roboquant.strategies.features import (
     PriceFeature,
@@ -35,6 +36,16 @@ class TestFeatures(unittest.TestCase):
             for feature in fs:
                 result = feature.calc(evt)
                 self.assertTrue(len(result) > 0)
+
+    def test_core_feature(self):
+        f = FixedValueFeature(np.ones(10,))[2:5]
+        values = f.calc(Event.empty())
+        self.assertEqual(3, len(values))
+
+        f = FixedValueFeature(np.ones(10,)).returns()
+        values = f.calc(Event.empty())
+        values = f.calc(Event.empty())
+        self.assertEqual(0, values[0])
 
 
 if __name__ == "__main__":

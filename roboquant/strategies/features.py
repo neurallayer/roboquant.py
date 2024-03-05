@@ -25,6 +25,21 @@ class Feature(ABC):
             return ReturnsFeature(self)
         return LongReturnsFeature(self, period)
 
+    def __getitem__(self, *args):
+        return SlicedFeature(self, args)
+
+
+class SlicedFeature(Feature):
+
+    def __init__(self, feature: Feature, args: tuple) -> None:
+        super().__init__()
+        self.args = args
+        self.feature = feature
+
+    def calc(self, evt):
+        values = self.feature.calc(evt)
+        return values[*self.args]
+
 
 class FixedValueFeature(Feature):
 
@@ -37,6 +52,7 @@ class FixedValueFeature(Feature):
 
 
 class PriceFeature(Feature):
+    """Extract a single price for a symbol"""
 
     def __init__(self, symbol: str, price_type: str = "DEFAULT") -> None:
         self.symbol = symbol
@@ -50,6 +66,7 @@ class PriceFeature(Feature):
 
 
 class CandleFeature(Feature):
+    """Extract the ohlcv values for a symbol"""
 
     def __init__(self, symbol: str) -> None:
 
@@ -64,7 +81,28 @@ class CandleFeature(Feature):
         return np.full((5,), float("nan"))
 
 
+class FillFeature(Feature):
+    """If the feature returns nan, use the last complete values instead"""
+
+    def __init__(self, feature: Feature) -> None:
+        super().__init__()
+        self.history = None
+        self.feature: Feature = feature
+
+    def calc(self, evt):
+        values = self.feature.calc(evt)
+
+        if np.any(np.isnan(values)):
+            if self.history is not None:
+                return self.history
+            return values
+
+        self.history = values
+        return values
+
+
 class VolumeFeature(Feature):
+    """Extract the volume for a symbol"""
 
     def __init__(self, symbol, volume_type: str = "DEFAULT") -> None:
         super().__init__()
@@ -116,6 +154,50 @@ class LongReturnsFeature(Feature):
         return r
 
 
+class MaxReturnFeature(Feature):
+    """Calculate the maximum return over a certain period.
+    This will only work on features that return a single value.
+    """
+    def __init__(self, feature: Feature, period: int) -> None:
+        super().__init__()
+        self.history = deque(maxlen=period)
+        self.feature: Feature = feature
+
+    def calc(self, evt):
+        values = self.feature.calc(evt)
+        h = self.history
+
+        if len(h) < h.maxlen:  # type: ignore
+            h.append(values)
+            return np.full(values.shape, float("nan"))
+
+        r = max(h) / h[0] - 1.0
+        h.append(values)
+        return r
+
+
+class MinReturnFeature(Feature):
+    """Calculate the minimum return over a certain period.
+    This will only work on features that return a single value.
+    """
+    def __init__(self, feature: Feature, period: int) -> None:
+        super().__init__()
+        self.history = deque(maxlen=period)
+        self.feature: Feature = feature
+
+    def calc(self, evt):
+        values = self.feature.calc(evt)
+        h = self.history
+
+        if len(h) < h.maxlen:  # type: ignore
+            h.append(values)
+            return np.full(values.shape, float("nan"))
+
+        r = min(h) / h[0] - 1.0
+        h.append(values)
+        return r
+
+
 class SMAFeature(Feature):
 
     def __init__(self, feature, period) -> None:
@@ -141,6 +223,7 @@ class SMAFeature(Feature):
 
 
 class DayOfWeekFeature(Feature):
+    """Calculate a one-hot-encoded day of week"""
 
     def __init__(self, tz=timezone.utc) -> None:
         self.tz = tz
