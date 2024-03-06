@@ -3,7 +3,7 @@ import unittest
 from pathlib import Path
 
 from roboquant.feeds import SQLFeed
-from tests.common import get_feed, run_priceitem_feed
+from tests.common import get_feed, run_price_item_feed
 
 
 class TestSQLFeed(unittest.TestCase):
@@ -25,7 +25,7 @@ class TestSQLFeed(unittest.TestCase):
 
         self.assertEqual(set(origin_feed.symbols), set(feed.symbols()))
 
-        run_priceitem_feed(feed, origin_feed.symbols, self)
+        run_price_item_feed(feed, origin_feed.symbols, self)
         db_file.unlink(missing_ok=True)
 
 

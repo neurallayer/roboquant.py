@@ -20,17 +20,17 @@ class EMACrossover(Strategy):
         for symbol, item in event.price_items.items():
 
             price = item.price(self.price_type)
-            calculators = self._history.get(symbol)
 
-            if calculators is None:
+            if symbol not in self._history:
                 self._history[symbol] = self._Calculator(self.fast, price), self._Calculator(self.slow, price)
             else:
-                old_rating = calculators[0].price > calculators[1].price
-                calculators[0].add_price(price)
-                calculators[1].add_price(price)
+                fast, slow = self._history[symbol]
+                old_rating = fast.price > slow.price
+                fast.add_price(price)
+                slow.add_price(price)
 
                 if self.step > self.min_steps:
-                    new_rating = calculators[0].price > calculators[1].price
+                    new_rating = fast.price > slow.price
                     if old_rating != new_rating:
                         signals[symbol] = Signal.buy() if new_rating else Signal.sell()
 

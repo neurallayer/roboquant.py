@@ -130,7 +130,7 @@ class FillFeature(Feature):
 class VolumeFeature(Feature):
     """Extract the volume for a symbol"""
 
-    def __init__(self, symbol, volume_type: str = "DEFAULT") -> None:
+    def __init__(self, symbol: str, volume_type: str = "DEFAULT") -> None:
         super().__init__()
         self.symbol = symbol
         self.volume_type = volume_type
@@ -228,7 +228,7 @@ class MinReturnFeature(Feature):
 
 class SMAFeature(Feature):
 
-    def __init__(self, feature, period) -> None:
+    def __init__(self, feature: Feature, period: int) -> None:
         super().__init__()
         self.period = period
         self.feature: Feature = feature
@@ -251,7 +251,7 @@ class SMAFeature(Feature):
 
 
 class DayOfWeekFeature(Feature):
-    """Calculate a one-hot-encoded day of week"""
+    """Calculate a one-hot-encoded day of the week, Monday being 0"""
 
     def __init__(self, tz=timezone.utc) -> None:
         self.tz = tz
@@ -265,7 +265,9 @@ class DayOfWeekFeature(Feature):
 
 
 class FeatureStrategy(Strategy, ABC):
-    """Abstract base class for strategies based on one or more features"""
+    """Abstract base class for strategies wanting to use features
+    for their input and target.
+    """
 
     def __init__(self, history: int, dtype="float32"):
         self._features_x = []

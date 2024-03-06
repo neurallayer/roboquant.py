@@ -34,7 +34,7 @@ class TestTorch(unittest.TestCase):
         prediction = 10
         feed = get_feed()
         model = _MyModel()
-        strategy = RNNStrategy(model, symbol, sequences=20, pct=0.01)
+        strategy = RNNStrategy(model, symbol, sequences=20, buy_pct=0.01)
         strategy.add_x(CandleFeature(symbol).returns())
         strategy.add_x(SMAFeature(PriceFeature(symbol, "HIGH"), 10).returns())
         strategy.add_y(PriceFeature(symbol, "CLOSE").returns(prediction))

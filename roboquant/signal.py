@@ -17,6 +17,13 @@ class SignalType(Flag):
 class Signal:
     """Signal that a strategy can create.
     It contains both a rating between -1.0 and 1.0 and the type of signal.
+
+    Examples:
+    ```
+    Signal.buy("XYZ")
+    Signal.sell("XYZ", SignalType.EXIT)
+    Signal("XYZ", 0.5, SignalType.ENTRY)
+    ```
     """
 
     rating: float

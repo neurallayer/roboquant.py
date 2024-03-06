@@ -19,7 +19,7 @@ def get_recent_start_date(days=10):
     return start.strftime("%Y-%m-%d")
 
 
-def run_priceitem_feed(feed, symbols: list[str], test_case: TestCase, timeframe=None):
+def run_price_item_feed(feed, symbols: list[str], test_case: TestCase, timeframe=None):
     """Common test for all feeds that produce price-items"""
 
     channel = feed.play_background(timeframe)
@@ -44,6 +44,8 @@ def run_priceitem_feed(feed, symbols: list[str], test_case: TestCase, timeframe=
             match item:
                 case Candle():
                     ohlcv = item.ohlcv
+                    v = ohlcv[4]
+                    test_case.assertTrue(math.isnan(v) or v >= 0.0)
                     for i in range(0, 4):
                         test_case.assertGreaterEqual(ohlcv[1], ohlcv[i])  # High >= OHLC
                         test_case.assertGreaterEqual(ohlcv[i], ohlcv[2])  # OHLC >= Low

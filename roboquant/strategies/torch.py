@@ -46,11 +46,12 @@ class SequenceDataset(Dataset):
 
 class RNNStrategy(FeatureStrategy):
 
-    def __init__(self, model: torch.nn.Module, symbol: str, sequences: int = 20, pct: float = 0.01):
+    def __init__(self, model: torch.nn.Module, symbol: str, sequences: int = 20, buy_pct: float = 0.01, sell_pct=0.0):
         super().__init__(sequences)
         self.sequences = sequences
         self.model = model
-        self.pct = pct
+        self.buy_pct = buy_pct
+        self.sell_pct = sell_pct
         self.symbol = symbol
         self._norm_x = None
         self._norm_y = None
@@ -70,9 +71,9 @@ class RNNStrategy(FeatureStrategy):
                 p = self._norm_y[1] * p + self._norm_y[0]
                 p = p[0]
             self.prediction_results.append(p)
-            if p > self.pct:
+            if p >= self.buy_pct:
                 return {self.symbol: BUY}
-            if p < -self.pct:
+            if p <= self.sell_pct:
                 return {self.symbol: SELL}
 
         return {}
@@ -120,6 +121,7 @@ class RNNStrategy(FeatureStrategy):
         epochs: int = 10,
         batch_size: int = 32,
         validation_split: float = 0.2,
+        warmup=50,
         writer=None,
     ):
         """
@@ -140,7 +142,7 @@ class RNNStrategy(FeatureStrategy):
         optimizer = optimizer or torch.optim.Adam(self.model.parameters(), lr=0.001)
         criterion = criterion or torch.nn.MSELoss()
 
-        x, y = self._get_xy(feed, timeframe, warmup=50)
+        x, y = self._get_xy(feed, timeframe, warmup=warmup)
         logger.info("x-shape=%s", x.shape)
         logger.info("y-shape=%s", y.shape)
 

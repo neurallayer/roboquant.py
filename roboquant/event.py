@@ -1,3 +1,4 @@
+from abc import abstractmethod
 from array import array
 from dataclasses import dataclass
 from datetime import datetime, timezone
@@ -7,11 +8,12 @@ from typing import Any
 
 @dataclass(slots=True)
 class PriceItem:
-    """Different type of price-times subclass this class"""
+    """Different types of price-items subclass this class"""
 
     symbol: str
     """the symbol for this price-item"""
 
+    @abstractmethod
     def price(self, price_type: str = "DEFAULT") -> float:
         """Returns the price for the provided price_type.
         A price_type, for example, is `OPEN` or `CLOSE`.
@@ -19,6 +21,7 @@ class PriceItem:
         All price-items are expected to return a DEFAULT price if the type is unknown.
         """
 
+    @abstractmethod
     def volume(self, volume_type: str = "DEFAULT") -> float:
         """Return the volume of the price-item"""
 
@@ -28,6 +31,8 @@ class Quote(PriceItem):
     data: array
 
     def price(self, price_type: str = "DEFAULT") -> float:
+        """Return the price, the default being the mid-point price"""
+
         match price_type:
             case "ASK":
                 return self.data[0]
@@ -44,6 +49,10 @@ class Quote(PriceItem):
     @property
     def bid_volume(self) -> float:
         return self.data[3]
+
+    @property
+    def midpoint_price(self) -> float:
+        return (self.data[0] + self.data[2]) / 2.0
 
     def volume(self, volume_type: str = "DEFAULT") -> float:
         match volume_type:
@@ -97,8 +106,8 @@ class Candle(PriceItem):
 class Event:
     """
     An event represents zero of items of information happening at a certain moment in time.
-    An item can contain any type of information, but a common use-case are price-items like candles.
-    Time is always a datetime object with UTC timezone.
+    An item can contain any type of information, but a common use-case are price-items like quotes, trades or candles.
+    Time is always a datetime object with the timezone set at UTC.
     """
 
     def __init__(self, time: datetime, items: list[Any]):
@@ -107,7 +116,7 @@ class Event:
         self.items = items
 
     @staticmethod
-    def empty(time=None):
+    def empty(time: datetime | None = None):
         """Return a new empty event"""
 
         time = time or datetime.now(timezone.utc)
@@ -137,4 +146,4 @@ class Event:
         return None
 
     def __repr__(self) -> str:
-        return f"Event(time={self.time} item={len(self.items)})"
+        return f"Event(time={self.time} items={len(self.items)})"

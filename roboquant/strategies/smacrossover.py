@@ -36,7 +36,8 @@ class SMACrossover(Strategy):
             h = self._history.get(symbol)
 
             if h is None:
-                h = collections.deque(maxlen=self.max_period)
+                maxlen = max(self.max_period, self.min_period)
+                h = collections.deque(maxlen=maxlen)
                 self._history[symbol] = h
 
             h.append(item.price())
