@@ -11,6 +11,7 @@ from roboquant.order import Order, OrderStatus
 @dataclass(slots=True, frozen=True)
 class _Trx:
     """transaction for an executed trade"""
+
     symbol: str
     size: Decimal
     price: float  # denoted in the currency of the symbol
@@ -29,11 +30,14 @@ class SimBroker(Broker):
     """
 
     def __init__(
-            self, initial_deposit=1_000_000.0, account=None, price_type="DEFAULT", slippage=0.001, clean_up_orders=True
+        self,
+        initial_deposit=1_000_000.0,
+        price_type="DEFAULT",
+        slippage=0.001,
+        clean_up_orders=True,
     ):
         super().__init__()
-        self.initial_deposit = initial_deposit
-        self._account = account or Account()
+        self._account = Account()
         self._modify_orders: list[Order] = []
         self._account.buying_power = initial_deposit
         self.slippage = slippage

@@ -85,18 +85,18 @@ class _IBApi(EWrapper, EClient):
         return self.account[equity_tag] or 0.0
 
     def orderStatus(
-            self,
-            orderId,
-            status,
-            filled,
-            remaining,
-            avgFillPrice,
-            permId,
-            parentId,
-            lastFillPrice,
-            clientId,
-            whyHeld,
-            mktCapPrice,
+        self,
+        orderId,
+        status,
+        filled,
+        remaining,
+        avgFillPrice,
+        permId,
+        parentId,
+        lastFillPrice,
+        clientId,
+        whyHeld,
+        mktCapPrice,
     ):
         logger.debug("order status orderId=%s status=%s fill=%s", orderId, status, filled)
         orderId = str(orderId)
@@ -122,10 +122,20 @@ class IBKRBroker(Broker):
         Map symbols to IBKR contracts.
         If a symbol is not found, the symbol is assumed to represent a US stock
 
+    host
+        the ip number of the host where TWS or IB Gateway is running.
+
+    port
+       By default, TWS uses socket port 7496 for live sessions and 7497 for paper sessions.
+       IB Gateway by contrast uses 4001 for live sessions and 4002 for paper sessions.
+       However these are just defaults, and can be modified as desired.
+
+    client_id
+        The client id to use to connect to TWS or IB Gateway.
     """
 
-    def __init__(self, host="127.0.0.1", port=4002, account=None, client_id=123) -> None:
-        self.__account = account or Account()
+    def __init__(self, host="127.0.0.1", port=4002, client_id=123) -> None:
+        self.__account = Account()
         self.contract_mapping: dict[str, Contract] = {}
         api = _IBApi()
         api.connect(host, port, client_id)
@@ -137,16 +147,25 @@ class IBKRBroker(Broker):
         self.__api_thread.start()
         time.sleep(3.0)
 
+    @classmethod
+    def use_tws(cls, client_id=123):
+        """Return a broker connected to the TWS papertrade instance with its default port (7497) settings"""
+        return cls("127.0.0.1", 7497, client_id)
+
+    @classmethod
+    def use_ibgateway(cls, client_id=123):
+        """Return a broker connected to a IB Gateway papertrade instance with its default port (4002) settings"""
+        return cls("127.0.0.1", 4002, client_id)
+
     def disconnect(self):
-        self.__api.reader.conn.disconnect()
+        self.__api.reader.conn.disconnect()  # type: ignore
 
     def _should_sync(self, now: datetime):
         """Avoid too many API calls"""
         return self.__has_new_orders_since_sync or now - self.__account.last_update > timedelta(seconds=1)
 
     def sync(self, event: Event | None = None) -> Account:
-        """Sync with the IBKR account
-        """
+        """Sync with the IBKR account"""
 
         logger.debug("start sync")
         now = datetime.now(timezone.utc)

@@ -1,3 +1,4 @@
+from abc import ABC, abstractmethod
 from dataclasses import dataclass
 from datetime import datetime
 from decimal import Decimal
@@ -16,8 +17,78 @@ class Position:
     """Average price paid denoted in the currency of the symbol"""
 
 
+class Converter(ABC):
+    """Abstraction that enables trading symbols that are denoted in different currencies and/or contact sizes"""
+
+    @abstractmethod
+    def __call__(self, symbol: str, time: datetime) -> float:
+        """Return the conversion rate for the symbol at the given time"""
+        ...
+
+
+class OptionConverter(Converter):
+    """
+    This converter handles common option contracts of size 100 and 10 and serves as an example.
+
+    If no contract size is registered for a symbol, it calculates one based on the symbol name.
+    If the symbol is not recognized as an OCC compliant option symbol, it is assumed to have a
+    contract size of 1.0
+    """
+
+    def __init__(self):
+        super().__init__()
+        self._contract_sizes: dict[str, float] = {}
+
+    def register(self, symbol: str, contract_size: float = 100.0):
+        """Register a contract-size for a symbol"""
+        self._contract_sizes[symbol] = contract_size
+
+    def __call__(self, symbol: str, time: datetime) -> float:
+        contract_size = self._contract_sizes.get(symbol)
+
+        # If no contract has been registered, we try to defer the contract size from the symbol
+        if contract_size is None:
+            if len(symbol) == 21:
+                # OCC compliant option symbol
+                symbol = symbol[0:6].rstrip()
+                contract_size = 10.0 if symbol[-1] == "7" else 100.0
+            else:
+                # not an option symbol
+                contract_size = 1.0
+
+            self._contract_sizes[symbol] = contract_size
+
+        return contract_size
+
+
+class CurrencyConverter(Converter):
+    """Support symbols that are denoted in a different currency from the base currency of the account"""
+
+    def __init__(self, base_currency="USD", default_symbol_currency="USD"):
+        super().__init__()
+        self.rates = {}
+        self.base_currency = base_currency
+        self.default_symbol_currency = default_symbol_currency
+        self.registered_symbols = {}
+
+    def register_symbol(self, symbol: str, currency: str):
+        """Register a symbol being denoted in a currency"""
+        self.registered_symbols[symbol] = currency
+
+    def register_rate(self, currency: str, rate: float):
+        """Register a conversion rate from a currency to the base_currency"""
+        self.rates[currency] = rate
+
+    def __call__(self, symbol: str, _: datetime) -> float:
+        currency = self.registered_symbols.get(symbol, self.default_symbol_currency)
+        if currency == self.base_currency:
+            return 1.0
+        return self.rates[currency]
+
+
 class Account:
-    """The account maintains the following state during a run:
+    """Represents a trading account with all monetary amounts denoted in a single currency.
+    The account maintains the following state during a run:
 
     - Available buying power for orders in the base currency of the account
     - All the open positions
@@ -28,11 +99,7 @@ class Account:
     Only the broker updates the account and does this only during its `sync` method.
     """
 
-    buying_power: float
-    positions: dict[str, Position]
-    orders: list[Order]
-    last_update: datetime
-    equity: float
+    __converter: Converter | None = None
 
     def __init__(self):
         self.buying_power: float = 0.0
@@ -41,16 +108,16 @@ class Account:
         self.last_update: datetime = datetime.fromisoformat("1900-01-01T00:00:00+00:00")
         self.equity: float = 0.0
 
+    @staticmethod
+    def register_converter(converter: Converter):
+        """Register a converter"""
+        Account.__converter = converter
+
     def contract_value(self, symbol: str, size: Decimal, price: float) -> float:
         # pylint: disable=unused-argument
-        """Return the total value of the provided contract size denoted in the base currency of the account.
-        The default implementation returns `size * price`.
-
-        A subclass can implement different logic to cater for:
-        - symbols denoted in different currencies
-        - symbols having different contract sizes like option contracts.
-        """
-        return float(size) * price
+        """Return the total value of the provided contract size denoted in the base currency of the account."""
+        rate = 1.0 if not Account.__converter else Account.__converter.__call__(symbol, self.last_update)
+        return float(size) * price * rate
 
     def mkt_value(self, prices: dict[str, float]) -> float:
         """Return the market value of all the open positions in the account using the provided prices.
@@ -115,36 +182,3 @@ class Account:
             f"""last update  : {self.last_update}"""
         )
         return result
-
-
-class OptionAccount(Account):
-    """
-    This account handles common option contracts of size 100 and 10 and serves as an example.
-    If no contract size is registered for a symbol, it creates one based on the option symbol name.
-
-    If the symbol is not recognized as an OCC compliant option symbol, it is assumed to have a
-    contract size of 1.0
-    """
-
-    def __init__(self):
-        super().__init__()
-        self._contract_sizes: dict[str, float] = {}
-
-    def register(self, symbol: str, contract_size: float = 100.0):
-        """Register a certain contract-size for a symbol"""
-        self._contract_sizes[symbol] = contract_size
-
-    def contract_value(self, symbol: str, size: Decimal, price: float) -> float:
-        contract_size = self._contract_sizes.get(symbol)
-
-        # If no contract has been registered, we try to defer the contract size from the symbol
-        if contract_size is None:
-            if len(symbol) == 21:
-                # OCC compliant option symbol
-                symbol = symbol[0:6].rstrip()
-                contract_size = 10.0 if symbol[-1] == "7" else 100.0
-            else:
-                # not an option symbol
-                contract_size = 1.0
-
-        return contract_size * float(size) * price

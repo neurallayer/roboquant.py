@@ -1,6 +1,7 @@
 from datetime import timedelta
 import logging
 import roboquant as rq
+from roboquant.account import Account, CurrencyConverter
 from roboquant.brokers.ibkrbroker import IBKRBroker
 
 from roboquant.feeds.feedutil import get_sp500_symbols
@@ -10,7 +11,10 @@ if __name__ == "__main__":
     logging.getLogger("roboquant").setLevel(level=logging.INFO)
 
     # Connect to local running TWS or IB Gateway
-    ibkr = IBKRBroker()
+    converter = CurrencyConverter("EUR", "USD")
+    converter.register_rate("USD", 0.91)
+    Account.register_converter(converter)
+    ibkr = IBKRBroker.use_tws()
 
     # Connect to Tiingo and subscribe to S&P-500 stocks
     src_feed = rq.feeds.TiingoLiveFeed(market="iex")

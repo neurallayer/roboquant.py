@@ -16,7 +16,7 @@ class Trader(Protocol):
     def create_orders(self, signals: dict[str, Signal], event: Event, account: Account) -> list[Order]:
         """Create zero or more orders.
 
-        Args:
+        Arguments
             signals: Zero or more signals created by the strategy.
             event: The event with its items.
             account: The latest account object.
