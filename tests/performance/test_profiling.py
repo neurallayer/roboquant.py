@@ -11,8 +11,8 @@ class TestProfile(unittest.TestCase):
     def test_profile(self):
         path = os.path.expanduser("~/data/nasdaq_stocks/1")
         feed = rq.feeds.CSVFeed.stooq_us_daily(path)
-        print("timeframe =", feed.timeframe(), " symbols =", len(feed.symbols))
-        strategy = rq.strategies.EMACrossover(13, 26)
+        print(feed)
+        strategy = rq.strategies.EMACrossover()
         journal = rq.journals.BasicJournal()
 
         # Profile the run to detect bottlenecks

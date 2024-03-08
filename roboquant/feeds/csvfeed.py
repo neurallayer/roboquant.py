@@ -15,28 +15,28 @@ class CSVFeed(HistoricFeed):
     """Use CSV files with historic data as a feed."""
 
     def __init__(
-            self,
-            path: str | pathlib.Path,
-            columns=None,
-            adj_close=False,
-            time_offset: str | None = None,
-            datetime_fmt: str | None = None,
-            endswith=".csv",
-            frequency="",
+        self,
+        path: str | pathlib.Path,
+        columns=None,
+        adj_close=False,
+        time_offset: str | None = None,
+        datetime_fmt: str | None = None,
+        endswith=".csv",
+        frequency="",
     ):
         super().__init__()
-        self.columns = columns
-        self.time_offset = time_offset
+        columns = columns or ["Date", "Open", "High", "Low", "Close", "Volume", "AdjClose"]
+        self.ohlcv_columns = columns[1:7] if adj_close else columns[1:6]
+        self.date_column = columns[0]
         self.datetime_fmt = datetime_fmt
         self.adj_close = adj_close
-        self.endswith = endswith
         self.freq = frequency
+        self.endswith = endswith
+        self.time_offset = time.fromisoformat(time_offset) if time_offset is not None else None
 
         files = self._get_files(path)
         logger.info("located %s files in path %s", len(files), path)
-
-        for file in files:
-            self._parse_csvfile(file)  # type: ignore
+        self._parse_csvfiles(files)  # type: ignore
 
     def _get_files(self, path):
         if pathlib.Path(path).is_file():
@@ -52,31 +52,28 @@ class CSVFeed(HistoricFeed):
         """Return the symbol based on the filename"""
         return pathlib.Path(filename).stem.upper()
 
-    def _parse_csvfile(self, filename: str):
+    def _parse_csvfiles(self, filenames: list[str]):
         adj_close = self.adj_close
         datetime_fmt = self.datetime_fmt
-        columns = self.columns or ["Date", "Open", "High", "Low", "Close", "Volume", "AdjClose"]
-        price_columns = columns[1:7] if adj_close else columns[1:6]
-        date_column = columns[0]
-        symbol = self._get_symbol(filename)
+        ohlcv_columns = self.ohlcv_columns
+        date_column = self.date_column
         freq = self.freq
-        t = time.fromisoformat(self.time_offset) if self.time_offset is not None else None
+        time_offset = self.time_offset
 
-        with open(filename, encoding="utf8") as csvfile:
-            reader = csv.DictReader(csvfile)
+        for filename in filenames:
+            symbol = self._get_symbol(filename)
+            with open(filename, encoding="utf8") as csvfile:
+                reader = csv.DictReader(csvfile)
 
-            for row in reader:
-                dt = (
-                    datetime.fromisoformat(row[date_column])  # type: ignore
-                    if datetime_fmt is None
-                    else datetime.strptime(row[date_column], datetime_fmt)  # type: ignore
-                )
-                if t:
-                    dt = datetime.combine(dt, t)
+                for row in reader:
+                    date_str = row[date_column]
+                    dt = datetime.strptime(date_str, datetime_fmt) if datetime_fmt else datetime.fromisoformat(date_str)
+                    if time_offset:
+                        dt = datetime.combine(dt, time_offset)
 
-                prices = array("f", [float(row[column_name]) for column_name in price_columns])
-                pb = Candle(symbol, prices, freq) if not adj_close else Candle.from_adj_close(symbol, prices, freq)
-                self._add_item(dt.astimezone(timezone.utc), pb)
+                    ohlcv = array("f", [float(row[column]) for column in ohlcv_columns])
+                    pb = Candle(symbol, ohlcv, freq) if not adj_close else Candle.from_adj_close(symbol, ohlcv, freq)
+                    self._add_item(dt.astimezone(timezone.utc), pb)
 
     @classmethod
     def stooq_us_daily(cls, path):

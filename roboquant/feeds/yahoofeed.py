@@ -1,6 +1,7 @@
 import logging
 from array import array
-from datetime import datetime, timezone
+from datetime import timezone
+import warnings
 
 import yfinance
 
@@ -15,17 +16,14 @@ class YahooFeed(HistoricFeed):
 
     def __init__(self, *symbols: str, start_date="2010-01-01", end_date: str | None = None, interval="1d"):
         super().__init__()
-
-        end_date = end_date or datetime.now().strftime("%Y-%m-%d")
-
+        warnings.simplefilter(action="ignore", category=FutureWarning)
         columns = ["Open", "High", "Low", "Close", "Volume", "Adj Close"]
 
         for symbol in symbols:
             logger.debug("requesting symbol=%s", symbol)
             df = yfinance.Ticker(symbol).history(
-                start=start_date, end=end_date, auto_adjust=False, actions=False, interval=interval
+                start=start_date, end=end_date, auto_adjust=False, actions=False, interval=interval, timeout=30
             )[columns]
-            df.dropna(inplace=True)
 
             if len(df) == 0:
                 logger.warning("no data retrieved for symbol=%s", symbol)
@@ -33,6 +31,7 @@ class YahooFeed(HistoricFeed):
 
             # yFinance one doesn't correct the volume, so we use this one instead
             self.__auto_adjust(df)
+
             for t in df.itertuples(index=True):
                 dt = t[0].to_pydatetime().astimezone(timezone.utc)
                 prices = t[1:6]

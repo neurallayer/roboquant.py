@@ -1,7 +1,7 @@
 import unittest
 from decimal import Decimal
 
-from roboquant import Account, Position, OptionAccount
+from roboquant import Account, Position, OptionConverter
 
 
 class TestAccount(unittest.TestCase):
@@ -25,8 +25,11 @@ class TestAccount(unittest.TestCase):
         self.assertAlmostEqual(acc.unrealized_pnl(prices), 0.0)
 
     def test_account_option(self):
-        acc = OptionAccount()
-        acc.register("DUMMY", 5.0)
+        oc = OptionConverter()
+        oc.register("DUMMY", 5.0)
+        acc = Account()
+        acc.register_converter(oc)
+
         self.assertEqual(1000.0, acc.contract_value("DUMMY", Decimal(1), 200.0))
         self.assertEqual(200.0, acc.contract_value("TSLA", Decimal(1), 200.0))
 

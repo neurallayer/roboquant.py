@@ -62,17 +62,17 @@ class OptionConverter(Converter):
 
 
 class CurrencyConverter(Converter):
-    """Support symbols that are denoted in a different currency from the base currency of the account"""
+    """Supports trading in symbols that are denoted in a different currency from the base currency of the account"""
 
-    def __init__(self, base_currency="USD", default_symbol_currency="USD"):
+    def __init__(self, base_currency="USD", default_symbol_currency: str | None = "USD"):
         super().__init__()
         self.rates = {}
         self.base_currency = base_currency
         self.default_symbol_currency = default_symbol_currency
-        self.registered_symbols = {}
+        self.registered_symbols: dict[str, str] = {}
 
     def register_symbol(self, symbol: str, currency: str):
-        """Register a symbol being denoted in a currency"""
+        """Register a symbol and its denoted currency"""
         self.registered_symbols[symbol] = currency
 
     def register_rate(self, currency: str, rate: float):
@@ -81,6 +81,8 @@ class CurrencyConverter(Converter):
 
     def __call__(self, symbol: str, _: datetime) -> float:
         currency = self.registered_symbols.get(symbol, self.default_symbol_currency)
+        if not currency:
+            raise ValueError(f"no currency or default_symbol_currency registered for symbol={symbol}")
         if currency == self.base_currency:
             return 1.0
         return self.rates[currency]
@@ -114,9 +116,9 @@ class Account:
         Account.__converter = converter
 
     def contract_value(self, symbol: str, size: Decimal, price: float) -> float:
-        # pylint: disable=unused-argument
+        # pylint: disable=not-callable
         """Return the total value of the provided contract size denoted in the base currency of the account."""
-        rate = 1.0 if not Account.__converter else Account.__converter.__call__(symbol, self.last_update)
+        rate = 1.0 if not Account.__converter else Account.__converter(symbol, self.last_update)
         return float(size) * price * rate
 
     def mkt_value(self, prices: dict[str, float]) -> float:

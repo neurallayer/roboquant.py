@@ -1,5 +1,6 @@
 import random
 from datetime import datetime, timedelta, timezone
+from typing import Any
 
 
 class Timeframe:
@@ -94,12 +95,13 @@ class Timeframe:
         years = timedelta(days=365) / self.duration
         return (1.0 + rate) ** years - 1.0
 
-    def split(self, n: int | timedelta) -> list["Timeframe"]:
+    def split(self, n: int | timedelta | Any) -> list["Timeframe"]:
         """Split the timeframe in sequential parts and return the resulting list of timeframes.
-        The parameter `n` can be a number or a timedelta instance.
+        The parameter `n` can be a number or a timedelta instance or other types like relativedelta that support
+        datetime calculations.
         """
 
-        period = n if isinstance(n, timedelta) else self.duration / n
+        period = self.duration / n if isinstance(n, int) else n
         end = self.start
         result = []
         while end < self.end:
@@ -113,7 +115,7 @@ class Timeframe:
             last.end = self.end
         return result
 
-    def sample(self, duration: timedelta, n: int = 1) -> list["Timeframe"]:
+    def sample(self, duration: timedelta | Any, n: int = 1) -> list["Timeframe"]:
         """Sample one or more periods of `duration` from this timeframe."""
 
         result = []

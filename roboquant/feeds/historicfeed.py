@@ -33,20 +33,20 @@ class HistoricFeed(Feed, ABC):
 
     @property
     def symbols(self):
-        """Return all the symbols available in this feed"""
+        """Return the list of symbols available in this feed"""
         self.__update()
         return self.__symbols
 
     def timeline(self) -> List[datetime]:
-        """Return the timeline of this feed"""
+        """Return the timeline of this feed as a list of datatime"""
         self.__update()
         return list(self.__data.keys())
 
     def timeframe(self):
         """Return the timeframe of this feed"""
         tl = self.timeline()
-        if len(tl) == 0:
-            return Timeframe.empty()
+        if not tl:
+            raise ValueError("Feed doesn't contain any events.")
 
         return Timeframe(tl[0], tl[-1], inclusive=True)
 
@@ -62,3 +62,9 @@ class HistoricFeed(Feed, ABC):
         for k, v in self.__data.items():
             evt = Event(k, v)
             channel.put(evt)
+
+    def __repr__(self) -> str:
+        events = len(self.timeline())
+        timeframe = self.timeframe() if events else None
+        feed = self.__class__.__name__
+        return f"{feed}(events={events} symbols={len(self.symbols)} timeframe={timeframe})"

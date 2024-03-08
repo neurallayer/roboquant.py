@@ -1,11 +1,11 @@
-__version__ = "0.2.4"
+__version__ = "0.2.5"
 
 from roboquant import brokers
 from roboquant import feeds
 from roboquant import journals
 from roboquant import strategies
 from roboquant import traders
-from .account import Account, OptionAccount, Position
+from .account import Account, Position, Converter, CurrencyConverter, OptionConverter
 from .config import Config
 from .event import Event, PriceItem, Candle, Trade, Quote
 from .order import Order, OrderStatus
