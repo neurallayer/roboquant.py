@@ -1,4 +1,3 @@
-import logging
 import unittest
 
 from torch import nn
@@ -27,8 +26,8 @@ class _MyModel(nn.Module):
 class TestTorch(unittest.TestCase):
 
     def test_lstm_model(self):
-        logging.basicConfig()
-        logging.getLogger("roboquant.strategies").setLevel(level=logging.INFO)
+        # logging.basicConfig()
+        # logging.getLogger("roboquant.strategies").setLevel(level=logging.INFO)
         # Setup
         symbol = "AAPL"
         prediction = 10

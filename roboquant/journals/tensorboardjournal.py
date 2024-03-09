@@ -10,10 +10,9 @@ class TensorboardJournal(Journal):
 
     def __init__(self, writer, *metrics: Metric):
         """
-        Params:
-
-        - writer: a tensorboard writer instance (`tensorboard.summary.Writer`)
-        - metrics: the metrics that should be calculated and be added to the tensorboard writer
+        Parameters:
+            writer: a tensorboard writer instance (`tensorboard.summary.Writer`)
+            metrics: the metrics that should be calculated and be added to the tensorboard writer
         """
         self.__writer = writer
         self._step = 0

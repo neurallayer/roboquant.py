@@ -1,9 +1,6 @@
 [tool.black]
 line-length = 127
 
-[tool.flake8]
-max-line-length = 127
-
 [tool.pytest.ini_options]
 minversion = "8.0"
 addopts = "-ra -q"
@@ -12,7 +9,7 @@ testpaths = [
 ]
 
 [tool.pyright]
-reportOptionalOperand = "off"
+reportOptionalOperand = "none"
 
 [tool.pylint.'MESSAGES CONTROL']
 max-line-length = 127

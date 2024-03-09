@@ -2,6 +2,7 @@ from copy import copy
 from dataclasses import dataclass
 from decimal import Decimal
 from enum import Flag, auto
+from typing import Any
 
 
 class OrderStatus(Flag):
@@ -36,7 +37,7 @@ class OrderStatus(Flag):
         return self.name
 
 
-@dataclass
+@dataclass(slots=True)
 class Order:
     """
     A trading order.
@@ -50,11 +51,13 @@ class Order:
     symbol: str
     size: Decimal
     limit: float | None
+    info: dict[str, Any]
+
     id: str | None
     status: OrderStatus
     fill: Decimal
 
-    def __init__(self, symbol: str, size: Decimal | str | int | float, limit: float | None = None):
+    def __init__(self, symbol: str, size: Decimal | str | int | float, limit: float | None = None, **kwargs):
         self.symbol = symbol
         self.size = Decimal(size)
         assert not self.size.is_zero(), "Cannot create a new order with size is zero"
@@ -63,6 +66,7 @@ class Order:
         self.id: str | None = None
         self.status: OrderStatus = OrderStatus.INITIAL
         self.fill = Decimal(0)
+        self.info = kwargs
 
     @property
     def open(self) -> bool:
@@ -99,7 +103,7 @@ class Order:
 
         size = Decimal(size) if size is not None else None
         if size is not None:
-            assert not size.is_zero(), "size cannot be set to zero, use order.cancel() instead"
+            assert not size.is_zero(), "size cannot be set to zero, use order.cancel() to cancel an order"
 
         result = copy(self)
         result.size = size or result.size
@@ -107,7 +111,7 @@ class Order:
         return result
 
     def __copy__(self):
-        result = Order(self.symbol, self.size, self.limit)
+        result = Order(self.symbol, self.size, self.limit, **self.info)
         result.id = self.id
         result.status = self.status
         result.fill = self.fill

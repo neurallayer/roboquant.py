@@ -82,8 +82,8 @@ class SimBroker(Broker):
         correction = self.slippage if order.is_buy else -self.slippage
         return price * (1.0 + correction)
 
-    def _simulate_market(self, order: Order, item) -> _Trx | None:
-        """Simulate a market for the three order types"""
+    def _execute(self, order: Order, item) -> _Trx | None:
+        """Simulate a market execution for the three order types"""
 
         price = self._get_execution_price(order, item)
         fill = self._get_fill(order, price)
@@ -122,7 +122,7 @@ class SimBroker(Broker):
 
     def __update_mkt_prices(self, price_items):
         """track the latest market prices for all open positions"""
-        for symbol in self._account.positions.keys():
+        for symbol in self._account.positions:
             if item := price_items.get(symbol):
                 self._prices[symbol] = item.price(self.price_type)
 
@@ -164,7 +164,7 @@ class SimBroker(Broker):
             else:
                 if (item := prices.get(order.symbol)) is not None:
                     state.expires_at = state.expires_at or self._account.last_update + timedelta(days=90)
-                    trx = self._simulate_market(order, item)
+                    trx = self._execute(order, item)
                     if trx is not None:
                         self._update_account(trx)
                         order.fill += trx.size

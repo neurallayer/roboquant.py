@@ -22,6 +22,16 @@ class TestOrder(unittest.TestCase):
         order = Order("AAPL", Decimal(100))
         self.assertEqual(Decimal(100), order.size)
 
+    def test_order_info(self):
+        order = Order("AAPL", 100, tif="ABC")
+        info = order.info
+        self.assertIn("tif", info)
+
+        order.id = "test"
+        update = order.update(size=50)
+        info = update.info
+        self.assertIn("tif", info)
+
     def test_order_update(self):
         order = Order("AAPL", 100)
         order.id = "update1"
