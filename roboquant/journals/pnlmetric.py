@@ -18,12 +18,11 @@ class PNLMetric(Metric):
         self.prev_equity = None
         self.max_equity = -10e10
         self.min_equity = 10e10
-        self._prices = {}
 
     def calc(self, event, account, signals, orders) -> dict[str, float]:
-        equity = account.equity
+        equity = account.equity()
 
-        total, realized, unrealized = self.__get_pnl_values(equity, event, account)
+        total, realized, unrealized = self.__get_pnl_values(equity, account)
 
         return {
             "pnl/equity": equity,
@@ -35,12 +34,11 @@ class PNLMetric(Metric):
             "pnl/unrealized": unrealized,
         }
 
-    def __get_pnl_values(self, equity, event, account):
+    def __get_pnl_values(self, equity, account):
         if self.first_equity is None:
             self.first_equity = equity
 
-        self._prices.update(event.get_prices())
-        unrealized = account.unrealized_pnl(self._prices)
+        unrealized = account.unrealized_pnl()
         total = equity - self.first_equity
         realized = total - unrealized
         return total, realized, unrealized

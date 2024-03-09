@@ -9,8 +9,8 @@ class TestAccount(unittest.TestCase):
     def test_account_init(self):
         acc = Account()
         self.assertEqual(acc.buying_power, 0.0)
-        self.assertEqual(acc.unrealized_pnl({}), 0.0)
-        self.assertEqual(acc.mkt_value({}), 0.0)
+        self.assertEqual(acc.unrealized_pnl(), 0.0)
+        self.assertEqual(acc.mkt_value(), 0.0)
 
     def test_account_positions(self):
         acc = Account()
@@ -18,11 +18,11 @@ class TestAccount(unittest.TestCase):
         for i in range(10):
             symbol = f"AA${i}"
             price = 10.0 + i
-            acc.positions[symbol] = Position(Decimal(10), price)
+            acc.positions[symbol] = Position(Decimal(10), price, price)
             prices[symbol] = price
 
-        self.assertAlmostEqual(acc.mkt_value(prices), 1450.0)
-        self.assertAlmostEqual(acc.unrealized_pnl(prices), 0.0)
+        self.assertAlmostEqual(acc.mkt_value(), 1450.0)
+        self.assertAlmostEqual(acc.unrealized_pnl(), 0.0)
 
     def test_account_option(self):
         oc = OptionConverter()

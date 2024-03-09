@@ -8,9 +8,11 @@ yfinance~=0.2.36
 torch>=2.1.0
 tensorboard>=2.15.1
 nautilus-ibapi~=10.19.2
+alpaca-py
 
 # Build tools
 build~=1.0.3
 twine>=5.0.0
 flake8>=7.0.0
+pylint>=3.1.0
 

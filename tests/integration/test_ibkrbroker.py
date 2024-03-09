@@ -4,7 +4,7 @@ import unittest
 from decimal import Decimal
 
 from roboquant import OrderStatus, Order
-from roboquant.brokers.ibkrbroker import IBKRBroker
+from roboquant.brokers.ibkr import IBKRBroker
 
 
 class TestIBKRBroker(unittest.TestCase):
@@ -17,7 +17,7 @@ class TestIBKRBroker(unittest.TestCase):
         broker = IBKRBroker()
 
         account = broker.sync()
-        self.assertGreater(account.equity, 0)
+        self.assertGreater(account.equity(), 0)
         self.assertEqual(len(account.orders), 0)
 
         # Place an order

@@ -84,7 +84,7 @@ class FlexTrader(Trader):
             return []
 
         orders: list[Order] = []
-        equity = account.equity
+        equity = account.equity()
         max_order_value = equity * self.max_order_perc
         min_order_value = equity * self.min_order_perc
         available = account.buying_power - self.min_buying_power_perc * equity

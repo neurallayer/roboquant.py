@@ -4,7 +4,7 @@ from datetime import datetime, timedelta, timezone
 import numpy as np
 
 from roboquant.event import Trade
-from .historicfeed import HistoricFeed
+from .historic import HistoricFeed
 
 
 class RandomWalk(HistoricFeed):

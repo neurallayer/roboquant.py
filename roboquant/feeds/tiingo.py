@@ -16,7 +16,7 @@ from roboquant.event import Candle
 from roboquant.event import Trade, Quote, Event
 from roboquant.feeds.eventchannel import EventChannel
 from roboquant.feeds.feed import Feed
-from roboquant.feeds.historicfeed import HistoricFeed
+from roboquant.feeds.historic import HistoricFeed
 
 logger = logging.getLogger(__name__)
 

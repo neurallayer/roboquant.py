@@ -2,11 +2,12 @@ from abc import ABC, abstractmethod
 from dataclasses import dataclass
 from datetime import datetime
 from decimal import Decimal
+from roboquant.event import Event
 
 from roboquant.order import Order
 
 
-@dataclass(slots=True, frozen=True)
+@dataclass(slots=True)
 class Position:
     """Position of a symbol"""
 
@@ -15,6 +16,9 @@ class Position:
 
     avg_price: float
     """Average price paid denoted in the currency of the symbol"""
+
+    mkt_price: float
+    """latest market price denoted in the currency of the symbol"""
 
 
 class Converter(ABC):
@@ -108,7 +112,7 @@ class Account:
         self.positions: dict[str, Position] = {}
         self.orders: list[Order] = []
         self.last_update: datetime = datetime.fromisoformat("1900-01-01T00:00:00+00:00")
-        self.equity: float = 0.0
+        self.cash: float = 0.0
 
     @staticmethod
     def register_converter(converter: Converter):
@@ -121,42 +125,33 @@ class Account:
         rate = 1.0 if not Account.__converter else Account.__converter(symbol, self.last_update)
         return float(size) * price * rate
 
-    def mkt_value(self, prices: dict[str, float]) -> float:
-        """Return the market value of all the open positions in the account using the provided prices.
-        If there is no known price provided for a position, the average price paid will be used instead.
-
-        Args:
-            prices: The prices to use to calculate the market value.
-        """
+    def mkt_value(self) -> float:
+        """Return the sum of the market values of the open positions in the account."""
         return sum(
-            [
-                self.contract_value(symbol, pos.size, prices[symbol] if symbol in prices else pos.avg_price)
-                for symbol, pos in self.positions.items()
-            ],
+            [self.contract_value(symbol, pos.size, pos.mkt_price) for symbol, pos in self.positions.items()],
             0.0,
         )
 
-    def unrealized_pnl(self, prices: dict[str, float]) -> float:
-        """Return the unrealized profit and loss for the open position given the provided market prices
-        If there is no known price provided for a position, it will be ignored.
+    def equity(self) -> float:
+        """Return the equity of the account.
 
-        Args:
-            prices: The prices to use to calculate the unrealized PNL.
+        equity = cash + sum of the market value of the open positions
+
         """
+        return self.cash + self.mkt_value()
+
+    def unrealized_pnl(self) -> float:
+        """Return the sum of the unrealized profit and loss for the open position."""
         return sum(
-            [
-                self.contract_value(symbol, pos.size, prices[symbol] - pos.avg_price)
-                for symbol, pos in self.positions.items()
-                if symbol in prices
-            ],
+            [self.contract_value(symbol, pos.size, pos.mkt_price - pos.avg_price) for symbol, pos in self.positions.items()],
             0.0,
         )
 
     def has_open_order(self, symbol: str) -> bool:
-        """Return True if there is an open order for the symbol, False otherwise"""
+        """Return True if there is at least one open order for the symbol, False otherwise"""
 
         for order in self.orders:
-            if order.symbol == symbol and not order.closed:
+            if order.symbol == symbol and order.open:
                 return True
         return False
 
@@ -165,9 +160,17 @@ class Account:
         pos = self.positions.get(symbol)
         return pos.size if pos else Decimal(0)
 
+    def update_positions(self, event: Event, price_type: str = "DEFAULT"):
+        """update the open positions with the latest market prices"""
+        self.last_update = event.time
+
+        for symbol, position in self.positions.items():
+            if price := event.get_price(symbol, price_type):
+                position.mkt_price = price
+
     def open_orders(self):
         """Return a list with the open orders"""
-        return [order for order in self.orders if not order.closed]
+        return [order for order in self.orders if order.open]
 
     def __repr__(self) -> str:
         p = [f"{v.size}@{k}" for k, v in self.positions.items()]
@@ -178,8 +181,10 @@ class Account:
 
         result = (
             f"""buying power : {self.buying_power:_.2f}\n"""
-            f"""equity       : {self.equity:_.2f}\n"""
+            f"""cash         : {self.cash:_.2f}\n"""
+            f"""equity       : {self.equity():_.2f}\n"""
             f"""positions    : {p_str}\n"""
+            f"""mkt value    : {self.mkt_value():_.2f}\n"""
             f"""open orders  : {o_str}\n"""
             f"""last update  : {self.last_update}"""
         )

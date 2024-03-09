@@ -1,7 +1,7 @@
 from time import sleep
 import logging
 from roboquant import Order
-from roboquant.brokers.ibkrbroker import IBKRBroker
+from roboquant.brokers.ibkr import IBKRBroker
 
 
 if __name__ == "__main__":

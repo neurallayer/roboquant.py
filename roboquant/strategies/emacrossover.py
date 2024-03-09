@@ -39,7 +39,7 @@ class EMACrossover(Strategy):
 
     class _Calculator:
 
-        __slots__ = "momentum", "price", "step"
+        __slots__ = "momentum", "price"
 
         def __init__(self, momentum, price):
             self.momentum = momentum

@@ -28,7 +28,7 @@ class _IBApi(EWrapper, EClient):
         EClient.__init__(self, self)
         self.orders: dict[str, Order] = {}
         self.positions: dict[str, Position] = {}
-        self.account = {"EquityWithLoanValue": 0.0, "AvailableFunds": 0.0}
+        self.__account = {AccountSummaryTags.TotalCashValue: 0.0, AccountSummaryTags.BuyingPower: 0.0}
         self.__account_end = threading.Condition()
         self.__order_id = 0
 
@@ -44,11 +44,13 @@ class _IBApi(EWrapper, EClient):
     def position(self, account: str, contract: Contract, position: Decimal, avgCost: float):
         logger.debug("position=%s symbol=%s  avgCost=%s", position, contract.localSymbol, avgCost)
         symbol = contract.localSymbol or contract.symbol
-        self.positions[symbol] = Position(position, avgCost)
+        old_position = self.positions.get(symbol)
+        mkt_price = old_position.mkt_price if old_position else avgCost
+        self.positions[symbol] = Position(position, avgCost, mkt_price)
 
     def accountSummary(self, reqId: int, account: str, tag: str, value: str, currency: str):
         logger.debug("account %s=%s", tag, value)
-        self.account[tag] = float(value)
+        self.__account[tag] = float(value)
 
     def accountSummaryEnd(self, reqId: int):
         with self.__account_end:
@@ -71,18 +73,18 @@ class _IBApi(EWrapper, EClient):
     def request_account(self):
         """blocking call till account summary has been received"""
         buyingpower_tag = AccountSummaryTags.BuyingPower
-        equity_tag = AccountSummaryTags.NetLiquidation
+        cash_tag = AccountSummaryTags.TotalCashValue
         with self.__account_end:
-            super().reqAccountSummary(1, "All", f"{buyingpower_tag},{equity_tag}")
+            super().reqAccountSummary(1, "All", f"{buyingpower_tag},{cash_tag}")
             self.__account_end.wait()
 
     def get_buying_power(self):
         buyingpower_tag = AccountSummaryTags.BuyingPower
-        return self.account[buyingpower_tag] or 0.0
+        return self.__account[buyingpower_tag] or 0.0
 
-    def get_equity(self):
-        equity_tag = AccountSummaryTags.NetLiquidation
-        return self.account[equity_tag] or 0.0
+    def get_cash(self):
+        cash_tag = AccountSummaryTags.TotalCashValue
+        return self.__account[cash_tag] or 0.0
 
     def orderStatus(
         self,
@@ -141,6 +143,7 @@ class IBKRBroker(Broker):
         api.connect(host, port, client_id)
         self.__api = api
         self.__has_new_orders_since_sync = False
+        self.price_type = "DEFAULT"
 
         # Start the handling in a thread
         self.__api_thread = threading.Thread(target=api.run, daemon=True)
@@ -189,7 +192,7 @@ class IBKRBroker(Broker):
             acc.positions = {k: v for k, v in api.positions.items() if not v.size.is_zero()}
             acc.orders = list(api.orders.values())
             acc.buying_power = api.get_buying_power()
-            acc.equity = api.get_equity()
+            acc.cash = api.get_cash()
 
         logger.debug("end sync")
         return acc
@@ -234,7 +237,12 @@ class IBKRBroker(Broker):
         o = IBKROrder()
         o.action = "BUY" if order.is_buy else "SELL"
         o.totalQuantity = abs(order.size)
-        o.tif = "GTC"
+        if order.gtd:
+            o.tif = "GTD"
+            o.goodTillDate = order.gtd.strftime("%Y%m%d %H:%M:%S %Z")
+        else:
+            o.tif = "GTC"
+
         if order.limit:
             o.orderType = "LMT"
             o.lmtPrice = order.limit

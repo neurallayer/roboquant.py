@@ -2,7 +2,7 @@ from datetime import timedelta
 import logging
 import roboquant as rq
 from roboquant.account import Account, CurrencyConverter
-from roboquant.brokers.ibkrbroker import IBKRBroker
+from roboquant.brokers.ibkr import IBKRBroker
 
 from roboquant.feeds.feedutil import get_sp500_symbols
 

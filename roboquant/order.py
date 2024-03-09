@@ -1,5 +1,6 @@
 from copy import copy
 from dataclasses import dataclass
+from datetime import datetime
 from decimal import Decimal
 from enum import Flag, auto
 from typing import Any
@@ -51,18 +52,23 @@ class Order:
     symbol: str
     size: Decimal
     limit: float | None
+    gtd: datetime | None
     info: dict[str, Any]
 
     id: str | None
     status: OrderStatus
     fill: Decimal
 
-    def __init__(self, symbol: str, size: Decimal | str | int | float, limit: float | None = None, **kwargs):
+    def __init__(
+        self, symbol: str, size: Decimal | str | int | float, limit: float | None = None, gtd: datetime | None = None, **kwargs
+    ):
         self.symbol = symbol
         self.size = Decimal(size)
         assert not self.size.is_zero(), "Cannot create a new order with size is zero"
 
         self.limit = limit
+        self.gtd = gtd
+
         self.id: str | None = None
         self.status: OrderStatus = OrderStatus.INITIAL
         self.fill = Decimal(0)
@@ -111,7 +117,7 @@ class Order:
         return result
 
     def __copy__(self):
-        result = Order(self.symbol, self.size, self.limit, **self.info)
+        result = Order(self.symbol, self.size, self.limit, self.gtd, **self.info)
         result.id = self.id
         result.status = self.status
         result.fill = self.fill

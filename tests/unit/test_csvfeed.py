@@ -1,7 +1,7 @@
 import pathlib
 import unittest
 
-from roboquant.feeds.csvfeed import CSVFeed
+from roboquant.feeds import CSVFeed
 from tests.common import run_price_item_feed
 
 

@@ -6,7 +6,7 @@ import warnings
 import yfinance
 
 from roboquant.event import Candle
-from roboquant.feeds.historicfeed import HistoricFeed
+from roboquant.feeds.historic import HistoricFeed
 
 logger = logging.getLogger(__name__)
 
