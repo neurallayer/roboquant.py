@@ -160,7 +160,7 @@ class Account:
             if order.symbol == symbol and order.is_open:
                 return True
         return False
-    
+
     def get_open_orders(self, symbol: str) -> list[Order]:
         """Return a list of open orders for the provided symbol"""
         return [order for order in self.orders if order.is_open and order.symbol == symbol]

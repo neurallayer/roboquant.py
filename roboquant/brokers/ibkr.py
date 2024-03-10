@@ -231,8 +231,7 @@ class IBKRBroker(Broker):
                 logger.warning("unknown field name=%s value=%s", name, value)
 
     def _get_contract(self, order: Order) -> Contract:
-        """Map an order to a IBKR contract.
-        """
+        """Map an order to a IBKR contract."""
 
         c = self.contract_mapping.get(order.symbol)
 
@@ -245,7 +244,7 @@ class IBKRBroker(Broker):
 
         # Override attributes
         IBKRBroker.__update_ibkr_object(c, order.info.get("contract"))
-       
+
         return c
 
     def _get_order(self, order: Order) -> IBKROrder:
