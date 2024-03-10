@@ -2,7 +2,6 @@ from abc import ABC, abstractmethod
 from dataclasses import dataclass
 from datetime import datetime
 from decimal import Decimal
-from roboquant.event import Event
 
 from roboquant.order import Order
 
@@ -133,15 +132,18 @@ class Account:
         )
 
     def equity(self) -> float:
-        """Return the equity of the account.
+        """Return the equity of the account. It will calcaluate the sum of the mkt value of
+        each open position and add the available cash.
 
-        equity = cash + sum of the market value of the open positions
-
+        The returned value is denoted in the base currency of the account.
         """
         return self.cash + self.mkt_value()
 
     def unrealized_pnl(self) -> float:
-        """Return the sum of the unrealized profit and loss for the open position."""
+        """Return the sum of the unrealized profit and loss for the open position.
+
+        The returned value is denoted in the base currency of the account.
+        """
         return sum(
             [self.contract_value(symbol, pos.size, pos.mkt_price - pos.avg_price) for symbol, pos in self.positions.items()],
             0.0,
@@ -155,18 +157,10 @@ class Account:
                 return True
         return False
 
-    def get_position_size(self, symbol) -> Decimal:
-        """Return the position size for the symbol"""
+    def get_position_size(self, symbol: str) -> Decimal:
+        """Return the position size for a symbol"""
         pos = self.positions.get(symbol)
         return pos.size if pos else Decimal(0)
-
-    def update_positions(self, event: Event, price_type: str = "DEFAULT"):
-        """update the open positions with the latest market prices"""
-        self.last_update = event.time
-
-        for symbol, position in self.positions.items():
-            if price := event.get_price(symbol, price_type):
-                position.mkt_price = price
 
     def open_orders(self):
         """Return a list with the open orders"""

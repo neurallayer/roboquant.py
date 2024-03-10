@@ -34,3 +34,15 @@ class Broker(Protocol):
 
         """
         ...
+
+
+def _update_positions(account: Account, event: Event | None, price_type: str = "DEFAULT"):
+    """update the open positions in the account with the latest market prices"""
+    if not event:
+        return
+
+    account.last_update = event.time
+
+    for symbol, position in account.positions.items():
+        if price := event.get_price(symbol, price_type):
+            position.mkt_price = price

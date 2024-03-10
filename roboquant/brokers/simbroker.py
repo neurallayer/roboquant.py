@@ -4,7 +4,7 @@ from decimal import Decimal
 import logging
 
 from roboquant.account import Account, Position
-from roboquant.brokers.broker import Broker
+from roboquant.brokers.broker import Broker, _update_positions
 from roboquant.event import Event
 from roboquant.order import Order, OrderStatus
 
@@ -184,6 +184,7 @@ class SimBroker(Broker):
 
         self._process_modify_order()
         self._process_create_orders(prices)
+        _update_positions(acc, event, self.price_type)
 
         acc.buying_power = acc.cash
         acc.orders = list(self._create_orders.values())

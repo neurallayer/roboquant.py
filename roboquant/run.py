@@ -17,8 +17,7 @@ def run(
         journal: Journal | None = None,
         timeframe: Timeframe | None = None,
         capacity: int = 10,
-        heartbeat_timeout: float | None = None,
-        price_type: str = "DEFAULT"
+        heartbeat_timeout: float | None = None
 ) -> Account:
     """Start a new run. Only the first two parameters, the feed and strategy, are mandatory.
     The other parameters are optional.
@@ -45,7 +44,6 @@ def run(
     while event := channel.get(heartbeat_timeout):
         signals = strategy.create_signals(event)
         account = broker.sync(event)
-        account.update_positions(event, price_type)
         orders = trader.create_orders(signals, event, account)
         broker.place_orders(orders)
         if journal:

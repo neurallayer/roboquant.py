@@ -14,7 +14,7 @@ from ibapi.wrapper import EWrapper
 from roboquant.account import Account, Position
 from roboquant.event import Event
 from roboquant.order import Order, OrderStatus
-from .broker import Broker
+from .broker import Broker, _update_positions
 
 assert VERSION["major"] == 10 and VERSION["minor"] == 19, "Wrong version of the IBAPI found"
 
@@ -194,6 +194,7 @@ class IBKRBroker(Broker):
             acc.buying_power = api.get_buying_power()
             acc.cash = api.get_cash()
 
+        _update_positions(acc, event)
         logger.debug("end sync")
         return acc
 
