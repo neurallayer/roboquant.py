@@ -28,7 +28,7 @@ class TestIBKRBroker(unittest.TestCase):
         account = broker.sync()
         self.assertEqual(len(account.orders), 1)
         self.assertEqual(account.orders[0].size, Decimal(10))
-        self.assertTrue(account.orders[0].open)
+        self.assertTrue(account.orders[0].is_open)
         self.assertEqual(symbol, account.orders[0].symbol)
 
         # Update an order
@@ -39,7 +39,7 @@ class TestIBKRBroker(unittest.TestCase):
         self.assertEqual(len(account.orders), 1)
         self.assertEqual(account.orders[0].size, Decimal(5))
         self.assertEqual(account.orders[0].limit, 160.0)
-        self.assertTrue(account.orders[0].open)
+        self.assertTrue(account.orders[0].is_open)
 
         # Cancel an order
         cancel_order = update_order.cancel()
@@ -48,7 +48,7 @@ class TestIBKRBroker(unittest.TestCase):
         account = broker.sync()
         self.assertEqual(len(account.orders), 1)
         order = account.orders[0]
-        self.assertTrue(order.closed)
+        self.assertTrue(order.is_closed)
         self.assertEqual(OrderStatus.CANCELLED, order.status)
         print()
         print(account)

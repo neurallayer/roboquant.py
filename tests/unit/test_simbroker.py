@@ -28,7 +28,7 @@ class TestSimbroker(unittest.TestCase):
         self.assertEqual(len(account.open_orders()), 1)
         order = account.orders[0]
         self.assertTrue(order.id is not None)
-        self.assertTrue(order.open)
+        self.assertTrue(order.is_open)
         self.assertEqual(Decimal(0), order.fill)
 
         event = self._create_event()
@@ -38,7 +38,7 @@ class TestSimbroker(unittest.TestCase):
         self.assertEqual(len(account.positions), 1)
         order = account.orders[0]
         self.assertTrue(order.id is not None)
-        self.assertTrue(order.closed)
+        self.assertTrue(order.is_closed)
         self.assertEqual(order.size, order.fill)
         self.assertEqual(Decimal(100), account.positions["AAPL"].size)
 

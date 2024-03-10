@@ -75,12 +75,12 @@ class Order:
         self.info = kwargs
 
     @property
-    def open(self) -> bool:
+    def is_open(self) -> bool:
         """Return True is the order is open, False otherwise"""
         return self.status.open
 
     @property
-    def closed(self) -> bool:
+    def is_closed(self) -> bool:
         """Return True is the order is closed, False otherwise"""
         return self.status.closed
 
@@ -89,7 +89,7 @@ class Order:
         The returned order looks like a regular order, but with its size set to zero.
         """
         assert self.id is not None, "Can only cancel orders with an id"
-        assert self.open, "Can only cancel open orders"
+        assert self.is_open, "Can only cancel open orders"
 
         result = copy(self)
         result.size = Decimal(0)
@@ -103,7 +103,7 @@ class Order:
         """
 
         assert self.id is not None, "Can only update orders with an id"
-        assert self.open, "Can only update open orders"
+        assert self.is_open, "Can only update open orders"
         if limit:
             assert self.limit, "Can only update the limit if it has already a limit defined"
 

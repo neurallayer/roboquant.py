@@ -96,9 +96,10 @@ class Account:
     The account maintains the following state during a run:
 
     - Available buying power for orders in the base currency of the account
-    - All the open positions
+    - Cash available
+    - The open positions
     - Orders
-    - Total equity value of the account in the base currency of the account
+    - Calculated derived equity value of the account in the base currency of the account
     - The last time the account was updated
 
     Only the broker updates the account and does this only during its `sync` method.
@@ -125,15 +126,18 @@ class Account:
         return float(size) * price * rate
 
     def mkt_value(self) -> float:
-        """Return the sum of the market values of the open positions in the account."""
+        """Return the sum of the market values of the open positions in the account.
+
+        The returned value is denoted in the base currency of the account.
+        """
         return sum(
             [self.contract_value(symbol, pos.size, pos.mkt_price) for symbol, pos in self.positions.items()],
             0.0,
         )
 
     def equity(self) -> float:
-        """Return the equity of the account. It will calcaluate the sum of the mkt value of
-        each open position and add the available cash.
+        """Return the equity of the account. It calcaluates the sum of the mkt value of
+        each open position and adds the available cash.
 
         The returned value is denoted in the base currency of the account.
         """
@@ -153,9 +157,13 @@ class Account:
         """Return True if there is at least one open order for the symbol, False otherwise"""
 
         for order in self.orders:
-            if order.symbol == symbol and order.open:
+            if order.symbol == symbol and order.is_open:
                 return True
         return False
+    
+    def get_open_orders(self, symbol: str) -> list[Order]:
+        """Return a list of open orders for the provided symbol"""
+        return [order for order in self.orders if order.is_open and order.symbol == symbol]
 
     def get_position_size(self, symbol: str) -> Decimal:
         """Return the position size for a symbol"""
@@ -164,7 +172,7 @@ class Account:
 
     def open_orders(self):
         """Return a list with the open orders"""
-        return [order for order in self.orders if order.open]
+        return [order for order in self.orders if order.is_open]
 
     def __repr__(self) -> str:
         p = [f"{v.size}@{k}" for k, v in self.positions.items()]

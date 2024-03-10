@@ -177,7 +177,7 @@ class IBKRBroker(Broker):
             # Let make sure we don't use IBKRBroker by mistake during a back-test.
             if now - event.time > timedelta(minutes=30):
                 logger.critical("received event from the past, now=%s event-time=%s", now, event.time)
-                raise ValueError(f"received event to far in the past now={now} event-time={event.time}")
+                raise ValueError(f"received event too far in the past now={now} event-time={event.time}")
 
         api = self.__api
         acc = self.__account
@@ -207,34 +207,49 @@ class IBKRBroker(Broker):
                 # avoid to many API calls
                 time.sleep(1)
 
-            assert not order.closed, "cannot place a closed order"
+            assert order.is_open, "can only place open orders"
             if order.size.is_zero():
-                assert order.id is not None
+                assert order.id is not None, "can only cancel orders with an id"
                 self.__api.cancelOrder(int(order.id), "")
             else:
                 if order.id is None:
                     order.id = self.__api.get_next_order_id()
                     self.__api.orders[order.id] = order
-                ibkr_order = self.__get_order(order)
-                contract = self.contract_mapping.get(order.symbol) or self._get_default_contract(order.symbol)
+                ibkr_order = self._get_order(order)
+                contract = self._get_contract(order)
                 self.__api.placeOrder(int(order.id), contract, ibkr_order)
 
-    def _get_default_contract(self, symbol: str) -> Contract:
-        """If no contract can be found in the `contract_mapping` dict, this method is called to get a default IBKR contract
-        for the provided symbol.
+    @staticmethod
+    def __update_ibkr_object(obj, update):
+        if not update:
+            return
+        assert isinstance(update, dict)
+        for name, value in update.items():
+            if hasattr(obj, name):
+                setattr(obj, name, value)
+            else:
+                logger.warning("unknown field name=%s value=%s", name, value)
 
-        The default implementation assumes it is a US stock symbol with SMART exchange routing.
+    def _get_contract(self, order: Order) -> Contract:
+        """Map an order to a IBKR contract.
         """
 
-        c = Contract()
-        c.symbol = symbol
-        c.secType = "STK"
-        c.currency = "USD"
-        c.exchange = "SMART"  # use smart routing by default
+        c = self.contract_mapping.get(order.symbol)
+
+        if not c:
+            c = Contract()
+            c.symbol = order.symbol
+            c.secType = "STK"
+            c.currency = "USD"
+            c.exchange = "SMART"  # use smart routing by default
+
+        # Override attributes
+        IBKRBroker.__update_ibkr_object(c, order.info.get("contract"))
+       
         return c
 
-    @staticmethod
-    def __get_order(order: Order):
+    def _get_order(self, order: Order) -> IBKROrder:
+        """Map an order to a IBKR order."""
         o = IBKROrder()
         o.action = "BUY" if order.is_buy else "SELL"
         o.totalQuantity = abs(order.size)
@@ -249,4 +264,8 @@ class IBKRBroker(Broker):
             o.lmtPrice = order.limit
         else:
             o.orderType = "MKT"
+
+        # Override attributes
+        IBKRBroker.__update_ibkr_object(o, order.info.get("order"))
+
         return o

@@ -123,7 +123,7 @@ class SimBroker(Broker):
         processed during time `t+1`. This protects against future bias.
         """
         for order in orders:
-            assert not order.closed, "cannot place a closed order"
+            assert not order.is_closed, "cannot place a closed order"
             if order.id is None:
                 order.id = self.__next_order_id()
                 assert order.id not in self._create_orders
@@ -138,7 +138,7 @@ class SimBroker(Broker):
             if not orig_order:
                 logger.info("couldn't find order with id %s", order.id)
                 continue
-            if orig_order.closed:
+            if orig_order.is_closed:
                 logger.info("cannot modify order because order is already closed %s", orig_order)
                 continue
             if order.is_cancellation:
@@ -152,7 +152,7 @@ class SimBroker(Broker):
 
     def _process_create_orders(self, prices):
         for order in self._create_orders.values():
-            if order.closed:
+            if order.is_closed:
                 continue
             if self._has_expired(order):
                 logger.info("order expired order=%s time=%s", order, self._account.last_update)
@@ -180,7 +180,7 @@ class SimBroker(Broker):
 
         if self.clean_up_orders:
             # remove all the closed orders from the previous step
-            self._create_orders = {order_id: order for order_id, order in self._create_orders.items() if not order.closed}
+            self._create_orders = {order_id: order for order_id, order in self._create_orders.items() if not order.is_closed}
 
         self._process_modify_order()
         self._process_create_orders(prices)
