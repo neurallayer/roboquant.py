@@ -57,7 +57,7 @@ class Signal:
 
 
 BUY = Signal.buy(SignalType.BOTH)
-"""Basic BUY signal with a rating of 1.0 and valid for both entry and exit"""
+"""BUY signal with a rating of 1.0 and valid for both entry and exit signals"""
 
 SELL = Signal.sell(SignalType.BOTH)
-"""Basic SELL signal with a rating of -1.0 and valid for both entry and exit"""
+"""SELL signal with a rating of -1.0 and valid for both entry and exit signals"""

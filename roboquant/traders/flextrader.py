@@ -1,3 +1,4 @@
+from datetime import datetime, timedelta
 import logging
 from decimal import Decimal
 from enum import Enum
@@ -52,15 +53,15 @@ class FlexTrader(Trader):
     """
 
     def __init__(
-            self,
-            one_order_only=True,
-            size_fractions=0,
-            min_buying_power_perc=0.05,  # don't use this buying power expressed as a percentage of the equity
-            increase_position=False,
-            shorting=False,
-            max_order_perc=0.05,
-            min_order_perc=0.02,
-            price_type="DEFAULT",
+        self,
+        one_order_only=True,
+        size_fractions=0,
+        min_buying_power_perc=0.05,
+        increase_position=False,
+        shorting=False,
+        max_order_perc=0.05,
+        min_order_perc=0.02,
+        price_type="DEFAULT",
     ) -> None:
         super().__init__()
         self.one_order_only = one_order_only
@@ -116,7 +117,7 @@ class FlexTrader(Trader):
                 if not signal.is_exit:
                     _log_rule("no exit signal", signal, symbol, pos_size)
                     continue
-                new_orders = self._get_orders(symbol, pos_size * -1, item, signal.rating)
+                new_orders = self._get_orders(symbol, pos_size * -1, item, signal.rating, event.time)
                 orders += new_orders
             else:
                 if not signal.is_entry:
@@ -143,17 +144,21 @@ class FlexTrader(Trader):
                     _log_rule("order value below minimum order value", signal, symbol, pos_size)
                     continue
 
-                new_orders = self._get_orders(symbol, order_size, item, signal.rating)
+                new_orders = self._get_orders(symbol, order_size, item, signal.rating, event.time)
                 if new_orders:
                     orders += new_orders
                     available -= order_value
 
         return orders
 
-    def _get_orders(self, symbol: str, size: Decimal, item: PriceItem, rating: float) -> list[Order]:
+    def _get_orders(self, symbol: str, size: Decimal, item: PriceItem, rating: float, time: datetime) -> list[Order]:
         # pylint: disable=unused-argument
-        """Return zero or more orders for the provided symbol and size, default is a single a Market Order.
+        """Return zero or more orders for the provided symbol and size.
+
+        Default is a single Limit Order with the limit the current price and GTD 3 days from now.
 
         Overwrite this method to create different order(s).
         """
-        return [Order(symbol, size)]
+        gtd = time + timedelta(days=3)
+        limit = item.price(self.price_type)
+        return [Order(symbol, size, limit, gtd)]
