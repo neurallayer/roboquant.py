@@ -1,13 +1,14 @@
-from typing import Protocol
+from abc import ABC, abstractmethod
 
 from roboquant.account import Account
 from roboquant.event import Event
 from roboquant.order import Order
 
 
-class Broker(Protocol):
+class Broker(ABC):
     """A broker accepts orders and communicates its state through the account object"""
 
+    @abstractmethod
     def place_orders(self, orders: list[Order]):
         """
         Place zero or more orders at this broker.
@@ -23,6 +24,7 @@ class Broker(Protocol):
         """
         ...
 
+    @abstractmethod
     def sync(self, event: Event | None = None) -> Account:
         """Sync the state, and return an updated account to reflect the latest state.
 
@@ -34,6 +36,9 @@ class Broker(Protocol):
 
         """
         ...
+
+    def reset(self):
+        """Reset the state"""
 
 
 def _update_positions(account: Account, event: Event | None, price_type: str = "DEFAULT"):

@@ -1,9 +1,10 @@
 import unittest
 
 import numpy as np
+from roboquant.account import Account
 from roboquant.event import Event
 
-from roboquant.strategies.features import (
+from roboquant.ml.features import (
     PriceFeature,
     SMAFeature,
     ReturnsFeature,
@@ -31,20 +32,22 @@ class TestFeatures(unittest.TestCase):
             VolumeFeature(symbol2), DayOfWeekFeature()
         ]
 
+        account = Account()
         channel = feed.play_background()
         while evt := channel.get():
             for feature in fs:
-                result = feature.calc(evt)
+                result = feature.calc(evt, account)
                 self.assertTrue(len(result) > 0)
 
     def test_core_feature(self):
+        account = Account()
         f = FixedValueFeature(np.ones(10,))[2:5]
-        values = f.calc(Event.empty())
+        values = f.calc(Event.empty(), account)
         self.assertEqual(3, len(values))
 
         f = FixedValueFeature(np.ones(10,)).returns()
-        values = f.calc(Event.empty())
-        values = f.calc(Event.empty())
+        values = f.calc(Event.empty(), account)
+        values = f.calc(Event.empty(), account)
         self.assertEqual(0, values[0])
 
 

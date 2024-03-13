@@ -10,49 +10,41 @@ class NumpyBuffer:
     It uses a single Numpy array to store its data.
     """
 
-    __slots__ = "_data", "_idx"
+    __slots__ = "_data", "_idx", "rows"
 
-    def __init__(self, columns: int, capacity: int, dtype: Any = "float32") -> None:
+    def __init__(self, rows: int, columns: int, dtype: Any = "float32", order="C") -> None:
         """Create a new Numpy buffer"""
-        self._data: NDArray = np.full((capacity, columns), np.nan, dtype=dtype)
+        size = int(rows * 1.25 + 3)
+        self._data: NDArray = np.full((size, columns), np.nan, dtype=dtype, order=order)  # type: ignore
         self._idx = 0
+        self.rows = rows
 
-    @classmethod
-    def _from_data(cls, data):
-        result = cls(0, 0)
-        result._data = data
-        result._idx = len(data)
-        return result
+    def append(self, data: array | NDArray | list | tuple):
+        if self._idx >= len(self._data):
+            self._data[0: self.rows] = self._data[-self.rows:]
+            self._idx = self.rows
 
-    def append(self, data: array | NDArray):
-        idx = self._idx % self.capacity
-        self._data[idx] = data
+        self._data[self._idx] = data
         self._idx += 1
 
-    @property
-    def capacity(self):
-        return len(self._data)
+    def __array__(self):
+        start = max(0, self._idx - self.rows)
+        return self._data[start: self._idx]
 
     def _get(self, column):
-        if self._idx < self.capacity:
-            return self._data[: self._idx, column]
-
-        idx = self._idx % self.capacity
-        return np.concatenate([self._data[idx:, column], self._data[:idx, column]])
+        start = max(0, self._idx - self.rows)
+        return self._data[start: self._idx, column]
 
     def __len__(self):
-        return min(self._idx, self.capacity)
+        return min(self._idx, self.rows)
 
-    def get_all(self):
-        """Return all the values in the buffer"""
-        if self._idx < self.capacity:
-            return self._data[: self._idx]
-
-        idx = self._idx % self.capacity
-        return np.concatenate([self._data[idx:], self._data[:idx]])
+    def to_numpy(self):
+        """Return all the values in the buffer as a 2D numpy array"""
+        start = max(0, self._idx - self.rows)
+        return self._data[start: self._idx]
 
     def is_full(self) -> bool:
-        return self._idx >= self.capacity
+        return self._idx >= self.rows
 
     def reset(self):
         """reset the buffer"""
@@ -61,12 +53,11 @@ class NumpyBuffer:
 
 
 class OHLCVBuffer(NumpyBuffer):
-    """A OHLCV buffer (first-in-first-out) of a fixed capacity.
-    """
+    """A OHLCV buffer (first-in-first-out) of a fixed capacity."""
 
     def __init__(self, capacity: int, dtype="float64") -> None:
         """Create a new OHLCV buffer"""
-        super().__init__(5, capacity, dtype)
+        super().__init__(capacity, 5, dtype)
 
     def open(self) -> NDArray:
         """Return the open prices"""

@@ -5,7 +5,8 @@ from datetime import datetime, timezone
 import numpy as np
 from numpy.typing import NDArray
 
-from roboquant import Signal
+from roboquant.signal import Signal
+from roboquant.account import Account
 from roboquant.event import Event, Candle
 from roboquant.feeds.feed import Feed
 from roboquant.strategies.strategy import Strategy
@@ -14,11 +15,15 @@ from roboquant.strategies.strategy import Strategy
 class Feature(ABC):
 
     @abstractmethod
-    def calc(self, evt: Event) -> NDArray:
+    def calc(self, evt: Event, account: Account) -> NDArray:
         """
         Return the result as a 1-dimensional NDArray.
         The result should always be the same size.
         """
+
+    @abstractmethod
+    def size(self) -> int:
+        "return the size of this feature"
 
     def returns(self, period=1):
         if period == 1:
@@ -28,6 +33,12 @@ class Feature(ABC):
     def __getitem__(self, *args):
         return SlicedFeature(self, args)
 
+    def reset(self):
+        """Reset the state of the feature"""
+
+    def _get_nan(self):
+        return np.full((self.size(),), float("nan"))
+
 
 class SlicedFeature(Feature):
 
@@ -35,10 +46,14 @@ class SlicedFeature(Feature):
         super().__init__()
         self.args = args
         self.feature = feature
+        self._size = len(np.zeros((self.feature.size(),))[args])
 
-    def calc(self, evt):
-        values = self.feature.calc(evt)
+    def calc(self, evt, account):
+        values = self.feature.calc(evt, account)
         return values[self.args]
+
+    def size(self):
+        return self._size
 
 
 class TrueRangeFeature(Feature):
@@ -49,7 +64,7 @@ class TrueRangeFeature(Feature):
         self.prev_close = None
         self.symbol = symbol
 
-    def calc(self, evt):
+    def calc(self, evt, account):
         item = evt.price_items.get(self.symbol)
         if item is None or not isinstance(item, Candle):
             return np.array([float("nan")])
@@ -66,6 +81,12 @@ class TrueRangeFeature(Feature):
 
         return np.array([result])
 
+    def size(self) -> int:
+        return 1
+
+    def reset(self):
+        self.prev_close = None
+
 
 class FixedValueFeature(Feature):
 
@@ -73,38 +94,89 @@ class FixedValueFeature(Feature):
         super().__init__()
         self.value = value
 
-    def calc(self, evt):
+    def size(self) -> int:
+        return len(self.value)
+
+    def calc(self, evt, account):
         return self.value
 
 
 class PriceFeature(Feature):
-    """Extract a single price for a symbol"""
+    """Extract a single price for one or more symbols"""
 
-    def __init__(self, symbol: str, price_type: str = "DEFAULT") -> None:
-        self.symbol = symbol
+    def __init__(self, *symbols: str, price_type: str = "DEFAULT") -> None:
+        super().__init__()
+        self.symbols = symbols
         self.price_type = price_type
-        self.name = f"{symbol}-{price_type}-PRICE"
 
-    def calc(self, evt):
-        item = evt.price_items.get(self.symbol)
-        price = item.price(self.price_type) if item else float("nan")
-        return np.array([price])
+    def calc(self, evt, account):
+        prices = [evt.get_price(symbol, self.price_type) for symbol in self.symbols]
+        return np.array(prices, dtype=np.float32)
+
+    def size(self) -> int:
+        return len(self.symbols)
+
+
+class PositionSizeFeature(Feature):
+    """Extract the position value for a symbol as fraction of the total equity"""
+
+    def __init__(self, *symbols: str) -> None:
+        super().__init__()
+        self.symbols = symbols
+
+    def calc(self, evt, account):
+        size = self.size()
+        result = np.zeros((size,), dtype=np.float32)
+        for i in range(size):
+            symbol = self.symbols[i]
+            position = account.positions.get(symbol)
+            if position:
+                value = account.contract_value(symbol, position.size, position.mkt_price)
+                pos_size = value / account.equity() - 1.0
+                result[i] = pos_size
+        return result
+
+    def size(self) -> int:
+        return len(self.symbols)
+
+
+class PositionPNLFeature(Feature):
+    """Extract the pnl for an open position for a symbol. Returns 0.0 if no open position"""
+
+    def __init__(self, *symbols: str) -> None:
+        super().__init__()
+        self.symbols = symbols
+
+    def calc(self, evt, account):
+        size = self.size()
+        result = np.zeros((size,), dtype=np.float32)
+        for i in range(size):
+            position = account.positions.get(self.symbols[i])
+            if position:
+                pnl = position.mkt_price / position.avg_price - 1.0
+                result[i] = pnl
+        return result
+
+    def size(self) -> int:
+        return len(self.symbols)
 
 
 class CandleFeature(Feature):
     """Extract the ohlcv values for a symbol"""
 
     def __init__(self, symbol: str) -> None:
-
+        super().__init__()
         self.symbol = symbol
-        self.name = f"{symbol}-CANDLE"
 
-    def calc(self, evt):
+    def calc(self, evt, account):
         item = evt.price_items.get(self.symbol)
         if isinstance(item, Candle):
             return np.array(item.ohlcv)
 
         return np.full((5,), float("nan"))
+
+    def size(self) -> int:
+        return 5
 
 
 class FillFeature(Feature):
@@ -115,8 +187,8 @@ class FillFeature(Feature):
         self.history = None
         self.feature: Feature = feature
 
-    def calc(self, evt):
-        values = self.feature.calc(evt)
+    def calc(self, evt, account):
+        values = self.feature.calc(evt, account)
 
         if np.any(np.isnan(values)):
             if self.history is not None:
@@ -126,19 +198,28 @@ class FillFeature(Feature):
         self.history = values
         return values
 
+    def reset(self):
+        self.history = None
+        self.feature.reset()
+
+    def size(self) -> int:
+        return self.feature.size()
+
 
 class VolumeFeature(Feature):
-    """Extract the volume for a symbol"""
+    """Extract the volume for one or more symbols"""
 
-    def __init__(self, symbol: str, volume_type: str = "DEFAULT") -> None:
+    def __init__(self, *symbols: str, volume_type: str = "DEFAULT") -> None:
         super().__init__()
-        self.symbol = symbol
+        self.symbols = symbols
         self.volume_type = volume_type
 
-    def calc(self, evt: Event):
-        price_data = evt.price_items.get(self.symbol)
-        volume = price_data.volume(self.volume_type) if price_data else float("nan")
-        return np.array([volume])
+    def calc(self, evt: Event, account: Account):
+        volumes = [evt.get_price(symbol, self.volume_type) for symbol in self.symbols]
+        return np.array(volumes, dtype=np.float32)
+
+    def size(self) -> int:
+        return len(self.symbols)
 
 
 class ReturnsFeature(Feature):
@@ -148,8 +229,8 @@ class ReturnsFeature(Feature):
         self.history = None
         self.feature: Feature = feature
 
-    def calc(self, evt):
-        values = self.feature.calc(evt)
+    def calc(self, evt, account):
+        values = self.feature.calc(evt, account)
 
         if self.history is None:
             self.history = values
@@ -159,6 +240,13 @@ class ReturnsFeature(Feature):
         self.history = values
         return r
 
+    def size(self) -> int:
+        return self.feature.size()
+
+    def reset(self):
+        self.history = None
+        self.feature.reset()
+
 
 class LongReturnsFeature(Feature):
 
@@ -167,8 +255,8 @@ class LongReturnsFeature(Feature):
         self.history = deque(maxlen=period)
         self.feature: Feature = feature
 
-    def calc(self, evt):
-        values = self.feature.calc(evt)
+    def calc(self, evt, account):
+        values = self.feature.calc(evt, account)
         h = self.history
 
         if len(h) < h.maxlen:  # type: ignore
@@ -178,6 +266,13 @@ class LongReturnsFeature(Feature):
         r = values / h[0] - 1.0
         h.append(values)
         return r
+
+    def size(self) -> int:
+        return self.feature.size()
+
+    def reset(self):
+        self.history.clear()
+        self.feature.reset()
 
 
 class MaxReturnFeature(Feature):
@@ -190,8 +285,8 @@ class MaxReturnFeature(Feature):
         self.history = deque(maxlen=period)
         self.feature: Feature = feature
 
-    def calc(self, evt):
-        values = self.feature.calc(evt)
+    def calc(self, evt, account):
+        values = self.feature.calc(evt, account)
         h = self.history
 
         if len(h) < h.maxlen:  # type: ignore
@@ -201,6 +296,13 @@ class MaxReturnFeature(Feature):
         r = max(h) / h[0] - 1.0
         h.append(values)
         return r
+
+    def size(self) -> int:
+        return self.feature.size()
+
+    def reset(self):
+        self.history.clear()
+        self.feature.reset()
 
 
 class MinReturnFeature(Feature):
@@ -213,8 +315,8 @@ class MinReturnFeature(Feature):
         self.history = deque(maxlen=period)
         self.feature: Feature = feature
 
-    def calc(self, evt):
-        values = self.feature.calc(evt)
+    def calc(self, evt, account):
+        values = self.feature.calc(evt, account)
         h = self.history
 
         if len(h) < h.maxlen:  # type: ignore
@@ -224,6 +326,13 @@ class MinReturnFeature(Feature):
         r = min(h) / h[0] - 1.0
         h.append(values)
         return r
+
+    def size(self) -> int:
+        return self.feature.size()
+
+    def reset(self):
+        self.history.clear()
+        self.feature.reset()
 
 
 class SMAFeature(Feature):
@@ -235,8 +344,8 @@ class SMAFeature(Feature):
         self.history = None
         self._cnt = 0
 
-    def calc(self, evt):
-        values = self.feature.calc(evt)
+    def calc(self, evt, account):
+        values = self.feature.calc(evt, account)
         if self.history is None:
             self.history = np.zeros((self.period, values.size))
 
@@ -249,6 +358,13 @@ class SMAFeature(Feature):
 
         return np.mean(self.history, axis=0)
 
+    def size(self) -> int:
+        return self.feature.size()
+
+    def reset(self):
+        self.history = None
+        self.feature.reset()
+
 
 class DayOfWeekFeature(Feature):
     """Calculate a one-hot-encoded day of the week, Monday being 0"""
@@ -256,12 +372,15 @@ class DayOfWeekFeature(Feature):
     def __init__(self, tz=timezone.utc) -> None:
         self.tz = tz
 
-    def calc(self, evt):
+    def calc(self, evt, account):
         dt = datetime.astimezone(evt.time, self.tz)
         weekday = dt.weekday()
         result = np.zeros(7)
         result[weekday] = 1.0
         return result
+
+    def size(self) -> int:
+        return 7
 
 
 class FeatureStrategy(Strategy, ABC):
@@ -294,7 +413,7 @@ class FeatureStrategy(Strategy, ABC):
     def predict(self, x: NDArray) -> dict[str, Signal]: ...
 
     def __get_row(self, evt, features) -> NDArray:
-        data = [feature.calc(evt) for feature in features]
+        data = [feature.calc(evt, None) for feature in features]
         return np.hstack(data, dtype=self._dtype)
 
     def _get_xy(self, feed: Feed, timeframe=None, warmup=0) -> tuple[NDArray, NDArray]:
@@ -304,9 +423,9 @@ class FeatureStrategy(Strategy, ABC):
         while evt := channel.get():
             if warmup:
                 for f in self._features_x:
-                    f.calc(evt)
+                    f.calc(evt, None)
                 for f in self._features_y:
-                    f.calc(evt)
+                    f.calc(evt, None)
                 warmup -= 1
             else:
                 x.append(self.__get_row(evt, self._features_x))

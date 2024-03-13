@@ -39,10 +39,20 @@ class SimBroker(Broker):
         self._create_orders: dict[str, Order] = {}
         self._account.cash = initial_deposit
         self._account.buying_power = initial_deposit
+        self._order_id = 0
+
         self.slippage = slippage
         self.price_type = price_type
         self.clean_up_orders = clean_up_orders
-        self.__order_id = 0
+        self.initial_deposit = initial_deposit
+
+    def reset(self):
+        self._account = Account()
+        self._modify_orders: list[Order] = []
+        self._create_orders: dict[str, Order] = {}
+        self._account.cash = self.initial_deposit
+        self._account.buying_power = self.initial_deposit
+        self._order_id = 0
 
     def _update_account(self, trx: _Trx):
         """Update a position and cash based on a new transaction"""
@@ -89,8 +99,8 @@ class SimBroker(Broker):
         return None
 
     def __next_order_id(self):
-        result = str(self.__order_id)
-        self.__order_id += 1
+        result = str(self._order_id)
+        self._order_id += 1
         return result
 
     def _has_expired(self, order: Order) -> bool:

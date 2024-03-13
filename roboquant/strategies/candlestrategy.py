@@ -1,5 +1,4 @@
 from abc import abstractmethod, ABC
-from typing import Dict
 
 from roboquant.event import Candle
 from roboquant.signal import Signal
@@ -14,10 +13,10 @@ class CandleStrategy(Strategy, ABC):
 
     def __init__(self, size: int) -> None:
         super().__init__()
-        self._data: Dict[str, OHLCVBuffer] = {}
+        self._data: dict[str, OHLCVBuffer] = {}
         self.size = size
 
-    def create_signals(self, event) -> Dict[str, Signal]:
+    def create_signals(self, event) -> dict[str, Signal]:
         signals = {}
         for item in event.items:
             if isinstance(item, Candle):

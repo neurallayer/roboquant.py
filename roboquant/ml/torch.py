@@ -4,8 +4,8 @@ import numpy as np
 import torch
 from torch.utils.data import DataLoader, Dataset
 
-from roboquant import Signal, BUY, SELL
-from roboquant.strategies.features import FeatureStrategy
+from roboquant.signal import Signal, BUY, SELL
+from roboquant.ml.features import FeatureStrategy
 
 logger = logging.getLogger(__name__)
 
@@ -18,6 +18,9 @@ class Normalize:
 
     def __call__(self, sample):
         return (sample - self.mean) / self.stdev
+
+    def __str__(self) -> str:
+        return f"mean={self.mean} stdev={self.stdev}"
 
 
 class SequenceDataset(Dataset):

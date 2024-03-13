@@ -5,6 +5,7 @@ from roboquant import feeds
 from roboquant import journals
 from roboquant import strategies
 from roboquant import traders
+from roboquant import ml
 from .account import Account, Position, Converter, CurrencyConverter, OptionConverter
 from .config import Config
 from .event import Event, PriceItem, Candle, Trade, Quote

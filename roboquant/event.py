@@ -145,5 +145,12 @@ class Event:
             return item.price(price_type)
         return None
 
+    def get_volume(self, symbol: str, volume_type: str = "DEFAULT") -> float | None:
+        """Return the volume for the symbol, or None if not found."""
+
+        if item := self.price_items.get(symbol):
+            return item.volume(volume_type)
+        return None
+
     def __repr__(self) -> str:
         return f"Event(time={self.time} items={len(self.items)})"
