@@ -8,7 +8,9 @@ yfinance~=0.2.36
 torch>=2.1.0
 tensorboard>=2.15.1
 nautilus-ibapi~=10.19.2
-alpaca-py
+alpaca-py~=0.18.1
+stable-baselines3~=2.2.1
+gymnasium~=0.29.1
 
 # Build tools
 build~=1.0.3

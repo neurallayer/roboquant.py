@@ -26,7 +26,8 @@ class CSVFeed(HistoricFeed):
     ):
         super().__init__()
         columns = columns or ["Date", "Open", "High", "Low", "Close", "Volume", "AdjClose"]
-        self.ohlcv_columns = columns[1:7] if adj_close else columns[1:6]
+        self.ohlcv_columns = columns[1:6]
+        self.adj_close_column = columns[6] if adj_close else None
         self.date_column = columns[0]
         self.datetime_fmt = datetime_fmt
         self.adj_close = adj_close
@@ -53,7 +54,7 @@ class CSVFeed(HistoricFeed):
         return pathlib.Path(filename).stem.upper()
 
     def _parse_csvfiles(self, filenames: list[str]):
-        adj_close = self.adj_close
+        adj_close_column = self.adj_close_column
         datetime_fmt = self.datetime_fmt
         ohlcv_columns = self.ohlcv_columns
         date_column = self.date_column
@@ -72,7 +73,11 @@ class CSVFeed(HistoricFeed):
                         dt = datetime.combine(dt, time_offset)
 
                     ohlcv = array("f", [float(row[column]) for column in ohlcv_columns])
-                    pb = Candle(symbol, ohlcv, freq) if not adj_close else Candle.from_adj_close(symbol, ohlcv, freq)
+                    if adj_close_column:
+                        adj_close = float(row[adj_close_column])
+                        pb = Candle.from_adj_close(symbol, ohlcv, adj_close, freq)
+                    else:
+                        pb = Candle(symbol, ohlcv, freq)
                     self._add_item(dt.astimezone(timezone.utc), pb)
 
     @classmethod

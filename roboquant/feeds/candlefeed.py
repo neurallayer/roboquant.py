@@ -8,11 +8,10 @@ from .feed import Feed
 
 
 class CandleFeed(Feed):
-    """Aggregates Trades of another feed into candles.
-    It can aggregate either Trade prices or Quote prices.
+    """Aggregates Trades or Quotes of another feed into candles.
 
     When trades are used, the actual trade price and volume are used to create aggregated candles.
-    Wen quotes are used, the midpoint price and no volume are used to create aggregated candles.
+    When quotes are used, the midpoint price and no volume are used to create aggregated candles.
     """
 
     def __init__(
@@ -56,12 +55,12 @@ class CandleFeed(Feed):
             else:
                 candles[symbol] = Candle(symbol, array("f", [price, price, price, price, volume]), freq)
 
-    @staticmethod
-    def __get_continued_candles(candles: dict[str, Candle]) -> dict[str, Candle]:
+    def __get_continued_candles(self, candles: dict[str, Candle]) -> dict[str, Candle]:
         result = {}
         for symbol, item in candles.items():
             p = item.price("CLOSE")
-            candle = Candle(symbol, array("f", [p, p, p, p, 0.0]))
+            v = 0.0 if self.item_type == "trade" else float("nan")
+            candle = Candle(symbol, array("f", [p, p, p, p, v]))
             result[symbol] = candle
         return result
 

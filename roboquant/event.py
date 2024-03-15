@@ -83,9 +83,9 @@ class Candle(PriceItem):
     frequency: str = ""  # f.e 1s , 15m, 4h, 1d
 
     @classmethod
-    def from_adj_close(cls, symbol, ohlcva: array, frequency=""):
-        adj = ohlcva[5] / ohlcva[3]
-        ohlcv = array("f", [ohlcva[0] * adj, ohlcva[1] * adj, ohlcva[2] * adj, ohlcva[5], ohlcva[4] / adj])
+    def from_adj_close(cls, symbol, ohlcv: array, adj_close: float, frequency=""):
+        adj = adj_close / ohlcv[3]
+        ohlcv = array("f", [ohlcv[0] * adj, ohlcv[1] * adj, ohlcv[2] * adj, ohlcv[5], ohlcv[4] / adj])
         return cls(symbol, ohlcv, frequency)
 
     def price(self, price_type: str = "DEFAULT") -> float:
@@ -124,7 +124,10 @@ class Event:
 
     def is_empty(self) -> bool:
         """return True if this is an empty event without any items, False otherwise"""
-        return len(self.items) == 0
+        return len(self) == 0
+
+    def __len__(self) -> int:
+        return len(self.items)
 
     @cached_property
     def price_items(self) -> dict[str, PriceItem]:
