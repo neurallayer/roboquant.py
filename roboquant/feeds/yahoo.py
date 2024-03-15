@@ -5,7 +5,7 @@ import warnings
 
 import yfinance
 
-from roboquant.event import Candle
+from roboquant.event import Bar
 from roboquant.feeds.historic import HistoricFeed
 
 logger = logging.getLogger(__name__)
@@ -35,8 +35,8 @@ class YahooFeed(HistoricFeed):
             for t in df.itertuples(index=True):
                 dt = t[0].to_pydatetime().astimezone(timezone.utc)
                 prices = t[1:6]
-                candle = Candle(symbol, array("f", prices), interval)
-                self._add_item(dt, candle)
+                b = Bar(symbol, array("f", prices), interval)
+                self._add_item(dt, b)
 
             logger.info("retrieved symbol=%s items=%s", symbol, len(df))
 

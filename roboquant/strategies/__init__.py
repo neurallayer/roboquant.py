@@ -1,5 +1,5 @@
 from .buffer import NumpyBuffer, OHLCVBuffer
-from .candlestrategy import CandleStrategy
+from .barstrategy import BarStrategy
 from .emacrossover import EMACrossover
 from .multistrategy import MultiStrategy
 from .nopstrategy import NOPStrategy

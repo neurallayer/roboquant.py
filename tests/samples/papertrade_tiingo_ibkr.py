@@ -22,7 +22,7 @@ if __name__ == "__main__":
     src_feed.subscribe(*sp500)
 
     # Convert the trades into 15-second candles
-    feed = rq.feeds.CandleFeed(src_feed, timedelta(seconds=15))
+    feed = rq.feeds.AggregatorFeed(src_feed, timedelta(seconds=15))
 
     # Let run an EMACrossover strategy
     strategy = rq.strategies.EMACrossover(13, 26)

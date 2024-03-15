@@ -3,7 +3,7 @@ import pathlib
 from datetime import date, datetime, timedelta
 from unittest import TestCase
 
-from roboquant import PriceItem, Candle, Quote, Trade
+from roboquant import PriceItem, Bar, Quote, Trade
 from roboquant.feeds import CSVFeed
 from roboquant.signal import Signal
 from roboquant.strategies.strategy import Strategy
@@ -42,7 +42,7 @@ def run_price_item_feed(feed, symbols: list[str], test_case: TestCase, timeframe
             test_case.assertEqual(item.symbol.upper(), item.symbol)
 
             match item:
-                case Candle():
+                case Bar():
                     ohlcv = item.ohlcv
                     v = ohlcv[4]
                     test_case.assertTrue(math.isnan(v) or v >= 0.0)

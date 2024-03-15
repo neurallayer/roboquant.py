@@ -1,5 +1,5 @@
 from roboquant.feeds import feedutil
-from .candlefeed import CandleFeed
+from .aggregate import AggregatorFeed
 from .csvfeed import CSVFeed
 from .eventchannel import EventChannel
 from .feed import Feed

@@ -7,7 +7,7 @@ from numpy.typing import NDArray
 
 from roboquant.signal import Signal
 from roboquant.account import Account
-from roboquant.event import Event, Candle
+from roboquant.event import Event, Bar
 from roboquant.feeds.feed import Feed
 from roboquant.strategies.strategy import Strategy
 
@@ -66,7 +66,7 @@ class TrueRangeFeature(Feature):
 
     def calc(self, evt, account):
         item = evt.price_items.get(self.symbol)
-        if item is None or not isinstance(item, Candle):
+        if item is None or not isinstance(item, Bar):
             return np.array([float("nan")])
 
         ohlcv = item.ohlcv
@@ -161,8 +161,8 @@ class PositionPNLFeature(Feature):
         return len(self.symbols)
 
 
-class CandleFeature(Feature):
-    """Extract the ohlcv values for a symbol"""
+class BarFeature(Feature):
+    """Extract the ohlcv values from bars for a symbol"""
 
     def __init__(self, symbol: str) -> None:
         super().__init__()
@@ -170,7 +170,7 @@ class CandleFeature(Feature):
 
     def calc(self, evt, account):
         item = evt.price_items.get(self.symbol)
-        if isinstance(item, Candle):
+        if isinstance(item, Bar):
             return np.array(item.ohlcv)
 
         return np.full((5,), float("nan"))

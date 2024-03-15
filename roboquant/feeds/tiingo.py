@@ -12,7 +12,7 @@ import requests
 import websocket
 
 from roboquant.config import Config
-from roboquant.event import Candle
+from roboquant.event import Bar
 from roboquant.event import Trade, Quote, Event
 from roboquant.feeds.eventchannel import EventChannel
 from roboquant.feeds.feed import Feed
@@ -72,7 +72,7 @@ class TiingoHistoricFeed(HistoricFeed):
                 d = datetime.fromisoformat(row[0])
                 dt = datetime.combine(d, closing_time)
                 ohlcv = [float(p) for p in row[1:6]]
-                pb = Candle(symbol, array("f", ohlcv), "1d")
+                pb = Bar(symbol, array("f", ohlcv), "1d")
                 self._add_item(dt, pb)
                 found = True
 
@@ -97,7 +97,7 @@ class TiingoHistoricFeed(HistoricFeed):
             for row in rows:
                 dt = datetime.fromisoformat(row[0]).astimezone(timezone.utc)
                 ohlcv = [float(p) for p in row[1:6]]
-                pb = Candle(symbol, array("f", ohlcv), frequency)
+                pb = Bar(symbol, array("f", ohlcv), frequency)
                 self._add_item(dt, pb)
 
     def retrieve_intraday_crypto(self, *symbols: str, start_date="2023-01-01", end_date: str | None = None, frequency="5min"):
@@ -118,7 +118,7 @@ class TiingoHistoricFeed(HistoricFeed):
             for e in row["priceData"]:
                 dt = datetime.fromisoformat(e["date"]).astimezone(timezone.utc)
                 ohlcv = [float(e["open"]), float(e["high"]), float(e["low"]), float(e["close"]), float(e["volume"])]
-                pb = Candle(symbol, array("f", ohlcv), frequency)
+                pb = Bar(symbol, array("f", ohlcv), frequency)
                 self._add_item(dt, pb)
 
     def retrieve_intraday_fx(self, *symbols: str, start_date="2023-01-01", end_date: str | None = None, frequency="5min"):
@@ -139,7 +139,7 @@ class TiingoHistoricFeed(HistoricFeed):
             symbol = row[1].upper()
             ohlcv = [float(p) for p in row[2:6]]
             ohlcv.append(float("nan"))
-            pb = Candle(symbol, array("f", ohlcv), frequency)
+            pb = Bar(symbol, array("f", ohlcv), frequency)
             self._add_item(dt, pb)
 
 

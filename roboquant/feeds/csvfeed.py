@@ -5,7 +5,7 @@ import pathlib
 from array import array
 from datetime import datetime, time, timezone
 
-from roboquant.event import Candle
+from roboquant.event import Bar
 from roboquant.feeds.historic import HistoricFeed
 
 logger = logging.getLogger(__name__)
@@ -75,9 +75,9 @@ class CSVFeed(HistoricFeed):
                     ohlcv = array("f", [float(row[column]) for column in ohlcv_columns])
                     if adj_close_column:
                         adj_close = float(row[adj_close_column])
-                        pb = Candle.from_adj_close(symbol, ohlcv, adj_close, freq)
+                        pb = Bar.from_adj_close(symbol, ohlcv, adj_close, freq)
                     else:
-                        pb = Candle(symbol, ohlcv, freq)
+                        pb = Bar(symbol, ohlcv, freq)
                     self._add_item(dt.astimezone(timezone.utc), pb)
 
     @classmethod

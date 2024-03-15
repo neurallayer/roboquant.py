@@ -1,4 +1,4 @@
-from roboquant.event import Candle, Event
+from roboquant.event import Bar, Event
 from roboquant.feeds.yahoo import YahooFeed
 
 
@@ -13,7 +13,7 @@ class ETR:
         m = self.momentum
 
         for symbol, item in event.price_items.items():
-            if not isinstance(item, Candle):
+            if not isinstance(item, Bar):
                 continue
             ohlcv = item.ohlcv
             h, l, c = ohlcv[1], ohlcv[2], ohlcv[3]

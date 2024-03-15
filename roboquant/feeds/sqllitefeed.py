@@ -2,7 +2,7 @@ import sqlite3
 from array import array
 from datetime import datetime
 
-from roboquant.event import Candle
+from roboquant.event import Bar
 from roboquant.event import Event
 from roboquant.timeframe import Timeframe
 from .eventchannel import EventChannel
@@ -67,7 +67,7 @@ class SQLFeed(Feed):
             symbol = row[1]
             prices = row[2:7]
             freq = row[7]
-            pb = Candle(symbol, array('f', prices), freq)
+            pb = Bar(symbol, array('f', prices), freq)
             items.append(pb)
             cnt += 1
         con.commit()
@@ -87,7 +87,7 @@ class SQLFeed(Feed):
         while event := channel.get():
             t = event.time
             for item in event.items:
-                if isinstance(item, Candle):
+                if isinstance(item, Bar):
                     ohlcv = item.ohlcv
                     elem = (t.isoformat(), item.symbol, *ohlcv, item.frequency)
                     data.append(elem)

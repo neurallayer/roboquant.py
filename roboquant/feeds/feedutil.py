@@ -2,7 +2,7 @@ import json
 import pathlib
 from datetime import datetime
 
-from roboquant.event import Candle
+from roboquant.event import Bar
 from roboquant.feeds.feed import Feed
 from roboquant.timeframe import Timeframe
 
@@ -24,13 +24,13 @@ def get_symbol_prices(
 
 
 def get_symbol_ohlcv(feed: Feed, symbol: str, timeframe: Timeframe | None = None) -> dict[str, list]:
-    """Get the candles for a single symbol from a feed"""
+    """Get the OHLCV values for a single symbol from a feed"""
 
     result = {column: [] for column in ["Date", "Open", "High", "Low", "Close", "Volume"]}
     channel = feed.play_background(timeframe)
     while event := channel.get():
         item = event.price_items.get(symbol)
-        if item and isinstance(item, Candle):
+        if item and isinstance(item, Bar):
             result["Date"].append(event.time)
             result["Open"].append(item.ohlcv[0])
             result["High"].append(item.ohlcv[1])

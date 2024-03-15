@@ -1,11 +1,11 @@
 import unittest
 
 from roboquant.signal import Signal
-from roboquant.strategies import CandleStrategy, OHLCVBuffer
+from roboquant.strategies import BarStrategy, OHLCVBuffer
 from tests.common import run_strategy
 
 
-class _MyStrategy(CandleStrategy):
+class _MyStrategy(BarStrategy):
     """Example using CandleStrategy to create a custom strategy"""
 
     def _create_signal(self, symbol, ohlcv: OHLCVBuffer) -> Signal | None:

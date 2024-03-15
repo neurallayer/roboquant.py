@@ -1,11 +1,11 @@
 import unittest
 import talib.stream as ta
 from roboquant import BUY, SELL, Signal
-from roboquant.strategies import CandleStrategy
+from roboquant.strategies import BarStrategy
 from tests.common import run_strategy
 
 
-class EMAStrategy(CandleStrategy):
+class EMAStrategy(BarStrategy):
     """Example using talib to create an EMA crossover strategy"""
 
     def _create_signal(self, symbol, ohlcv) -> Signal | None:
@@ -19,7 +19,7 @@ class EMAStrategy(CandleStrategy):
         return None
 
 
-class RSIStrategy(CandleStrategy):
+class RSIStrategy(BarStrategy):
     """Example using talib to create an RSI strategy"""
 
     def __init__(self, period):

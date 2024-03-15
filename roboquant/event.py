@@ -78,7 +78,7 @@ class Trade(PriceItem):
 
 
 @dataclass(slots=True)
-class Candle(PriceItem):
+class Bar(PriceItem):
     ohlcv: array
     frequency: str = ""  # f.e 1s , 15m, 4h, 1d
 
@@ -106,7 +106,7 @@ class Candle(PriceItem):
 class Event:
     """
     An event represents zero of items of information happening at a certain moment in time.
-    An item can contain any type of information, but a common use-case are price-items like quotes, trades or candles.
+    An item can contain any type of information, but a common use-case are price-items like quotes, trades or bars.
     Time is always a datetime object with the timezone set at UTC.
     """
 
