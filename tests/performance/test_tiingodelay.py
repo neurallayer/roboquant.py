@@ -24,11 +24,27 @@ class TestTiingoDelay(unittest.TestCase):
 
         feed = TiingoLiveFeed(market="iex")
 
-        # subscribe to all IEX stocks for TOP of order book changes and Trades.
-        feed.subscribe(threshold_level=5)
+        # subscribe to popular stocks for TOP of order book changes and Trades.
+        feed.subscribe(
+            "TSLA",
+            "MSFT",
+            "NVDA",
+            "AMD",
+            "AAPL",
+            "AMZN",
+            "META",
+            "GOOG",
+            "XOM",
+            "JPM",
+            "NLFX",
+            "BA",
+            "INTC",
+            "V",
+            threshold_level=0,
+        )
 
         timeframe = Timeframe.next(minutes=1)
-        channel = feed.play_background(timeframe, 10_000)
+        channel = feed.play_background(timeframe, 1000)
 
         delays = []
         while event := channel.get(70):

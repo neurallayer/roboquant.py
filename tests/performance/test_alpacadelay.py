@@ -7,9 +7,9 @@ from roboquant import Timeframe
 from roboquant.feeds.alpacafeed import AlpacaLiveFeed
 
 
-class TestAlpacaDelay(unittest.IsolatedAsyncioTestCase):
+class TestAlpacaDelay(unittest.TestCase):
 
-    async def test_alpaca_delay(self):
+    def test_alpaca_delay(self):
 
         logging.basicConfig(level=logging.INFO)
 
@@ -36,8 +36,6 @@ class TestAlpacaDelay(unittest.IsolatedAsyncioTestCase):
             print(t)
         else:
             print("didn't receive any items, is it perhaps outside trading hours?")
-
-        await feed.close()
 
 
 if __name__ == "__main__":

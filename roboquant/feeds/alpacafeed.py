@@ -1,21 +1,23 @@
 from array import array
+from datetime import timedelta
 import threading
 import time
 from typing import Literal
 
+from alpaca.data import DataFeed
 from alpaca.data.live.crypto import CryptoDataStream
 from alpaca.data.live.stock import StockDataStream
 from alpaca.data.live.option import OptionDataStream
-from alpaca.data import DataFeed
 
 from roboquant.config import Config
 from roboquant.event import Event, Quote, Trade, Bar
 from roboquant.feeds.eventchannel import EventChannel
-
 from roboquant.feeds.feed import Feed
 
 
 class AlpacaLiveFeed(Feed):
+
+    __one_minute = str(timedelta(minutes=1))
 
     def __init__(self, market: Literal["iex", "sip", "crypto", "option"] = "iex") -> None:
         super().__init__()
@@ -55,7 +57,7 @@ class AlpacaLiveFeed(Feed):
 
     async def __handle_bars(self, data):
         if self._channel:
-            item = Bar(data.symbol, array("f", [data.open, data.high, data.low, data.close, data.volume]))
+            item = Bar(data.symbol, array("f", [data.open, data.high, data.low, data.close, data.volume]), self.__one_minute)
             event = Event(data.timestamp, [item])
             self._channel.put(event)
 

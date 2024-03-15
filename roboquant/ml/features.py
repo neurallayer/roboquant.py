@@ -36,8 +36,11 @@ class Feature(ABC):
     def reset(self):
         """Reset the state of the feature"""
 
-    def _get_nan(self):
-        return np.full((self.size(),), float("nan"))
+    def _zeros(self):
+        return np.zeros((self.size(),), dtype=np.float32)
+
+    def _full_nan(self):
+        return np.full((self.size(),), float("nan"), dtype=np.float32)
 
 
 class SlicedFeature(Feature):
@@ -46,7 +49,7 @@ class SlicedFeature(Feature):
         super().__init__()
         self.args = args
         self.feature = feature
-        self._size = len(np.zeros((self.feature.size(),))[args])
+        self._size = len(feature._zeros()[args])
 
     def calc(self, evt, account):
         values = self.feature.calc(evt, account)
@@ -125,15 +128,13 @@ class PositionSizeFeature(Feature):
         self.symbols = symbols
 
     def calc(self, evt, account):
-        size = self.size()
-        result = np.zeros((size,), dtype=np.float32)
-        for i in range(size):
-            symbol = self.symbols[i]
+        result = self._zeros()
+        for idx, symbol in enumerate(self.symbols):
             position = account.positions.get(symbol)
             if position:
                 value = account.contract_value(symbol, position.size, position.mkt_price)
                 pos_size = value / account.equity() - 1.0
-                result[i] = pos_size
+                result[idx] = pos_size
         return result
 
     def size(self) -> int:
@@ -141,20 +142,20 @@ class PositionSizeFeature(Feature):
 
 
 class PositionPNLFeature(Feature):
-    """Extract the pnl for an open position for a symbol. Returns 0.0 if no open position"""
+    """Extract the pnl for an open position for a symbol.
+    Returns 0.0 if there is no open position for a symbol"""
 
     def __init__(self, *symbols: str) -> None:
         super().__init__()
         self.symbols = symbols
 
     def calc(self, evt, account):
-        size = self.size()
-        result = np.zeros((size,), dtype=np.float32)
-        for i in range(size):
-            position = account.positions.get(self.symbols[i])
+        result = self._zeros()
+        for idx, symbol in enumerate(self.symbols):
+            position = account.positions.get(symbol)
             if position:
                 pnl = position.mkt_price / position.avg_price - 1.0
-                result[i] = pnl
+                result[idx] = pnl
         return result
 
     def size(self) -> int:
@@ -162,21 +163,24 @@ class PositionPNLFeature(Feature):
 
 
 class BarFeature(Feature):
-    """Extract the ohlcv values from bars for a symbol"""
+    """Extract the ohlcv values from bars for one or more symbols"""
 
-    def __init__(self, symbol: str) -> None:
+    def __init__(self, *symbols: str) -> None:
         super().__init__()
-        self.symbol = symbol
+        self.symbols = symbols
 
     def calc(self, evt, account):
-        item = evt.price_items.get(self.symbol)
-        if isinstance(item, Bar):
-            return np.array(item.ohlcv)
+        result = self._full_nan()
+        for idx, symbol in enumerate(self.symbols):
+            item = evt.price_items.get(symbol)
+            if isinstance(item, Bar):
+                offset = idx * 5
+                result[offset: offset + 5] = item.ohlcv
 
-        return np.full((5,), float("nan"))
+        return result
 
     def size(self) -> int:
-        return 5
+        return 5 * len(self.symbols)
 
 
 class FillFeature(Feature):
@@ -215,7 +219,7 @@ class VolumeFeature(Feature):
         self.volume_type = volume_type
 
     def calc(self, evt: Event, account: Account):
-        volumes = [evt.get_price(symbol, self.volume_type) for symbol in self.symbols]
+        volumes = [evt.get_volume(symbol, self.volume_type) for symbol in self.symbols]
         return np.array(volumes, dtype=np.float32)
 
     def size(self) -> int:
@@ -234,7 +238,7 @@ class ReturnsFeature(Feature):
 
         if self.history is None:
             self.history = values
-            return np.full(values.shape, float("nan"))
+            return self._full_nan()
 
         r = values / self.history - 1.0
         self.history = values
@@ -261,7 +265,7 @@ class LongReturnsFeature(Feature):
 
         if len(h) < h.maxlen:  # type: ignore
             h.append(values)
-            return np.full(values.shape, float("nan"))
+            return self._full_nan()
 
         r = values / h[0] - 1.0
         h.append(values)
@@ -291,7 +295,7 @@ class MaxReturnFeature(Feature):
 
         if len(h) < h.maxlen:  # type: ignore
             h.append(values)
-            return np.full(values.shape, float("nan"))
+            return self._full_nan()
 
         r = max(h) / h[0] - 1.0
         h.append(values)
@@ -321,7 +325,7 @@ class MinReturnFeature(Feature):
 
         if len(h) < h.maxlen:  # type: ignore
             h.append(values)
-            return np.full(values.shape, float("nan"))
+            return self._full_nan()
 
         r = min(h) / h[0] - 1.0
         h.append(values)
@@ -354,7 +358,7 @@ class SMAFeature(Feature):
         self._cnt += 1
 
         if self._cnt < self.period:
-            return np.full((values.size,), np.nan)
+            return self._full_nan()
 
         return np.mean(self.history, axis=0)
 
