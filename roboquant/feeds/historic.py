@@ -33,12 +33,12 @@ class HistoricFeed(Feed, ABC):
 
     @property
     def symbols(self):
-        """Return the list of symbols available in this feed"""
+        """Return the list of unique symbols available in this feed"""
         self.__update()
         return self.__symbols
 
     def timeline(self) -> List[datetime]:
-        """Return the timeline of this feed as a list of datatime"""
+        """Return the timeline of this feed as a list of datatime objects"""
         self.__update()
         return list(self.__data.keys())
 

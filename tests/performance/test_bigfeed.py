@@ -18,10 +18,10 @@ class TestBigFeed(unittest.TestCase):
         account = rq.run(feed, strategy, journal=journal)
         runtime = time.time() - start
 
-        # self.assertTrue(journal.items > 1_000_000)
-        # self.assertTrue(journal.signals > 100_000)
-        # self.assertTrue(journal.orders > 10_000)
-        # self.assertTrue(journal.events > 10_000)
+        self.assertTrue(journal.items > 1_000_000)
+        self.assertTrue(journal.signals > 100_000)
+        self.assertTrue(journal.orders > 10_000)
+        self.assertTrue(journal.events > 10_000)
 
         print("", account, journal, sep="\n\n")
 
