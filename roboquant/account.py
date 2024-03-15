@@ -182,12 +182,12 @@ class Account:
         o_str = ", ".join(o) or "none"
 
         result = (
-            f"""buying power : {self.buying_power:_.2f}\n"""
-            f"""cash         : {self.cash:_.2f}\n"""
-            f"""equity       : {self.equity():_.2f}\n"""
-            f"""positions    : {p_str}\n"""
-            f"""mkt value    : {self.mkt_value():_.2f}\n"""
-            f"""open orders  : {o_str}\n"""
-            f"""last update  : {self.last_update}"""
+            f"buying power : {self.buying_power:_.2f}\n"
+            f"cash         : {self.cash:_.2f}\n"
+            f"equity       : {self.equity():_.2f}\n"
+            f"positions    : {p_str}\n"
+            f"mkt value    : {self.mkt_value():_.2f}\n"
+            f"open orders  : {o_str}\n"
+            f"last update  : {self.last_update}"
         )
         return result

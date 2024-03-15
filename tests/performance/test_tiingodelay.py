@@ -31,7 +31,7 @@ class TestTiingoDelay(unittest.TestCase):
         channel = feed.play_background(timeframe, 10_000)
 
         delays = []
-        while event := channel.get():
+        while event := channel.get(70):
             if event.items:
                 delays.append(time.time() - event.time.timestamp())
 

@@ -162,3 +162,7 @@ class FlexTrader(Trader):
         gtd = time + timedelta(days=3)
         limit = item.price(self.price_type)
         return [Order(symbol, size, limit, gtd)]
+
+    def __str__(self) -> str:
+        attrs = " ".join([f"{k}={v}" for k, v in self.__dict__.items() if not k.startswith("_")])
+        return f"FlexTrader({attrs})"

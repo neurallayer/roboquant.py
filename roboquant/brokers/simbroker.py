@@ -199,3 +199,7 @@ class SimBroker(Broker):
         acc.buying_power = acc.cash
         acc.orders = list(self._create_orders.values())
         return acc
+
+    def __str__(self) -> str:
+        attrs = " ".join([f"{k}={v}" for k, v in self.__dict__.items() if not k.startswith("_")])
+        return f"SimBroker({attrs})"

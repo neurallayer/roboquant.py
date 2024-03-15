@@ -4,6 +4,7 @@ from gymnasium import spaces
 import numpy as np
 from roboquant.account import Account
 
+from roboquant.brokers.broker import Broker
 from roboquant.brokers.simbroker import SimBroker
 from roboquant.event import Event
 from roboquant.feeds.eventchannel import EventChannel
@@ -12,6 +13,7 @@ from roboquant.signal import Signal
 from roboquant.ml.features import Feature
 from roboquant.ml.torch import Normalize
 from roboquant.traders.flextrader import FlexTrader
+from roboquant.traders.trader import Trader
 
 
 logger = logging.getLogger(__name__)
@@ -23,18 +25,24 @@ class TradingEnv(gym.Env):
     metadata = {"render_modes": ["human", "rgb_array"], "render_fps": 4}
 
     def __init__(
-        self, features: list[Feature], feed: Feed, rating_symbols: list[str], warmup: int = 0, broker=None, trader=None
+        self,
+        features: list[Feature],
+        feed: Feed,
+        rating_symbols: list[str],
+        warmup: int = 0,
+        broker: Broker | None = None,
+        trader: Trader | None = None,
     ):
-        self.broker = broker or SimBroker()
-        self.trader = trader or FlexTrader()
+        self.broker: Broker = broker or SimBroker()
+        self.trader: Trader = trader or FlexTrader()
         self.channel = EventChannel()
         self.feed = feed
         self.event: Event | None = None
-        self.account = self.broker.sync()
+        self.account: Account = self.broker.sync()
         self.symbols = rating_symbols
         self.features = features
         self.warmup = warmup
-        self.last_equity = self.account.equity()
+        self.last_equity: float = self.account.equity()
         self.obs_normalizer = None
         self.reward_normalizer = None
 
@@ -44,13 +52,9 @@ class TradingEnv(gym.Env):
         self.observation_space = spaces.Box(-1.0, 1.0, shape=(obs_size,), dtype=np.float32)
         self.action_space = spaces.Box(-1.0, 1.0, shape=(action_size,), dtype=np.float32)
 
+        logger.info("observation_space=%s action_space=%s", self.observation_space, self.action_space)
+
         self.render_mode = None
-
-    def get_broker(self):
-        return SimBroker()
-
-    def get_trader(self):
-        return FlexTrader()
 
     def calc_normalization(self, steps: int):
         obs, _ = self.reset()
@@ -87,6 +91,7 @@ class TradingEnv(gym.Env):
         assert self.event is not None
         assert self.account is not None
         signals = {symbol: Signal(rating) for symbol, rating in zip(self.symbols, action)}
+        logger.debug("time=%s signals=%s", self.event.time, signals)
 
         orders = self.trader.create_orders(signals, self.event, self.account)
         self.broker.place_orders(orders)
@@ -116,9 +121,18 @@ class TradingEnv(gym.Env):
             self.account = self.broker.sync(self.event)
             self.trader.create_orders({}, self.event, self.account)
             observation = self._get_obs(self.event, self.account)
+            self._get_reward(self.event, self.account)
             i += 1
-        self.last_equity = self.account.equity()
         return observation, {}
 
     def render(self):
         pass
+
+    def __str__(self):
+        result = (
+            f"TradingEnv(\n\tbroker={self.broker}\n\ttrader={self.trader}\n\tfeed={self.feed}"
+            f"\n\tfeatures={len(self.features)}\n\twarmup={self.warmup}"
+            f"\n\tobservation_space={self.observation_space}\n\taction_space={self.action_space}"
+            "\n)"
+        )
+        return result

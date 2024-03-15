@@ -10,6 +10,7 @@ tensorboard>=2.15.1
 nautilus-ibapi~=10.19.2
 alpaca-py~=0.18.1
 stable-baselines3~=2.2.1
+sb3-contrib~=2.2.1
 gymnasium~=0.29.1
 
 # Build tools
