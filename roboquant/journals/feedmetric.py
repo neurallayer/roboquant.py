@@ -12,8 +12,7 @@ class FeedMetric(Metric):
     def calc(self, event, account, signals, orders):
         mkt_return = 0.0
         n = 0
-        for symbol, item in event.price_items.items():
-            price = item.price(self.price_type)
+        for symbol, price in event.get_prices(self.price_type).items():
             if prev_price := self._prev_prices.get(symbol):
                 mkt_return += price / prev_price - 1.0
                 n += 1
