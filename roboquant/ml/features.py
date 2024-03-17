@@ -15,7 +15,7 @@ from roboquant.strategies.strategy import Strategy
 class Feature(ABC):
 
     @abstractmethod
-    def calc(self, evt: Event, account: Account) -> NDArray:
+    def calc(self, evt: Event, account: Account | None) -> NDArray:
         """
         Return the result as a 1-dimensional NDArray.
         The result should always be the same size.
@@ -128,6 +128,7 @@ class PositionSizeFeature(Feature):
         self.symbols = symbols
 
     def calc(self, evt, account):
+        assert account is not None
         result = self._zeros()
         for idx, symbol in enumerate(self.symbols):
             position = account.positions.get(symbol)
@@ -150,6 +151,7 @@ class PositionPNLFeature(Feature):
         self.symbols = symbols
 
     def calc(self, evt, account):
+        assert account is not None
         result = self._zeros()
         for idx, symbol in enumerate(self.symbols):
             position = account.positions.get(symbol)
