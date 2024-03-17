@@ -38,11 +38,6 @@ class NumpyBuffer:
     def __len__(self):
         return min(self._idx, self.rows)
 
-    def to_numpy(self):
-        """Return all the values in the buffer as a 2D numpy array"""
-        start = max(0, self._idx - self.rows)
-        return self._data[start: self._idx]
-
     def is_full(self) -> bool:
         return self._idx >= self.rows
 
