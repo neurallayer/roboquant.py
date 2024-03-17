@@ -12,7 +12,7 @@ class TestDelay(unittest.TestCase):
     Measure the delay fro receiving live prices from IEX.
     This includes the following paths if you run it from home:
 
-    - From IEX to provider (Tiingo or Alpaca)
+    - From IEX to the market data provider (Tiingo or Alpaca)
     - Provider holds it for 15ms (requirement from IEX)
     - From provider to the modem/access-point in your house
     - From the access-point to your computer (f.e lan or Wi-Fi)
