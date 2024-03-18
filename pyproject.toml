@@ -54,11 +54,11 @@ dependencies = [
 version = {attr = "roboquant.__version__"}
 
 [project.optional-dependencies]
-torch = ["torch>=2.1.0", "tensorboard>=2.15.2", "stable-baselines3>=2.2.1"]
+torch = ["torch>=2.1.0", "tensorboard>=2.15.2", "stable-baselines3>=2.2.1", "sb3-contrib>=2.2.1"]
 yahoo = ["yfinance~=0.2.36"]
 ibkr = ["nautilus-ibapi~=10.19.2"]
 alpaca = ["alpaca-py"]
-all = [ "roboquant[torch,yahoo,ibkr]" ]
+all = ["roboquant[torch,yahoo,ibkr]"]
 
 
 [project.urls]

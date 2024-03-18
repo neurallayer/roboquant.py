@@ -8,7 +8,6 @@ from roboquant.ml.strategies import SB3PolicyTrader
 
 
 def _learn(path):
-
     symbols = ["IBM", "JPM", "MSFT", "BA"]
     yahoo = YahooFeed(*symbols, start_date="2000-01-01", end_date="2020-12-31")
 
@@ -22,7 +21,6 @@ def _learn(path):
     model = RecurrentPPO("MlpLstmPolicy", env, verbose=1)
     model.learn(log_interval=10, total_timesteps=100_000)
     model.policy.save(path)
-
     return env
 
 

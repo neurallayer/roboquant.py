@@ -1,4 +1,9 @@
+
+[[ ! -f "LICENSE" ]] && echo "run the script from the project root directory like this: ./bin/publish.sh" && exit 1
+
 source .venv/bin/activate
+
+rm -rf ./runs
 
 # QA
 flake8 roboquant tests || exit 1

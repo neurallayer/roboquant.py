@@ -93,7 +93,7 @@ class StrategyEnv(gym.Env):
             self._cache[evt.time] = result
         return result
 
-    def _get_reward(self, evt: Event, account: Account) -> float:
+    def get_reward(self, evt: Event, account: Account) -> float:
         equity = account.equity()
         reward = equity / self.last_equity - 1.0
         self.last_equity = equity
@@ -115,7 +115,7 @@ class StrategyEnv(gym.Env):
         if self.event:
             self.account = self.broker.sync(self.event)
             observation = self.get_observation(self.event)
-            reward = self._get_reward(self.event, self.account)
+            reward = self.get_reward(self.event, self.account)
             return observation, reward, False, False, {}
 
         return None, 0.0, True, False, {}
@@ -135,7 +135,7 @@ class StrategyEnv(gym.Env):
             self.account = self.broker.sync(self.event)
             self.trader.create_orders({}, self.event, self.account)
             observation = self.get_observation(self.event)
-            self._get_reward(self.event, self.account)
+            self.get_reward(self.event, self.account)
             if not np.any(np.isnan(observation)):
                 return observation, {}
 

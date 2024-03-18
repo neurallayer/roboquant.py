@@ -17,6 +17,8 @@ class YahooFeed(HistoricFeed):
     def __init__(self, *symbols: str, start_date="2010-01-01", end_date: str | None = None, interval="1d"):
         super().__init__()
         warnings.simplefilter(action="ignore", category=FutureWarning)
+        warnings.simplefilter(action="ignore", category=DeprecationWarning)
+
         columns = ["Open", "High", "Low", "Close", "Volume", "Adj Close"]
 
         for symbol in symbols:

@@ -39,6 +39,9 @@ class Feature(ABC):
     def _zeros(self):
         return np.zeros((self.size(),), dtype=np.float32)
 
+    def _ones(self):
+        return np.ones((self.size(),), dtype=np.float32)
+
     def _full_nan(self):
         return np.full((self.size(),), float("nan"), dtype=np.float32)
 
@@ -120,6 +123,17 @@ class PriceFeature(Feature):
         return len(self.symbols)
 
 
+class EquityFeature(Feature):
+
+    def calc(self, evt, account):
+        assert account is not None
+        equity = account.equity()
+        return np.asarray([equity], dtype=np.float32)
+
+    def size(self) -> int:
+        return 1
+
+
 class PositionSizeFeature(Feature):
     """Extract the position value for a symbol as fraction of the total equity"""
 
@@ -185,27 +199,133 @@ class BarFeature(Feature):
         return 5 * len(self.symbols)
 
 
-class FillFeature(Feature):
-    """If the feature returns nan, use the last complete values instead"""
+class CombinedFeature(Feature):
+    """Combine multiple features into one single feature"""
+
+    def __init__(self, *features: Feature) -> None:
+        super().__init__()
+        self.features = features
+        self._size = sum(feature.size() for feature in self.features)
+
+    def calc(self, evt, account):
+        data = [feature.calc(evt, account) for feature in self.features]
+        return np.hstack(data, dtype=np.float32)
+
+    def size(self) -> int:
+        return self._size
+
+
+class RunningStats:
+
+    def __init__(self, size) -> None:
+        self.existing_aggregate = (0, self._zeros(size), self._zeros(size))
+
+    @staticmethod
+    def _zeros(size):
+        return np.zeros((size,), dtype=np.float32)
+
+    def push(self, new_value):
+        (count, mean, m2) = self.existing_aggregate
+        count += 1
+        delta = new_value - mean
+        mean += delta / count
+        delta2 = new_value - mean
+        m2 += delta * delta2
+        self.existing_aggregate = (count, mean, m2)
+
+    # Retrieve the mean, variance and sample variance from an aggregate
+    def get_normalize_values(self):
+        (count, mean, m2) = self.existing_aggregate
+        if count < 1:
+            raise ValueError("not enough data")
+
+        variance = m2 / count
+        return mean, np.sqrt(variance)
+
+
+class NormalizeFeature(Feature):
+    """online normalization calculator"""
 
     def __init__(self, feature: Feature) -> None:
         super().__init__()
-        self.history = None
-        self.feature: Feature = feature
+        self.feature = feature
+        self.train = False
+        self.existing_aggregate = (0, self._zeros(), self._zeros())
+
+    def __update(self, new_value):
+        (count, mean, m2) = self.existing_aggregate
+        count += 1
+        delta = new_value - mean
+        mean += delta / count
+        delta2 = new_value - mean
+        m2 += delta * delta2
+        self.existing_aggregate = (count, mean, m2)
+
+    def normalize_values(self, values):
+        (count, mean, m2) = self.existing_aggregate
+        if not count:
+            return self._full_nan()
+
+        stdev = np.sqrt(m2 / count) + 1e-12
+        return (values - mean) / stdev
 
     def calc(self, evt, account):
         values = self.feature.calc(evt, account)
+        if self.train and not np.any(np.isnan(values)):
+            self.__update(values)
 
-        if np.any(np.isnan(values)):
-            if self.history is not None:
-                return self.history
-            return values
+        return self.normalize_values(values)
 
-        self.history = values
+    def size(self) -> int:
+        return self.feature.size()
+
+
+class FillFeature(Feature):
+    """If a feature returns a nan value, use the last known value instead"""
+
+    def __init__(self, feature: Feature) -> None:
+        super().__init__()
+        self.feature: Feature = feature
+        self.fill = self._full_nan()
+
+    def calc(self, evt, account):
+        values = self.feature.calc(evt, account)
+        mask = np.isnan(values)
+        values[mask] = self.fill[mask]
+        self.fill = np.copy(values)
         return values
 
     def reset(self):
-        self.history = None
+        self.fill = self._full_nan()
+        self.feature.reset()
+
+    def size(self) -> int:
+        return self.feature.size()
+
+
+class CacheFeature(Feature):
+    """Cache the results of a feature. This requires the feed to have always increasing time value
+    and the feature to produce same output.
+
+    Typically this doesn't work for features that depend on account values.
+    """
+
+    def __init__(self, feature: Feature) -> None:
+        super().__init__()
+        self.feature: Feature = feature
+        self.cache = {}
+
+    def calc(self, evt, account):
+        time = evt.time
+        if time in self.cache:
+            return self.cache[time]
+
+        values = self.feature.calc(evt, account)
+        self.cache[time] = values
+        return values
+
+    def reset(self):
+        self.cache = {}
         self.feature.reset()
 
     def size(self) -> int:
@@ -389,7 +509,7 @@ class DayOfWeekFeature(Feature):
         return 7
 
 
-class FeatureStrategy(Strategy, ABC):
+class FeatureStrategy(Strategy):
     """Abstract base class for strategies wanting to use features
     for their input and target.
     """

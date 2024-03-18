@@ -10,9 +10,7 @@ from roboquant.ml.strategies import SB3PolicyStrategy
 from roboquant.traders import FlexTrader
 
 
-def _run():
-    # pylint: disable=unused-variable
-
+def _train(path):
     symbols = ["IBM", "JPM", "MSFT", "BA", "AAPL", "AMZN"]
     yahoo = YahooFeed(*symbols, start_date="2000-01-01", end_date="2020-12-31")
 
@@ -34,19 +32,24 @@ def _run():
     model.learn(log_interval=10_000, total_timesteps=100_000)
 
     policy = model.policy
-    policy.save("/tmp/trained_policy.zip")
+    policy.save(path)
+    return env
 
+
+def _run(env, path):
     # Run a back test
     env.enable_cache = False
-    policy = ActorCriticPolicy.load("/tmp/trained_policy.zip")
+    policy = ActorCriticPolicy.load(path)
     strategy = SB3PolicyStrategy(env, policy)
-    feed = YahooFeed(*symbols, start_date="2021-01-01")
+    feed = YahooFeed(env.symbols, start_date="2021-01-01")
     journal = BasicJournal()
 
-    account = run(feed, strategy, trader, journal=journal)
+    account = run(feed, strategy, env.trader, journal=journal)
     print(account)
     print(journal)
 
 
 if __name__ == "__main__":
-    _run()
+    PATH = "/tmp/trained_policy.zip"
+    env1 = _train(PATH)
+    _run(env1, PATH)
