@@ -41,8 +41,8 @@ def run(
     channel = feed.play_background(timeframe, capacity)
 
     while event := channel.get(heartbeat_timeout):
-        signals = strategy.create_signals(event) if strategy else {}
         account = broker.sync(event)
+        signals = strategy.create_signals(event) if strategy else {}
         orders = trader.create_orders(signals, event, account)
         broker.place_orders(orders)
         if journal:
