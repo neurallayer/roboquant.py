@@ -2,7 +2,7 @@ from sb3_contrib import RecurrentPPO
 from sb3_contrib.common.recurrent.policies import RecurrentActorCriticPolicy
 from roboquant import run
 from roboquant.feeds.yahoo import YahooFeed
-from roboquant.ml.features import BarFeature
+from roboquant.ml.features import BarFeature, EquityFeature
 from roboquant.ml.envs import TraderEnv
 from roboquant.ml.strategies import SB3PolicyTrader
 
@@ -11,13 +11,10 @@ def _learn(path):
     symbols = ["IBM", "JPM", "MSFT", "BA"]
     yahoo = YahooFeed(*symbols, start_date="2000-01-01", end_date="2020-12-31")
 
-    features = [
-        BarFeature(*symbols).returns(),
-    ]
+    obs_feature = BarFeature(*symbols).returns().normalize(20)
+    reward_feature = EquityFeature().normalize(20)
 
-    env = TraderEnv(features, yahoo, symbols)
-    env.calc_normalization(1000)
-
+    env = TraderEnv(obs_feature, reward_feature, yahoo, symbols)
     model = RecurrentPPO("MlpLstmPolicy", env, verbose=1)
     model.learn(log_interval=10, total_timesteps=100_000)
     model.policy.save(path)
@@ -28,7 +25,6 @@ def _run(env, path):
     policy = RecurrentActorCriticPolicy.load(path)
     trader = SB3PolicyTrader(env, policy)
     feed = YahooFeed(*env.symbols, start_date="2021-01-01")
-
     account = run(feed, trader=trader)
     print(account)
 

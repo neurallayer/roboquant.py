@@ -32,7 +32,8 @@ class TestFeatures(unittest.TestCase):
             SMAFeature(FixedValueFeature(np.ones((3,))), 8),
             SMAFeature(PriceFeature(symbol2, "CLOSE"), 10),
             ReturnsFeature(PriceFeature(symbol1, "OPEN")),
-            VolumeFeature(symbol2), DayOfWeekFeature()
+            VolumeFeature(symbol2),
+            DayOfWeekFeature(),
         )
         account = Account()
         channel = feed.play_background()
@@ -54,23 +55,16 @@ class TestFeatures(unittest.TestCase):
             result2 = feature.calc(evt, account).sum()
             if not np.isnan(result1):
                 self.assertEqual(result1, result2)
-            
+
     def test_normalize(self):
         feed = get_feed()
 
         feature = CombinedFeature(
-            PriceFeature(*feed.symbols),
+            PriceFeature(*feed.symbols).returns(),
         )
 
-        norm_feature = NormalizeFeature(feature)
-        norm_feature.train = True
+        norm_feature = NormalizeFeature(feature, 10)
         account = Account()
-        channel = feed.play_background()
-        while evt := channel.get():
-            result = norm_feature.calc(evt, account)
-            self.assertTrue(len(result) == feature.size())
-
-        norm_feature.train = False
         channel = feed.play_background()
         while evt := channel.get():
             result = norm_feature.calc(evt, account)
@@ -78,11 +72,17 @@ class TestFeatures(unittest.TestCase):
 
     def test_core_feature(self):
         account = Account()
-        f = FixedValueFeature(np.ones(10,))[2:5]
+        f = FixedValueFeature(
+            np.ones((10,))
+        )[2:5]
         values = f.calc(Event.empty(), account)
         self.assertEqual(3, len(values))
 
-        f = FixedValueFeature(np.ones(10,)).returns()
+        f = FixedValueFeature(
+            np.ones(
+                10,
+            )
+        ).returns()
         values = f.calc(Event.empty(), account)
         values = f.calc(Event.empty(), account)
         self.assertEqual(0, values[0])

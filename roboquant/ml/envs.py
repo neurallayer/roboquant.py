@@ -1,6 +1,5 @@
 from decimal import Decimal
 import logging
-from typing import Sequence
 import gymnasium as gym
 from gymnasium import spaces
 import numpy as np
@@ -15,7 +14,6 @@ from roboquant.feeds.feed import Feed
 from roboquant.order import Order
 from roboquant.signal import Signal
 from roboquant.ml.features import Feature
-from roboquant.ml.torch import Normalize
 from roboquant.traders.flextrader import FlexTrader
 from roboquant.traders.trader import Trader
 
@@ -30,7 +28,8 @@ class StrategyEnv(gym.Env):
 
     def __init__(
         self,
-        features: Sequence[Feature],
+        obs_feature: Feature,
+        reward_feature:  Feature,
         feed: Feed,
         rating_symbols: list[str],
         broker: Broker | None = None,
@@ -43,61 +42,20 @@ class StrategyEnv(gym.Env):
         self.event: Event | None = None
         self.account: Account = self.broker.sync()
         self.symbols = rating_symbols
-        self.features = features
-        self.last_equity: float = self.account.equity()
-        self.obs_normalizer = None
-        self.reward_normalizer = None
-        self.enable_cache = True
-        self._cache = {}
-
-        action_size = len(rating_symbols)
-        obs_size = sum(feature.size() for feature in features)
-
-        self.observation_space = spaces.Box(-1.0, 1.0, shape=(obs_size,), dtype=np.float32)
-        self.action_space = spaces.Box(-1.0, 1.0, shape=(action_size,), dtype=np.float32)
-
-        logger.info("observation_space=%s action_space=%s", self.observation_space, self.action_space)
-
+        self.obs_feature = obs_feature
+        self.reward_feature = reward_feature
         self.render_mode = None
 
-    def calc_normalization(self, steps: int):
-        enable_cache = self.enable_cache
-        self.enable_cache = False
-        obs, _ = self.reset()
-        obs_buffer = np.zeros((steps, obs.shape[0]), dtype=np.float32)
-        reward_buffer = np.zeros((steps,), dtype=np.float32)
-        step = 0
-        while step < steps:
-            action = self.action_space.sample()
-            obs, reward, terminated, _, _ = self.step(action)
-            if not terminated:
-                obs_buffer[step] = obs
-                reward_buffer[step] = reward
-            else:
-                self.reset()
-            step += 1
-
-        obs_norm = obs_buffer.mean(axis=0), obs_buffer.std(axis=0)
-        reward_norm = reward_buffer.mean(axis=0).item(), reward_buffer.std(axis=0).item()
-        self.obs_normalizer = Normalize(obs_norm)
-        self.reward_normalizer = Normalize(reward_norm)
-        self.enable_cache = enable_cache
+        action_size = len(rating_symbols)
+        self.observation_space = spaces.Box(-1.0, 1.0, shape=(self.obs_feature.size(),), dtype=np.float32)
+        self.action_space = spaces.Box(-1.0, 1.0, shape=(action_size,), dtype=np.float32)
+        logger.info("observation_space=%s action_space=%s", self.observation_space, self.action_space)
 
     def get_observation(self, evt: Event) -> NDArray[np.float32]:
-        if self.enable_cache and evt.time in self._cache:
-            return self._cache[evt.time]
-        data = [feature.calc(evt, None) for feature in self.features]
-        obs = np.hstack(data, dtype=np.float32)
-        result = self.obs_normalizer(obs) if self.obs_normalizer else obs
-        if self.enable_cache:
-            self._cache[evt.time] = result
-        return result
+        return self.obs_feature.calc(evt, None)
 
-    def get_reward(self, evt: Event, account: Account) -> float:
-        equity = account.equity()
-        reward = equity / self.last_equity - 1.0
-        self.last_equity = equity
-        return self.reward_normalizer(reward) if self.reward_normalizer else reward
+    def get_reward(self, evt: Event, account: Account):
+        return self.reward_feature.calc(evt, account)
 
     def get_signals(self, action, event):
         return {symbol: Signal(rating) for symbol, rating in zip(self.symbols, action)}
@@ -124,8 +82,8 @@ class StrategyEnv(gym.Env):
         super().reset(seed=seed, options=options)
         self.broker.reset()
         self.trader.reset()
-        for feature in self.features:
-            feature.reset()
+        self.obs_feature.reset()
+        self.reward_feature.reset()
 
         self.channel = self.feed.play_background()
 
@@ -145,7 +103,7 @@ class StrategyEnv(gym.Env):
     def __str__(self):
         result = (
             f"TradingEnv(\n\tbroker={self.broker}\n\ttrader={self.trader}\n\tfeed={self.feed}"
-            f"\n\tfeatures={len(self.features)}"
+            f"\n\tfeatures_size={self.obs_feature.size()}"
             f"\n\tobservation_space={self.observation_space}\n\taction_space={self.action_space}"
             "\n)"
         )
@@ -159,10 +117,10 @@ class TraderEnv(gym.Env):
 
     def __init__(
         self,
-        features: Sequence[Feature],
+        obs_feature: Feature,
+        reward_feature:  Feature,
         feed: Feed,
         rating_symbols: list[str],
-        warmup: int = 0,
         broker: Broker | None = None,
     ):
         self.broker: Broker = broker or SimBroker()
@@ -171,51 +129,22 @@ class TraderEnv(gym.Env):
         self.event: Event | None = None
         self.account: Account = self.broker.sync()
         self.symbols = rating_symbols
-        self.features = features
-        self.last_equity: float = self.account.equity()
-        self.obs_normalizer = None
-        self.reward_normalizer = None
+        self.obs_feature = obs_feature
+        self.reward_feature = reward_feature
 
         action_size = len(rating_symbols)
-        obs_size = sum(feature.size() for feature in features)
-
-        self.observation_space = spaces.Box(-1.0, 1.0, shape=(obs_size,), dtype=np.float32)
+        self.observation_space = spaces.Box(-1.0, 1.0, shape=(obs_feature.size(),), dtype=np.float32)
         self.action_space = spaces.Box(-1.0, 1.0, shape=(action_size,), dtype=np.float32)
 
         logger.info("observation_space=%s action_space=%s", self.observation_space, self.action_space)
 
         self.render_mode = None
 
-    def calc_normalization(self, steps: int):
-        obs, _ = self.reset()
-        obs_buffer = np.zeros((steps, obs.shape[0]), dtype=np.float32)
-        reward_buffer = np.zeros((steps,), dtype=np.float32)
-        step = 0
-        while step < steps:
-            action = self.action_space.sample()
-            obs, reward, terminated, _, _ = self.step(action)
-            if not terminated:
-                obs_buffer[step] = obs
-                reward_buffer[step] = reward
-            else:
-                self.reset()
-            step += 1
-
-        obs_norm = obs_buffer.mean(axis=0), obs_buffer.std(axis=0)
-        reward_norm = reward_buffer.mean(axis=0).item(), reward_buffer.std(axis=0).item()
-        self.obs_normalizer = Normalize(obs_norm)
-        self.reward_normalizer = Normalize(reward_norm)
-
     def get_observation(self, evt: Event, account) -> NDArray[np.float32]:
-        data = [feature.calc(evt, account) for feature in self.features]
-        obs = np.hstack(data, dtype=np.float32)
-        return self.obs_normalizer(obs) if self.obs_normalizer else obs
+        return self.obs_feature.calc(evt, account)
 
-    def _get_reward(self, evt: Event, account: Account) -> float:
-        equity = account.equity()
-        reward = equity / self.last_equity - 1.0
-        self.last_equity = equity
-        return self.reward_normalizer(reward) if self.reward_normalizer else reward
+    def get_reward(self, evt: Event, account: Account):
+        return self.reward_feature.calc(evt, account)
 
     def account_rebalance(self, account: Account, new_sizes: dict[str, Decimal]) -> list[Order]:
         orders = []
@@ -255,7 +184,7 @@ class TraderEnv(gym.Env):
         if self.event:
             self.account = self.broker.sync(self.event)
             observation = self.get_observation(self.event, self.account)
-            reward = self._get_reward(self.event, self.account)
+            reward = self.get_reward(self.event, self.account)
             return observation, reward, False, False, {}
 
         return None, 0.0, True, False, {}
@@ -263,8 +192,8 @@ class TraderEnv(gym.Env):
     def reset(self, *, seed=None, options=None):
         super().reset(seed=seed, options=options)
         self.broker.reset()
-        for feature in self.features:
-            feature.reset()
+        self.obs_feature.reset()
+        self.reward_feature.reset()
 
         self.channel = self.feed.play_background()
 
@@ -273,7 +202,7 @@ class TraderEnv(gym.Env):
             assert self.event is not None, "feed empty during warmup"
             self.account = self.broker.sync(self.event)
             observation = self.get_observation(self.event, self.account)
-            self._get_reward(self.event, self.account)
+            self.get_reward(self.event, self.account)
             if not np.any(np.isnan(observation)):
                 return observation, {}
 
@@ -283,7 +212,7 @@ class TraderEnv(gym.Env):
     def __str__(self):
         result = (
             f"TradingEnv(\n\tbroker={self.broker}\n\tfeed={self.feed}"
-            f"\n\tfeatures={len(self.features)}"
+            f"\n\tfeature_size={self.obs_feature.size()}"
             f"\n\tobservation_space={self.observation_space}\n\taction_space={self.action_space}"
             "\n)"
         )

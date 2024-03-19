@@ -25,10 +25,19 @@ class Feature(ABC):
     def size(self) -> int:
         "return the size of this feature"
 
+    def shape(self):
+        return (self.size(),)
+
     def returns(self, period=1):
         if period == 1:
             return ReturnsFeature(self)
         return LongReturnsFeature(self, period)
+
+    def normalize(self, min_period=3):
+        return NormalizeFeature(self, min_period)
+
+    def cache(self):
+        return CacheFeature(self)
 
     def __getitem__(self, *args):
         return SlicedFeature(self, args)
@@ -37,13 +46,13 @@ class Feature(ABC):
         """Reset the state of the feature"""
 
     def _zeros(self):
-        return np.zeros((self.size(),), dtype=np.float32)
+        return np.zeros(self.shape(), dtype=np.float32)
 
     def _ones(self):
-        return np.ones((self.size(),), dtype=np.float32)
+        return np.ones(self.shape(), dtype=np.float32)
 
     def _full_nan(self):
-        return np.full((self.size(),), float("nan"), dtype=np.float32)
+        return np.full(self.shape(), float("nan"), dtype=np.float32)
 
 
 class SlicedFeature(Feature):
@@ -246,38 +255,41 @@ class RunningStats:
 class NormalizeFeature(Feature):
     """online normalization calculator"""
 
-    def __init__(self, feature: Feature) -> None:
+    def __init__(self, feature: Feature, min_count: int = 3) -> None:
         super().__init__()
         self.feature = feature
-        self.train = False
-        self.existing_aggregate = (0, self._zeros(), self._zeros())
+        self.min_count = min_count
+        self.existing_aggregate = (self._zero_int(), self._zeros(), self._zeros())
+
+    def _zero_int(self):
+        return np.zeros((self.size(),), dtype="int")
 
     def __update(self, new_value):
         (count, mean, m2) = self.existing_aggregate
-        count += 1
+        mask = ~ np.isnan(new_value)
+        count[mask] += 1
         delta = new_value - mean
-        mean += delta / count
+        mean[mask] += delta[mask] / count[mask]
         delta2 = new_value - mean
-        m2 += delta * delta2
-        self.existing_aggregate = (count, mean, m2)
+        m2[mask] += delta[mask] * delta2[mask]
 
-    def normalize_values(self, values):
+    def __normalize_values(self, values):
         (count, mean, m2) = self.existing_aggregate
-        if not count:
-            return self._full_nan()
-
-        stdev = np.sqrt(m2 / count) + 1e-12
+        stdev = self._full_nan()
+        mask = count >= self.min_count
+        stdev[mask] = np.sqrt(m2[mask] / count[mask]) + 1e-12
         return (values - mean) / stdev
 
     def calc(self, evt, account):
         values = self.feature.calc(evt, account)
-        if self.train and not np.any(np.isnan(values)):
-            self.__update(values)
-
-        return self.normalize_values(values)
+        self.__update(values)
+        return self.__normalize_values(values)
 
     def size(self) -> int:
         return self.feature.size()
+
+    def reset(self):
+        self.existing_aggregate = (self._zero_int(), self._zeros(), self._zeros())
 
 
 class FillFeature(Feature):
@@ -313,20 +325,24 @@ class CacheFeature(Feature):
     def __init__(self, feature: Feature) -> None:
         super().__init__()
         self.feature: Feature = feature
-        self.cache = {}
+        self._cache: dict[datetime, NDArray] = {}
 
     def calc(self, evt, account):
         time = evt.time
-        if time in self.cache:
-            return self.cache[time]
+        if time in self._cache:
+            return self._cache[time]
 
         values = self.feature.calc(evt, account)
-        self.cache[time] = values
+        self._cache[time] = values
         return values
 
     def reset(self):
-        self.cache = {}
+        """Reset the underlying feature. This doesn't cleear the cache"""
         self.feature.reset()
+
+    def clear(self):
+        """Clear all of the cache"""
+        self._cache = {}
 
     def size(self) -> int:
         return self.feature.size()
@@ -352,16 +368,11 @@ class ReturnsFeature(Feature):
 
     def __init__(self, feature: Feature) -> None:
         super().__init__()
-        self.history = None
         self.feature: Feature = feature
+        self.history = self._full_nan()
 
     def calc(self, evt, account):
         values = self.feature.calc(evt, account)
-
-        if self.history is None:
-            self.history = values
-            return self._full_nan()
-
         r = values / self.history - 1.0
         self.history = values
         return r
@@ -370,7 +381,7 @@ class ReturnsFeature(Feature):
         return self.feature.size()
 
     def reset(self):
-        self.history = None
+        self.history = self._full_nan()
         self.feature.reset()
 
 

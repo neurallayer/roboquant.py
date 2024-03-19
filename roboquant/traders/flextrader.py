@@ -33,8 +33,8 @@ def _log_rule(rule: str, signal: Signal, symbol: str, position: Decimal):
 
 
 class FlexTrader(Trader):
-    """Implementation of a Trader that has configurable rules to modify its behavior. This implementation will not
-    generate orders if there is not a price in the event for the underlying symbol.
+    """Implementation of a Trader that has configurable rules to modify which signals are converted into orders.
+    This implementation will not generate orders if there is not a price in the event for the underlying symbol.
 
     The configurable parameters include:
 
