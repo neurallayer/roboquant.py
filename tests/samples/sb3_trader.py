@@ -3,33 +3,34 @@ from sb3_contrib.common.recurrent.policies import RecurrentActorCriticPolicy
 from roboquant import run
 from roboquant.feeds.yahoo import YahooFeed
 from roboquant.ml.features import BarFeature, EquityFeature
-from roboquant.ml.envs import TraderEnv
+from roboquant.ml.envs import Action2Orders, TraderEnv
 from roboquant.ml.strategies import SB3PolicyTrader
 
 
-def _learn(path):
-    symbols = ["IBM", "JPM", "MSFT", "BA"]
+def _learn(symbols, path):
     yahoo = YahooFeed(*symbols, start_date="2000-01-01", end_date="2020-12-31")
 
     obs_feature = BarFeature(*symbols).returns().normalize(20)
     reward_feature = EquityFeature().normalize(20)
 
-    env = TraderEnv(obs_feature, reward_feature, yahoo, symbols)
+    action_2_orders = Action2Orders(symbols)
+    env = TraderEnv(yahoo, obs_feature, reward_feature, action_2_orders)
     model = RecurrentPPO("MlpLstmPolicy", env, verbose=1)
     model.learn(log_interval=10, total_timesteps=100_000)
     model.policy.save(path)
     return env
 
 
-def _run(env, path):
+def _run(symbols, env, path):
     policy = RecurrentActorCriticPolicy.load(path)
-    trader = SB3PolicyTrader(env, policy)
-    feed = YahooFeed(*env.symbols, start_date="2021-01-01")
+    trader = SB3PolicyTrader.from_env(env, policy)
+    feed = YahooFeed(*symbols, start_date="2021-01-01")
     account = run(feed, trader=trader)
     print(account)
 
 
 if __name__ == "__main__":
+    SYMBOLS = ["IBM", "JPM", "MSFT", "BA"]
     PATH = "/tmp/trained_reccurrent_policy.zip"
-    env1 = _learn(PATH)
-    _run(env1, PATH)
+    ENV = _learn(SYMBOLS, PATH)
+    _run(SYMBOLS, ENV, PATH)

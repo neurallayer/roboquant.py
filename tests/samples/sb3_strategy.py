@@ -4,13 +4,12 @@ from stable_baselines3.common.policies import ActorCriticPolicy
 from roboquant import run
 from roboquant.feeds.yahoo import YahooFeed
 from roboquant.ml.features import BarFeature, CombinedFeature, EquityFeature, PriceFeature, SMAFeature
-from roboquant.ml.envs import StrategyEnv
+from roboquant.ml.envs import Action2Signals, StrategyEnv
 from roboquant.ml.strategies import SB3PolicyStrategy
 from roboquant.traders import FlexTrader
 
 
-def _train(path):
-    symbols = ["IBM", "JPM", "MSFT", "BA", "AAPL", "AMZN"]
+def _train(symbols, path):
     yahoo = YahooFeed(*symbols, start_date="2000-01-01", end_date="2020-12-31")
 
     obs_feature = CombinedFeature(
@@ -23,7 +22,8 @@ def _train(path):
     reward_feature = EquityFeature().normalize(20)
 
     trader = FlexTrader(max_order_perc=0.2, min_order_perc=0.1)
-    env = StrategyEnv(obs_feature, reward_feature, feed=yahoo, rating_symbols=symbols, trader=trader)
+    action_2_signals = Action2Signals(symbols)
+    env = StrategyEnv(yahoo, obs_feature, reward_feature, action_2_signals, trader=trader)
     print(env)
 
     model = A2C("MlpPolicy", env, verbose=1)
@@ -36,15 +36,16 @@ def _train(path):
     return env
 
 
-def _run(env, path):
+def _run(symbols, env, path):
     policy = ActorCriticPolicy.load(path)
-    strategy = SB3PolicyStrategy(env, policy)
-    feed = YahooFeed(*env.symbols, start_date="2021-01-01")
+    strategy = SB3PolicyStrategy.from_env(env, policy)
+    feed = YahooFeed(*symbols, start_date="2021-01-01")
     account = run(feed, strategy, env.trader)
     print(account)
 
 
 if __name__ == "__main__":
+    SYMBOLS = ["IBM", "JPM", "MSFT", "BA", "AAPL", "AMZN"]
     PATH = "/tmp/trained_policy.zip"
-    env1 = _train(PATH)
-    _run(env1, PATH)
+    ENV = _train(SYMBOLS, PATH)
+    _run(SYMBOLS, ENV, PATH)
