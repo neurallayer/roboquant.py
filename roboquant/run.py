@@ -6,7 +6,7 @@ from roboquant.journals.journal import Journal
 from roboquant.strategies.strategy import Strategy
 from roboquant.traders.flextrader import FlexTrader
 from roboquant.traders.trader import Trader
-from .timeframe import Timeframe
+from roboquant.timeframe import Timeframe
 
 
 def run(

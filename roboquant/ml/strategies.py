@@ -30,6 +30,7 @@ class SB3PolicyStrategy(Strategy):
 
     def reset(self):
         self.state = None
+        self.obs_feature.reset()
 
 
 class SB3PolicyTrader(Trader):
@@ -55,3 +56,4 @@ class SB3PolicyTrader(Trader):
     def reset(self):
         super().reset()
         self.state = None
+        self.obs_feature.reset()

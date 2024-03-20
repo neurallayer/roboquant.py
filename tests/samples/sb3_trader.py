@@ -15,8 +15,8 @@ def _learn(symbols, path):
 
     action_2_orders = Action2Orders(symbols)
     env = TraderEnv(yahoo, obs_feature, reward_feature, action_2_orders)
-    model = RecurrentPPO("MlpLstmPolicy", env, verbose=1)
-    model.learn(log_interval=10, total_timesteps=100_000)
+    model = RecurrentPPO("MlpLstmPolicy", env)
+    model.learn(total_timesteps=20_000, progress_bar=True)
     model.policy.save(path)
     return env
 
@@ -31,6 +31,6 @@ def _run(symbols, env, path):
 
 if __name__ == "__main__":
     SYMBOLS = ["IBM", "JPM", "MSFT", "BA"]
-    PATH = "/tmp/trained_reccurrent_policy.zip"
+    PATH = "/tmp/trained_recurrent_policy.zip"
     ENV = _learn(SYMBOLS, PATH)
     _run(SYMBOLS, ENV, PATH)

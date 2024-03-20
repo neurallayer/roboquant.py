@@ -26,10 +26,10 @@ def _train(symbols, path):
     env = StrategyEnv(yahoo, obs_feature, reward_feature, action_2_signals, trader=trader)
     print(env)
 
-    model = A2C("MlpPolicy", env, verbose=1)
+    model = A2C("MlpPolicy", env, verbose=0)
 
     # Train the model
-    model.learn(log_interval=10_000, total_timesteps=100_000)
+    model.learn(total_timesteps=100_000, progress_bar=True)
 
     policy = model.policy
     policy.save(path)
