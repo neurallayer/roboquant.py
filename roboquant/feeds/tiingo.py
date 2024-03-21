@@ -14,9 +14,8 @@ import websocket
 from roboquant.config import Config
 from roboquant.event import Bar
 from roboquant.event import Trade, Quote, Event
-from roboquant.feeds.eventchannel import EventChannel
-from roboquant.feeds.feed import Feed
 from roboquant.feeds.historic import HistoricFeed
+from roboquant.feeds.live import LiveFeed
 
 logger = logging.getLogger(__name__)
 
@@ -143,16 +142,15 @@ class TiingoHistoricFeed(HistoricFeed):
             self._add_item(dt, pb)
 
 
-class TiingoLiveFeed(Feed):
+class TiingoLiveFeed(LiveFeed):
     """Subscribe to real-time market data from Tiingo
 
     There is support for US stocks, crypto and forex. See Tiingo.com for more details.
     """
 
     def __init__(self, key: str | None = None, market: Literal["crypto", "iex", "fx"] = "crypto"):
-
+        super().__init__()
         self.__key = key or Config().get("tiingo.key")
-        self.channel = None
 
         url = f"wss://api.tiingo.com/{market}"
         logger.info("Opening websocket url=%s", url)
@@ -166,24 +164,9 @@ class TiingoLiveFeed(Feed):
         sleep(3)
         self._last_time = datetime.fromisoformat("1900-01-01T00:00:00+00:00")
 
-    def play(self, channel: EventChannel):
-        self.channel = channel
-        while not channel.is_closed:
-            sleep(1)
-        self.channel = None
-
     def _deliver(self, price, now: datetime):
-        if self.channel and not self.channel.is_closed:
-            t = now.astimezone(timezone.utc)
-
-            # required for crypto times
-            if t < self._last_time:
-                t = self._last_time
-            else:
-                self._last_time = t
-
-            event = Event(t, [price])
-            self.channel.put(event)
+        event = Event(now, [price])
+        self.put(event)
 
     def _handle_message_iex(self, arr):
         if arr[13] == 1:  # inter-market sweep order

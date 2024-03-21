@@ -133,6 +133,7 @@ class PriceFeature(Feature):
 
 
 class EquityFeature(Feature):
+    """Returns the total equity value of the account"""
 
     def calc(self, evt, account):
         assert account is not None

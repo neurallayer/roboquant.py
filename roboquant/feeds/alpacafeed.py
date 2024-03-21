@@ -1,7 +1,6 @@
 from array import array
 from datetime import timedelta
 import threading
-import time
 from typing import Literal
 
 from alpaca.data import DataFeed
@@ -11,11 +10,10 @@ from alpaca.data.live.option import OptionDataStream
 
 from roboquant.config import Config
 from roboquant.event import Event, Quote, Trade, Bar
-from roboquant.feeds.eventchannel import EventChannel
-from roboquant.feeds.feed import Feed
+from roboquant.feeds.live import LiveFeed
 
 
-class AlpacaLiveFeed(Feed):
+class AlpacaLiveFeed(LiveFeed):
 
     __one_minute = str(timedelta(minutes=1))
 
@@ -38,34 +36,24 @@ class AlpacaLiveFeed(Feed):
 
         thread = threading.Thread(None, self.stream.run, daemon=True)
         thread.start()
-        self._channel = None
-
-    def play(self, channel: EventChannel):
-        self._channel = channel
-        while not channel.is_closed:
-            time.sleep(1)
-        self._channel = None
 
     async def close(self):
         await self.stream.close()
 
     async def __handle_trades(self, data):
-        if self._channel:
-            item = Trade(data.symbol, data.price, data.size)
-            event = Event(data.timestamp, [item])
-            self._channel.put(event)
+        item = Trade(data.symbol, data.price, data.size)
+        event = Event(data.timestamp, [item])
+        self.put(event)
 
     async def __handle_bars(self, data):
-        if self._channel:
-            item = Bar(data.symbol, array("f", [data.open, data.high, data.low, data.close, data.volume]), self.__one_minute)
-            event = Event(data.timestamp, [item])
-            self._channel.put(event)
+        item = Bar(data.symbol, array("f", [data.open, data.high, data.low, data.close, data.volume]), self.__one_minute)
+        event = Event(data.timestamp, [item])
+        self.put(event)
 
     async def __handle_quotes(self, data):
-        if self._channel:
-            item = Quote(data.symbol, array("f", [data.ask_price, data.ask_size, data.bid_price, data.bid_size]))
-            event = Event(data.timestamp, [item])
-            self._channel.put(event)
+        item = Quote(data.symbol, array("f", [data.ask_price, data.ask_size, data.bid_price, data.bid_size]))
+        event = Event(data.timestamp, [item])
+        self.put(event)
 
     def subscribe_trades(self, *symbols: str):
         self.stream.subscribe_trades(self.__handle_trades, *symbols)

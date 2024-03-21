@@ -1,5 +1,5 @@
 from roboquant.event import Event
-from roboquant.signal import Signal
+from roboquant.signal import Signal, BUY, SELL
 from roboquant.strategies.strategy import Strategy
 
 
@@ -28,7 +28,7 @@ class EMACrossover(Strategy):
                 if step > self.min_steps:
                     new_rating = calculator.is_above()
                     if old_rating != new_rating:
-                        signals[symbol] = Signal.buy() if new_rating else Signal.sell()
+                        signals[symbol] = BUY if new_rating else SELL
 
         return signals
 
@@ -47,7 +47,8 @@ class EMACrossover(Strategy):
             return self.price1 > self.price2
 
         def add_price(self, price: float):
-            self.price1 = self.momentum1 * self.price1 + (1.0 - self.momentum1) * price
-            self.price2 = self.momentum2 * self.price2 + (1.0 - self.momentum2) * price
+            m1, m2 = self.momentum1, self.momentum2
+            self.price1 = m1 * self.price1 + (1.0 - m1) * price
+            self.price2 = m2 * self.price2 + (1.0 - m2) * price
             self.step += 1
             return self.step

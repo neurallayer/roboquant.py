@@ -14,7 +14,7 @@ from ibapi.wrapper import EWrapper
 from roboquant.account import Account, Position
 from roboquant.event import Event
 from roboquant.order import Order, OrderStatus
-from .broker import Broker, _update_positions
+from roboquant.brokers.broker import Broker, _update_positions
 
 assert VERSION["major"] == 10 and VERSION["minor"] == 19, "Wrong version of the IBAPI found"
 
@@ -144,6 +144,7 @@ class IBKRBroker(Broker):
         self.__api = api
         self.__has_new_orders_since_sync = False
         self.price_type = "DEFAULT"
+        self.sleep_after_cancel = 0.0
 
         # Start the handling in a thread
         self.__api_thread = threading.Thread(target=api.run, daemon=True)
@@ -211,6 +212,8 @@ class IBKRBroker(Broker):
             if order.size.is_zero():
                 assert order.id is not None, "can only cancel orders with an id"
                 self.__api.cancelOrder(int(order.id), "")
+                if self.sleep_after_cancel:
+                    time.sleep(self.sleep_after_cancel)
             else:
                 if order.id is None:
                     order.id = self.__api.get_next_order_id()

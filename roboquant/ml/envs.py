@@ -14,6 +14,7 @@ from roboquant.feeds.feed import Feed
 from roboquant.order import Order
 from roboquant.signal import Signal
 from roboquant.ml.features import Feature
+from roboquant.timeframe import Timeframe
 from roboquant.traders.flextrader import FlexTrader
 from roboquant.traders.trader import Trader
 
@@ -81,6 +82,7 @@ class StrategyEnv(gym.Env):
         action_2_signals: Action2Signals,
         broker: Broker | None = None,
         trader: Trader | None = None,
+        timeframe: Timeframe | None = None
     ):
         self.broker: Broker = broker or SimBroker()
         self.trader: Trader = trader or FlexTrader()
@@ -92,6 +94,7 @@ class StrategyEnv(gym.Env):
         self.obs_feature = obs_feature
         self.reward_feature = reward_feature
         self.render_mode = None
+        self.timeframe = timeframe
 
         self.observation_space = spaces.Box(-1.0, 1.0, shape=(self.obs_feature.size(),), dtype=np.float32)
         self.action_space = action_2_signals.get_action_space()
@@ -128,7 +131,7 @@ class StrategyEnv(gym.Env):
         self.obs_feature.reset()
         self.reward_feature.reset()
 
-        self.channel = self.feed.play_background()
+        self.channel = self.feed.play_background(self.timeframe)
 
         while True:
             self.event = self.channel.get()
@@ -165,6 +168,7 @@ class TraderEnv(gym.Env):
         reward_feature:  Feature,
         action_2_orders: Action2Orders,
         broker: Broker | None = None,
+        timeframe: Timeframe | None = None
     ):
         self.broker: Broker = broker or SimBroker()
         self.channel = EventChannel()
@@ -174,6 +178,7 @@ class TraderEnv(gym.Env):
         self.account: Account = self.broker.sync()
         self.obs_feature = obs_feature
         self.reward_feature = reward_feature
+        self.timefame = timeframe
 
         self.observation_space = spaces.Box(-1.0, 1.0, shape=(obs_feature.size(),), dtype=np.float32)
         self.action_space = action_2_orders.get_action_space()
@@ -211,7 +216,7 @@ class TraderEnv(gym.Env):
         self.obs_feature.reset()
         self.reward_feature.reset()
 
-        self.channel = self.feed.play_background()
+        self.channel = self.feed.play_background(self.timefame)
 
         while True:
             self.event = self.channel.get()

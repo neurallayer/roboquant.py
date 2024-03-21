@@ -19,7 +19,7 @@ def _train(symbols, path):
             SMAFeature(PriceFeature(*symbols), 20).returns(),
         ).normalize(20).cache()
 
-    reward_feature = EquityFeature().normalize(20)
+    reward_feature = EquityFeature().returns().normalize(20)
 
     trader = FlexTrader(max_order_perc=0.2, min_order_perc=0.1)
     action_2_signals = Action2Signals(symbols)

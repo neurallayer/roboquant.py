@@ -11,7 +11,7 @@ def _learn(symbols, path):
     yahoo = YahooFeed(*symbols, start_date="2000-01-01", end_date="2020-12-31")
 
     obs_feature = BarFeature(*symbols).returns().normalize(20)
-    reward_feature = EquityFeature().normalize(20)
+    reward_feature = EquityFeature().returns().normalize(20)
 
     action_2_orders = Action2Orders(symbols)
     env = TraderEnv(yahoo, obs_feature, reward_feature, action_2_orders)
