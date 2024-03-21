@@ -155,14 +155,46 @@ class FlexTrader(Trader):
         # pylint: disable=unused-argument
         """Return zero or more orders for the provided symbol and size.
 
-        Default is a single Limit Order with the limit the current price and GTD 3 days from now.
-
-        Overwrite this method to create different order(s).
+        Default is a MarketOrder. Overwrite this method to create different order types.
         """
-        gtd = time + timedelta(days=3)
-        limit = item.price(self.price_type)
-        return [Order(symbol, size, limit, gtd)]
+
+        return [Order(symbol, size)]
 
     def __str__(self) -> str:
         attrs = " ".join([f"{k}={v}" for k, v in self.__dict__.items() if not k.startswith("_")])
         return f"FlexTrader({attrs})"
+
+
+class FlexLimitOrderTrader(FlexTrader):
+    """A FlexTrader version that returns a limit order"""
+
+    def __init__(
+        self,
+        one_order_only=True,
+        size_fractions=0,
+        min_buying_power_perc=0.05,
+        increase_position=False,
+        shorting=False,
+        max_order_perc=0.05,
+        min_order_perc=0.02,
+        price_type="DEFAULT",
+        gtd=timedelta(days=3)
+    ) -> None:
+        super().__init__(
+            one_order_only,
+            size_fractions,
+            min_buying_power_perc,
+            increase_position,
+            shorting,
+            max_order_perc,
+            min_order_perc,
+            price_type,
+        )
+        self.gtd_timedelta = gtd
+
+    def _get_orders(self, symbol: str, size: Decimal, item: PriceItem, rating: float, time: datetime) -> list[Order]:
+        # pylint: disable=unused-argument
+        """Return a single limit-order with the limit the current price a GTD with a configurable 3 days from now."""
+        gtd = time + self.gtd_timedelta
+        limit = item.price(self.price_type)
+        return [Order(symbol, size, limit, gtd)]

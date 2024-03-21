@@ -33,9 +33,9 @@ class ETR:
 
 
 if __name__ == "__main__":
-    feed = YahooFeed("IBM", "TSLA")
+    feed = YahooFeed("IBM", "MSFT", "TSLA")
     channel = feed.play_background()
     e = ETR(80, 0.1)
     while evt := channel.get():
         e.add(evt)
-        print(e.get_value("IBM"), e.get_value("TSLA"))
+        print(e.get_value("IBM"), e.get_value("TSLA"), e.get_value("MSFT"))

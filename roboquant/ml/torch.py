@@ -61,11 +61,12 @@ class RNNStrategy(FeatureStrategy):
 
         self.model.eval()
         with torch.no_grad():
-            output = self.model(x)
-            p = output.item()
+            output = self.model(x).numpy()
 
-            if self.label_feature is NormalizeFeature:
-                p = self.label_feature.denormalize(p)
+            if isinstance(self.label_feature, NormalizeFeature):
+                p = self.label_feature.denormalize(output).item()
+            else:
+                p = output.item()
 
             self.prediction_results.append(p)
             if p >= self.buy_pct:
