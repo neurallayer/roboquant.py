@@ -111,7 +111,7 @@ class Event:
     """
 
     def __init__(self, time: datetime, items: list[Any]):
-        assert time.tzname() == "UTC", time.tzname()
+        assert time.tzname() == "UTC", "event with non UTC timezone"
         self.time = time
         self.items = items
 

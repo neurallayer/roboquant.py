@@ -165,6 +165,7 @@ class TiingoLiveFeed(LiveFeed):
         self._last_time = datetime.fromisoformat("1900-01-01T00:00:00+00:00")
 
     def _deliver(self, price, now: datetime):
+        now = now.astimezone(timezone.utc)
         event = Event(now, [price])
         self.put(event)
 
