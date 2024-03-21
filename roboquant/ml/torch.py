@@ -1,32 +1,20 @@
 import logging
 
 import numpy as np
+from numpy.typing import NDArray
 import torch
 from torch.utils.data import DataLoader, Dataset
 
 from roboquant.signal import Signal, BUY, SELL
-from roboquant.ml.features import FeatureStrategy, NormalizeFeature
+from roboquant.ml.features import Feature, FeatureStrategy, NormalizeFeature
 
 logger = logging.getLogger(__name__)
-
-
-class Normalize:
-    """Normalize transform function"""
-
-    def __init__(self, norm):
-        self.mean, self.stdev = norm
-
-    def __call__(self, sample):
-        return (sample - self.mean) / self.stdev
-
-    def __str__(self) -> str:
-        return f"mean={self.mean} stdev={self.stdev}"
 
 
 class SequenceDataset(Dataset):
     """Sequence Dataset"""
 
-    def __init__(self, x_data, y_data, sequences=20, transform=None, target_transform=None):
+    def __init__(self, x_data: NDArray, y_data: NDArray, sequences=20, transform=None, target_transform=None):
         self.sequences = sequences
         self.x_data = x_data
         self.y_data = y_data
@@ -51,8 +39,8 @@ class RNNStrategy(FeatureStrategy):
 
     def __init__(
         self,
-        input_feature,
-        label_feature,
+        input_feature: Feature,
+        label_feature: Feature,
         model: torch.nn.Module,
         symbol: str,
         sequences: int = 20,
@@ -86,10 +74,6 @@ class RNNStrategy(FeatureStrategy):
                 return {self.symbol: SELL}
 
         return {}
-
-    @staticmethod
-    def calc_norm(data):
-        return data.mean(axis=0), data.std(axis=0)
 
     def _get_dataloaders(self, x, y, prediction: int, validation_split: float, batch_size: int):
         # what is the border between train- and validation-data
