@@ -6,7 +6,7 @@ import torch.nn.functional as F
 
 import roboquant as rq
 from roboquant.journals.basicjournal import BasicJournal
-from roboquant.ml.features import BarFeature, MaxReturnFeature, PriceFeature, SMAFeature
+from roboquant.ml.features import BarFeature, CombinedFeature, MaxReturnFeature, PriceFeature, SMAFeature
 from roboquant.ml.torch import RNNStrategy
 
 
@@ -38,11 +38,16 @@ class TestTorch(unittest.TestCase):
 
         # Define the stategy
         model = _MyModel()
-        strategy = RNNStrategy(model, symbol, sequences=20, buy_pct=0.04, sell_pct=0.01)
-        strategy.add_x(BarFeature(symbol).returns())
-        strategy.add_x(SMAFeature(BarFeature(symbol), 10).returns())
-        strategy.add_x(SMAFeature(BarFeature(symbol), 20).returns())
-        strategy.add_y(MaxReturnFeature(PriceFeature(symbol, "HIGH"), prediction))
+
+        input_feature = CombinedFeature(
+            BarFeature(symbol).returns(),
+            SMAFeature(BarFeature(symbol), 10).returns(),
+            SMAFeature(BarFeature(symbol), 20).returns(),
+        ).normalize()
+
+        label_feature = MaxReturnFeature(PriceFeature(symbol, price_type="HIGH"), 10)
+
+        strategy = RNNStrategy(input_feature, label_feature, model, symbol, sequences=20, buy_pct=0.04, sell_pct=0.01)
 
         # Train the model
         tf = rq.Timeframe.fromisoformat(start_date, "2020-01-01")

@@ -4,7 +4,7 @@ from torch import nn
 import torch.nn.functional as F
 
 import roboquant as rq
-from roboquant.ml.features import BarFeature, PriceFeature, SMAFeature
+from roboquant.ml.features import BarFeature, CombinedFeature, PriceFeature, SMAFeature
 from roboquant.ml.torch import RNNStrategy
 from tests.common import get_feed
 
@@ -33,10 +33,15 @@ class TestTorch(unittest.TestCase):
         prediction = 10
         feed = get_feed()
         model = _MyModel()
-        strategy = RNNStrategy(model, symbol, sequences=20, buy_pct=0.01)
-        strategy.add_x(BarFeature(symbol).returns())
-        strategy.add_x(SMAFeature(PriceFeature(symbol, price_type="HIGH"), 10).returns())
-        strategy.add_y(PriceFeature(symbol, price_type="CLOSE").returns(prediction))
+
+        input_feature = CombinedFeature(
+            BarFeature(symbol),
+            SMAFeature(PriceFeature(symbol, price_type="HIGH"), 10)
+        ).returns().normalize()
+
+        label_feature = PriceFeature(symbol, price_type="CLOSE").returns(prediction)
+
+        strategy = RNNStrategy(input_feature, label_feature, model, symbol, sequences=20, buy_pct=0.01)
 
         # Train the model with 10 years of data
         tf = rq.Timeframe.fromisoformat("2010-01-01", "2020-01-01")

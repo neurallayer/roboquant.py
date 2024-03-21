@@ -265,6 +265,11 @@ class NormalizeFeature(Feature):
     def _zero_int(self):
         return np.zeros((self.size(),), dtype="int")
 
+    def denormalize(self, value):
+        (count, mean, m2) = self.existing_aggregate
+        stdev = np.sqrt(m2 / count) - 1e-12
+        return value * stdev + mean
+
     def __update(self, new_value):
         (count, mean, m2) = self.existing_aggregate
         mask = ~ np.isnan(new_value)
@@ -526,21 +531,17 @@ class FeatureStrategy(Strategy):
     for their input and target.
     """
 
-    def __init__(self, history: int, dtype="float32"):
+    def __init__(self, input_feature: Feature, label_feature: Feature, history: int, dtype="float32"):
         self._features_x = []
         self._features_y = []
+        self.input_feature = input_feature
+        self.label_feature = label_feature
         self._hist = deque(maxlen=history)
         self._dtype = dtype
 
-    def add_x(self, feature):
-        self._features_x.append(feature)
-
-    def add_y(self, feature):
-        self._features_y.append(feature)
-
     def create_signals(self, event: Event) -> dict[str, Signal]:
         h = self._hist
-        row = self.__get_row(event, self._features_x)
+        row = self.input_feature.calc(event, None)
         h.append(row)
         if len(h) == h.maxlen:
             x = np.asarray(h, dtype=self._dtype)
@@ -550,23 +551,17 @@ class FeatureStrategy(Strategy):
     @abstractmethod
     def predict(self, x: NDArray) -> dict[str, Signal]: ...
 
-    def __get_row(self, evt, features) -> NDArray:
-        data = [feature.calc(evt, None) for feature in features]
-        return np.hstack(data, dtype=self._dtype)
-
     def _get_xy(self, feed: Feed, timeframe=None, warmup=0) -> tuple[NDArray, NDArray]:
         channel = feed.play_background(timeframe)
         x = []
         y = []
         while evt := channel.get():
             if warmup:
-                for f in self._features_x:
-                    f.calc(evt, None)
-                for f in self._features_y:
-                    f.calc(evt, None)
+                self.label_feature.calc(evt, None)
+                self.input_feature.calc(evt, None)
                 warmup -= 1
             else:
-                x.append(self.__get_row(evt, self._features_x))
-                y.append(self.__get_row(evt, self._features_y))
+                x.append(self.input_feature.calc(evt, None))
+                y.append(self.label_feature.calc(evt, None))
 
         return np.asarray(x, dtype=self._dtype), np.asarray(y, dtype=self._dtype)

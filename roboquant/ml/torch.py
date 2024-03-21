@@ -5,7 +5,7 @@ import torch
 from torch.utils.data import DataLoader, Dataset
 
 from roboquant.signal import Signal, BUY, SELL
-from roboquant.ml.features import FeatureStrategy
+from roboquant.ml.features import FeatureStrategy, NormalizeFeature
 
 logger = logging.getLogger(__name__)
 
@@ -49,20 +49,25 @@ class SequenceDataset(Dataset):
 
 class RNNStrategy(FeatureStrategy):
 
-    def __init__(self, model: torch.nn.Module, symbol: str, sequences: int = 20, buy_pct: float = 0.01, sell_pct=0.0):
-        super().__init__(sequences)
+    def __init__(
+        self,
+        input_feature,
+        label_feature,
+        model: torch.nn.Module,
+        symbol: str,
+        sequences: int = 20,
+        buy_pct: float = 0.01,
+        sell_pct=0.0,
+    ):
+        super().__init__(input_feature, label_feature, sequences)
         self.sequences = sequences
         self.model = model
         self.buy_pct = buy_pct
         self.sell_pct = sell_pct
         self.symbol = symbol
-        self._norm_x = None
-        self._norm_y = None
         self.prediction_results = []
 
     def predict(self, x) -> dict[str, Signal]:
-        if self._norm_x is not None:
-            x = (x - self._norm_x[0]) / self._norm_x[1]
         x = torch.asarray(x)
         x = torch.unsqueeze(x, dim=0)  # add the batch dimension
 
@@ -70,9 +75,10 @@ class RNNStrategy(FeatureStrategy):
         with torch.no_grad():
             output = self.model(x)
             p = output.item()
-            if self._norm_y is not None:
-                p = self._norm_y[1] * p + self._norm_y[0]
-                p = p[0]
+
+            if self.label_feature is NormalizeFeature:
+                p = self.label_feature.denormalize(p)
+
             self.prediction_results.append(p)
             if p >= self.buy_pct:
                 return {self.symbol: BUY}
@@ -92,20 +98,14 @@ class RNNStrategy(FeatureStrategy):
         x_train = x[: border - prediction]
         y_train = y[prediction:border]
 
-        self._norm_x = self.calc_norm(x_train)
-        self._norm_y = self.calc_norm(y_train)
-
-        transform_x = Normalize(self._norm_x)
-        transform_y = Normalize(self._norm_y)
-
-        train_dataset = SequenceDataset(x_train, y_train, self.sequences, transform_x, transform_y)
+        train_dataset = SequenceDataset(x_train, y_train, self.sequences)
         train_dataloader = DataLoader(train_dataset, batch_size=batch_size, shuffle=True)
 
         valid_dataloader = None
         if validation_split > 0.0:
             x_valid = x[border - prediction: -prediction]
             y_valid = y[border:]
-            valid_dataset = SequenceDataset(x_valid, y_valid, self.sequences, transform_x, transform_y)
+            valid_dataset = SequenceDataset(x_valid, y_valid, self.sequences)
             valid_dataloader = DataLoader(valid_dataset, batch_size=batch_size, shuffle=False)
 
         return train_dataloader, valid_dataloader
