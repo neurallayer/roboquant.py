@@ -7,7 +7,7 @@ from roboquant.ml.envs import Action2Orders, TraderEnv
 from roboquant.ml.strategies import SB3PolicyTrader
 
 
-def _learn(symbols, path):
+def learn(symbols, path):
     yahoo = YahooFeed(*symbols, start_date="2000-01-01", end_date="2020-12-31")
 
     obs_feature = BarFeature(*symbols).returns().normalize(20)
@@ -21,7 +21,7 @@ def _learn(symbols, path):
     return env
 
 
-def _run(symbols, env, path):
+def validate(symbols, env, path):
     policy = RecurrentActorCriticPolicy.load(path)
     trader = SB3PolicyTrader.from_env(env, policy)
     feed = YahooFeed(*symbols, start_date="2021-01-01")
@@ -32,5 +32,5 @@ def _run(symbols, env, path):
 if __name__ == "__main__":
     SYMBOLS = ["IBM", "JPM", "MSFT", "BA"]
     PATH = "/tmp/trained_recurrent_policy.zip"
-    ENV = _learn(SYMBOLS, PATH)
-    _run(SYMBOLS, ENV, PATH)
+    ENV = learn(SYMBOLS, PATH)
+    validate(SYMBOLS, ENV, PATH)

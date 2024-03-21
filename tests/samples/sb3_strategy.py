@@ -9,7 +9,7 @@ from roboquant.ml.strategies import SB3PolicyStrategy
 from roboquant.traders import FlexTrader
 
 
-def _train(symbols, path):
+def learn(symbols, path):
     yahoo = YahooFeed(*symbols, start_date="2000-01-01", end_date="2020-12-31")
 
     obs_feature = CombinedFeature(
@@ -36,7 +36,7 @@ def _train(symbols, path):
     return env
 
 
-def _run(symbols, env, path):
+def validate(symbols, env, path):
     policy = ActorCriticPolicy.load(path)
     strategy = SB3PolicyStrategy.from_env(env, policy)
     feed = YahooFeed(*symbols, start_date="2021-01-01")
@@ -47,5 +47,5 @@ def _run(symbols, env, path):
 if __name__ == "__main__":
     SYMBOLS = ["IBM", "JPM", "MSFT", "BA", "AAPL", "AMZN"]
     PATH = "/tmp/trained_policy.zip"
-    ENV = _train(SYMBOLS, PATH)
-    _run(SYMBOLS, ENV, PATH)
+    ENV = learn(SYMBOLS, PATH)
+    validate(SYMBOLS, ENV, PATH)
