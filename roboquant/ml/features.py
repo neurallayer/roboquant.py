@@ -524,4 +524,3 @@ class DayOfWeekFeature(Feature):
 
     def size(self) -> int:
         return 7
-
