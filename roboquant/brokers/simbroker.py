@@ -29,7 +29,7 @@ class SimBroker(Broker):
     def __init__(
         self,
         initial_deposit=1_000_000.0,
-        price_type="DEFAULT",
+        price_type="OPEN",
         slippage=0.001,
         clean_up_orders=True,
     ):
@@ -115,8 +115,10 @@ class SimBroker(Broker):
         The default implementation is:
 
         - A market order is always fully filled,
-        - A limit order only when the limit is below the BUY price or
-        above the SELL price."""
+        - A limit order only when the limit is below the BUY price or above the SELL price.
+
+        Overwrite this method in a subclass if you require more advanced behavior, like partial fills.
+        """
         if order.limit is None:
             return order.remaining
         if order.is_buy and price <= order.limit:
@@ -127,7 +129,9 @@ class SimBroker(Broker):
         return Decimal(0)
 
     def place_orders(self, orders):
-        """Place new orders at this broker. The order gets assigned a unique id if it hasn't one already.
+        """Place new orders at this broker. The order gets assigned a unique order-id if it hasn't one already.
+
+        Orders that are placed that have already an order-id are either update- or cancellation-orders.
 
         There is no trading simulation yet performed or account updated. Orders placed at time `t`, will be
         processed during time `t+1`. This protects against future bias.
@@ -180,7 +184,8 @@ class SimBroker(Broker):
                             order.status = OrderStatus.FILLED
 
     def sync(self, event: Event | None = None) -> Account:
-        """This will perform the trading simulation for open orders areturn an updated the account"""
+        """This will perform the order-execution simulation for the open orders and
+        return the updated the account as a result."""
 
         acc = self._account
         if event:
@@ -189,8 +194,9 @@ class SimBroker(Broker):
         prices = event.price_items if event else {}
 
         if self.clean_up_orders:
-            # remove all the closed orders from the previous step
-            self._create_orders = {order_id: order for order_id, order in self._create_orders.items() if not order.is_closed}
+            # only keep the open orders from the previous step
+            # this improces performance a lot for large back tests
+            self._create_orders = {order_id: order for order_id, order in self._create_orders.items() if order.is_open}
 
         self._process_modify_order()
         self._process_create_orders(prices)

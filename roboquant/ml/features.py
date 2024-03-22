@@ -5,14 +5,14 @@ from datetime import datetime, timezone
 import numpy as np
 from numpy.typing import NDArray
 
-from roboquant.signal import Signal
 from roboquant.account import Account
 from roboquant.event import Event, Bar
-from roboquant.feeds.feed import Feed
-from roboquant.strategies.strategy import Strategy
 
 
 class Feature(ABC):
+    """Features allows to create features from an event or account object.
+    Many features also allow post transformation after that, like normalization.
+    """
 
     @abstractmethod
     def calc(self, evt: Event, account: Account | None) -> NDArray:
@@ -525,43 +525,3 @@ class DayOfWeekFeature(Feature):
     def size(self) -> int:
         return 7
 
-
-class FeatureStrategy(Strategy):
-    """Abstract base class for strategies wanting to use features
-    for their input and target.
-    """
-
-    def __init__(self, input_feature: Feature, label_feature: Feature, history: int, dtype="float32"):
-        self._features_x = []
-        self._features_y = []
-        self.input_feature = input_feature
-        self.label_feature = label_feature
-        self._hist = deque(maxlen=history)
-        self._dtype = dtype
-
-    def create_signals(self, event: Event) -> dict[str, Signal]:
-        h = self._hist
-        row = self.input_feature.calc(event, None)
-        h.append(row)
-        if len(h) == h.maxlen:
-            x = np.asarray(h, dtype=self._dtype)
-            return self.predict(x)
-        return {}
-
-    @abstractmethod
-    def predict(self, x: NDArray) -> dict[str, Signal]: ...
-
-    def _get_xy(self, feed: Feed, timeframe=None, warmup=0) -> tuple[NDArray, NDArray]:
-        channel = feed.play_background(timeframe)
-        x = []
-        y = []
-        while evt := channel.get():
-            if warmup:
-                self.label_feature.calc(evt, None)
-                self.input_feature.calc(evt, None)
-                warmup -= 1
-            else:
-                x.append(self.input_feature.calc(evt, None))
-                y.append(self.label_feature.calc(evt, None))
-
-        return np.asarray(x, dtype=self._dtype), np.asarray(y, dtype=self._dtype)

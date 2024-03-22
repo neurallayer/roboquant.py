@@ -5,8 +5,9 @@ from numpy.typing import NDArray
 import torch
 from torch.utils.data import DataLoader, Dataset
 
+from roboquant.ml.strategies import FeatureStrategy
 from roboquant.signal import Signal, BUY, SELL
-from roboquant.ml.features import Feature, FeatureStrategy, NormalizeFeature
+from roboquant.ml.features import Feature, NormalizeFeature
 
 logger = logging.getLogger(__name__)
 

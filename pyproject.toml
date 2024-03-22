@@ -68,7 +68,7 @@ torch = ["torch>=2.1.0", "tensorboard>=2.15.2", "stable-baselines3[extra]>=2.2.1
 yahoo = ["yfinance~=0.2.36"]
 ibkr = ["nautilus-ibapi~=10.19.2"]
 alpaca = ["alpaca-py"]
-all = ["roboquant[torch,yahoo,ibkr]"]
+all = ["roboquant[torch,yahoo,ibkr,alpaca]"]
 
 
 [project.urls]
