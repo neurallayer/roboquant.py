@@ -1,36 +1,31 @@
+# %%
+import matplotlib.pyplot as plt
+import matplotlib as mpl
+import roboquant as rq
 
-if __name__ == "__main__":
-    # %%
-    import matplotlib.pyplot as plt
-    import matplotlib as mpl
-    import roboquant as rq
-    import warnings
+plt.style.use('dark_background')
+mpl.rcParams['figure.facecolor'] = '#202020'
+# %%
+feed = rq.feeds.YahooFeed("JPM", "IBM", "F", start_date="2010-01-01")
+_, axs = plt.subplots(2, figsize=(10, 10))
 
-    warnings.simplefilter(action='ignore', category=FutureWarning)
-    plt.style.use('dark_background')
-    mpl.rcParams['figure.facecolor'] = '#202020'
+feed.plot(axs[0], "JPM")
+feed.plot(axs[1], "IBM")
+plt.show()
 
-    # %%
-    feed = rq.feeds.YahooFeed("JPM", "IBM", "F", start_date="2010-01-01")
-    _, axs = plt.subplots(2, figsize=(10, 10))
+# %%
+strategy = rq.strategies.EMACrossover()
+journal = rq.journals.MetricsJournal.pnl()
+rq.run(feed, strategy, journal=journal)
 
-    feed.plot(axs[0], "JPM")
-    feed.plot(axs[1], "IBM")
-    plt.show()
+# %%
+journal.plot(plt, "pnl/equity", color="green", linewidth=0.5)
+plt.show()
 
-    # %%
-    strategy = rq.strategies.EMACrossover()
-    journal = rq.journals.MetricsJournal.pnl()
-    rq.run(feed, strategy, journal=journal)
-
-    # %%
-    journal.plot(plt, "pnl/equity", color="green", linewidth=0.5)
-    plt.show()
-
-    # %%
-    metric_names = journal.get_metric_names()
-    _, axs = plt.subplots(3, 3, figsize=(15, 15))
-    axs = axs.flatten()
-    for ax, metric_name in zip(axs, metric_names):
-        journal.plot(ax, metric_name)
-    plt.show()
+# %%
+metric_names = journal.get_metric_names()
+_, axs = plt.subplots(3, 3, figsize=(15, 15))
+axs = axs.flatten()
+for ax, metric_name in zip(axs, metric_names):
+    journal.plot(ax, metric_name)
+plt.show()

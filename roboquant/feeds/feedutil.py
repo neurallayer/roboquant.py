@@ -23,8 +23,11 @@ def get_symbol_prices(
     return x, y
 
 
-def get_symbol_ohlcv(feed: Feed, symbol: str, timeframe: Timeframe | None = None) -> dict[str, list]:
-    """Get the OHLCV values for a single symbol from a feed"""
+def get_ohlcv(feed: Feed, symbol: str, timeframe: Timeframe | None = None) -> dict[str, list]:
+    """Get the OHLCV values for a symbol from a feed.
+    The returned value is a dict with the keys being "Date", "Open", "High", "Low", "Close", "Volume"
+    and the values a list.
+    """
 
     result = {column: [] for column in ["Date", "Open", "High", "Low", "Close", "Volume"]}
     channel = feed.play_background(timeframe)

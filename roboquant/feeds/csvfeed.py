@@ -1,4 +1,5 @@
 import csv
+import sys
 import logging
 import os
 import pathlib
@@ -87,9 +88,18 @@ class CSVFeed(HistoricFeed):
 
         class StooqCSVFeed(CSVFeed):
             def __init__(self):
-                super().__init__(
-                    path, columns=columns, time_offset="21:00:00+00:00", datetime_fmt="%Y%m%d", endswith=".txt", frequency="1d"
-                )
+                # from Python 3.11 onwards we can use the fast standard ISO parsing
+                if sys.version_info >= (3, 11):
+                    super().__init__(path, columns=columns, time_offset="21:00:00+00:00", endswith=".txt", frequency="1d")
+                else:
+                    super().__init__(
+                        path,
+                        columns=columns,
+                        time_offset="21:00:00+00:00",
+                        datetime_fmt="%Y%m%d",
+                        endswith=".txt",
+                        frequency="1d",
+                    )
 
             def _get_symbol(self, filename: str):
                 base = pathlib.Path(filename).stem.upper()

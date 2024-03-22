@@ -1,6 +1,4 @@
-import logging
-import unittest
-
+# %%
 from torch import nn
 import torch.nn.functional as F
 
@@ -9,8 +7,10 @@ from roboquant.journals.basicjournal import BasicJournal
 from roboquant.ml.features import BarFeature, CombinedFeature, MaxReturnFeature, PriceFeature, SMAFeature
 from roboquant.ml.torch import RNNStrategy
 
+# %%
+# Torch LSTM Model
+class MyModel(nn.Module):
 
-class _MyModel(nn.Module):
     def __init__(self) -> None:
         super().__init__()
         self.lstm = nn.LSTM(15, 16, batch_first=True, num_layers=2, dropout=0.4)
@@ -23,47 +23,43 @@ class _MyModel(nn.Module):
         output = self.linear(output)
         return output
 
+# %%
+# Config
+symbol = "AAPL"
+prediction = 10
+start_date = "2010-01-01"
+feed = rq.feeds.YahooFeed(symbol, start_date=start_date)
 
-class TestTorch(unittest.TestCase):
+# %%
+# Define the strategy
+model = MyModel()
 
-    def test_lstm_model(self):
-        logging.basicConfig()
-        logging.getLogger("roboquant.strategies").setLevel(level=logging.INFO)
+input_feature = CombinedFeature(
+    BarFeature(symbol).returns(),
+    SMAFeature(BarFeature(symbol), 10).returns(),
+    SMAFeature(BarFeature(symbol), 20).returns(),
+).normalize()
 
-        # Config
-        symbol = "AAPL"
-        prediction = 10
-        start_date = "2010-01-01"
-        feed = rq.feeds.YahooFeed(symbol, start_date=start_date)
+label_feature = MaxReturnFeature(PriceFeature(symbol, price_type="HIGH"), 10)
 
-        # Define the stategy
-        model = _MyModel()
+strategy = RNNStrategy(input_feature, label_feature, model, symbol, sequences=20, buy_pct=0.04, sell_pct=0.01)
 
-        input_feature = CombinedFeature(
-            BarFeature(symbol).returns(),
-            SMAFeature(BarFeature(symbol), 10).returns(),
-            SMAFeature(BarFeature(symbol), 20).returns(),
-        ).normalize()
+# %%
+# Train the model
+tf = rq.Timeframe.fromisoformat(start_date, "2020-01-01")
+strategy.fit(feed, timeframe=tf, epochs=20, validation_split=0.25, prediction=prediction)
 
-        label_feature = MaxReturnFeature(PriceFeature(symbol, price_type="HIGH"), 10)
+# %%
+# Run the trained model with the last years of data
+tf = rq.Timeframe.fromisoformat("2020-01-01", "2025-01-01")
+journal = BasicJournal()
+account = rq.run(feed, strategy, timeframe=tf, journal=journal)
 
-        strategy = RNNStrategy(input_feature, label_feature, model, symbol, sequences=20, buy_pct=0.04, sell_pct=0.01)
+# %%
+# Print some results
+print(journal)
+predictions = strategy.prediction_results
+print(max(predictions), min(predictions))
+print(account)
 
-        # Train the model
-        tf = rq.Timeframe.fromisoformat(start_date, "2020-01-01")
-        strategy.fit(feed, timeframe=tf, epochs=20, validation_split=0.25, prediction=prediction)
-
-        # Run the trained model with the last 4 years of data
-        tf = rq.Timeframe.fromisoformat("2020-01-01", "2024-01-01")
-        journal = BasicJournal()
-        account = rq.run(feed, strategy, timeframe=tf, journal=journal)
-
-        # Print some results
-        print(journal)
-        predictions = strategy.prediction_results
-        print(max(predictions), min(predictions))
-        print(account)
-
-
-if __name__ == "__main__":
-    unittest.main()
+# %%

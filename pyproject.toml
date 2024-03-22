@@ -10,6 +10,10 @@ testpaths = [
 
 [tool.pyright]
 reportOptionalOperand = "none"
+exclude = ["samples/*.py"]
+
+[tool.pylint.MASTER]
+ignore-paths = 'samples'
 
 [tool.pylint.'MESSAGES CONTROL']
 max-line-length = 127
@@ -21,6 +25,12 @@ max-attributes = 10
 [build-system]
 requires = ["setuptools>=61.0"]
 build-backend = "setuptools.build_meta"
+
+[tool.setuptools.packages.find]
+exclude = ["docs*", "tests*", "samples*"]
+
+[tool.setuptools.package-data]
+"*" = ["*.json"]
 
 [project]
 name = "roboquant"

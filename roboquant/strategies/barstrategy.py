@@ -9,6 +9,9 @@ from roboquant.strategies.strategy import Strategy
 class BarStrategy(Strategy):
     """Abstract base class for other strategies that helps to implement trading solutions
     based on technical indicators using bars.
+
+    Sub classes should implement the _create_signal method. This method is only invoked once
+    there is at least `size` history for an individual symbol.
     """
 
     def __init__(self, size: int) -> None:
@@ -34,6 +37,6 @@ class BarStrategy(Strategy):
     @abstractmethod
     def _create_signal(self, symbol: str, ohlcv: OHLCVBuffer) -> Signal | None:
         """
-        Subclasses should implement this method and return a signal or None for the provided symbol and ohlcv data.
+        Return a signal or None for the provided symbol and ohlcv data.
         """
         ...

@@ -33,5 +33,14 @@
     "python.testing.unittestEnabled": true,
     "[python]": {
         "editor.defaultFormatter": "ms-python.black-formatter"
-    }
+    },
+    "pylint.ignorePatterns": [
+        "*samples/*.py"
+    ],
+    "flake8.ignorePatterns": [
+        "*samples/*.py"
+    ],
+    "python.analysis.exclude": [
+        "**/samples", "**/Interactive*.py"
+    ]
 }

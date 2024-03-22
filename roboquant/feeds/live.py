@@ -8,7 +8,7 @@ from .feed import Feed
 
 class LiveFeed(Feed):
     """
-    Abstract base class for other feeds that produce live price-items. It will ensure that
+    Abstract base class for feeds that produce live price-items. It will ensure that
     events that are published are monotonic in time (so always increasing).
     """
 
