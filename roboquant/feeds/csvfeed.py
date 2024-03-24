@@ -79,6 +79,7 @@ class CSVFeed(HistoricFeed):
         return pathlib.Path(filename).stem.upper()
 
     def _parse_csvfiles(self, filenames: list[str]):
+        # pylint: disable=too-many-locals
         adj_close_column = self.adj_close_column
         date_fmt = self.date_fmt
         time_fmt = self.time_fmt
@@ -87,7 +88,7 @@ class CSVFeed(HistoricFeed):
         time_column = self.time_column
         freq = self.freq
         time_offset = self.time_offset
-   
+
         for filename in filenames:
             symbol = self._get_symbol(filename)
             with open(filename, encoding="utf8") as csvfile:
@@ -110,7 +111,7 @@ class CSVFeed(HistoricFeed):
                         pb = Bar.from_adj_close(symbol, ohlcv, adj_close, freq)
                     else:
                         pb = Bar(symbol, ohlcv, freq)
-   
+
                     self._add_item(dt.astimezone(timezone.utc), pb)
 
     @classmethod

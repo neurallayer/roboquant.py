@@ -55,7 +55,7 @@ def run_price_item_feed(feed: Feed, symbols: list[str], test_case: TestCase, tim
                     for f in item.data:
                         test_case.assertTrue(math.isfinite(f))
 
-    test_case.assertGreaterEqual(n_items, min_items)    
+    test_case.assertGreaterEqual(n_items, min_items)
 
 
 def run_strategy(strategy: Strategy, test_case: TestCase):
