@@ -5,7 +5,7 @@ import torch.nn.functional as F
 
 import roboquant as rq
 from roboquant.ml.features import BarFeature, CombinedFeature, PriceFeature, SMAFeature
-from roboquant.ml.torch import RNNStrategy
+from roboquant.ml.strategies import RNNStrategy
 from tests.common import get_feed
 
 
@@ -23,7 +23,7 @@ class _MyModel(nn.Module):
         return output
 
 
-class TestTorch(unittest.TestCase):
+class TestRNN(unittest.TestCase):
 
     def test_lstm_model(self):
         # logging.basicConfig()

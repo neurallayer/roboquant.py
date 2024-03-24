@@ -5,7 +5,7 @@ import torch.nn.functional as F
 import roboquant as rq
 from roboquant.journals.basicjournal import BasicJournal
 from roboquant.ml.features import BarFeature, CombinedFeature, MaxReturnFeature, PriceFeature, SMAFeature
-from roboquant.ml.torch import RNNStrategy
+from roboquant.ml.strategies import RNNStrategy
 
 # %%
 # Torch LSTM Model

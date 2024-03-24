@@ -5,13 +5,14 @@ from unittest import TestCase
 
 from roboquant import PriceItem, Bar, Quote, Trade
 from roboquant.feeds import CSVFeed
+from roboquant.feeds.feed import Feed
 from roboquant.signal import Signal
 from roboquant.strategies.strategy import Strategy
 
 
 def get_feed() -> CSVFeed:
     root = pathlib.Path(__file__).parent.resolve().joinpath("data", "csv")
-    return CSVFeed(str(root), time_offset="21:00:00+00:00", datetime_fmt="%Y%m%d")
+    return CSVFeed(str(root), time_offset="21:00:00+00:00", date_fmt="%Y%m%d")
 
 
 def get_recent_start_date(days=10):
@@ -19,22 +20,20 @@ def get_recent_start_date(days=10):
     return start.strftime("%Y-%m-%d")
 
 
-def run_price_item_feed(feed, symbols: list[str], test_case: TestCase, timeframe=None):
+def run_price_item_feed(feed: Feed, symbols: list[str], test_case: TestCase, timeframe=None, min_items=1):
     """Common test for all feeds that produce price-items"""
 
     channel = feed.play_background(timeframe)
 
-    last = None
+    last = datetime.fromisoformat("1900-01-01T00:00:00+00:00")
+    n_items = 0
     while event := channel.get(30.0):
-
         test_case.assertIsInstance(event.time, datetime)
         test_case.assertEqual("UTC", event.time.tzname())
-
-        if last is not None:
-            # testCase.assertLessEqual(event.time - last, timedelta(minutes=1))
-            test_case.assertGreaterEqual(event.time, last, f"{event} < {last}, items={event.items}")
-
+        test_case.assertGreater(event.time, last, f"{event} < {last}, items={event.items}")
         last = event.time
+
+        n_items += len(event.items)
 
         for item in event.items:
             test_case.assertIsInstance(item, PriceItem)
@@ -55,6 +54,8 @@ def run_price_item_feed(feed, symbols: list[str], test_case: TestCase, timeframe
                 case Quote():
                     for f in item.data:
                         test_case.assertTrue(math.isfinite(f))
+
+    test_case.assertGreaterEqual(n_items, min_items)    
 
 
 def run_strategy(strategy: Strategy, test_case: TestCase):

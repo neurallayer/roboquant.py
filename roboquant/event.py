@@ -85,7 +85,7 @@ class Bar(PriceItem):
     @classmethod
     def from_adj_close(cls, symbol, ohlcv: array, adj_close: float, frequency=""):
         adj = adj_close / ohlcv[3]
-        ohlcv = array("f", [ohlcv[0] * adj, ohlcv[1] * adj, ohlcv[2] * adj, ohlcv[5], ohlcv[4] / adj])
+        ohlcv = array("f", [ohlcv[0] * adj, ohlcv[1] * adj, ohlcv[2] * adj, adj_close, ohlcv[4] / adj])
         return cls(symbol, ohlcv, frequency)
 
     def price(self, price_type: str = "DEFAULT") -> float:

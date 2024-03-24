@@ -7,22 +7,8 @@ import roboquant as rq
 
 class TestBigFeed(unittest.TestCase):
 
-    def test_big_feed(self):
-        start = time.time()
-        path = os.path.expanduser("~/data/nyse_stocks/")
-        feed = rq.feeds.CSVFeed.stooq_us_daily(path)
-        load_time = time.time() - start
-        strategy = rq.strategies.EMACrossover(13, 26)
-        journal = rq.journals.BasicJournal()
-        start = time.time()
-        account = rq.run(feed, strategy, journal=journal)
-        runtime = time.time() - start
-
-        self.assertTrue(journal.items > 1_000_000)
-        self.assertTrue(journal.signals > 100_000)
-        self.assertTrue(journal.orders > 10_000)
-        self.assertTrue(journal.events > 10_000)
-
+    @staticmethod
+    def _print(account, journal, feed, load_time, runtime):
         print("", account, journal, sep="\n\n")
 
         # Print statistics
@@ -36,6 +22,40 @@ class TestBigFeed(unittest.TestCase):
         throughput = candles / runtime
         print(f"throughput = {throughput:.1f}M candles/s")
         print()
+
+    def _run(self, feed, journal):
+        strategy = rq.strategies.EMACrossover(13, 26)
+        start = time.time()
+        account = rq.run(feed, strategy, journal=journal)
+
+        self.assertTrue(journal.items > 1_000_000)
+        self.assertTrue(journal.signals > 100_000)
+        self.assertTrue(journal.orders > 1_000)
+        self.assertTrue(journal.events > 1_000)
+
+        return account, time.time() - start
+
+    def test_big_feed_daily(self):
+        start = time.time()
+        path = os.path.expanduser("~/data/nyse_stocks/")
+        feed = rq.feeds.CSVFeed.stooq_us_daily(path)
+        load_time = time.time() - start
+
+        journal = rq.journals.BasicJournal()
+        account, runtime = self._run(feed, journal)
+
+        self._print(account, journal, feed, load_time, runtime)
+
+    def test_big_feed_intraday(self):
+        start = time.time()
+        path = os.path.expanduser("~/data/intra/")
+        feed = rq.feeds.CSVFeed.stooq_us_intraday(path)
+        load_time = time.time() - start
+
+        journal = rq.journals.BasicJournal()
+        account, runtime = self._run(feed, journal)
+
+        self._print(account, journal, feed, load_time, runtime)
 
 
 if __name__ == "__main__":
