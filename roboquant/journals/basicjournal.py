@@ -9,18 +9,18 @@ logger = logging.getLogger(__name__)
 @dataclass
 class BasicJournal(Journal):
     """Tracks a number of basic metrics:
-    - total number of events, items, signalsm, orders and max positions until that time
+    - total number of events, items, signals, orders and max open positions.
 
     It will also log these values at each step in the run at `info` level.
 
-    This journal adds little overhead to a run, both CPU and memory wise and is helfull in
+    This journal adds little overhead to a run, both CPU and memory wise and is helpful in
     determning if the setup works correctly.
     """
 
-    items: int
-    orders: int
-    signals: int
     events: int
+    items: int
+    signals: int
+    orders: int
     max_positions: int
 
     def __init__(self):
