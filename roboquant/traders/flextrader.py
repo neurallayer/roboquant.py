@@ -2,6 +2,7 @@ from datetime import datetime, timedelta
 import logging
 from decimal import Decimal
 from enum import Enum
+import random
 
 from roboquant.event import Event
 from roboquant.order import Order
@@ -62,6 +63,7 @@ class FlexTrader(Trader):
         max_order_perc=0.05,
         min_order_perc=0.02,
         price_type="DEFAULT",
+        shuffle_signals=False,
     ) -> None:
         super().__init__()
         self.one_order_only = one_order_only
@@ -72,6 +74,7 @@ class FlexTrader(Trader):
         self.max_order_perc = max_order_perc
         self.min_order_perc = min_order_perc
         self.price_type = price_type
+        self.shuffle_signals = shuffle_signals
 
     def _get_order_size(self, rating: float, contract_price: float, max_order_value: float) -> Decimal:
         """Return the order size"""
@@ -80,9 +83,13 @@ class FlexTrader(Trader):
         return rounded_size
 
     def create_orders(self, signals: dict[str, Signal], event: Event, account: Account) -> list[Order]:
-        # pylint: disable=too-many-branches,too-many-statements
+        # pylint: disable=too-many-branches,too-many-statements,too-many-locals
         if not signals:
             return []
+
+        signals_items = list(signals.items())
+        if self.shuffle_signals:
+            random.shuffle(signals_items)
 
         orders: list[Order] = []
         equity = account.equity()
@@ -90,7 +97,7 @@ class FlexTrader(Trader):
         min_order_value = equity * self.min_order_perc
         available = account.buying_power - self.min_buying_power_perc * equity
 
-        for symbol, signal in signals.items():
+        for symbol, signal in signals_items:
             pos_size = account.get_position_size(symbol)
 
             if self.one_order_only and account.has_open_order(symbol):

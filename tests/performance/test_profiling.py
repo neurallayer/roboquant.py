@@ -7,6 +7,7 @@ import roboquant as rq
 
 
 class TestProfile(unittest.TestCase):
+    """Collect profiling statistics over a simple backtest"""
 
     def test_profile(self):
         path = os.path.expanduser("~/data/nasdaq_stocks/1")

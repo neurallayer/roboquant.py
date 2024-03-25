@@ -9,7 +9,7 @@ from roboquant.feeds.alpacafeed import AlpacaLiveFeed
 
 class TestDelay(unittest.TestCase):
     """
-    Measure the delay fro receiving live prices from IEX.
+    Measure the delay of receiving live prices from IEX.
     This includes the following paths if you run it from home:
 
     - From IEX to the market data provider (Tiingo or Alpaca)

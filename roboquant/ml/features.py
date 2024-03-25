@@ -10,8 +10,9 @@ from roboquant.event import Event, Bar
 
 
 class Feature(ABC):
-    """Features allows to create features from an event or account object.
-    Many features also allow post transformation after that, like normalization.
+    """Features allows to:
+    - extract features from an event and/or account.
+    - transform other features.
     """
 
     @abstractmethod
@@ -94,7 +95,7 @@ class TrueRangeFeature(Feature):
 
         result = max(high - low, abs(high - prev_close), abs(low - prev_close))
 
-        return np.array([result])
+        return np.array([result], dtype=np.float32)
 
     def size(self) -> int:
         return 1
@@ -210,7 +211,7 @@ class BarFeature(Feature):
 
 
 class CombinedFeature(Feature):
-    """Combine multiple features into one single feature"""
+    """Combine multiple features into one single feature by stacking them."""
 
     def __init__(self, *features: Feature) -> None:
         super().__init__()
@@ -223,34 +224,6 @@ class CombinedFeature(Feature):
 
     def size(self) -> int:
         return self._size
-
-
-class RunningStats:
-
-    def __init__(self, size) -> None:
-        self.existing_aggregate = (0, self._zeros(size), self._zeros(size))
-
-    @staticmethod
-    def _zeros(size):
-        return np.zeros((size,), dtype=np.float32)
-
-    def push(self, new_value):
-        (count, mean, m2) = self.existing_aggregate
-        count += 1
-        delta = new_value - mean
-        mean += delta / count
-        delta2 = new_value - mean
-        m2 += delta * delta2
-        self.existing_aggregate = (count, mean, m2)
-
-    # Retrieve the mean, variance and sample variance from an aggregate
-    def get_normalize_values(self):
-        (count, mean, m2) = self.existing_aggregate
-        if count < 1:
-            raise ValueError("not enough data")
-
-        variance = m2 / count
-        return mean, np.sqrt(variance)
 
 
 class NormalizeFeature(Feature):
@@ -299,7 +272,7 @@ class NormalizeFeature(Feature):
 
 
 class FillFeature(Feature):
-    """If a feature returns a nan value, use the last known value instead"""
+    """If a feature contains a nan value, use the last known value instead"""
 
     def __init__(self, feature: Feature) -> None:
         super().__init__()
@@ -448,6 +421,39 @@ class MaxReturnFeature(Feature):
         self.feature.reset()
 
 
+class MaxReturnFeature2(Feature):
+    """Calculate the maximum return over a certain period.
+    """
+
+    def __init__(self, feature: Feature, period: int) -> None:
+        super().__init__()
+        self.feature: Feature = feature
+        self.history = np.full((period, self.size()), float("nan"), dtype=np.float32)
+        self.idx = -1
+
+    def calc(self, evt, account):
+        self.idx += 1
+        values = self.feature.calc(evt, account)
+        h = self.history
+        h[self.idx] = values
+
+        hist_len = len(h)
+        if self.idx < hist_len:
+            return self._full_nan()
+
+        root_idx = self.idx % hist_len + 1
+        root_idx = root_idx if root_idx < hist_len else 0
+        r = np.max(h) / h[root_idx] - 1.0
+        return r
+
+    def size(self) -> int:
+        return self.feature.size()
+
+    def reset(self):
+        self.idx = -1
+        self.feature.reset()
+
+
 class MinReturnFeature(Feature):
     """Calculate the minimum return over a certain period.
     This will only work on features that return a single value.
@@ -518,7 +524,7 @@ class DayOfWeekFeature(Feature):
     def calc(self, evt, account):
         dt = datetime.astimezone(evt.time, self.tz)
         weekday = dt.weekday()
-        result = np.zeros(7)
+        result = np.zeros(7, dtype=np.float32)
         result[weekday] = 1.0
         return result
 
