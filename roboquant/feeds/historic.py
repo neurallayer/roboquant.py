@@ -7,6 +7,7 @@ from roboquant.event import Event, PriceItem
 from roboquant.timeframe import Timeframe
 from .eventchannel import EventChannel
 from .feed import Feed
+from .feedutil import get_ohlcv
 
 
 class HistoricFeed(Feed, ABC):
@@ -49,6 +50,12 @@ class HistoricFeed(Feed, ABC):
             raise ValueError("Feed doesn't contain any events.")
 
         return Timeframe(tl[0], tl[-1], inclusive=True)
+
+    def get_ohlcv(self, symbol: str, timeframe=None):
+        """Get the OHLCV values for a symbol from a feed for the (optional) provided timeframe.
+        This makes it easy to plot prices and use them in a dataframe.
+        """
+        return get_ohlcv(self, symbol, timeframe)
 
     def __update(self):
         if self.__modified:
