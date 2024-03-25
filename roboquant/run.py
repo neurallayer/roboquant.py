@@ -28,9 +28,9 @@ def run(
         broker: The broker you want to use. If None is specified, the `SimBroker` will be used with its default settings
         journal: Journal to use to log and/or store progress and metrics, default is None.
         timeframe: Optionally limit the run to events within this timeframe. The default is None
-        capacity: The max capacity of the event channel. Default is 10 events.
-        heartbeat_timeout: Optionally, a heartbeat will be generated if no other events are received within the specified
-            timeout in seconds. The default is None.
+        capacity: The max capacity of the used event channel. Default is 10 events.
+        heartbeat_timeout: Optionally, a heartbeat (is an empty event) will be generated if no other events are received
+        within the specified timeout in seconds. The default is None.
 
     Returns:
         The latest version of the account
