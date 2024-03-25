@@ -32,7 +32,7 @@ class TiingoHistoricFeed(HistoricFeed):
     def __init__(self, key: str | None = None):
         super().__init__()
         self.key = key or Config().get("tiingo.key")
-        assert self.key, "no Tiingo key found"
+        assert self.key, "no Tiingo key provided or found"
         self.timeout = 10
 
     @staticmethod

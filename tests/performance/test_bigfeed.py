@@ -44,7 +44,6 @@ class TestBigFeed(unittest.TestCase):
 
         journal = rq.journals.BasicJournal()
         account, runtime = self._run(feed, journal)
-
         self._print(account, journal, feed, load_time, runtime)
 
     def test_big_feed_intraday(self):
@@ -55,7 +54,6 @@ class TestBigFeed(unittest.TestCase):
 
         journal = rq.journals.BasicJournal()
         account, runtime = self._run(feed, journal)
-
         self._print(account, journal, feed, load_time, runtime)
 
 

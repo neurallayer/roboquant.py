@@ -17,11 +17,11 @@ class AlpacaLiveFeed(LiveFeed):
 
     __one_minute = str(timedelta(minutes=1))
 
-    def __init__(self, market: Literal["iex", "sip", "crypto", "option"] = "iex") -> None:
+    def __init__(self, market: Literal["iex", "sip", "crypto", "option"] = "iex", api_key=None, secret_key=None) -> None:
         super().__init__()
         config = Config()
-        api_key = config.get("alpaca.public.key")
-        secret_key = config.get("alpaca.secret.key")
+        api_key = api_key or config.get("alpaca.public.key")
+        secret_key = secret_key or config.get("alpaca.secret.key")
         match market:
             case "sip":
                 self.stream = StockDataStream(api_key, secret_key, feed=DataFeed.SIP)

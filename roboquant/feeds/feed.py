@@ -1,3 +1,4 @@
+from datetime import datetime
 import threading
 from abc import ABC, abstractmethod
 
@@ -73,18 +74,26 @@ class Feed(ABC):
             Additional keyword arguments to pass to the plt.plot() function.
         """
 
-        channel = self.play_background(timeframe)
-        times = []
-        prices = []
-        while evt := channel.get():
-            price = evt.get_price(symbol, price_type)
-            if price is not None:
-                times.append(evt.time)
-                prices.append(price)
-
+        times, prices = get_symbol_prices(self, symbol, price_type, timeframe)
         plt.plot(times, prices, **kwargs)
         if hasattr(plt, "set_title"):
             # assume we are in a subplot
             plt.set_title(symbol)
         else:
             plt.title(symbol)
+
+
+def get_symbol_prices(
+        feed: Feed, symbol: str, price_type="DEFAULT", timeframe: Timeframe | None = None
+) -> tuple[list[datetime], list[float]]:
+    """Get prices for a single symbol from a feed"""
+
+    x = []
+    y = []
+    channel = feed.play_background(timeframe)
+    while event := channel.get():
+        price = event.get_price(symbol, price_type)
+        if price:
+            x.append(event.time)
+            y.append(price)
+    return x, y

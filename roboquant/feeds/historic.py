@@ -51,8 +51,8 @@ class HistoricFeed(Feed, ABC):
 
         return Timeframe(tl[0], tl[-1], inclusive=True)
 
-    def get_ohlcv(self, symbol: str, timeframe=None):
-        """Get the OHLCV values for a symbol from a feed for the (optional) provided timeframe.
+    def get_ohlcv(self, symbol: str, timeframe=None) -> dict[str, list]:
+        """Get the OHLCV values for a symbol for the (optional) provided timeframe.
         This makes it easy to plot prices and use them in a dataframe.
         """
         return get_ohlcv(self, symbol, timeframe)

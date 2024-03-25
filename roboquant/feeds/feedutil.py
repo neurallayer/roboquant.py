@@ -1,26 +1,9 @@
 import json
 import pathlib
-from datetime import datetime
 
 from roboquant.event import Bar
 from roboquant.feeds.feed import Feed
 from roboquant.timeframe import Timeframe
-
-
-def get_symbol_prices(
-        feed: Feed, symbol: str, price_type="DEFAULT", timeframe: Timeframe | None = None
-) -> tuple[list[datetime], list[float]]:
-    """Get prices for a single symbol from a feed"""
-
-    x = []
-    y = []
-    channel = feed.play_background(timeframe)
-    while event := channel.get():
-        price = event.get_price(symbol, price_type)
-        if price:
-            x.append(event.time)
-            y.append(price)
-    return x, y
 
 
 def get_ohlcv(feed: Feed, symbol: str, timeframe: Timeframe | None = None) -> dict[str, list]:

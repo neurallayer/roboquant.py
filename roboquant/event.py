@@ -67,6 +67,9 @@ class Quote(PriceItem):
 
 @dataclass(slots=True)
 class Trade(PriceItem):
+    """Holds a single price and optional the volume.
+    Often this reflects an actual trade, but it can also be used in different scenarios.
+    """
     trade_price: float
     trade_volume: float
 
@@ -79,6 +82,9 @@ class Trade(PriceItem):
 
 @dataclass(slots=True)
 class Bar(PriceItem):
+    """Represents a bar (a.k.a candlestick) with open, high, low, close and volume data.
+    """
+
     ohlcv: array
     frequency: str = ""  # f.e 1s , 15m, 4h, 1d
 
