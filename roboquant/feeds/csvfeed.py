@@ -156,6 +156,7 @@ class CSVFeed(HistoricFeed):
                         columns=columns,
                         has_time_column=True,
                         date_fmt="%Y%m%d",
+                        time_fmt="%H%M%S",
                         endswith=".txt"
                     )
 
