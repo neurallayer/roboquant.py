@@ -26,7 +26,7 @@ print(account)
 
 ## Install
 Roboquant can be installed like most other Python packages, using pip or conda.
-Make sure you have Python version 3.10 or higher installed.
+Make sure you have Python version 3.11 or higher installed.
 
 ```shell
 python3 -m pip install --upgrade roboquant
