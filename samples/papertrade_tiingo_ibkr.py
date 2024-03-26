@@ -30,7 +30,7 @@ feed = rq.feeds.AggregatorFeed(tiingo_feed, timedelta(seconds=15))
 
 # %%
 strategy = rq.strategies.EMACrossover(13, 26)
-timeframe = rq.Timeframe.next(minutes=10)
+timeframe = rq.Timeframe.next(minutes=15)
 journal = rq.journals.BasicJournal()
 account = rq.run(feed, strategy, broker=ibkr, journal=journal, timeframe=timeframe)
 tiingo_feed.close()

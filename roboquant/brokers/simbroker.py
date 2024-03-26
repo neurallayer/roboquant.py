@@ -5,7 +5,7 @@ import logging
 
 from roboquant.account import Account, Position
 from roboquant.brokers.broker import Broker, _update_positions
-from roboquant.event import Event
+from roboquant.event import Event, PriceItem
 from roboquant.order import Order, OrderStatus
 
 logger = logging.getLogger(__name__)
@@ -39,6 +39,7 @@ class SimBroker(Broker):
         self._create_orders: dict[str, Order] = {}
         self._account.cash = initial_deposit
         self._account.buying_power = initial_deposit
+        self._last_known_prices: dict[str, PriceItem] = {}
         self._order_id = 0
 
         self.slippage = slippage
@@ -52,6 +53,7 @@ class SimBroker(Broker):
         self._create_orders: dict[str, Order] = {}
         self._account.cash = self.initial_deposit
         self._account.buying_power = self.initial_deposit
+        self._last_known_prices = {}
         self._order_id = 0
 
     def _update_account(self, trx: _Trx):
@@ -183,6 +185,23 @@ class SimBroker(Broker):
                         if order.fill == order.size:
                             order.status = OrderStatus.FILLED
 
+    def _get_last_known_price(self, symbol):
+        item = self._last_known_prices.get(symbol)
+        return item.price(self.price_type) if item else None
+
+    def calculate_buyingpower(self):
+        """Calculate buying power, based on the available cash minus the open orders"""
+        bp = self._account.cash
+        for order in self._account.open_orders():
+            old_pos = self._account.get_position_size(order.symbol)
+            remaining = order.size - order.fill
+            if abs(old_pos + remaining) > abs(old_pos):
+                price = order.limit or self._get_last_known_price(order.symbol)
+                if price:
+                    reserve = self._account.contract_value(order.symbol, remaining, price)
+                    bp -= abs(reserve)
+        return bp
+
     def sync(self, event: Event | None = None) -> Account:
         """This will perform the order-execution simulation for the open orders and
         return the updated the account as a result."""
@@ -192,18 +211,19 @@ class SimBroker(Broker):
             acc.last_update = event.time
 
         prices = event.price_items if event else {}
+        self._last_known_prices.update(prices)
 
         if self.clean_up_orders:
             # only keep the open orders from the previous step
-            # this improces performance a lot for large back tests
+            # this improves performance for large back tests
             self._create_orders = {order_id: order for order_id, order in self._create_orders.items() if order.is_open}
 
         self._process_modify_order()
         self._process_create_orders(prices)
         _update_positions(acc, event, self.price_type)
 
-        acc.buying_power = acc.cash
         acc.orders = list(self._create_orders.values())
+        acc.buying_power = self.calculate_buyingpower()
         return acc
 
     def __str__(self) -> str:

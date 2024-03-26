@@ -3,13 +3,13 @@ from enum import Flag, auto
 
 
 class SignalType(Flag):
-    """Type of signal, either ENTRY, EXIT or BOTH"""
+    """Type of signal, either ENTRY, EXIT or ENTRY_EXIT"""
 
     ENTRY = auto()
     EXIT = auto()
-    BOTH = ENTRY | EXIT
+    ENTRY_EXIT = ENTRY | EXIT
 
-    def __repr__(self):
+    def __str__(self):
         return self.name
 
 
@@ -27,15 +27,15 @@ class Signal:
     """
 
     rating: float
-    type: SignalType = SignalType.BOTH
+    type: SignalType = SignalType.ENTRY_EXIT
 
     @staticmethod
-    def buy(signal_type=SignalType.BOTH):
+    def buy(signal_type=SignalType.ENTRY_EXIT):
         """Create a BUY signal with a rating of 1.0"""
         return Signal(1.0, signal_type)
 
     @staticmethod
-    def sell(signal_type=SignalType.BOTH):
+    def sell(signal_type=SignalType.ENTRY_EXIT):
         """Create a SELL signal with a rating of -1.0"""
         return Signal(-1.0, signal_type)
 
@@ -56,8 +56,8 @@ class Signal:
         return SignalType.EXIT in self.type
 
 
-BUY = Signal.buy(SignalType.BOTH)
+BUY = Signal.buy(SignalType.ENTRY_EXIT)
 """BUY signal with a rating of 1.0 and valid for both entry and exit signals"""
 
-SELL = Signal.sell(SignalType.BOTH)
+SELL = Signal.sell(SignalType.ENTRY_EXIT)
 """SELL signal with a rating of -1.0 and valid for both entry and exit signals"""

@@ -17,7 +17,7 @@ class TestSignal(unittest.TestCase):
 
     def test_signal_equal(self):
         x = SELL
-        y = Signal(-1.0, SignalType.BOTH)
+        y = Signal(-1.0, SignalType.ENTRY_EXIT)
         self.assertEqual(x, y)
         self.assertEqual(BUY, BUY)
         self.assertNotEqual(BUY, SELL)

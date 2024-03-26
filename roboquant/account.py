@@ -135,6 +135,12 @@ class Account:
             0.0,
         )
 
+    def position_value(self, symbol) -> float:
+        """Return position value denoted in the base currency of the account.
+        """
+        pos = self.positions.get(symbol)
+        return self.contract_value(symbol, pos.size, pos.mkt_price) if pos else 0.0
+
     def equity(self) -> float:
         """Return the equity of the account. It calcaluates the sum of the mkt value of
         each open position and adds the available cash.
