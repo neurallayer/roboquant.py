@@ -28,7 +28,7 @@ class Action2Signals:
         self.symbols = symbols
 
     def get_signals(self, action, _):
-        return {symbol: Signal(rating) for symbol, rating in zip(self.symbols, action)}
+        return [Signal(symbol, float(rating)) for symbol, rating in zip(self.symbols, action)]
 
     def get_action_space(self):
         return spaces.Box(-1.0, 1.0, shape=(len(self.symbols),), dtype=np.float32)
@@ -137,7 +137,7 @@ class StrategyEnv(gym.Env):
             self.event = self.channel.get()
             assert self.event is not None, "feed empty during warmup"
             self.account = self.broker.sync(self.event)
-            self.trader.create_orders({}, self.event, self.account)
+            self.trader.create_orders([], self.event, self.account)
             observation = self.get_observation(self.event)
             self.get_reward(self.event, self.account)
             if not np.any(np.isnan(observation)):

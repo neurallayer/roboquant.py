@@ -25,13 +25,13 @@ class SMACrossover(Strategy):
         if symbol in self._prev_ratings:
             prev_rating = self._prev_ratings[symbol]
             if prev_rating != new_rating:
-                result = Signal.buy() if new_rating else Signal.sell()
+                result = Signal.buy(symbol) if new_rating else Signal.sell(symbol)
 
         self._prev_ratings[symbol] = new_rating
         return result
 
     def create_signals(self, event):
-        signals: dict[str, Signal] = {}
+        signals = []
         for (symbol, item) in event.price_items.items():
             h = self._history.get(symbol)
 
@@ -43,6 +43,6 @@ class SMACrossover(Strategy):
             h.append(item.price())
             if len(h) == h.maxlen:
                 if signal := self.__get_signal(symbol):
-                    signals[symbol] = signal
+                    signals.append(signal)
 
         return signals

@@ -64,7 +64,8 @@ def run_strategy(strategy: Strategy, test_case: TestCase):
     tot_ratings = 0
     while event := channel.get():
         signals = strategy.create_signals(event)
-        for symbol, signal in signals.items():
+        for signal in signals:
+            symbol = signal.symbol
             test_case.assertEqual(type(signal), Signal)
             test_case.assertEqual(type(symbol), str)
             test_case.assertEqual(symbol, symbol.upper())

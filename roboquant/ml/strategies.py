@@ -10,7 +10,7 @@ from roboquant.event import Event
 from roboquant.ml.envs import Action2Signals, StrategyEnv, TraderEnv
 from roboquant.ml.features import Feature, NormalizeFeature
 from roboquant.order import Order
-from roboquant.signal import BUY, SELL, Signal
+from roboquant.signal import Signal
 from roboquant.strategies.strategy import Strategy
 from roboquant.traders.trader import Trader
 
@@ -30,7 +30,7 @@ class SB3PolicyStrategy(Strategy):
     def from_env(cls, env: StrategyEnv, policy):
         return cls(env.obs_feature, env.action_2_signals, policy)
 
-    def create_signals(self, event) -> dict[str, Signal]:
+    def create_signals(self, event):
         obs = self.obs_feature.calc(event, None)
         if np.any(np.isnan(obs)):
             return {}
@@ -81,17 +81,17 @@ class FeatureStrategy(Strategy):
         self._hist = deque(maxlen=history)
         self._dtype = dtype
 
-    def create_signals(self, event: Event) -> dict[str, Signal]:
+    def create_signals(self, event: Event):
         h = self._hist
         row = self.input_feature.calc(event, None)
         h.append(row)
         if len(h) == h.maxlen:
             x = np.asarray(h, dtype=self._dtype)
             return self.predict(x)
-        return {}
+        return []
 
     @abstractmethod
-    def predict(self, x: NDArray) -> dict[str, Signal]: ...
+    def predict(self, x: NDArray) -> list[Signal]: ...
 
     def _get_xy(self, feed, timeframe=None, warmup=0) -> tuple[NDArray, NDArray]:
         channel = feed.play_background(timeframe)
@@ -153,7 +153,7 @@ class RNNStrategy(FeatureStrategy):
         self.symbol = symbol
         self.prediction_results = []
 
-    def predict(self, x) -> dict[str, Signal]:
+    def predict(self, x):
         x = torch.asarray(x)
         x = torch.unsqueeze(x, dim=0)  # add the batch dimension
 
@@ -168,9 +168,9 @@ class RNNStrategy(FeatureStrategy):
 
             self.prediction_results.append(p)
             if p >= self.buy_pct:
-                return {self.symbol: BUY}
+                return [Signal.buy(self.symbol)]
             if p <= self.sell_pct:
-                return {self.symbol: SELL}
+                return [Signal.sell(self.symbol)]
 
         return {}
 

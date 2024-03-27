@@ -1,6 +1,5 @@
 import logging
 import time
-from datetime import datetime, timezone, timedelta
 from decimal import Decimal
 from alpaca.trading.client import TradingClient
 from alpaca.trading.enums import OrderSide, TimeInForce
@@ -13,16 +12,17 @@ from alpaca.trading.requests import LimitOrderRequest, MarketOrderRequest, Repla
 from roboquant.account import Account, Position
 from roboquant.config import Config
 from roboquant.event import Event
-from roboquant.brokers.broker import Broker
+from roboquant.brokers.broker import LiveBroker
 from roboquant.order import Order, OrderStatus
 
 
 logger = logging.getLogger(__name__)
 
 
-class AlpacaBroker(Broker):
+class AlpacaBroker(LiveBroker):
 
     def __init__(self, api_key=None, secret_key=None) -> None:
+        super().__init__()
         self.__account = Account()
         config = Config()
         api_key = api_key or config.get("alpaca.public.key")
@@ -59,13 +59,7 @@ class AlpacaBroker(Broker):
             self.__account.positions[p.symbol] = new_pos
 
     def sync(self, event: Event | None = None) -> Account:
-        now = datetime.now(timezone.utc)
-
-        if event:
-            # Let make sure we don't use IBKRBroker by mistake during a back-test.
-            if now - event.time > timedelta(minutes=30):
-                logger.critical("received event from the past, now=%s event-time=%s", now, event.time)
-                raise ValueError(f"received event too far in the past now={now} event-time={event.time}")
+        now = self.guard(event)
 
         client = self.__client
         acc: TradeAccount = client.get_account()  # type: ignore
@@ -122,8 +116,17 @@ if __name__ == "__main__":
     broker = AlpacaBroker()
     account = broker.sync()
     print(account)
+
     tsla_order = Order("TSLA", 10)
     broker.place_orders([tsla_order])
     time.sleep(5)
     account = broker.sync()
     print(account)
+
+    tesla_size = account.get_position_size("TSLA")
+    if tesla_size:
+        tsla_order = Order("TSLA", -tesla_size)
+        broker.place_orders([tsla_order])
+        time.sleep(5)
+        account = broker.sync()
+        print(account)

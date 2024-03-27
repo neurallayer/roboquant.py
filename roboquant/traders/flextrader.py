@@ -109,14 +109,13 @@ class FlexTrader(Trader):
         rounded_size = round(size, self.size_digits)
         return rounded_size
 
-    def create_orders(self, signals: dict[str, Signal], event: Event, account: Account) -> list[Order]:
+    def create_orders(self, signals: list[Signal], event: Event, account: Account) -> list[Order]:
         # pylint: disable=too-many-branches,too-many-statements,too-many-locals
         if not signals:
             return []
 
-        signals_items = list(signals.items())
         if self.shuffle_signals:
-            random.shuffle(signals_items)
+            random.shuffle(signals)
 
         orders: list[Order] = []
         equity = account.equity()
@@ -125,7 +124,8 @@ class FlexTrader(Trader):
         max_pos_value = equity * self.max_position_perc
         available = account.buying_power - self.safety_margin_perc * equity
 
-        for symbol, signal in signals_items:
+        for signal in signals:
+            symbol = signal.symbol
             pos_size = account.get_position_size(symbol)
 
             if self.one_order_only and account.has_open_order(symbol):
@@ -150,6 +150,9 @@ class FlexTrader(Trader):
                     _log_rule("no exit signal", signal, symbol, pos_size)
                     continue
                 rounded_size = round(pos_size * Decimal(signal.rating), self.size_digits)
+                if rounded_size.is_zero():
+                    _log_rule("cannot exit with order size zero", signal, symbol, pos_size)
+                    continue
                 new_orders = self._get_orders(symbol, rounded_size, item, signal, event.time)
                 orders += new_orders
             else:

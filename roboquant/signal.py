@@ -15,8 +15,10 @@ class SignalType(Flag):
 
 @dataclass(slots=True, frozen=True)
 class Signal:
-    """Signal that a strategy can create.
-    It contains both a rating between -1.0 and 1.0 and the type of signal.
+    """Signal that a strategy can create.It contains both a rating and the type of signal.
+
+    A rating is a float normally between -1.0 and 1.0, where -1.0 is a strong sell and 1.0 is a strong buy.
+    But in cases it can exceed these values. It is up to the used trader to handle these values
 
     Examples:
     ```
@@ -25,19 +27,19 @@ class Signal:
     Signal("XYZ", 0.5, SignalType.ENTRY)
     ```
     """
-
+    symbol: str
     rating: float
     type: SignalType = SignalType.ENTRY_EXIT
 
     @staticmethod
-    def buy(signal_type=SignalType.ENTRY_EXIT):
+    def buy(symbol, signal_type=SignalType.ENTRY_EXIT):
         """Create a BUY signal with a rating of 1.0"""
-        return Signal(1.0, signal_type)
+        return Signal(symbol, 1.0, signal_type)
 
     @staticmethod
-    def sell(signal_type=SignalType.ENTRY_EXIT):
+    def sell(symbol, signal_type=SignalType.ENTRY_EXIT):
         """Create a SELL signal with a rating of -1.0"""
-        return Signal(-1.0, signal_type)
+        return Signal(symbol, -1.0, signal_type)
 
     @property
     def is_buy(self):
@@ -54,10 +56,3 @@ class Signal:
     @property
     def is_exit(self):
         return SignalType.EXIT in self.type
-
-
-BUY = Signal.buy(SignalType.ENTRY_EXIT)
-"""BUY signal with a rating of 1.0 and valid for both entry and exit signals"""
-
-SELL = Signal.sell(SignalType.ENTRY_EXIT)
-"""SELL signal with a rating of -1.0 and valid for both entry and exit signals"""

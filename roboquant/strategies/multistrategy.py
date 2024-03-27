@@ -1,7 +1,6 @@
 from typing import Literal
 
 from roboquant.event import Event
-from roboquant.signal import Signal
 from roboquant.strategies.strategy import Strategy
 
 
@@ -13,23 +12,22 @@ class MultiStrategy(Strategy):
     - last:  in case of multiple signals for a symbol, the last strategy wins. This is also the default policy
     """
 
-    def __init__(self, *strategies: Strategy, policy: Literal["last", "first"] = "last"):
+    def __init__(self, *strategies: Strategy, policy: Literal["last", "first", "all"] = "last"):
         self.strategies = list(strategies)
         self.policy = policy
 
-    def create_signals(self, event: Event) -> dict[str, Signal]:
-        all_signals: list[dict[str, Signal]] = []
+    def create_signals(self, event: Event):
+        signals = []
         for strategy in self.strategies:
-            signals = strategy.create_signals(event)
-            all_signals.append(signals)
+            tmp = strategy.create_signals(event)
+            signals += tmp
 
-        result = {}
         match self.policy:
             case "last":
-                for signals in all_signals:
-                    result.update(signals)
+                s = {s.symbol: s for s in signals}
+                return list(s.values())
             case "first":
-                for signals in reversed(all_signals):
-                    result.update(signals)
-
-        return result
+                s = {s.symbol: s for s in reversed(signals)}
+                return list(s.values())
+            case "all":
+                return signals

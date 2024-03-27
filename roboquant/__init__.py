@@ -11,5 +11,5 @@ from .config import Config
 from .event import Event, PriceItem, Bar, Trade, Quote
 from .order import Order, OrderStatus
 from .run import run
-from .signal import SignalType, Signal, BUY, SELL
+from .signal import SignalType, Signal
 from .timeframe import Timeframe

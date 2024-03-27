@@ -14,7 +14,7 @@ class Trader(ABC):
     """
 
     @abstractmethod
-    def create_orders(self, signals: dict[str, Signal], event: Event, account: Account) -> list[Order]:
+    def create_orders(self, signals: list[Signal], event: Event, account: Account) -> list[Order]:
         """Create zero or more orders.
 
         Arguments

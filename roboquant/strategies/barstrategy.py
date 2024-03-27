@@ -19,8 +19,8 @@ class BarStrategy(Strategy):
         self._data: dict[str, OHLCVBuffer] = {}
         self.size = size
 
-    def create_signals(self, event) -> dict[str, Signal]:
-        signals = {}
+    def create_signals(self, event):
+        signals = []
         for item in event.items:
             if isinstance(item, Bar):
                 symbol = item.symbol
@@ -31,7 +31,7 @@ class BarStrategy(Strategy):
                 if ohlcv.is_full():
                     signal = self._create_signal(symbol, ohlcv)
                     if signal is not None:
-                        signals[symbol] = signal
+                        signals.append(signal)
         return signals
 
     @abstractmethod

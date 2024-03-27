@@ -1,7 +1,7 @@
 import logging
 import threading
 import time
-from datetime import datetime, timezone, timedelta
+from datetime import datetime, timedelta
 from decimal import Decimal
 
 from ibapi import VERSION
@@ -14,7 +14,7 @@ from ibapi.wrapper import EWrapper
 from roboquant.account import Account, Position
 from roboquant.event import Event
 from roboquant.order import Order, OrderStatus
-from roboquant.brokers.broker import Broker, _update_positions
+from roboquant.brokers.broker import LiveBroker, _update_positions
 
 assert VERSION["major"] == 10 and VERSION["minor"] == 19, "Wrong version of the IBAPI found"
 
@@ -116,7 +116,7 @@ class _IBApi(EWrapper, EClient):
             logger.warning("received status for unknown order id=%s status=%s", orderId, status)
 
 
-class IBKRBroker(Broker):
+class IBKRBroker(LiveBroker):
     """
     Attributes
     ==========
@@ -137,6 +137,7 @@ class IBKRBroker(Broker):
     """
 
     def __init__(self, host="127.0.0.1", port=4002, client_id=123) -> None:
+        super().__init__()
         self.__account = Account()
         self.contract_mapping: dict[str, Contract] = {}
         api = _IBApi()
@@ -170,15 +171,7 @@ class IBKRBroker(Broker):
 
     def sync(self, event: Event | None = None) -> Account:
         """Sync with the IBKR account"""
-
-        logger.debug("start sync")
-        now = datetime.now(timezone.utc)
-
-        if event:
-            # Let make sure we don't use IBKRBroker by mistake during a back-test.
-            if now - event.time > timedelta(minutes=30):
-                logger.critical("received event from the past, now=%s event-time=%s", now, event.time)
-                raise ValueError(f"received event too far in the past now={now} event-time={event.time}")
+        now = self.guard(event)
 
         api = self.__api
         acc = self.__account
@@ -196,7 +189,6 @@ class IBKRBroker(Broker):
             acc.cash = api.get_cash()
 
         _update_positions(acc, event)
-        logger.debug("end sync")
         return acc
 
     def place_orders(self, orders):

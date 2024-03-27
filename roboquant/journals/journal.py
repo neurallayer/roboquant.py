@@ -14,7 +14,7 @@ class Journal(Protocol):
     It serves as a tool to track and analyze their performance, decisions, and outcomes over time
     """
 
-    def track(self, event: Event, account: Account, signals: dict[str, Signal], orders: list[Order]):
+    def track(self, event: Event, account: Account, signals: list[Signal], orders: list[Order]):
         """invoked at each step of a run that provides the journal with the opportunity to
         track and log various metrics."""
         ...

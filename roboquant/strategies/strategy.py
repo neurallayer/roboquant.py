@@ -11,7 +11,7 @@ class Strategy(ABC):
     """
 
     @abstractmethod
-    def create_signals(self, event: Event) -> dict[str, Signal]:
+    def create_signals(self, event: Event) -> list[Signal]:
         """Create a signal for zero or more symbols. Signals are returned as a dictionary with key being the symbol and
         the value being the Signal.
         """

@@ -60,11 +60,14 @@ class LiveBroker(Broker):
         super().__init__()
         self.max_delay = timedelta(minutes=30)
 
-    def guard(self, event: Event | None = None):
-        if not event:
-            return
+    def guard(self, event: Event | None = None) -> datetime:
 
         now = datetime.now(timezone.utc)
 
+        if not event:
+            return now
+
         if now - event.time > self.max_delay:
             raise ValueError(f"received event too far in the past now={now} event-time={event.time}")
+
+        return now

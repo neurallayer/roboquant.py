@@ -13,9 +13,9 @@ class _MyStrategy(BarStrategy):
         sma12 = close[-12:].mean()
         sma26 = close[-26:].mean()
         if sma12 > sma26:
-            return Signal.buy()
+            return Signal.buy(symbol)
         if sma12 < sma26:
-            return Signal.sell()
+            return Signal.sell(symbol)
         return None
 
 
