@@ -28,13 +28,8 @@ class AlpacaBroker(Broker):
         api_key = api_key or config.get("alpaca.public.key")
         secret_key = secret_key or config.get("alpaca.secret.key")
         self.__client = TradingClient(api_key, secret_key)
-        self.__has_new_orders_since_sync = False
         self.price_type = "DEFAULT"
         self.sleep_after_cancel = 0.0
-
-    def _should_sync(self, now: datetime):
-        """Avoid too many API calls"""
-        return self.__has_new_orders_since_sync or now - self.__account.last_update > timedelta(seconds=1)
 
     def _sync_orders(self):
         for order in self.__account.open_orders():
@@ -64,8 +59,6 @@ class AlpacaBroker(Broker):
             self.__account.positions[p.symbol] = new_pos
 
     def sync(self, event: Event | None = None) -> Account:
-
-        logger.debug("start sync")
         now = datetime.now(timezone.utc)
 
         if event:
@@ -82,17 +75,11 @@ class AlpacaBroker(Broker):
 
         self._sync_positions()
         self._sync_orders()
-        logger.debug("end sync")
         return self.__account
 
     def place_orders(self, orders):
 
-        self.__has_new_orders_since_sync = len(orders) > 0
-
-        for idx, order in enumerate(orders, start=1):
-            if idx % 25 == 0:
-                # avoid to many API calls
-                time.sleep(1)
+        for order in orders:
 
             assert order.is_open, "can only place open orders"
             if order.size.is_zero():
@@ -122,10 +109,7 @@ class AlpacaBroker(Broker):
             )
         else:
             result = MarketOrderRequest(
-                symbol=order.symbol,
-                qty=abs(float(order.size)),
-                side=side,
-                time_in_force=TimeInForce.GTC
+                symbol=order.symbol, qty=abs(float(order.size)), side=side, time_in_force=TimeInForce.GTC
             )
         return result
 

@@ -9,7 +9,7 @@ from tests.common import get_feed
 
 class _MyTrader(FlexTrader):
 
-    def _get_orders(self, symbol, size, item, rating, time):
+    def _get_orders(self, symbol, size, item, signal, time):
         price = item.price("CLOSE")
         if price:
             limit_price = price * 0.99 if size > 0 else price * 1.01

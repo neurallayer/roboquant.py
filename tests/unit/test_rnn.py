@@ -51,7 +51,7 @@ class TestRNN(unittest.TestCase):
         tf = rq.Timeframe.fromisoformat("2020-01-01", "2024-01-01")
         rq.run(feed, strategy, timeframe=tf)
         predictions = strategy.prediction_results
-        self.assertEqual(760, len(predictions))
+        self.assertEqual(987, len(predictions))
         self.assertNotEqual(max(predictions), min(predictions))
 
 

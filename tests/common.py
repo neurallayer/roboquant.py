@@ -11,8 +11,8 @@ from roboquant.strategies.strategy import Strategy
 
 
 def get_feed() -> CSVFeed:
-    root = pathlib.Path(__file__).parent.resolve().joinpath("data", "csv")
-    return CSVFeed(str(root), time_offset="21:00:00+00:00", date_fmt="%Y%m%d")
+    root = pathlib.Path(__file__).parent.resolve().joinpath("data", "yahoo")
+    return CSVFeed(str(root), time_offset="21:00:00+00:00")
 
 
 def get_recent_start_date(days=10):

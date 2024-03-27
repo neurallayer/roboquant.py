@@ -48,7 +48,7 @@ class CSVFeed(HistoricFeed):
         frequency="",
     ):
         super().__init__()
-        columns = columns or ["Date", "Open", "High", "Low", "Close", "Volume", "AdjClose", "Time"]
+        columns = columns or ["Date", "Open", "High", "Low", "Close", "Volume", "Adj Close", "Time"]
         self.ohlcv_columns = columns[1:6]
         self.adj_close_column = columns[6] if adj_close else None
         self.date_column = columns[0]
@@ -147,7 +147,7 @@ class CSVFeed(HistoricFeed):
 
         class StooqIntradayFeed(CSVFeed):
             def __init__(self):
-                # from Python 3.11 onwards we can use the fast standard ISO parsing
+                # from Python 3.11 onwards we can use the faster standard ISO parsing
                 if sys.version_info >= (3, 11):
                     super().__init__(path, columns=columns, has_time_column=True, endswith=".txt")
                 else:

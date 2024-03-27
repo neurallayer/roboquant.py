@@ -12,15 +12,10 @@ class TestCSVFeed(unittest.TestCase):
         root = pathlib.Path(__file__).parent.resolve().joinpath("..", "data", *paths)
         return str(root)
 
-    def test_csv_feed_generic(self):
-        root = self._get_root_dir("csv")
-        feed = CSVFeed(root, time_offset="21:00:00+00:00")
-        run_price_item_feed(feed, ["AAPL", "AMZN", "TSLA"], self)
-
     def test_csv_feed_yahoo(self):
         root = self._get_root_dir("yahoo")
         feed = CSVFeed.yahoo(root)
-        run_price_item_feed(feed, ["META"], self)
+        run_price_item_feed(feed, ["META", "AAPL", "AMZN", "TSLA"], self)
 
     def test_csv_feed_stooq_daily(self):
         root = self._get_root_dir("stooq", "daily")

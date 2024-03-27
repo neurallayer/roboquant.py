@@ -1,4 +1,5 @@
 from abc import ABC, abstractmethod
+from datetime import datetime, timedelta, timezone
 
 from roboquant.account import Account
 from roboquant.event import Event
@@ -51,3 +52,19 @@ def _update_positions(account: Account, event: Event | None, price_type: str = "
     for symbol, position in account.positions.items():
         if price := event.get_price(symbol, price_type):
             position.mkt_price = price
+
+
+class LiveBroker(Broker):
+
+    def __init__(self) -> None:
+        super().__init__()
+        self.max_delay = timedelta(minutes=30)
+
+    def guard(self, event: Event | None = None):
+        if not event:
+            return
+
+        now = datetime.now(timezone.utc)
+
+        if now - event.time > self.max_delay:
+            raise ValueError(f"received event too far in the past now={now} event-time={event.time}")
