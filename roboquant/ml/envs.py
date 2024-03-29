@@ -23,18 +23,24 @@ logger = logging.getLogger(__name__)
 
 
 class Action2Signals:
+    """Transforms an action into signals"""
 
     def __init__(self, symbols: list[str]):
         self.symbols = symbols
 
+    @staticmethod
+    def __limit(rating):
+        return max(-1.0, min(1.0, float(rating)))
+
     def get_signals(self, action, _):
-        return [Signal(symbol, float(rating)) for symbol, rating in zip(self.symbols, action)]
+        return [Signal(symbol, self.__limit(rating)) for symbol, rating in zip(self.symbols, action)]
 
     def get_action_space(self):
         return spaces.Box(-1.0, 1.0, shape=(len(self.symbols),), dtype=np.float32)
 
 
 class Action2Orders:
+    """Transforms an action into orders"""
 
     def __init__(self, symbols: list[str]):
         self.symbols = symbols
@@ -50,10 +56,10 @@ class Action2Orders:
 
         return orders
 
-    def get_orders(self, action, event: Event, account: Account) -> list[Order]:
+    def get_orders(self, actions, event: Event, account: Account) -> list[Order]:
         new_positions = {}
         equity = account.equity()
-        for symbol, fraction in zip(self.symbols, action):
+        for symbol, fraction in zip(self.symbols, actions):
             price = event.get_price(symbol)
             if price:
                 rel_fraction = fraction / len(self.symbols)

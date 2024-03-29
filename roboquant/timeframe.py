@@ -37,35 +37,25 @@ class Timeframe:
         return Timeframe.fromisoformat("1900-01-01T00:00:00+00:00", "1900-01-01T00:00:00+00:00", False)
 
     @staticmethod
-    def previous(days=0, seconds=0, microseconds=0, milliseconds=0, minutes=0, hours=0, weeks=0, inclusive=False):
-        """Convenient method to create a historic timeframe"""
+    def previous(inclusive=False, **kwargs):
+        """Convenient method to create a historic timeframe, the kwargs arguments will be passed to the timedelta
 
-        td = timedelta(
-            days=days,
-            seconds=seconds,
-            microseconds=microseconds,
-            milliseconds=milliseconds,
-            minutes=minutes,
-            hours=hours,
-            weeks=weeks,
-        )
+        timeframe = Timeframe.previous(days=365)
+        """
+
+        td = timedelta(**kwargs)
         end = datetime.now(timezone.utc)
         start = end - td
         return Timeframe(start, end, inclusive)
 
     @staticmethod
-    def next(days=0, seconds=0, microseconds=0, milliseconds=0, minutes=0, hours=0, weeks=0, inclusive=False):
-        """Convenient method to create a future timeframe"""
+    def next(inclusive=False, **kwargs):
+        """Convenient method to create a future timeframe, the kwargs arguments will be passed to the timedelta
 
-        td = timedelta(
-            days=days,
-            seconds=seconds,
-            microseconds=microseconds,
-            milliseconds=milliseconds,
-            minutes=minutes,
-            hours=hours,
-            weeks=weeks,
-        )
+        timeframe = Timeframe.next(minutes=30)
+        """
+
+        td = timedelta(**kwargs)
         start = datetime.now(timezone.utc)
         end = start + td
         return Timeframe(start, end, inclusive)
@@ -97,7 +87,7 @@ class Timeframe:
 
     def split(self, n: int | timedelta | Any) -> list["Timeframe"]:
         """Split the timeframe in sequential parts and return the resulting list of timeframes.
-        The parameter `n` can be a number or a timedelta instance or other types like relativedelta that support
+        The parameter `n` can be a number, a timedelta instance or other types like relativedelta that support
         datetime calculations.
         """
 
