@@ -3,11 +3,12 @@ from collections import deque
 import logging
 import numpy as np
 from numpy.typing import NDArray
+from stable_baselines3.common.policies import BasePolicy
 import torch
 from torch.utils.data import DataLoader, Dataset
 
 from roboquant.event import Event
-from roboquant.ml.envs import Action2Signals, StrategyEnv, TraderEnv
+from roboquant.ml.envs import Action2Orders, Action2Signals, StrategyEnv, TraderEnv
 from roboquant.ml.features import Feature, NormalizeFeature
 from roboquant.order import Order
 from roboquant.signal import Signal
@@ -19,7 +20,7 @@ logger = logging.getLogger(__name__)
 
 class SB3PolicyStrategy(Strategy):
 
-    def __init__(self, obs_feature: Feature, action_2_signals: Action2Signals, policy):
+    def __init__(self, obs_feature: Feature, action_2_signals: Action2Signals, policy: BasePolicy):
         super().__init__()
         self.obs_feature = obs_feature
         self.action_2_signals = action_2_signals
@@ -44,7 +45,7 @@ class SB3PolicyStrategy(Strategy):
 
 class SB3PolicyTrader(Trader):
 
-    def __init__(self, obs_feature: Feature, action_2_orders, policy):
+    def __init__(self, obs_feature: Feature, action_2_orders: Action2Orders, policy: BasePolicy):
         super().__init__()
         self.obs_feature = obs_feature
         self.action_2_orders = action_2_orders

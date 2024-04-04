@@ -1,10 +1,9 @@
 # %%
 import talib.stream as ta
 import roboquant as rq
-from roboquant.strategies import BarStrategy
 
 # %%
-class MyStrategy(BarStrategy):
+class MyStrategy(rq.strategies.BarStrategy):
     """Example using talib to create a combined RSI/BollingerBand strategy"""
 
     def _create_signal(self, symbol, ohlcv):
@@ -16,12 +15,12 @@ class MyStrategy(BarStrategy):
             close, timeperiod=self.size-1, nbdevup=2, nbdevdn=2
         )
 
-        price = close[-1]
+        latest_price = close[-1]
 
-        if rsi < 30 and price < lower:
-            return rq.BUY
-        if rsi > 70 and price > upper:
-            return rq.SELL
+        if rsi < 30 and latest_price < lower:
+            return rq.Signal.buy(symbol)
+        if rsi > 70 and latest_price > upper:
+            return rq.Signal.sell(symbol)
 
         return None
 

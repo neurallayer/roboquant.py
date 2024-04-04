@@ -18,7 +18,7 @@ feed = rq.feeds.AggregatorFeed(alpaca, timedelta(seconds=15))
 # %%
 # Let run an EMACrossover strategy
 strategy = rq.strategies.EMACrossover(13, 26)
-timeframe = rq.Timeframe.next(minutes=60)
+timeframe = rq.Timeframe.next(minutes=30)
 journal = rq.journals.BasicJournal()
 account = rq.run(feed, strategy, journal=journal, timeframe=timeframe)
 

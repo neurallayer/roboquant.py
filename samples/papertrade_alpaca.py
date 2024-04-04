@@ -31,6 +31,3 @@ account = rq.run(feed, strategy, broker=broker, journal=journal, timeframe=timef
 # %%
 print(account)
 print(journal)
-
-
-# %%
