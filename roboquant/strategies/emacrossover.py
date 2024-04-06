@@ -53,3 +53,36 @@ class EMACrossover(Strategy):
             self.price2 = m2 * self.price2 + (1.0 - m2) * price
             self.step += 1
             return self.step
+
+
+class _Calculator2:
+
+    __slots__ = "entries", "step"
+
+    def __init__(self, *momentums, price):
+        self.entries = [[m, price] for m in momentums]
+        self.step = 0
+
+    def is_above(self):
+        prev = None
+        for _, p in self.entries:
+            if prev is not None and p <= prev:
+                return False
+            prev = p
+        return True
+
+    def is_below(self):
+        prev = None
+        for _, p in self.entries:
+            if prev is not None and p >= prev:
+                return False
+            prev = p
+        return True
+
+    def add_price(self, price: float):
+        for entry in self.entries:
+            m, p = entry
+            entry[1] = m * p + (1 - m) * price
+
+        self.step += 1
+        return self.step

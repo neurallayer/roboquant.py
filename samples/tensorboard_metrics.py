@@ -5,15 +5,16 @@ import roboquant as rq
 from roboquant.journals import TensorboardJournal, PNLMetric, RunMetric, FeedMetric, PriceItemMetric, AlphaBeta
 
 # %%
-# Compare 3 runs with different parameters using tensorboard
-feed = rq.feeds.YahooFeed("JPM", "IBM", "F", start_date="2000-01-01")
+# Compare runs with different parameters using tensorboard
+feed = rq.feeds.YahooFeed("JPM", "IBM", "F", "MSFT", "V", "GE","CSCO", "WMT", "XOM", "INTC", start_date="2010-01-01")
 
-params = [(3, 5), (13, 26), (12, 50)]
+hyper_params = [(3, 5), (13, 26), (12, 50)]
 
-for p1, p2 in params:
+for p1, p2 in hyper_params:
     s = rq.strategies.EMACrossover(p1, p2)
     log_dir = f"""runs/ema_{p1}_{p2}"""
     writer = Writer(log_dir)
     journal = TensorboardJournal(writer, PNLMetric(), RunMetric(), FeedMetric(), PriceItemMetric("JPM"), AlphaBeta(200))
-    rq.run(feed, s, journal=journal)
+    account = rq.run(feed, s, journal=journal)
+    print(p1, p2, account.equity())
     writer.close()

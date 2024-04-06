@@ -24,6 +24,9 @@ class Feed(ABC):
         """
         ...
 
+    def timeframe(self) -> Timeframe | None:
+        return None
+
     def play_background(self, timeframe: Timeframe | None = None, channel_capacity: int = 10) -> EventChannel:
         """
         Plays this feed in the background on its own thread.

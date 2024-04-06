@@ -10,14 +10,14 @@ from roboquant.timeframe import Timeframe
 
 
 def run(
-        feed: Feed,
-        strategy: Strategy | None = None,
-        trader: Trader | None = None,
-        broker: Broker | None = None,
-        journal: Journal | None = None,
-        timeframe: Timeframe | None = None,
-        capacity: int = 10,
-        heartbeat_timeout: float | None = None
+    feed: Feed,
+    strategy: Strategy | None = None,
+    trader: Trader | None = None,
+    broker: Broker | None = None,
+    journal: Journal | None = None,
+    timeframe: Timeframe | None = None,
+    capacity: int = 10,
+    heartbeat_timeout: float | None = None,
 ) -> Account:
     """Start a new run.
 

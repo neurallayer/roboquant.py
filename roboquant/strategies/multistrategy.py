@@ -1,33 +1,44 @@
 from typing import Literal
+from itertools import groupby
+from statistics import mean
 
 from roboquant.event import Event
+from roboquant.signal import Signal
 from roboquant.strategies.strategy import Strategy
 
 
 class MultiStrategy(Strategy):
     """Combine one or more strategies. The MultiStrategy provides additional control on how to handle conflicting
-    signals for the same symbols:
+    signals for the same symbols via the signal_filter:
 
-    - first: in case of multiple signals for a symbol, the first strategy wins
-    - last:  in case of multiple signals for a symbol, the last strategy wins. This is also the default policy
+    - first: in case of multiple signals for the same symbol, the first one wins
+    - last:  in case of multiple signals for the same symbol, the last one wins.
+    - avg: return the avgerage of the signals. All signals will be ENTRY and EXIT.
+    - none: return all signals. This is also the default.
     """
 
-    def __init__(self, *strategies: Strategy, policy: Literal["last", "first", "all"] = "last"):
+    def __init__(self, *strategies: Strategy, signal_filter: Literal["last", "first", "avg", "none"] = "none"):
         self.strategies = list(strategies)
-        self.policy = policy
+        self.signal_filter = signal_filter
 
     def create_signals(self, event: Event):
-        signals = []
+        signals: list[Signal] = []
         for strategy in self.strategies:
-            tmp = strategy.create_signals(event)
-            signals += tmp
+            signals += strategy.create_signals(event)
 
-        match self.policy:
+        match self.signal_filter:
+            case "none":
+                return signals
             case "last":
                 s = {s.symbol: s for s in signals}
                 return list(s.values())
             case "first":
                 s = {s.symbol: s for s in reversed(signals)}
                 return list(s.values())
-            case "all":
-                return signals
+            case "avg":
+                result = []
+                g = groupby(signals, lambda x: x.symbol)
+                for symbol, v in g:
+                    rating = mean(s.rating for s in v)
+                    result.append(Signal(symbol, rating))
+                return result

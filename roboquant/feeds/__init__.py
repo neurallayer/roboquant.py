@@ -7,6 +7,7 @@ from .historic import HistoricFeed
 from .randomwalk import RandomWalk
 from .sqllitefeed import SQLFeed
 from .tiingo import TiingoLiveFeed, TiingoHistoricFeed
+from .feedutil import get_sp500_symbols
 
 try:
     from .alpacafeed import AlpacaLiveFeed

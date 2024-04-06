@@ -2,6 +2,7 @@ from decimal import Decimal
 import logging
 import gymnasium as gym
 from gymnasium import spaces
+from gymnasium.envs.registration import register
 import numpy as np
 from numpy.typing import NDArray
 from roboquant.account import Account
@@ -19,6 +20,8 @@ from roboquant.traders.flextrader import FlexTrader
 from roboquant.traders.trader import Trader
 
 
+register(id="roboquant/StrategyEnv-v0", entry_point="roboquant.ml.envs:StrategyEnv")
+register(id="roboquant/TraderEnv-v0", entry_point="roboquant.ml.envs:TraderEnv")
 logger = logging.getLogger(__name__)
 
 

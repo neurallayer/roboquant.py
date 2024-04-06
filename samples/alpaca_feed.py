@@ -1,9 +1,6 @@
 # %%
 from datetime import timedelta
-from roboquant.feeds.aggregate import AggregatorFeed
-from roboquant.feeds.alpacafeed import AlpacaLiveFeed
-from roboquant.feeds.feedutil import get_sp500_symbols
-
+from roboquant.feeds import AggregatorFeed, AlpacaLiveFeed, get_sp500_symbols
 
 # %%
 alpaca_feed = AlpacaLiveFeed()

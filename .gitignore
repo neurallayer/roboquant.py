@@ -2,7 +2,7 @@ __pycache__
 runs/
 .idea/
 *.db
-scratch*.py
+scratch/
 dist/
 roboquant.egg-info/
 build/
