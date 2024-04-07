@@ -4,7 +4,7 @@ from statistics import mean, stdev
 
 from roboquant import Timeframe
 from roboquant.feeds import TiingoLiveFeed
-from roboquant.feeds.alpacafeed import AlpacaLiveFeed
+from roboquant.alpaca import AlpacaLiveFeed
 
 
 class TestDelay(unittest.TestCase):

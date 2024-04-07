@@ -10,11 +10,6 @@ from .tiingo import TiingoLiveFeed, TiingoHistoricFeed
 from .feedutil import get_sp500_symbols
 
 try:
-    from .alpacafeed import AlpacaLiveFeed
-except ImportError:
-    pass
-
-try:
     from .yahoo import YahooFeed
 except ImportError:
     pass

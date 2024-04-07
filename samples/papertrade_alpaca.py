@@ -2,7 +2,7 @@
 from datetime import timedelta
 import logging
 import roboquant as rq
-from roboquant.brokers.alpacabroker import AlpacaBroker
+from roboquant.alpaca import AlpacaBroker, AlpacaLiveFeed
 
 # %%
 logging.basicConfig()
@@ -15,7 +15,7 @@ print(account)
 
 # %%
 # Connect to Alpaca and subscribe to popular S&P-500 stocks
-alpaca_feed = rq.feeds.AlpacaLiveFeed(market="iex")
+alpaca_feed = AlpacaLiveFeed(market="iex")
 symbols = ["TSLA", "MSFT", "NVDA", "AMD", "AAPL", "AMZN", "META", "GOOG", "XOM", "JPM", "NLFX", "BA", "INTC", "V"]
 alpaca_feed.subscribe_trades(*symbols)
 
