@@ -126,7 +126,7 @@ class Account:
         return float(size) * price * rate
 
     def mkt_value(self) -> float:
-        """Return the sum of the market values of the open positions in the account.
+        """Return the sum market values of the open positions in the account.
 
         The returned value is denoted in the base currency of the account.
         """
@@ -142,8 +142,8 @@ class Account:
         return self.contract_value(symbol, pos.size, pos.mkt_price) if pos else 0.0
 
     def equity(self) -> float:
-        """Return the equity of the account. It calcaluates the sum of the mkt value of
-        each open position and adds the available cash.
+        """Return the equity of the account.
+        It calculates the sum mkt values of each open position and adds the available cash.
 
         The returned value is denoted in the base currency of the account.
         """

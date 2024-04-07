@@ -75,9 +75,9 @@ class FlexTrader(Trader):
     It might be sometimes challenging to understand wby a signal isn't converted into an order. The flex-trader logs
     at INFO level when certain rules have been fired.
 
-    import logging
-    logging.basicConfig(level=logging.WARNING)
-    logging.getLogger("roboquant.traders.flextrader").setLevel(logging.INFO)
+    Setting higher logging:
+        logging.basicConfig(level=logging.WARNING)
+        logging.getLogger("roboquant.traders.flextrader").setLevel(logging.INFO)
     """
 
     def __init__(

@@ -121,7 +121,7 @@ class CSVFeed(HistoricFeed):
 
         class StooqDailyFeed(CSVFeed):
             def __init__(self):
-                # from Python 3.11 onwards we can use the fast standard ISO parsing
+                # from Python 3.11 onwards, we can use the fast standard ISO parsing
                 if sys.version_info >= (3, 11):
                     super().__init__(path, columns=columns, time_offset="21:00:00+00:00", endswith=".txt", frequency="1d")
                 else:
@@ -147,7 +147,7 @@ class CSVFeed(HistoricFeed):
 
         class StooqIntradayFeed(CSVFeed):
             def __init__(self):
-                # from Python 3.11 onwards we can use the faster standard ISO parsing
+                # from Python 3.11 onwards, we can use the faster standard ISO parsing
                 if sys.version_info >= (3, 11):
                     super().__init__(path, columns=columns, has_time_column=True, endswith=".txt")
                 else:

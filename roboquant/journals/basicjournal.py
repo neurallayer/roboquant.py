@@ -13,8 +13,8 @@ class BasicJournal(Journal):
 
     It will also log these values at each step in the run at `info` level.
 
-    This journal adds little overhead to a run, both CPU and memory wise and is helpful in
-    determning if the setup works correctly.
+    This journal adds little overhead to a run, both CPU and memory wise, and is helpful in
+    determining if the setup works correctly.
     """
 
     events: int

@@ -24,7 +24,7 @@ class Feature(ABC):
 
     @abstractmethod
     def size(self) -> int:
-        "return the size of this feature"
+        """return the size of this feature"""
 
     def shape(self):
         return (self.size(),)
@@ -146,7 +146,7 @@ class EquityFeature(Feature):
 
 
 class PositionSizeFeature(Feature):
-    """Extract the position value for a symbol as fraction of the total equity"""
+    """Extract the position value for a symbol as the fraction of the total equity"""
 
     def __init__(self, *symbols: str) -> None:
         super().__init__()
@@ -296,9 +296,9 @@ class FillFeature(Feature):
 
 class CacheFeature(Feature):
     """Cache the results of a feature. This requires the feed to have always increasing time value
-    and the feature to produce same output.
+    and the feature to produce the same output.
 
-    Typically this doesn't work for features that depend on account values.
+    Typically, this doesn't work for features that depend on account values.
     """
 
     def __init__(self, feature: Feature) -> None:
@@ -316,11 +316,11 @@ class CacheFeature(Feature):
         return values
 
     def reset(self):
-        """Reset the underlying feature. This doesn't cleear the cache"""
+        """Reset the underlying feature. This doesn't clear the cache"""
         self.feature.reset()
 
     def clear(self):
-        """Clear all of the cache"""
+        """Clear all the cache"""
         self._cache = {}
 
     def size(self) -> int:

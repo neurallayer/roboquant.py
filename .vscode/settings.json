@@ -42,5 +42,6 @@
     ],
     "python.analysis.exclude": [
         "**/samples", "**/Interactive*.py"
-    ]
+    ],
+    "python.analysis.typeCheckingMode": "standard"
 }

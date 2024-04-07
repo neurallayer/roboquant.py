@@ -40,7 +40,8 @@ class Timeframe:
     def previous(inclusive=False, **kwargs):
         """Convenient method to create a historic timeframe, the kwargs arguments will be passed to the timedelta
 
-        timeframe = Timeframe.previous(days=365)
+        Usage:
+            tf = Timeframe.previous(days=365)
         """
 
         td = timedelta(**kwargs)
@@ -52,7 +53,8 @@ class Timeframe:
     def next(inclusive=False, **kwargs):
         """Convenient method to create a future timeframe, the kwargs arguments will be passed to the timedelta
 
-        timeframe = Timeframe.next(minutes=30)
+        Usage:
+            tf = Timeframe.next(minutes=30)
         """
 
         td = timedelta(**kwargs)

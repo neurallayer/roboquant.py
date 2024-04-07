@@ -3,7 +3,7 @@ from roboquant.feeds.yahoo import YahooFeed
 
 
 class ETR:
-    "Average True Range with a twist, it uses an exponential moving average of the true range"
+    """Average True Range with a twist, it uses an exponential moving average of the true range"""
 
     def __init__(self, period=10, smoothing=2.0):
         self.history = {}

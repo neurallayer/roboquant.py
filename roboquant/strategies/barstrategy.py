@@ -10,7 +10,7 @@ class BarStrategy(Strategy):
     """Abstract base class for other strategies that helps to implement trading solutions
     based on technical indicators using bars.
 
-    Sub classes should implement the _create_signal method. This method is only invoked once
+    Subclasses should implement the _create_signal method. This method is only invoked once
     there is at least `size` history for an individual symbol.
     """
 

@@ -83,7 +83,7 @@ class TestFeatures(unittest.TestCase):
                 10,
             )
         ).returns()
-        values = f.calc(Event.empty(), account)
+        f.calc(Event.empty(), account)
         values = f.calc(Event.empty(), account)
         self.assertEqual(0, values[0])
 
