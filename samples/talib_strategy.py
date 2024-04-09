@@ -3,7 +3,7 @@ import talib.stream as ta
 import roboquant as rq
 
 # %%
-class MyStrategy(rq.strategies.BarStrategy):
+class MyStrategy(rq.strategies.TaStrategy):
     """Example using talib to create a combined RSI/BollingerBand strategy"""
 
     def _create_signal(self, symbol, ohlcv):

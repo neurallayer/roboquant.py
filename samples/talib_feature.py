@@ -5,8 +5,7 @@ from roboquant.ml.features import TaFeature
 
 # %%
 class RSIFeature(TaFeature):
-    """Example using talib to create a RIS feature"""
-
+    """Example using talib to create an RSI feature"""
 
     def __init__(self, *symbols: str, timeperiod=10) -> None:
         self.timeperiod = timeperiod
