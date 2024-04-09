@@ -7,6 +7,7 @@ from numpy.typing import NDArray
 
 from roboquant.account import Account
 from roboquant.event import Event, Bar
+from roboquant.strategies.buffer import OHLCVBuffer
 
 
 class Feature(ABC):
@@ -146,7 +147,7 @@ class EquityFeature(Feature):
 
 
 class PositionSizeFeature(Feature):
-    """Extract the position value for a symbol as the fraction of the total equity"""
+    """Extract the position value for one or more symbols as the fraction of the total equity"""
 
     def __init__(self, *symbols: str) -> None:
         super().__init__()
@@ -155,11 +156,12 @@ class PositionSizeFeature(Feature):
     def calc(self, evt, account):
         assert account is not None
         result = self._zeros()
+        equity = account.equity()
         for idx, symbol in enumerate(self.symbols):
             position = account.positions.get(symbol)
             if position:
                 value = account.contract_value(symbol, position.size, position.mkt_price)
-                pos_size = value / account.equity() - 1.0
+                pos_size = value / equity - 1.0
                 result[idx] = pos_size
         return result
 
@@ -168,7 +170,7 @@ class PositionSizeFeature(Feature):
 
 
 class PositionPNLFeature(Feature):
-    """Extract the pnl for an open position for a symbol.
+    """Extract the pnl percentage for an open position for one or more symbols.
     Returns 0.0 if there is no open position for a symbol"""
 
     def __init__(self, *symbols: str) -> None:
@@ -295,8 +297,8 @@ class FillFeature(Feature):
 
 
 class CacheFeature(Feature):
-    """Cache the results of a feature. This requires the feed to have always increasing time value
-    and the feature to produce the same output.
+    """Cache the results of a feature. This requires the feed to have an always increasing time value
+    and the feature to produce the same output at a given time.
 
     Typically, this doesn't work for features that depend on account values.
     """
@@ -335,7 +337,7 @@ class VolumeFeature(Feature):
         self.symbols = symbols
         self.volume_type = volume_type
 
-    def calc(self, evt: Event, account: Account):
+    def calc(self, evt: Event, account):
         volumes = [evt.get_volume(symbol, self.volume_type) for symbol in self.symbols]
         return np.array(volumes, dtype=np.float32)
 
@@ -516,7 +518,7 @@ class SMAFeature(Feature):
 
 
 class DayOfWeekFeature(Feature):
-    """Calculate a one-hot-encoded day of the week, Monday being 0"""
+    """Calculate a one-hot-encoded day of the week where Monday == 0 and Sunday == 6"""
 
     def __init__(self, tz=timezone.utc) -> None:
         self.tz = tz
@@ -530,3 +532,37 @@ class DayOfWeekFeature(Feature):
 
     def size(self) -> int:
         return 7
+
+
+class TaFeature(Feature):
+
+    def __init__(self, *symbols: str, history_size: int) -> None:
+        self._data: dict[str, OHLCVBuffer] = {}
+        self._size = history_size
+        self.symbols = list(symbols)
+
+    def calc(self, evt, account):
+        result = []
+        nan = float("nan")
+        for symbol in self.symbols:
+            value = nan
+            item = evt.price_items.get(symbol)
+            if isinstance(item, Bar):
+                symbol = item.symbol
+                if symbol not in self._data:
+                    self._data[symbol] = OHLCVBuffer(self._size)
+                ohlcv = self._data[symbol]
+                ohlcv.append(item.ohlcv)
+                if ohlcv.is_full():
+                    value = self._calc(symbol, ohlcv)
+
+            result.append(value)
+        return np.asarray(result, dtype=np.float32)
+
+    @abstractmethod
+    def _calc(self, symbol: str, ohlcv: OHLCVBuffer) -> float:
+        """Override this method with technical analysis logic"""
+        ...
+
+    def size(self) -> int:
+        return len(self.symbols)

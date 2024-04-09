@@ -31,7 +31,7 @@ print(env)
 
 # %%
 model = A2C("MlpPolicy", env, verbose=0)
-model.learn(total_timesteps=100_000, progress_bar=True)
+model.learn(total_timesteps=500_000, progress_bar=True)
 
 # %%
 policy = model.policy

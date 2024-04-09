@@ -3,14 +3,15 @@ import unittest
 from statistics import mean, stdev
 
 from roboquant import Timeframe
-from roboquant.feeds import TiingoLiveFeed
+from roboquant.feeds import TiingoLiveFeed, Feed
 from roboquant.alpaca import AlpacaLiveFeed
 
 
 class TestDelay(unittest.TestCase):
     """
-    Measure the delay of receiving live prices from IEX.
-    This includes the following paths if you run it from home:
+    Measure the delay of receiving live prices from IEX using Tiingo and Alpaca.
+
+    This route includes the following paths if you run this script from home:
 
     - From IEX to the market data provider (Tiingo or Alpaca)
     - Provider holds it for 15ms (requirement from IEX)
@@ -22,7 +23,7 @@ class TestDelay(unittest.TestCase):
         # Popular stocks
         return ["TSLA", "MSFT", "NVDA", "AMD", "AAPL", "AMZN", "META", "GOOG", "XOM", "JPM", "NLFX", "BA", "INTC", "V"]
 
-    def __run_feed(self, feed):
+    def __run_feed(self, feed: Feed):
         timeframe = Timeframe.next(minutes=1)
         channel = feed.play_background(timeframe, 1000)
         name = type(feed).__name__

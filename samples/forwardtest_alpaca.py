@@ -8,7 +8,7 @@ from roboquant.alpaca import AlpacaLiveFeed
 logging.basicConfig()
 logging.getLogger("roboquant").setLevel(level=logging.INFO)
 
-# Connect to Tiingo and subscribe to S&P-500 stocks
+# Connect to Alpaca and subscribe to some IEX stocks
 symbols = ["TSLA", "MSFT", "NVDA", "AMD", "AAPL", "AMZN", "META", "GOOG", "XOM", "JPM", "NLFX", "BA", "INTC", "V"]
 alpaca = AlpacaLiveFeed(market="iex")
 alpaca.subscribe_trades(*symbols)

@@ -47,7 +47,7 @@ class _PositionChange(Flag):
 def _log_rule(rule: str, signal: Signal, symbol: str, position: Decimal):
     if logger.isEnabledFor(logging.INFO):
         logger.info(
-            "rating=%s type=%s symbol=%s position=%s discarded because of %s",
+            "Discarded [rating=%s type=%s symbol=%s position=%s] because of %s",
             signal.rating,
             signal.type,
             symbol,

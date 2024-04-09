@@ -13,14 +13,14 @@ logging.basicConfig()
 logging.getLogger("roboquant").setLevel(level=logging.INFO)
 
 # %%
-# Connect to local running TWS or IB Gateway
+# Connect to local running TWS
 converter = CurrencyConverter("EUR", "USD")
 converter.register_rate("USD", 0.91)
 Account.register_converter(converter)
 ibkr = IBKRBroker.use_tws()
 
 # %%
-# Connect to Tiingo and subscribe to S&P-500 stocks
+# Connect to Tiingo and subscribe to 10 S&P-500 stocks
 tiingo_feed = rq.feeds.TiingoLiveFeed(market="iex")
 symbols = random.sample(get_sp500_symbols(), 10)
 tiingo_feed.subscribe(*symbols)

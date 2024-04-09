@@ -34,7 +34,7 @@ class SB3PolicyStrategy(Strategy):
     def create_signals(self, event):
         obs = self.obs_feature.calc(event, None)
         if np.any(np.isnan(obs)):
-            return {}
+            return []
         action, self.state = self.policy.predict(obs, state=self.state, deterministic=True)  # type: ignore
         return self.action_2_signals.get_signals(action, event)
 
@@ -56,7 +56,7 @@ class SB3PolicyTrader(Trader):
     def from_env(cls, env: TraderEnv, policy):
         return cls(env.obs_feature, env.action_2_orders, policy)
 
-    def create_orders(self, _, event, account) -> list[Order]:
+    def create_orders(self, signals, event, account) -> list[Order]:
         obs = self.obs_feature.calc(event, account)
         if np.any(np.isnan(obs)):
             return []
@@ -173,7 +173,7 @@ class RNNStrategy(FeatureStrategy):
             if p <= self.sell_pct:
                 return [Signal.sell(self.symbol)]
 
-        return {}
+        return []
 
     def _get_dataloaders(self, x, y, prediction: int, validation_split: float, batch_size: int):
         # what is the border between train- and validation-data
