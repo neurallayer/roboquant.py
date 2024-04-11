@@ -8,17 +8,17 @@ from .feed import Feed
 
 
 class AggregatorFeed(Feed):
-    """Aggregates Trades or Quotes of another feed into a `Bar`.
+    """Aggregates Trades or Quotes of another feed into a `Bar` prices.
 
-    When trades are used, the actual trade price and volume are used to create the aggregated bars.
-    When quotes are used, the midpoint price and no volume are used to create the aggregated bars.
+    When trades are used, the actual trade prices and volumes are used to create the aggregated bars.
+    When quotes are used, the midpoint prices and no volumes are used to create the aggregated bars.
     """
 
     def __init__(
         self,
         feed: Feed,
         frequency: timedelta,
-        item_type: Literal["trade", "quote"] = "trade",
+        price_type: Literal["trade", "quote"] = "trade",
         send_remaining=False,
         continuation=True,
     ):
@@ -27,16 +27,16 @@ class AggregatorFeed(Feed):
         self.freq = frequency
         self.send_remaining = send_remaining
         self.continuation = continuation
-        self.item_type = item_type
+        self.price_type = price_type
 
     def __aggr_trade2bar(self, evt: Event, bars: dict[str, Bar], freq: str):
 
         for item in evt.items:
 
-            if self.item_type == "trade" and isinstance(item, Trade):
+            if self.price_type == "trade" and isinstance(item, Trade):
                 price = item.trade_price
                 volume = item.trade_volume
-            elif self.item_type == "quote" and isinstance(item, Quote):
+            elif self.price_type == "quote" and isinstance(item, Quote):
                 price = item.midpoint_price
                 volume = float("nan")
             else:
@@ -59,7 +59,7 @@ class AggregatorFeed(Feed):
         result = {}
         for symbol, item in bars.items():
             p = item.price("CLOSE")
-            v = 0.0 if self.item_type == "trade" else float("nan")
+            v = 0.0 if self.price_type == "trade" else float("nan")
             b = Bar(symbol, array("f", [p, p, p, p, v]))
             result[symbol] = b
         return result

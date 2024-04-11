@@ -82,7 +82,7 @@ class Trade(PriceItem):
 
 @dataclass(slots=True)
 class Bar(PriceItem):
-    """Represents a bar (a.k.a. candlestick) with open, high, low, close and volume data.
+    """Represents a bar (a.k.a. candlestick) with open-, high-, low-, close-price and volume data.
     """
 
     ohlcv: array

@@ -4,7 +4,10 @@ from configparser import ConfigParser
 
 
 class Config:
-    """Access to the roboquant configuration file"""
+    """Access to the roboquant configuration file.
+    This allows to share the same property file for both the Python and Kotlin
+    version of roboquant.
+    """
 
     def __init__(self, path=None):
         path = path or os.path.expanduser("~/.roboquant/.env")
