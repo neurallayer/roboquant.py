@@ -65,7 +65,7 @@ class Feed(ABC):
 
         Parameters
         ----------
-        plt : matplotlib.pyplot
+        plt : matplotlib axes
             The matplotlib.pyplot object where the plot will be drawn.
         symbol : str
             The symbol for which to plot prices.
@@ -76,14 +76,10 @@ class Feed(ABC):
         **kwargs
             Additional keyword arguments to pass to the plt.plot() function.
         """
-
+        plt = plt.subplot() if hasattr(plt, "subplot") else plt
         times, prices = get_symbol_prices(self, symbol, price_type, timeframe)
         plt.plot(times, prices, **kwargs)
-        if hasattr(plt, "set_title"):
-            # assume we are in a subplot
-            plt.set_title(symbol)
-        else:
-            plt.title(symbol)
+        plt.set_title(symbol)
 
 
 def get_symbol_prices(

@@ -14,6 +14,7 @@ from roboquant.feeds.live import LiveFeed
 
 
 class AlpacaLiveFeed(LiveFeed):
+    """Subscribe to live market data for stocks, crypto currencies or options"""
 
     __one_minute = str(timedelta(minutes=1))
 
@@ -40,20 +41,21 @@ class AlpacaLiveFeed(LiveFeed):
     async def close(self):
         await self.stream.close()
 
+    def __put_item(self, time, item):
+        event = Event(time, [item])
+        self.put(event)
+
     async def __handle_trades(self, data):
         item = Trade(data.symbol, data.price, data.size)
-        event = Event(data.timestamp, [item])
-        self.put(event)
+        self.__put_item(data.timestamp, item)
 
     async def __handle_bars(self, data):
         item = Bar(data.symbol, array("f", [data.open, data.high, data.low, data.close, data.volume]), self.__one_minute)
-        event = Event(data.timestamp, [item])
-        self.put(event)
+        self.__put_item(data.timestamp, item)
 
     async def __handle_quotes(self, data):
         item = Quote(data.symbol, array("f", [data.ask_price, data.ask_size, data.bid_price, data.bid_size]))
-        event = Event(data.timestamp, [item])
-        self.put(event)
+        self.__put_item(data.timestamp, item)
 
     def subscribe_trades(self, *symbols: str):
         self.stream.subscribe_trades(self.__handle_trades, *symbols)

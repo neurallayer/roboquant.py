@@ -110,23 +110,3 @@ class AlpacaBroker(LiveBroker):
     def _get_replace_request(self, order: Order):
         result = ReplaceOrderRequest(qty=int(abs(float(order.size))), limit_price=order.limit)
         return result
-
-
-if __name__ == "__main__":
-    broker = AlpacaBroker()
-    account = broker.sync()
-    print(account)
-
-    tsla_order = Order("TSLA", 10)
-    broker.place_orders([tsla_order])
-    time.sleep(5)
-    account = broker.sync()
-    print(account)
-
-    tesla_size = account.get_position_size("TSLA")
-    if tesla_size:
-        tsla_order = Order("TSLA", -tesla_size)
-        broker.place_orders([tsla_order])
-        time.sleep(5)
-        account = broker.sync()
-        print(account)

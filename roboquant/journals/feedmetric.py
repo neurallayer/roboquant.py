@@ -2,7 +2,7 @@ from roboquant.journals.metric import Metric
 
 
 class FeedMetric(Metric):
-    """Tracks the combined performance of the price-items in the event"""
+    """Tracks the performance of the market, aka the price-items in the event"""
 
     def __init__(self, price_type="DEFAULT"):
         self._prev_prices = {}

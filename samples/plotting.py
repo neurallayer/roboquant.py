@@ -29,3 +29,12 @@ axs = axs.flatten()
 for ax, metric_name in zip(axs, metric_names):
     journal.plot(ax, metric_name)
 plt.show()
+
+# %%
+timeframes = feed.timeframe().split(4)
+
+for timeframe in timeframes:
+    strategy = rq.strategies.EMACrossover()
+    journal = rq.journals.MetricsJournal.pnl()
+    rq.run(feed, strategy, journal=journal, timeframe=timeframe)
+    journal.plot(plt, "pnl/equity", linewidth=0.5)
