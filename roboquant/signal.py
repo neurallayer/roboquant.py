@@ -32,32 +32,33 @@ class Signal:
     Signal("XYZ", 0.5, SignalType.ENTRY)
     ```
     """
+
     symbol: str
     rating: float
     type: SignalType = SignalType.ENTRY_EXIT
 
     @staticmethod
-    def buy(symbol, signal_type=SignalType.ENTRY_EXIT):
+    def buy(symbol, signal_type=SignalType.ENTRY_EXIT) -> "Signal":
         """Create a BUY signal with a rating of 1.0"""
         return Signal(symbol, 1.0, signal_type)
 
     @staticmethod
-    def sell(symbol, signal_type=SignalType.ENTRY_EXIT):
+    def sell(symbol, signal_type=SignalType.ENTRY_EXIT) -> "Signal":
         """Create a SELL signal with a rating of -1.0"""
         return Signal(symbol, -1.0, signal_type)
 
     @property
-    def is_buy(self):
+    def is_buy(self) -> bool:
         return self.rating > 0.0
 
     @property
-    def is_sell(self):
+    def is_sell(self) -> bool:
         return self.rating < 0.0
 
     @property
-    def is_entry(self):
+    def is_entry(self) -> bool:
         return SignalType.ENTRY in self.type
 
     @property
-    def is_exit(self):
+    def is_exit(self) -> bool:
         return SignalType.EXIT in self.type
