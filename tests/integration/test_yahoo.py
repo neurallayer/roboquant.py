@@ -5,7 +5,7 @@ from roboquant.feeds import YahooFeed
 from tests.common import run_price_item_feed
 
 
-class TestYahooFeed(unittest.TestCase):
+class TestYahoo(unittest.TestCase):
 
     def test_yahoo_feed(self):
         feed = YahooFeed("MSFT", "JPM", start_date="2018-01-01", end_date="2020-01-01")

@@ -7,7 +7,7 @@ from roboquant import OrderStatus, Order
 from roboquant.brokers.ibkr import IBKRBroker
 
 
-class TestIBKRBroker(unittest.TestCase):
+class TestIBKR(unittest.TestCase):
 
     def test_ibkr_order(self):
         logging.basicConfig(level=logging.DEBUG)

@@ -1,12 +1,12 @@
 import logging
 import unittest
 
-from roboquant import Config
-from roboquant.feeds import TiingoHistoricFeed
+from roboquant import Config, Timeframe
+from roboquant.feeds import TiingoHistoricFeed, TiingoLiveFeed
 from tests.common import get_recent_start_date, run_price_item_feed
 
 
-class TestTiingoHistoricFeed(unittest.TestCase):
+class TestTiingo(unittest.TestCase):
 
     def setUp(self) -> None:
         config = Config()
@@ -32,6 +32,24 @@ class TestTiingoHistoricFeed(unittest.TestCase):
         feed = TiingoHistoricFeed(self.key)
         feed.retrieve_intraday_fx("EURUSD", "AUDUSD", start_date=get_recent_start_date())
         run_price_item_feed(feed, ["EURUSD", "AUDUSD"], self)
+
+    def test_tiingo_crypt_live_feed(self):
+        feed = TiingoLiveFeed(self.key)
+        feed.subscribe("btcusdt", "ethusdt")
+        run_price_item_feed(feed, ["BTCUSDT", "ETHUSDT"], self, Timeframe.next(minutes=1))
+        feed.close()
+
+    def test_tiingo_fx_live_feed(self):
+        feed = TiingoLiveFeed(self.key, "fx")
+        feed.subscribe("eurusd")
+        run_price_item_feed(feed, ["EURUSD"], self, Timeframe.next(minutes=1))
+        feed.close()
+
+    def test_tiingo_iex_live_feed(self):
+        feed = TiingoLiveFeed(self.key, "iex")
+        feed.subscribe("IBM", "TSLA")
+        run_price_item_feed(feed, ["IBM", "TSLA"], self, Timeframe.next(minutes=1))
+        feed.close()
 
 
 if __name__ == "__main__":
