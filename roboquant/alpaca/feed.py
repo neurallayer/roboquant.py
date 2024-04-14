@@ -4,6 +4,7 @@ import threading
 from typing import Literal
 
 from alpaca.data import DataFeed
+from alpaca.data.enums import Adjustment
 from alpaca.data.historical.crypto import CryptoHistoricalDataClient
 from alpaca.data.historical.stock import StockHistoricalDataClient
 from alpaca.data.live.crypto import CryptoDataStream
@@ -23,7 +24,6 @@ from alpaca.data.timeframe import TimeFrame, TimeFrameUnit
 
 from roboquant.config import Config
 from roboquant.event import Event, Quote, Trade, Bar
-from roboquant.feeds.feedutil import print_feed_items
 from roboquant.feeds.historic import HistoricFeed
 from roboquant.feeds.live import LiveFeed
 
@@ -109,6 +109,9 @@ class AlpacaHistoricFeed(HistoricFeed):
 
 
 class AlpacaHistoricStockFeed(AlpacaHistoricFeed):
+    """Get historic stock prices from Alpaca.
+    Support for bars, trades and quotes.
+    """
 
     def __init__(self, api_key=None, secret_key=None, data_api_url=None):
         super().__init__()
@@ -117,9 +120,11 @@ class AlpacaHistoricStockFeed(AlpacaHistoricFeed):
         secret_key = secret_key or config.get("alpaca.secret.key")
         self.client = StockHistoricalDataClient(api_key, secret_key, url_override=data_api_url)
 
-    def retrieve_bars(self, *symbols, start=None, end=None, resolution: TimeFrame | None = None):
+    def retrieve_bars(self, *symbols, start=None, end=None, resolution: TimeFrame | None = None, adjustment=Adjustment.ALL):
         resolution = resolution or TimeFrame(amount=1, unit=TimeFrameUnit.Day)
-        req = StockBarsRequest(symbol_or_symbols=list(symbols), timeframe=resolution, start=start, end=end)
+        req = StockBarsRequest(
+            symbol_or_symbols=list(symbols), timeframe=resolution, start=start, end=end, adjustment=adjustment
+        )
         res = self.client.get_stock_bars(req)
         assert isinstance(res, BarSet)
         freq = str(resolution)
@@ -139,6 +144,9 @@ class AlpacaHistoricStockFeed(AlpacaHistoricFeed):
 
 
 class AlpacaHistoricCryptoFeed(AlpacaHistoricFeed):
+    """Get historic crypto-currency prices from Alpaca.
+    Support for bars and trades.
+    """
 
     def __init__(self, api_key=None, secret_key=None, data_api_url=None):
         super().__init__()
@@ -160,21 +168,3 @@ class AlpacaHistoricCryptoFeed(AlpacaHistoricFeed):
         res = self.client.get_crypto_trades(req)
         assert isinstance(res, TradeSet)
         self._process_trades(res.data)
-
-
-if __name__ == "__main__":
-    feed = AlpacaHistoricStockFeed()
-    feed.retrieve_bars("AAPL", "TSLA", start="2024-03-01", end="2024-03-02")
-    print_feed_items(feed)
-
-    feed = AlpacaHistoricStockFeed()
-    feed.retrieve_trades("AAPL", "TSLA", start="2024-03-01T18:00:00", end="2024-03-01T18:01:00")
-    print_feed_items(feed)
-
-    feed = AlpacaHistoricStockFeed()
-    feed.retrieve_quotes("AAPL", "TSLA", start="2024-03-01T18:00:00", end="2024-03-01T18:01:00")
-    print_feed_items(feed)
-
-    feed = AlpacaHistoricCryptoFeed()
-    feed.retrieve_bars("BTC/USDT", start="2024-03-01", end="2024-03-02", resolution=TimeFrame.Hour)  # type: ignore
-    print_feed_items(feed)

@@ -1,7 +1,8 @@
 import unittest
 from alpaca.data.timeframe import TimeFrame
 
-from roboquant.alpaca.feed import AlpacaHistoricCryptoFeed, AlpacaHistoricStockFeed
+from roboquant.alpaca import AlpacaHistoricCryptoFeed, AlpacaHistoricStockFeed, AlpacaBroker
+from roboquant.order import Order
 from tests.common import run_price_item_feed
 
 
@@ -25,6 +26,15 @@ class TestAlpaca(unittest.TestCase):
         feed = AlpacaHistoricCryptoFeed()
         feed.retrieve_bars("BTC/USDT", start="2024-03-01", end="2024-03-02", resolution=TimeFrame.Hour)  # type: ignore
         run_price_item_feed(feed, ["BTC/USDT"], self)
+
+    def test_alpaca_broker(self):
+        broker = AlpacaBroker()
+        account = broker.sync()
+        self.assertTrue(account.buying_power > 0)
+        self.assertTrue(account.equity() > 0)
+        order = Order("TSLA", 1)
+        broker.place_orders([order])
+        account = broker.sync()
 
 
 if __name__ == "__main__":
