@@ -7,18 +7,20 @@ from tests.common import run_price_item_feed
 
 class TestAlpaca(unittest.TestCase):
 
+    stocks = ["AAPL", "TSLA"]
+
     def test_alpaca_feed(self):
         feed = AlpacaHistoricStockFeed()
-        feed.retrieve_bars("AAPL", "TSLA", start="2024-03-01", end="2024-03-02")
-        run_price_item_feed(feed, ["AAPL", "TSLA"], self)
+        feed.retrieve_bars(*self.stocks, start="2024-03-01", end="2024-03-02")
+        run_price_item_feed(feed, self.stocks, self)
 
         feed = AlpacaHistoricStockFeed()
-        feed.retrieve_trades("AAPL", "TSLA", start="2024-03-01T18:00:00", end="2024-03-01T18:01:00")
-        run_price_item_feed(feed, ["AAPL", "TSLA"], self)
+        feed.retrieve_trades(*self.stocks, start="2024-03-01T18:00:00", end="2024-03-01T18:01:00")
+        run_price_item_feed(feed, self.stocks, self)
 
         feed = AlpacaHistoricStockFeed()
-        feed.retrieve_quotes("AAPL", "TSLA", start="2024-03-01T18:00:00", end="2024-03-01T18:01:00")
-        run_price_item_feed(feed, ["AAPL", "TSLA"], self)
+        feed.retrieve_quotes(*self.stocks, start="2024-03-01T18:00:00", end="2024-03-01T18:01:00")
+        run_price_item_feed(feed, self.stocks, self)
 
         feed = AlpacaHistoricCryptoFeed()
         feed.retrieve_bars("BTC/USDT", start="2024-03-01", end="2024-03-02", resolution=TimeFrame.Hour)  # type: ignore
