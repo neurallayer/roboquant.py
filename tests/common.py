@@ -54,6 +54,7 @@ def run_price_item_feed(feed: Feed, symbols: list[str], test_case: TestCase, tim
                 case Quote():
                     for f in item.data:
                         test_case.assertTrue(math.isfinite(f))
+                    test_case.assertGreaterEqual(item.data[0], item.data[2])  # ask >= bid
 
     test_case.assertGreaterEqual(n_items, min_items)
 

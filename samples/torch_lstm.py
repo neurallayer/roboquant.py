@@ -58,8 +58,4 @@ account = rq.run(feed, strategy, timeframe=tf, journal=journal)
 # %%
 # Print some results
 print(journal)
-predictions = strategy.prediction_results
-print(max(predictions), min(predictions))
 print(account)
-
-# %%

@@ -1,5 +1,6 @@
 from abc import abstractmethod
 from collections import deque
+from datetime import datetime
 import logging
 import numpy as np
 from numpy.typing import NDArray
@@ -71,14 +72,12 @@ class SB3PolicyTrader(Trader):
 
 class FeatureStrategy(Strategy):
     """Abstract base class for strategies wanting to use features
-    for their input and target.
+    for their input.
     """
 
-    def __init__(self, input_feature: Feature, label_feature: Feature, history: int, dtype="float32"):
-        self._features_x = []
-        self._features_y = []
+    def __init__(self, input_feature: Feature, history: int, dtype="float32"):
         self.input_feature = input_feature
-        self.label_feature = label_feature
+        self.history = history
         self._hist = deque(maxlen=history)
         self._dtype = dtype
 
@@ -88,26 +87,11 @@ class FeatureStrategy(Strategy):
         h.append(row)
         if len(h) == h.maxlen:
             x = np.asarray(h, dtype=self._dtype)
-            return self.predict(x)
+            return self.predict(x, event.time)
         return []
 
     @abstractmethod
-    def predict(self, x: NDArray) -> list[Signal]: ...
-
-    def _get_xy(self, feed, timeframe=None, warmup=0) -> tuple[NDArray, NDArray]:
-        channel = feed.play_background(timeframe)
-        x = []
-        y = []
-        while evt := channel.get():
-            if warmup:
-                self.label_feature.calc(evt, None)
-                self.input_feature.calc(evt, None)
-                warmup -= 1
-            else:
-                x.append(self.input_feature.calc(evt, None))
-                y.append(self.label_feature.calc(evt, None))
-
-        return np.asarray(x, dtype=self._dtype), np.asarray(y, dtype=self._dtype)
+    def predict(self, x: NDArray, time: datetime) -> list[Signal]: ...
 
 
 class SequenceDataset(Dataset):
@@ -146,15 +130,14 @@ class RNNStrategy(FeatureStrategy):
         buy_pct: float = 0.01,
         sell_pct=0.0,
     ):
-        super().__init__(input_feature, label_feature, sequences)
-        self.sequences = sequences
+        super().__init__(input_feature, sequences)
+        self.label_feature = label_feature
         self.model = model
         self.buy_pct = buy_pct
         self.sell_pct = sell_pct
         self.symbol = symbol
-        self.prediction_results = []
 
-    def predict(self, x):
+    def predict(self, x, time):
         x = torch.asarray(x)
         x = torch.unsqueeze(x, dim=0)  # add the batch dimension
 
@@ -167,7 +150,7 @@ class RNNStrategy(FeatureStrategy):
             else:
                 p = output.item()
 
-            self.prediction_results.append(p)
+            logger.info("prediction p=%s time=%s", p, time)
             if p >= self.buy_pct:
                 return [Signal.buy(self.symbol)]
             if p <= self.sell_pct:
@@ -182,17 +165,32 @@ class RNNStrategy(FeatureStrategy):
         x_train = x[: border - prediction]
         y_train = y[prediction:border]
 
-        train_dataset = SequenceDataset(x_train, y_train, self.sequences)
+        train_dataset = SequenceDataset(x_train, y_train, self.history)
         train_dataloader = DataLoader(train_dataset, batch_size=batch_size, shuffle=True)
 
         valid_dataloader = None
         if validation_split > 0.0:
             x_valid = x[border - prediction: -prediction]
             y_valid = y[border:]
-            valid_dataset = SequenceDataset(x_valid, y_valid, self.sequences)
+            valid_dataset = SequenceDataset(x_valid, y_valid, self.history)
             valid_dataloader = DataLoader(valid_dataset, batch_size=batch_size, shuffle=False)
 
         return train_dataloader, valid_dataloader
+
+    def __get_xy(self, feed, timeframe=None, warmup=0) -> tuple[NDArray, NDArray]:
+        channel = feed.play_background(timeframe)
+        x = []
+        y = []
+        while evt := channel.get():
+            if warmup:
+                self.label_feature.calc(evt, None)
+                self.input_feature.calc(evt, None)
+                warmup -= 1
+            else:
+                x.append(self.input_feature.calc(evt, None))
+                y.append(self.label_feature.calc(evt, None))
+
+        return np.asarray(x, dtype=self._dtype), np.asarray(y, dtype=self._dtype)
 
     @staticmethod
     def describe(x):
@@ -229,7 +227,7 @@ class RNNStrategy(FeatureStrategy):
         optimizer = optimizer or torch.optim.Adam(self.model.parameters(), lr=0.001)
         criterion = criterion or torch.nn.MSELoss()
 
-        x, y = self._get_xy(feed, timeframe, warmup=warmup)
+        x, y = self.__get_xy(feed, timeframe, warmup=warmup)
         logger.info("x-shape=%s", x.shape)
         logger.info("y-shape=%s", y.shape)
 

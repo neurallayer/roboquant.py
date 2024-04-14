@@ -4,12 +4,27 @@ import threading
 from typing import Literal
 
 from alpaca.data import DataFeed
+from alpaca.data.historical.crypto import CryptoHistoricalDataClient
+from alpaca.data.historical.stock import StockHistoricalDataClient
 from alpaca.data.live.crypto import CryptoDataStream
 from alpaca.data.live.stock import StockDataStream
 from alpaca.data.live.option import OptionDataStream
+from alpaca.data.models.bars import BarSet
+from alpaca.data.models.quotes import QuoteSet
+from alpaca.data.models.trades import TradeSet
+from alpaca.data.requests import (
+    CryptoBarsRequest,
+    CryptoTradesRequest,
+    StockBarsRequest,
+    StockQuotesRequest,
+    StockTradesRequest,
+)
+from alpaca.data.timeframe import TimeFrame, TimeFrameUnit
 
 from roboquant.config import Config
 from roboquant.event import Event, Quote, Trade, Bar
+from roboquant.feeds.feedutil import print_feed_items
+from roboquant.feeds.historic import HistoricFeed
 from roboquant.feeds.live import LiveFeed
 
 
@@ -65,3 +80,101 @@ class AlpacaLiveFeed(LiveFeed):
 
     def subscribe_bars(self, *symbols: str):
         self.stream.subscribe_bars(self.__handle_bars, *symbols)
+
+
+class AlpacaHistoricFeed(HistoricFeed):
+
+    def _process_bars(self, bar_set, freq: str):
+        for symbol, data in bar_set.items():
+            for d in data:
+                time = d.timestamp
+                ohlcv = array("f", [d.open, d.high, d.low, d.close, d.volume])
+                item = Bar(symbol, ohlcv, freq)
+                super()._add_item(time, item)
+
+    def _process_trades(self, quote_set):
+        for symbol, data in quote_set.items():
+            for d in data:
+                time = d.timestamp
+                item = Trade(symbol, d.price, d.size)
+                super()._add_item(time, item)
+
+    def _process_quotes(self, quote_set):
+        for symbol, data in quote_set.items():
+            for d in data:
+                time = d.timestamp
+                arr = array("f", [d.ask_price, d.ask_size, d.bid_price, d.bid_size])
+                item = Quote(symbol, arr)
+                super()._add_item(time, item)
+
+
+class AlpacaHistoricStockFeed(AlpacaHistoricFeed):
+
+    def __init__(self, api_key=None, secret_key=None, data_api_url=None):
+        super().__init__()
+        config = Config()
+        api_key = api_key or config.get("alpaca.public.key")
+        secret_key = secret_key or config.get("alpaca.secret.key")
+        self.client = StockHistoricalDataClient(api_key, secret_key, url_override=data_api_url)
+
+    def retrieve_bars(self, *symbols, start=None, end=None, resolution: TimeFrame | None = None):
+        resolution = resolution or TimeFrame(amount=1, unit=TimeFrameUnit.Day)
+        req = StockBarsRequest(symbol_or_symbols=list(symbols), timeframe=resolution, start=start, end=end)
+        res = self.client.get_stock_bars(req)
+        assert isinstance(res, BarSet)
+        freq = str(resolution)
+        self._process_bars(res.data, freq)
+
+    def retrieve_trades(self, *symbols, start=None, end=None):
+        req = StockTradesRequest(symbol_or_symbols=list(symbols), start=start, end=end)
+        res = self.client.get_stock_trades(req)
+        assert isinstance(res, TradeSet)
+        self._process_trades(res.data)
+
+    def retrieve_quotes(self, *symbols, start=None, end=None):
+        req = StockQuotesRequest(symbol_or_symbols=list(symbols), start=start, end=end)
+        res = self.client.get_stock_quotes(req)
+        assert isinstance(res, QuoteSet)
+        self._process_quotes(res.data)
+
+
+class AlpacaHistoricCryptoFeed(AlpacaHistoricFeed):
+
+    def __init__(self, api_key=None, secret_key=None, data_api_url=None):
+        super().__init__()
+        config = Config()
+        api_key = api_key or config.get("alpaca.public.key")
+        secret_key = secret_key or config.get("alpaca.secret.key")
+        self.client = CryptoHistoricalDataClient(api_key, secret_key, url_override=data_api_url)
+
+    def retrieve_bars(self, *symbols, start=None, end=None, resolution: TimeFrame | None = None):
+        resolution = resolution or TimeFrame(amount=1, unit=TimeFrameUnit.Day)
+        req = CryptoBarsRequest(symbol_or_symbols=list(symbols), timeframe=resolution, start=start, end=end)
+        res = self.client.get_crypto_bars(req)
+        assert isinstance(res, BarSet)
+        freq = str(resolution)
+        self._process_bars(res.data, freq)
+
+    def retrieve_trades(self, *symbols, start=None, end=None):
+        req = CryptoTradesRequest(symbol_or_symbols=list(symbols), start=start, end=end)
+        res = self.client.get_crypto_trades(req)
+        assert isinstance(res, TradeSet)
+        self._process_trades(res.data)
+
+
+if __name__ == "__main__":
+    feed = AlpacaHistoricStockFeed()
+    feed.retrieve_bars("AAPL", "TSLA", start="2024-03-01", end="2024-03-02")
+    print_feed_items(feed)
+
+    feed = AlpacaHistoricStockFeed()
+    feed.retrieve_trades("AAPL", "TSLA", start="2024-03-01T18:00:00", end="2024-03-01T18:01:00")
+    print_feed_items(feed)
+
+    feed = AlpacaHistoricStockFeed()
+    feed.retrieve_quotes("AAPL", "TSLA", start="2024-03-01T18:00:00", end="2024-03-01T18:01:00")
+    print_feed_items(feed)
+
+    feed = AlpacaHistoricCryptoFeed()
+    feed.retrieve_bars("BTC/USDT", start="2024-03-01", end="2024-03-02", resolution=TimeFrame.Hour)  # type: ignore
+    print_feed_items(feed)
