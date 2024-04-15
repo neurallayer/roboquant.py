@@ -11,8 +11,11 @@ class TestYahoo(unittest.TestCase):
         feed = YahooFeed("MSFT", "JPM", start_date="2018-01-01", end_date="2020-01-01")
         self.assertEqual(2, len(feed.symbols))
         self.assertEqual({"MSFT", "JPM"}, set(feed.symbols))
-        self.assertTrue(feed.timeframe().start == datetime.fromisoformat("2018-01-02T05:00:00+00:00"))
-        self.assertTrue(feed.timeframe().end == datetime.fromisoformat("2019-12-31T05:00:00+00:00"))
+
+        tf = feed.timeframe()
+        assert tf
+        self.assertTrue(tf.start == datetime.fromisoformat("2018-01-02T05:00:00+00:00"))
+        self.assertTrue(tf.end == datetime.fromisoformat("2019-12-31T05:00:00+00:00"))
         self.assertEqual(503, len(feed.timeline()))
 
         run_price_item_feed(feed, ["MSFT", "JPM"], self)

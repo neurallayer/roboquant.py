@@ -25,12 +25,12 @@ class OrderStatus(Flag):
     _CLOSE = REJECTED | FILLED | CANCELLED | EXPIRED
 
     @property
-    def open(self):
+    def is_open(self):
         """Return True is the status is open, False otherwise"""
         return self in OrderStatus._OPEN
 
     @property
-    def closed(self):
+    def is_closed(self):
         """Return True is the status is closed, False otherwise"""
         return self in OrderStatus._CLOSE
 
@@ -77,12 +77,12 @@ class Order:
     @property
     def is_open(self) -> bool:
         """Return True is the order is open, False otherwise"""
-        return self.status.open
+        return self.status.is_open
 
     @property
     def is_closed(self) -> bool:
         """Return True is the order is closed, False otherwise"""
-        return self.status.closed
+        return self.status.is_closed
 
     def cancel(self) -> "Order":
         """Create a cancellation order. You can only cancel orders that are still open and have an id.

@@ -4,7 +4,7 @@ from itertools import chain
 from typing import List
 
 from roboquant.event import Event, PriceItem
-from roboquant.timeframe import Timeframe
+from roboquant.timeframe import EMPTY_TIMEFRAME, Timeframe
 from .eventchannel import EventChannel
 from .feed import Feed
 from .feedutil import get_ohlcv
@@ -22,7 +22,9 @@ class HistoricFeed(Feed, ABC):
         self.__symbols = []
 
     def _add_item(self, time: datetime, item: PriceItem):
-        """Add a price-item at a moment in time to this feed"""
+        """Add a price-item at a moment in time to this feed.
+        Subclasses should invoke this method to populate the historic-feed.
+        """
 
         self.__modified = True
 
@@ -38,6 +40,11 @@ class HistoricFeed(Feed, ABC):
         self.__update()
         return self.__symbols
 
+    @property
+    def events(self):
+        """Return the total number of events"""
+        return len(self.__data)
+
     def timeline(self) -> List[datetime]:
         """Return the timeline of this feed as a list of datatime objects"""
         self.__update()
@@ -46,10 +53,10 @@ class HistoricFeed(Feed, ABC):
     def timeframe(self):
         """Return the timeframe of this feed"""
         tl = self.timeline()
-        if not tl:
-            raise ValueError("Feed doesn't contain any events.")
+        if tl:
+            return Timeframe(tl[0], tl[-1], inclusive=True)
 
-        return Timeframe(tl[0], tl[-1], inclusive=True)
+        return EMPTY_TIMEFRAME
 
     def get_ohlcv(self, symbol: str, timeframe=None) -> dict[str, list]:
         """Get the OHLCV values for a symbol for the (optional) provided timeframe.
@@ -71,7 +78,5 @@ class HistoricFeed(Feed, ABC):
             channel.put(evt)
 
     def __repr__(self) -> str:
-        events = len(self.timeline())
-        timeframe = self.timeframe() if events else None
         feed = self.__class__.__name__
-        return f"{feed}(events={events} symbols={len(self.symbols)} timeframe={timeframe})"
+        return f"{feed}(events={self.events} symbols={len(self.symbols)} timeframe={self.timeframe()})"

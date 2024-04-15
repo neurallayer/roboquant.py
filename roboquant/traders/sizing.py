@@ -31,11 +31,14 @@ class ETR:
             return entry[0]
         return None
 
+    def reset(self):
+        self.history = {}
+
 
 if __name__ == "__main__":
     feed = YahooFeed("IBM", "MSFT", "TSLA")
     channel = feed.play_background()
-    e = ETR(80, 0.1)
+    e = ETR(20, 2.0)
     while evt := channel.get():
         e.add(evt)
         print(e.get_value("IBM"), e.get_value("TSLA"), e.get_value("MSFT"))

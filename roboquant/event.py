@@ -130,10 +130,10 @@ class Event:
 
     def is_empty(self) -> bool:
         """return True if this is an empty event without any items, False otherwise"""
-        return len(self) == 0
+        return len(self.items) == 0
 
-    def __len__(self) -> int:
-        return len(self.items)
+    # def __len__(self) -> int:
+    #    return len(self.items)
 
     @cached_property
     def price_items(self) -> dict[str, PriceItem]:

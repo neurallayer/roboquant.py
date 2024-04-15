@@ -25,6 +25,7 @@ class Feed(ABC):
         ...
 
     def timeframe(self) -> Timeframe | None:
+        """Return the timeframe of this feed it has one and is known, otherwise return None."""
         return None
 
     def play_background(self, timeframe: Timeframe | None = None, channel_capacity: int = 10) -> EventChannel:

@@ -58,6 +58,7 @@ class Feature(ABC):
 
 
 class SlicedFeature(Feature):
+    """Calculate a slice from another feature"""
 
     def __init__(self, feature: Feature, args) -> None:
         super().__init__()
@@ -400,6 +401,7 @@ class MaxReturnFeature(Feature):
 
     def __init__(self, feature: Feature, period: int) -> None:
         super().__init__()
+        assert feature.size() == 1
         self.history = deque(maxlen=period)
         self.feature: Feature = feature
 
@@ -521,6 +523,7 @@ class DayOfWeekFeature(Feature):
     """Calculate a one-hot-encoded day of the week where Monday == 0 and Sunday == 6"""
 
     def __init__(self, tz=timezone.utc) -> None:
+        super().__init__()
         self.tz = tz
 
     def calc(self, evt, account):
@@ -534,9 +537,34 @@ class DayOfWeekFeature(Feature):
         return 7
 
 
+class TimeDifference(Feature):
+    """Calculate the time difference in seconds between two consecutive events."""
+
+    def __init__(self) -> None:
+        super().__init__()
+        self._last_time: datetime | None = None
+
+    def calc(self, evt, account):
+        if self._last_time:
+            diff = evt.time - self._last_time
+            self._last_time = evt.time
+            return np.asarray([diff.total_seconds], dtype="float32")
+
+        self._last_time = evt.time
+        return self._full_nan()
+
+    def size(self) -> int:
+        return 1
+
+    def reset(self):
+        self._last_time = None
+
+
 class TaFeature(Feature):
+    """Base class for technical analysis features"""
 
     def __init__(self, *symbols: str, history_size: int) -> None:
+        super().__init__()
         self._data: dict[str, OHLCVBuffer] = {}
         self._size = history_size
         self.symbols = list(symbols)

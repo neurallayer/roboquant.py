@@ -4,7 +4,7 @@ from typing import Any
 
 
 class Timeframe:
-    """A timeframe represents a period in time with a specific start- and end-datetime.
+    """A timeframe represents a period in time with a specific start- and end-datetime. Timeframes should not be mutated.
 
     Internally it stores the start and end times as Python datetime objects with the timezone set to UTC.
     """
@@ -32,9 +32,9 @@ class Timeframe:
         e = datetime.fromisoformat(end)
         return cls(s, e, inclusive)
 
-    @staticmethod
-    def empty():
-        return Timeframe.fromisoformat("1900-01-01T00:00:00+00:00", "1900-01-01T00:00:00+00:00", False)
+    def is_empty(self):
+        """Return true if this is an empty timeframe"""
+        return self.start == self.end and not self.inclusive
 
     @staticmethod
     def previous(inclusive=False, **kwargs):
@@ -68,6 +68,9 @@ class Timeframe:
         return self.start <= time < self.end
 
     def __repr__(self):
+        if self == EMPTY_TIMEFRAME:
+            return "EMPTY_TIMEFRAME"
+
         last_char = "]" if self.inclusive else ">"
         fmt_str = "%Y-%m-%d %H:%M:%S"
         return f"[{self.start.strftime(fmt_str)} ― {self.end.strftime(fmt_str)}{last_char}"
@@ -126,3 +129,7 @@ class Timeframe:
             return self.start == other.start and self.end == other.end and self.inclusive == other.inclusive
 
         return False
+
+
+EMPTY_TIMEFRAME = Timeframe.fromisoformat("1900-01-01T00:00:00+00:00", "1900-01-01T00:00:00+00:00", False)
+"""Represents an empty timeframe, one that cannot contain events"""
