@@ -30,7 +30,8 @@ def run(
         timeframe: Optionally limit the run to events within this timeframe. The default is None
         capacity: The max capacity of the used event channel. Default is 10 events.
         heartbeat_timeout: Optionally, a heartbeat (is an empty event) will be generated if no other events are received
-        within the specified timeout in seconds. The default is None.
+        within the specified timeout in seconds. The default is None. This should normally only be used with live feeds since
+        the timestamp used for the heartbeat is the current time.
 
     Returns:
         The latest version of the account

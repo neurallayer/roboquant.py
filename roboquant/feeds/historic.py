@@ -24,6 +24,9 @@ class HistoricFeed(Feed, ABC):
     def _add_item(self, time: datetime, item: PriceItem):
         """Add a price-item at a moment in time to this feed.
         Subclasses should invoke this method to populate the historic-feed.
+
+        Items added at the same time, will be part of the same event.
+        So each unique time will only produce a single event.
         """
 
         self.__modified = True
