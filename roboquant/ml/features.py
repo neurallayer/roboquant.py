@@ -20,14 +20,16 @@ class Feature(ABC):
     def calc(self, evt: Event, account: Account | None) -> NDArray:
         """
         Return the result as a 1-dimensional NDArray.
-        The result should always be the same size.
+        The result should always be the same size. If a value cannot be calculated at a certain
+        tiem, it should return a float NaN.
         """
 
     @abstractmethod
     def size(self) -> int:
         """return the size of this feature"""
 
-    def shape(self):
+    def _shape(self):
+        """return the shape of this feature as a tuple"""
         return (self.size(),)
 
     def returns(self, period=1):
@@ -48,13 +50,13 @@ class Feature(ABC):
         """Reset the state of the feature"""
 
     def _zeros(self):
-        return np.zeros(self.shape(), dtype=np.float32)
+        return np.zeros(self._shape(), dtype=np.float32)
 
     def _ones(self):
-        return np.ones(self.shape(), dtype=np.float32)
+        return np.ones(self._shape(), dtype=np.float32)
 
     def _full_nan(self):
-        return np.full(self.shape(), float("nan"), dtype=np.float32)
+        return np.full(self._shape(), float("nan"), dtype=np.float32)
 
 
 class SlicedFeature(Feature):
