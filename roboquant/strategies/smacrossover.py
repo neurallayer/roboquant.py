@@ -31,7 +31,7 @@ class SMACrossover(Strategy):
         return result
 
     def create_signals(self, event):
-        signals = []
+        signals: list[Signal] = []
         for (symbol, item) in event.price_items.items():
             h = self._history.get(symbol)
 

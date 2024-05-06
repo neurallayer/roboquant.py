@@ -13,4 +13,4 @@ timeframes = feed.timeframe().split(4)
 for timeframe in timeframes:
     strategy = rq.strategies.EMACrossover(13, 26)
     account = rq.run(feed, strategy, timeframe=timeframe)
-    print(f"{timeframe}  equity={account.equity():7_.2f}")
+    print(f"{timeframe}  equity={account.equity():7_.2f} USD")

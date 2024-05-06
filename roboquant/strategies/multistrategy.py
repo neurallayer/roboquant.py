@@ -42,3 +42,5 @@ class MultiStrategy(Strategy):
                     rating = mean(s.rating for s in v)
                     result.append(Signal(symbol, rating))
                 return result
+
+        raise ValueError("unsupported signal filter")

@@ -20,7 +20,7 @@ class TaStrategy(Strategy):
         self.size = size
 
     def create_signals(self, event):
-        signals = []
+        signals: list[Signal] = []
         for item in event.items:
             if isinstance(item, Bar):
                 symbol = item.symbol

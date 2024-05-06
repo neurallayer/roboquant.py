@@ -113,17 +113,25 @@ class AlpacaHistoricStockFeed(AlpacaHistoricFeed):
     Support for bars, trades and quotes.
     """
 
-    def __init__(self, api_key=None, secret_key=None, data_api_url=None):
+    def __init__(self, api_key=None, secret_key=None, data_api_url=None, feed: DataFeed | None = None):
         super().__init__()
         config = Config()
         api_key = api_key or config.get("alpaca.public.key")
         secret_key = secret_key or config.get("alpaca.secret.key")
         self.client = StockHistoricalDataClient(api_key, secret_key, url_override=data_api_url)
+        self.feed = feed
 
-    def retrieve_bars(self, *symbols, start=None, end=None, resolution: TimeFrame | None = None, adjustment=Adjustment.ALL):
+    def retrieve_bars(
+        self,
+        *symbols,
+        start=None,
+        end=None,
+        resolution: TimeFrame | None = None,
+        adjustment=Adjustment.ALL
+    ):
         resolution = resolution or TimeFrame(amount=1, unit=TimeFrameUnit.Day)
         req = StockBarsRequest(
-            symbol_or_symbols=list(symbols), timeframe=resolution, start=start, end=end, adjustment=adjustment
+            symbol_or_symbols=list(symbols), timeframe=resolution, start=start, end=end, adjustment=adjustment, feed=self.feed
         )
         res = self.client.get_stock_bars(req)
         assert isinstance(res, BarSet)
@@ -131,13 +139,13 @@ class AlpacaHistoricStockFeed(AlpacaHistoricFeed):
         self._process_bars(res.data, freq)
 
     def retrieve_trades(self, *symbols, start=None, end=None):
-        req = StockTradesRequest(symbol_or_symbols=list(symbols), start=start, end=end)
+        req = StockTradesRequest(symbol_or_symbols=list(symbols), start=start, end=end, feed=self.feed)
         res = self.client.get_stock_trades(req)
         assert isinstance(res, TradeSet)
         self._process_trades(res.data)
 
     def retrieve_quotes(self, *symbols, start=None, end=None):
-        req = StockQuotesRequest(symbol_or_symbols=list(symbols), start=start, end=end)
+        req = StockQuotesRequest(symbol_or_symbols=list(symbols), start=start, end=end, feed=self.feed)
         res = self.client.get_stock_quotes(req)
         assert isinstance(res, QuoteSet)
         self._process_quotes(res.data)

@@ -15,7 +15,7 @@ class EMACrossover(Strategy):
         self.min_steps = max(fast_period, slow_period)
 
     def create_signals(self, event: Event):
-        signals = []
+        signals: list[Signal] = []
         for symbol, price in event.get_prices(self.price_type).items():
 
             if symbol not in self._history:

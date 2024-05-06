@@ -1,3 +1,4 @@
+import os.path
 import sqlite3
 from array import array
 from datetime import datetime
@@ -23,6 +24,9 @@ class SQLFeed(Feed):
     def __init__(self, db_file) -> None:
         super().__init__()
         self.db_file = db_file
+
+    def exists(self):
+        return os.path.exists(self.db_file)
 
     def create_index(self):
         con = sqlite3.connect(self.db_file)
@@ -73,7 +77,8 @@ class SQLFeed(Feed):
         con.commit()
 
     def record(self, feed: Feed, timeframe=None, append=False):
-        """Record another feed to this SQLite database"""
+        """Record another feed to this SQLite database. 
+        It only supports Bars and not types of prices."""
         con = sqlite3.connect(self.db_file)
         cur = con.cursor()
 
