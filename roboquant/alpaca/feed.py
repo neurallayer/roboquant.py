@@ -82,7 +82,7 @@ class AlpacaLiveFeed(LiveFeed):
         self.stream.subscribe_bars(self.__handle_bars, *symbols)
 
 
-class AlpacaHistoricFeed(HistoricFeed):
+class _AlpacaHistoricFeed(HistoricFeed):
 
     def _process_bars(self, bar_set, freq: str):
         for symbol, data in bar_set.items():
@@ -108,7 +108,7 @@ class AlpacaHistoricFeed(HistoricFeed):
                 super()._add_item(time, item)
 
 
-class AlpacaHistoricStockFeed(AlpacaHistoricFeed):
+class AlpacaHistoricStockFeed(_AlpacaHistoricFeed):
     """Get historic stock prices from Alpaca.
     Support for bars, trades and quotes.
     """
@@ -151,7 +151,7 @@ class AlpacaHistoricStockFeed(AlpacaHistoricFeed):
         self._process_quotes(res.data)
 
 
-class AlpacaHistoricCryptoFeed(AlpacaHistoricFeed):
+class AlpacaHistoricCryptoFeed(_AlpacaHistoricFeed):
     """Get historic crypto-currency prices from Alpaca.
     Support for bars and trades.
     """
