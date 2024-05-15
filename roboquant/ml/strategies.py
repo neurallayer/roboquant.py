@@ -37,6 +37,7 @@ class SB3PolicyStrategy(Strategy):
         if np.any(np.isnan(obs)):
             return []
         action, self.state = self.policy.predict(obs, state=self.state, deterministic=True)  # type: ignore
+        logger.debug(action)
         return self.action_2_signals.get_signals(action, event)
 
     def reset(self):

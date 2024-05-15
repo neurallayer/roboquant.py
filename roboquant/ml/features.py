@@ -6,7 +6,7 @@ import numpy as np
 from numpy.typing import NDArray
 
 from roboquant.account import Account
-from roboquant.event import Event, Bar
+from roboquant.event import Event, Bar, Quote
 from roboquant.strategies.buffer import OHLCVBuffer
 
 
@@ -213,6 +213,27 @@ class BarFeature(Feature):
 
     def size(self) -> int:
         return 5 * len(self.symbols)
+
+
+class QuoteFeature(Feature):
+    """Extract the values from quotes for one or more symbols"""
+
+    def __init__(self, *symbols: str) -> None:
+        super().__init__()
+        self.symbols = symbols
+
+    def calc(self, evt, account):
+        result = self._full_nan()
+        for idx, symbol in enumerate(self.symbols):
+            item = evt.price_items.get(symbol)
+            if isinstance(item, Quote):
+                offset = idx * 4
+                result[offset: offset + 4] = item.data
+
+        return result
+
+    def size(self) -> int:
+        return 4 * len(self.symbols)
 
 
 class CombinedFeature(Feature):
@@ -550,7 +571,7 @@ class TimeDifference(Feature):
         if self._last_time:
             diff = evt.time - self._last_time
             self._last_time = evt.time
-            return np.asarray([diff.total_seconds], dtype="float32")
+            return np.asarray([diff.total_seconds()], dtype="float32")
 
         self._last_time = evt.time
         return self._full_nan()

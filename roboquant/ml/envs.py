@@ -1,3 +1,4 @@
+import math
 from decimal import Decimal
 import logging
 import gymnasium as gym
@@ -33,7 +34,10 @@ class Action2Signals:
 
     @staticmethod
     def __limit(rating):
-        return max(-1.0, min(1.0, float(rating)))
+        print(rating)
+        rating = float(rating)
+        assert math.isfinite(rating), f"rating not finite rating={rating}"
+        return max(-1.0, min(1.0, rating))
 
     def get_signals(self, action, _):
         return [Signal(symbol, self.__limit(rating)) for symbol, rating in zip(self.symbols, action)]
@@ -235,6 +239,8 @@ class TraderEnv(gym.Env):
             self.get_reward(self.event, self.account)
             if not np.any(np.isnan(observation)):
                 return observation, {}
+            else:
+                logger.info(observation)
 
     def render(self):
         pass

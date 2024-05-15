@@ -127,6 +127,8 @@ class FlexTrader(Trader):
         for signal in signals:
             symbol = signal.symbol
             pos_size = account.get_position_size(symbol)
+            change = _PositionChange.get_change(signal.is_buy, pos_size)
+            logger.info("available=%s signal=%s pos=%s change=%s", available, signal, pos_size, change)
 
             if self.one_order_only and account.has_open_order(symbol):
                 _log_rule("one order only", signal, symbol, pos_size)
@@ -138,7 +140,6 @@ class FlexTrader(Trader):
                 continue
 
             price = item.price(self.price_type)
-            change = _PositionChange.get_change(signal.is_buy, pos_size)
 
             if not self.shorting and change == _PositionChange.ENTRY_SHORT:
                 _log_rule("no shorting", signal, symbol, pos_size)
@@ -149,13 +150,18 @@ class FlexTrader(Trader):
                 if not signal.is_exit:
                     _log_rule("no exit signal", signal, symbol, pos_size)
                     continue
-                rounded_size = round(pos_size * Decimal(signal.rating), self.size_digits)
+
+                rounded_size = round(-pos_size * abs(Decimal(signal.rating)), self.size_digits)
                 if rounded_size.is_zero():
                     _log_rule("cannot exit with order size zero", signal, symbol, pos_size)
                     continue
                 new_orders = self._get_orders(symbol, rounded_size, item, signal, event.time)
                 orders += new_orders
             else:
+                if available < 0:
+                    _log_rule("no more available buying power", signal, symbol, pos_size)
+                    continue
+
                 if not signal.is_entry:
                     _log_rule("no entry signal", signal, symbol, pos_size)
                     continue
@@ -177,10 +183,10 @@ class FlexTrader(Trader):
                     continue
 
                 order_value = abs(account.contract_value(symbol, order_size, price))
-                if order_value > available:
+                if abs(order_value) > available:
                     _log_rule("order value above available buying power", signal, symbol, pos_size)
                     continue
-                if order_value < min_order_value:
+                if abs(order_value) < min_order_value:
                     _log_rule("order value below minimum order value", signal, symbol, pos_size)
                     continue
 

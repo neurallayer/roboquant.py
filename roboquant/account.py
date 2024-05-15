@@ -19,6 +19,14 @@ class Position:
     mkt_price: float
     """latest market price denoted in the currency of the symbol"""
 
+    @property
+    def is_short(self):
+        return self.size < 0
+
+    @property
+    def is_long(self):
+        return self.size > 0
+
 
 class Converter(ABC):
     """Abstraction that enables trading symbols that are denoted in different currencies and/or contact sizes"""

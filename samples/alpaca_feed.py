@@ -9,6 +9,7 @@ alpaca_feed = AlpacaLiveFeed()
 
 stocks = get_sp500_symbols()[:30]
 alpaca_feed.subscribe_quotes(*stocks)
+
 # alpaca_feed.subscribe_bars(*stocks)
 # feed.subscribe_trades("BTC/USD", "ETH/USD")
 # feed.subscribe("SPXW240312C05190000")

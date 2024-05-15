@@ -189,17 +189,32 @@ class SimBroker(Broker):
         item = self._last_known_prices.get(symbol)
         return item.price(self.price_type) if item else None
 
-    def calculate_buyingpower(self):
-        """Calculate buying power, based on the available cash minus the open orders"""
-        bp = self._account.cash
+    def _calculate_open_orders(self):
+        reserved = 0.0
         for order in self._account.open_orders():
             old_pos = self._account.get_position_size(order.symbol)
             remaining = order.size - order.fill
+
+            # only update reserved amount if remaining order size would increase position size
             if abs(old_pos + remaining) > abs(old_pos):
-                price = order.limit or self._get_last_known_price(order.symbol)
-                if price:
-                    reserve = self._account.contract_value(order.symbol, remaining, price)
-                    bp -= abs(reserve)
+                if price := (order.limit or self._get_last_known_price(order.symbol)):
+                    reserved += abs(self._account.contract_value(order.symbol, remaining, price))
+
+        return reserved
+
+    def _calculate_short_positions(self):
+        reserved = 0.0
+        for symbol, position in self._account.positions.items():
+            if position.is_short:
+                short_value = self._account.contract_value(symbol, position.size, position.mkt_price)
+                reserved += abs(short_value)
+        return reserved
+
+    def _calculate_buyingpower(self):
+        """Calculate buying power, based on the available cash minus the open orders and short positions"""
+        bp = self._account.cash
+        bp -= self._calculate_open_orders()
+        bp -= self._calculate_short_positions()
         return bp
 
     def sync(self, event: Event | None = None) -> Account:
@@ -223,7 +238,7 @@ class SimBroker(Broker):
         _update_positions(acc, event, self.price_type)
 
         acc.orders = list(self._create_orders.values())
-        acc.buying_power = self.calculate_buyingpower()
+        acc.buying_power = self._calculate_buyingpower()
         return acc
 
     def __str__(self) -> str:

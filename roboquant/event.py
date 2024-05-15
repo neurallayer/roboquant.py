@@ -28,7 +28,7 @@ class PriceItem:
 
 @dataclass(slots=True)
 class Quote(PriceItem):
-    data: array
+    data: array  # [ask-price, ask-volume, bid-price, bid-volume]
 
     def price(self, price_type: str = "DEFAULT") -> float:
         """Return the price, the default being the mid-point price"""
@@ -161,5 +161,5 @@ class Event:
             return item.volume(volume_type)
         return None
 
-    def __repr__(self) -> str:
+    def __str__(self) -> str:
         return f"Event(time={self.time} items={len(self.items)})"

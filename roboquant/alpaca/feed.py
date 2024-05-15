@@ -2,6 +2,7 @@ from array import array
 from datetime import timedelta
 import threading
 from typing import Literal
+import numpy as np
 
 from alpaca.data import DataFeed
 from alpaca.data.enums import Adjustment
@@ -104,8 +105,11 @@ class _AlpacaHistoricFeed(HistoricFeed):
             for d in data:
                 time = d.timestamp
                 arr = array("f", [d.ask_price, d.ask_size, d.bid_price, d.bid_size])
-                item = Quote(symbol, arr)
-                super()._add_item(time, item)
+
+                if np.all(arr):
+                    # on rare occasions values are missing and have 0.0 as a value
+                    item = Quote(symbol, arr)
+                    super()._add_item(time, item)
 
 
 class AlpacaHistoricStockFeed(_AlpacaHistoricFeed):
