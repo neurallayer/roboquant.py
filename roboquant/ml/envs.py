@@ -239,8 +239,7 @@ class TraderEnv(gym.Env):
             self.get_reward(self.event, self.account)
             if not np.any(np.isnan(observation)):
                 return observation, {}
-            else:
-                logger.info(observation)
+            logger.info(observation)
 
     def render(self):
         pass
