@@ -34,7 +34,6 @@ class Action2Signals:
 
     @staticmethod
     def __limit(rating):
-        print(rating)
         rating = float(rating)
         assert math.isfinite(rating), f"rating not finite rating={rating}"
         return max(-1.0, min(1.0, rating))
@@ -116,7 +115,7 @@ class StrategyEnv(gym.Env):
     def get_observation(self, evt: Event) -> NDArray[np.float32]:
         return self.obs_feature.calc(evt, None)
 
-    def get_reward(self, evt: Event, account: Account):
+    def get_reward(self, evt: Event, account: Account) -> NDArray[np.float32]:
         return self.reward_feature.calc(evt, account)
 
     def step(self, action):
@@ -139,6 +138,7 @@ class StrategyEnv(gym.Env):
 
     def reset(self, *, seed=None, options=None):
         super().reset(seed=seed, options=options)
+        logger.info("environment resetting")
         self.broker.reset()
         self.trader.reset()
         self.obs_feature.reset()

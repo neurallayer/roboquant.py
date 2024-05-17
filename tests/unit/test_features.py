@@ -56,6 +56,10 @@ class TestFeatures(unittest.TestCase):
             if not np.isnan(result1):
                 self.assertEqual(result1, result2)
 
+    def test_slice(self):
+        f = FixedValueFeature([1, 2, 3, 4, 5, 6, 7, 8])[1:6:2]
+        self.assertEqual(3, f.size())
+
     def test_normalize(self):
         feed = get_feed()
 
@@ -72,9 +76,7 @@ class TestFeatures(unittest.TestCase):
 
     def test_core_feature(self):
         account = Account()
-        f = FixedValueFeature(
-            np.ones((10,))
-        )[2:5]
+        f = FixedValueFeature(np.ones((10,)))[2:5]
         values = f.calc(Event.empty(), account)
         self.assertEqual(3, len(values))
 

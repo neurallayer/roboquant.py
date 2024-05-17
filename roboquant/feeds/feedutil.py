@@ -45,3 +45,14 @@ def print_feed_items(feed: Feed, timeframe: Timeframe | None = None, timeout: fl
         print(event.time)
         for item in event.items:
             print("======> ", item)
+
+
+def count_events(feed: Feed, timeframe: Timeframe | None = None, timeout: float | None = None, include_empty=False):
+    """Count the number of events in a feed"""
+
+    channel = feed.play_background(timeframe)
+    events = 0
+    while evt := channel.get(timeout):
+        if evt.items or include_empty:
+            events += 1
+    return events

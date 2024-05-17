@@ -15,7 +15,7 @@ class SignalType(Flag):
     ENTRY_EXIT = ENTRY | EXIT
 
     def __str__(self):
-        return self.name
+        return self.name or str(self)
 
 
 @dataclass(slots=True, frozen=True)

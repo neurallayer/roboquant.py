@@ -43,6 +43,14 @@ class Quote(PriceItem):
                 return (self.data[0] + self.data[2]) / 2.0
 
     @property
+    def ask_price(self) -> float:
+        return self.data[0]
+
+    @property
+    def bid_price(self) -> float:
+        return self.data[2]
+
+    @property
     def ask_volume(self) -> float:
         return self.data[1]
 

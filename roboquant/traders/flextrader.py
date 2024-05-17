@@ -44,16 +44,24 @@ class _PositionChange(Flag):
         return _PositionChange.EXIT_SHORT if is_buy else _PositionChange.ENTRY_SHORT
 
 
-def _log_rule(rule: str, signal: Signal, symbol: str, position: Decimal):
-    if logger.isEnabledFor(logging.INFO):
-        logger.info(
-            "Discarded [rating=%s type=%s symbol=%s position=%s] because of %s",
-            signal.rating,
-            signal.type,
-            symbol,
-            position,
-            rule,
-        )
+class _Context:
+
+    def __init__(self, signal: Signal, position: Decimal) -> None:
+        self.signal = signal
+        self.position = position
+
+    def log(self, rule: str, **kwargs):
+        if logger.isEnabledFor(logging.INFO):
+            extra = ' '.join(f"{k}={v}" for k, v in kwargs.items())
+            logger.info(
+                "Discarded signal because %s [symbol=%s rating=%s type=%s position=%s %s]",
+                rule,
+                self.signal.symbol,
+                self.signal.rating,
+                self.signal.type,
+                self.position,
+                extra,
+            )
 
 
 class FlexTrader(Trader):
@@ -127,67 +135,78 @@ class FlexTrader(Trader):
         for signal in signals:
             symbol = signal.symbol
             pos_size = account.get_position_size(symbol)
+            ctx = _Context(signal, pos_size)
+
             change = _PositionChange.get_change(signal.is_buy, pos_size)
+
             logger.info("available=%s signal=%s pos=%s change=%s", available, signal, pos_size, change)
 
             if self.one_order_only and account.has_open_order(symbol):
-                _log_rule("one order only", signal, symbol, pos_size)
+                ctx.log("one order only")
                 continue
 
             item = event.price_items.get(symbol)
             if item is None:
-                _log_rule("no price is available", signal, symbol, pos_size)
+                ctx.log("no price is available")
                 continue
 
             price = item.price(self.price_type)
 
             if not self.shorting and change == _PositionChange.ENTRY_SHORT:
-                _log_rule("no shorting", signal, symbol, pos_size)
+                ctx.log("no shorting")
                 continue
 
             if change.is_exit:
                 # Closing orders don't require or use buying power
                 if not signal.is_exit:
-                    _log_rule("no exit signal", signal, symbol, pos_size)
+                    ctx.log("no exit signal")
                     continue
 
                 rounded_size = round(-pos_size * abs(Decimal(signal.rating)), self.size_digits)
                 if rounded_size.is_zero():
-                    _log_rule("cannot exit with order size zero", signal, symbol, pos_size)
+                    ctx.log("cannot exit with order size zero")
                     continue
                 new_orders = self._get_orders(symbol, rounded_size, item, signal, event.time)
                 orders += new_orders
             else:
                 if available < 0:
-                    _log_rule("no more available buying power", signal, symbol, pos_size)
+                    ctx.log("no more available buying power")
                     continue
 
                 if not signal.is_entry:
-                    _log_rule("no entry signal", signal, symbol, pos_size)
+                    ctx.log("no entry signal")
                     continue
 
                 if available < min_order_value:
-                    _log_rule("available buying power below minimum order value", signal, symbol, pos_size)
+                    ctx.log("available buying power below minimum order value")
                     continue
 
                 available_order_value = min(available, max_order_value, max_pos_value - abs(account.position_value(symbol)))
                 if available_order_value < min_order_value:
-                    _log_rule("calculated available order value below minimum order value", signal, symbol, pos_size)
+                    ctx.log("calculated available order value below minimum order value")
                     continue
 
                 contract_price = account.contract_value(symbol, Decimal(1), price)
                 order_size = self._get_order_size(signal.rating, contract_price, available_order_value)
 
                 if order_size.is_zero():
-                    _log_rule("calculated order size is zero", signal, symbol, pos_size)
+                    ctx.log("calculated order size is zero")
                     continue
 
                 order_value = abs(account.contract_value(symbol, order_size, price))
                 if abs(order_value) > available:
-                    _log_rule("order value above available buying power", signal, symbol, pos_size)
+                    ctx.log(
+                        "order value above available buying power",
+                        order_value=order_value,
+                        available=available,
+                    )
                     continue
                 if abs(order_value) < min_order_value:
-                    _log_rule("order value below minimum order value", signal, symbol, pos_size)
+                    ctx.log(
+                        "order value below minimum order value",
+                        order_value=order_value,
+                        min_order_value=min_order_value,
+                    )
                     continue
 
                 new_orders = self._get_orders(symbol, order_size, item, signal, event.time)

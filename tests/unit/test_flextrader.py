@@ -24,13 +24,13 @@ class TestFlexTrader(unittest.TestCase):
         feed = get_feed()
         journal = BasicJournal()
         rq.run(feed, EMACrossover(), journal=journal)
-        self.assertGreater(journal.orders, 0)
+        self.assertGreater(journal.buy_orders, 0)
 
     def test_custom_flex_trader(self):
         feed = get_feed()
         journal = BasicJournal()
         rq.run(feed, EMACrossover(), trader=_MyTrader(), journal=journal)
-        self.assertGreater(journal.orders, 0)
+        self.assertGreater(journal.buy_orders, 0)
 
 
 if __name__ == "__main__":

@@ -5,7 +5,7 @@ import logging
 
 from roboquant.account import Account, Position
 from roboquant.brokers.broker import Broker, _update_positions
-from roboquant.event import Event, PriceItem
+from roboquant.event import Event, PriceItem, Quote
 from roboquant.order import Order, OrderStatus
 
 logger = logging.getLogger(__name__)
@@ -86,6 +86,8 @@ class SimBroker(Broker):
 
         The default implementation is a fixed slippage percentage based on the configured price_type.
         """
+        if isinstance(item, Quote):
+            return item.ask_price if order.is_buy else item.bid_price
 
         price = item.price(self.price_type)
         correction = self.slippage if order.is_buy else -self.slippage

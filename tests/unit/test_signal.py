@@ -26,6 +26,11 @@ class TestSignal(unittest.TestCase):
         self.assertTrue(s.is_entry)
         self.assertFalse(s.is_exit)
 
+    def test_type(self):
+        t = SignalType.ENTRY
+        self.assertEqual("ENTRY", str(t))
+        self.assertEqual("ENTRY_EXIT", str(SignalType.ENTRY_EXIT))
+
 
 if __name__ == "__main__":
     unittest.main()

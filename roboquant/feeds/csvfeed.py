@@ -171,11 +171,3 @@ class CSVFeed(HistoricFeed):
         """Parse one or more CSV files that meet the Yahoo Finance format"""
         columns = ["Date", "Open", "High", "Low", "Close", "Volume", "Adj Close"]
         return cls(path, columns=columns, adj_close=True, time_offset="21:00:00+00:00", frequency=frequency)
-
-
-if __name__ == "__main__":
-    t = datetime.strptime("210000", "%H%M%S").time()
-    print(t)
-
-    t = time.fromisoformat("210000")
-    print(t)

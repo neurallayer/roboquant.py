@@ -1,6 +1,7 @@
 from abc import ABC, abstractmethod
 from collections import deque
 from datetime import datetime, timezone
+from typing import Any
 
 import numpy as np
 from numpy.typing import NDArray
@@ -40,8 +41,8 @@ class Feature(ABC):
     def normalize(self, min_period=3):
         return NormalizeFeature(self, min_period)
 
-    def cache(self):
-        return CacheFeature(self)
+    def cache(self, validate=False):
+        return CacheFeature(self, validate)
 
     def __getitem__(self, *args):
         return SlicedFeature(self, args)
@@ -74,6 +75,9 @@ class SlicedFeature(Feature):
 
     def size(self):
         return self._size
+
+    def reset(self):
+        return self.feature.reset()
 
 
 class TrueRangeFeature(Feature):
@@ -110,9 +114,9 @@ class TrueRangeFeature(Feature):
 
 class FixedValueFeature(Feature):
 
-    def __init__(self, value: NDArray) -> None:
+    def __init__(self, value: Any) -> None:
         super().__init__()
-        self.value = value
+        self.value = np.array(value, dtype="float32")
 
     def size(self) -> int:
         return len(self.value)
@@ -251,6 +255,10 @@ class CombinedFeature(Feature):
     def size(self) -> int:
         return self._size
 
+    def reset(self):
+        for feature in self.features:
+            feature.reset()
+
 
 class NormalizeFeature(Feature):
     """online normalization calculator"""
@@ -271,7 +279,7 @@ class NormalizeFeature(Feature):
 
     def __update(self, new_value):
         (count, mean, m2) = self.existing_aggregate
-        mask = ~ np.isnan(new_value)
+        mask = ~np.isnan(new_value)
         count[mask] += 1
         delta = new_value - mean
         mean[mask] += delta[mask] / count[mask]
@@ -295,6 +303,7 @@ class NormalizeFeature(Feature):
 
     def reset(self):
         self.existing_aggregate = (self._zero_int(), self._zeros(), self._zeros())
+        self.feature.reset()
 
 
 class FillFeature(Feature):
@@ -327,15 +336,22 @@ class CacheFeature(Feature):
     Typically, this doesn't work for features that depend on account values.
     """
 
-    def __init__(self, feature: Feature) -> None:
+    def __init__(self, feature: Feature, validate=False) -> None:
         super().__init__()
         self.feature: Feature = feature
         self._cache: dict[datetime, NDArray] = {}
+        self.validate = validate
 
     def calc(self, evt, account):
         time = evt.time
         if time in self._cache:
-            return self._cache[time]
+            values = self._cache[time]
+            if self.validate:
+                calc_values = self.feature.calc(evt, account)
+                assert np.array_equal(
+                    values, calc_values, equal_nan=True
+                ), f"Wrong cache time={time} cache={values} calculated={calc_values}"
+            return values
 
         values = self.feature.calc(evt, account)
         self._cache[time] = values
@@ -449,8 +465,7 @@ class MaxReturnFeature(Feature):
 
 
 class MaxReturnFeature2(Feature):
-    """Calculate the maximum return over a certain period.
-    """
+    """Calculate the maximum return over a certain period."""
 
     def __init__(self, feature: Feature, period: int) -> None:
         super().__init__()
@@ -540,6 +555,7 @@ class SMAFeature(Feature):
     def reset(self):
         self.history = None
         self.feature.reset()
+        self._cnt = 0
 
 
 class DayOfWeekFeature(Feature):
@@ -617,3 +633,6 @@ class TaFeature(Feature):
 
     def size(self) -> int:
         return len(self.symbols)
+
+    def reset(self):
+        self._data = {}

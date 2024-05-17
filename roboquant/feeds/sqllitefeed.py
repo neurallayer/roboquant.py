@@ -66,11 +66,11 @@ class SQLFeed(Feed):
             symbol = row[1]
             prices = row[2:7]
             freq = row[7]
-            return Bar(symbol, array('f', prices), freq)
+            return Bar(symbol, array("f", prices), freq)
 
         symbol = row[1]
         data = row[2:6]
-        return Quote(symbol, array('f', data))
+        return Quote(symbol, array("f", data))
 
     def play(self, channel: EventChannel):
         con = sqlite3.connect(self.db_file)
@@ -79,7 +79,11 @@ class SQLFeed(Feed):
         t_old = ""
         items = []
         tf = channel.timeframe
-        result = cur.execute(SQLFeed._sql_select_by_date, [tf.start, tf.end]) if tf else cur.execute(SQLFeed._sql_select)
+        result = (
+            cur.execute(SQLFeed._sql_select_by_date, [tf.start.isoformat(), tf.end.isoformat()])
+            if tf
+            else cur.execute(SQLFeed._sql_select)
+        )
 
         for row in result:
             t = row[0]
