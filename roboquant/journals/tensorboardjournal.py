@@ -1,4 +1,4 @@
-from roboquant.journals import Journal
+from roboquant.journals.journal import Journal
 from roboquant.journals.metric import Metric
 
 
