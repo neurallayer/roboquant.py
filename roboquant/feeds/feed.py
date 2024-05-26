@@ -1,9 +1,12 @@
+import logging
 from datetime import datetime
 import threading
 from abc import ABC, abstractmethod
 
 from roboquant.feeds.eventchannel import EventChannel, ChannelClosed
 from roboquant.timeframe import Timeframe
+
+logger = logging.getLogger(__name__)
 
 
 class Feed(ABC):
@@ -48,11 +51,14 @@ class Feed(ABC):
         channel = EventChannel(timeframe, channel_capacity)
 
         def __background():
+            # pylint: disable=broad-exception-caught
             try:
                 self.play(channel)
             except ChannelClosed:
                 # this exception we can expect
                 pass
+            except Exception as e:
+                logging.error('Error at playback', exc_info=e)
             finally:
                 channel.close()
 

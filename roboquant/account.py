@@ -188,7 +188,7 @@ class Account:
         """Return a list with the open orders"""
         return [order for order in self.orders if order.is_open]
 
-    def __repr__(self) -> str:
+    def __str__(self) -> str:
         p = [f"{v.size}@{k}" for k, v in self.positions.items()]
         p_str = ", ".join(p) or "none"
 

@@ -12,6 +12,7 @@ alpaca-py~=0.21.1
 stable-baselines3[extra_no_roms]~=2.3.2
 sb3-contrib~=2.3.0
 gymnasium~=0.29.1
+fastavro~=1.9.4
 # TA-Lib~=0.4.28
 
 # Build tools

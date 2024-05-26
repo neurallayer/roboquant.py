@@ -34,7 +34,7 @@ class OrderStatus(Flag):
         """Return True is the status is closed, False otherwise"""
         return self in OrderStatus._CLOSE
 
-    def __repr__(self):
+    def __str__(self):  # type: ignore
         return self.name
 
 
