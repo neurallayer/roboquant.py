@@ -1,7 +1,7 @@
 # Core 
 numpy~=1.26.4
 websocket-client~=1.7.0
-requests~=2.31.0
+requests>=2.32.0
 
 # Part of optional 
 yfinance~=0.2.38
