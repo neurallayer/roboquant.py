@@ -80,6 +80,6 @@ class HistoricFeed(Feed, ABC):
             evt = Event(k, v)
             channel.put(evt)
 
-    def __str__(self) -> str:
+    def __repr__(self) -> str:
         feed = self.__class__.__name__
         return f"{feed}(events={self.events} symbols={len(self.symbols)} timeframe={self.timeframe()})"

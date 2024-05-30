@@ -225,7 +225,7 @@ class FlexTrader(Trader):
 
         return [Order(symbol, size)]
 
-    def __str__(self) -> str:
+    def __repr__(self) -> str:
         attrs = " ".join([f"{k}={v}" for k, v in self.__dict__.items() if not k.startswith("_")])
         return f"FlexTrader({attrs})"
 

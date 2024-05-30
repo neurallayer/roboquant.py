@@ -14,6 +14,9 @@ class SignalType(Flag):
     EXIT = auto()
     ENTRY_EXIT = ENTRY | EXIT
 
+    def __repr__(self):
+        return self.name or str(self)
+
     def __str__(self):
         return self.name or str(self)
 

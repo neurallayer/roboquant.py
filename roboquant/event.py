@@ -169,5 +169,5 @@ class Event:
             return item.volume(volume_type)
         return None
 
-    def __str__(self) -> str:
+    def __repr__(self) -> str:
         return f"Event(time={self.time} items={len(self.items)})"

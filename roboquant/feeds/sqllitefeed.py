@@ -131,5 +131,5 @@ class SQLFeed(Feed):
         cur.executemany(insert_sql, data)
         con.commit()
 
-    def __str__(self) -> str:
+    def __repr__(self) -> str:
         return f"SQLFeed(timeframe={self.timeframe()} items={self.items()} symbols={len(self.symbols())})"

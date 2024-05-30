@@ -1,6 +1,5 @@
 # %%
 import logging
-from alpaca.data.timeframe import TimeFrame
 
 import roboquant as rq
 from roboquant.alpaca import AlpacaHistoricStockFeed
@@ -8,7 +7,15 @@ from roboquant.feeds.feedutil import count_events
 from roboquant.feeds.sqllitefeed import SQLFeed
 
 from sb3_contrib import RecurrentPPO
-from roboquant.ml.features import CombinedFeature, QuoteFeature, EquityFeature, TimeDifference, DayOfWeekFeature, SMAFeature, PriceFeature
+from roboquant.ml.features import (
+    CombinedFeature,
+    QuoteFeature,
+    EquityFeature,
+    TimeDifference,
+    DayOfWeekFeature,
+    SMAFeature,
+    PriceFeature,
+)
 from roboquant.ml.envs import Action2Signals, StrategyEnv
 from roboquant.ml.strategies import SB3PolicyStrategy
 from roboquant.traders.flextrader import FlexTrader
@@ -23,7 +30,7 @@ end_validation = "2024-05-14"
 if not feed.exists():
     print("The retrieval of historical data will take some time....")
     alpaca_feed = AlpacaHistoricStockFeed()
-    alpaca_feed.retrieve_quotes(symbol, start = start_training)
+    alpaca_feed.retrieve_quotes(symbol, start=start_training)
     print(alpaca_feed)
 
     # store it for later use
@@ -32,17 +39,21 @@ if not feed.exists():
 # Run a backtest using the stored feed
 print(feed)
 
-obs_feature = CombinedFeature(
-    QuoteFeature(symbol).returns(),
-    SMAFeature(PriceFeature(symbol), 20).returns(),
-    SMAFeature(PriceFeature(symbol), 40).returns(),
-    TimeDifference(), 
-    DayOfWeekFeature(),
-).normalize(50).cache()
+obs_feature = (
+    CombinedFeature(
+        QuoteFeature(symbol).returns(),
+        SMAFeature(PriceFeature(symbol), 20).returns(),
+        SMAFeature(PriceFeature(symbol), 40).returns(),
+        TimeDifference(),
+        DayOfWeekFeature(),
+    )
+    .normalize(50)
+    .cache()
+)
 
 reward_feature = EquityFeature().returns().normalize(20)
 
-#%%
+# %%
 # logging.basicConfig()
 # logging.getLogger("roboquant.ml.envs").setLevel(logging.INFO)
 tf = rq.Timeframe.fromisoformat(start_training, end_training)
@@ -64,7 +75,7 @@ journal = rq.journals.BasicJournal()
 obs_feature.reset()
 strategy = SB3PolicyStrategy(obs_feature, action_2_signals, model.policy)
 
-#%%
+# %%
 account = rq.run(feed, strategy, env.trader, journal=journal, timeframe=tf)
 
 # %%

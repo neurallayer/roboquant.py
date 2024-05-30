@@ -159,7 +159,7 @@ class StrategyEnv(gym.Env):
     def render(self):
         pass
 
-    def __str__(self):
+    def __repr__(self):
         result = (
             f"TradingEnv(\n\tbroker={self.broker}\n\ttrader={self.trader}\n\tfeed={self.feed}"
             f"\n\tfeatures_size={self.obs_feature.size()}"
@@ -244,7 +244,7 @@ class TraderEnv(gym.Env):
     def render(self):
         pass
 
-    def __str__(self):
+    def __repr__(self):
         result = (
             f"TradingEnv(\n\tbroker={self.broker}\n\tfeed={self.feed}"
             f"\n\tfeature_size={self.obs_feature.size()}"

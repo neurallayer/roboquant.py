@@ -6,8 +6,8 @@ source .venv/bin/activate
 rm -rf ./runs
 
 # QA
-flake8 roboquant tests || exit 1
-pylint roboquant tests || exit 1
+flake8 || exit 1
+pylint roboquant tests samples || exit 1
 python -m unittest discover -s tests/unit || exit 1
 
 # Build

@@ -67,7 +67,7 @@ class Timeframe:
             return self.start <= time <= self.end
         return self.start <= time < self.end
 
-    def __str__(self):
+    def __repr__(self):
         if self == EMPTY_TIMEFRAME:
             return "EMPTY_TIMEFRAME"
 

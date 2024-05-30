@@ -2,6 +2,7 @@
 import talib.stream as ta
 import roboquant as rq
 
+
 # %%
 class MyStrategy(rq.strategies.TaStrategy):
     """Example using talib to create a combined RSI/BollingerBand strategy"""
@@ -9,11 +10,9 @@ class MyStrategy(rq.strategies.TaStrategy):
     def _create_signal(self, symbol, ohlcv):
         close = ohlcv.close()
 
-        rsi = ta.RSI(close, timeperiod=self.size-1)  # type: ignore
+        rsi = ta.RSI(close, timeperiod=self.size - 1)  # type: ignore
 
-        upper, _, lower = ta.BBANDS(  # type: ignore
-            close, timeperiod=self.size-1, nbdevup=2, nbdevdn=2
-        )
+        upper, _, lower = ta.BBANDS(close, timeperiod=self.size - 1, nbdevup=2, nbdevdn=2)  # type: ignore
 
         latest_price = close[-1]
 
@@ -23,6 +22,7 @@ class MyStrategy(rq.strategies.TaStrategy):
             return rq.Signal.sell(symbol)
 
         return None
+
 
 # %%
 feed = rq.feeds.YahooFeed("IBM", "AAPL")

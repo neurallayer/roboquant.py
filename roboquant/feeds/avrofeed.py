@@ -103,7 +103,7 @@ class AvroFeed(Feed):
         with open(self.avro_file, "wb") as out:
             writer(out, schema, records)
 
-    def __str__(self) -> str:
+    def __repr__(self) -> str:
         return f"AvroFeed(path={self.avro_file})"
 
 

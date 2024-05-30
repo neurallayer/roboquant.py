@@ -1,5 +1,4 @@
 # %%
-from datetime import timedelta
 import logging
 import roboquant as rq
 from roboquant.alpaca import AlpacaLiveFeed

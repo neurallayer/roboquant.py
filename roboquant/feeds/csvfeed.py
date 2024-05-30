@@ -24,7 +24,7 @@ class CSVColumn(str, Enum):
     ADJ_CLOSE = "Adj CLose"
     TIME = "Time"
 
-    def __str__(self) -> str:
+    def __repr__(self) -> str:
         return self.value
 
     @staticmethod
