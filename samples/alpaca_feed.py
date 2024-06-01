@@ -1,21 +1,20 @@
 # %%
-from datetime import timedelta
 
-from roboquant.feeds import AggregatorFeed, get_sp500_symbols
+from roboquant.feeds import get_sp500_symbols
 from roboquant.alpaca import AlpacaLiveFeed
+from roboquant import Timeframe
 
 # %%
-alpaca_feed = AlpacaLiveFeed()
+feed = AlpacaLiveFeed()
 
 stocks = get_sp500_symbols()[:30]
-alpaca_feed.subscribe_quotes(*stocks)
+feed.subscribe_quotes(*stocks)
 
 # alpaca_feed.subscribe_bars(*stocks)
 # feed.subscribe_trades("BTC/USD", "ETH/USD")
 # feed.subscribe("SPXW240312C05190000")
 
-feed = AggregatorFeed(alpaca_feed, timedelta(seconds=15), price_type="quote")
-
-channel = feed.play_background()
+timeframe = Timeframe.next(minutes=1)
+channel = feed.play_background(timeframe)
 while event := channel.get():
-    print(event.items)
+    print(event.time, event.items)
