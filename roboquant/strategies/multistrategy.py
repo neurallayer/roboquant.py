@@ -3,12 +3,12 @@ from itertools import groupby
 from statistics import mean
 
 from roboquant.event import Event
-from roboquant.signal import Signal
-from roboquant.strategies.strategy import Strategy
+from roboquant.strategies.signal import Signal
+from roboquant.strategies.signalstrategy import SignalStrategy
 
 
-class MultiStrategy(Strategy):
-    """Combine one or more strategies. The MultiStrategy provides additional control on how to handle conflicting
+class MultiStrategy(SignalStrategy):
+    """Combine one or more signal strategies. The MultiStrategy provides additional control on how to handle conflicting
     signals for the same symbols via the signal_filter:
 
     - first: in case of multiple signals for the same symbol, the first one wins
@@ -17,7 +17,8 @@ class MultiStrategy(Strategy):
     - none: return all signals. This is also the default.
     """
 
-    def __init__(self, *strategies: Strategy, signal_filter: Literal["last", "first", "avg", "none"] = "none"):
+    def __init__(self, *strategies: SignalStrategy, signal_filter: Literal["last", "first", "avg", "none"] = "none"):
+        super().__init__()
         self.strategies = list(strategies)
         self.signal_filter = signal_filter
 

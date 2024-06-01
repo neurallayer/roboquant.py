@@ -8,7 +8,7 @@ from alpaca.trading.models import Position as APosition
 from alpaca.trading.models import Order as AOrder
 from alpaca.trading.models import OrderStatus as AOrderStatus
 
-from alpaca.trading.requests import LimitOrderRequest, MarketOrderRequest, ReplaceOrderRequest
+from alpaca.trading.requests import LimitOrderRequest, ReplaceOrderRequest
 from roboquant.account import Account, Position
 from roboquant.config import Config
 from roboquant.event import Event
@@ -37,7 +37,8 @@ class AlpacaBroker(LiveBroker):
             alpaca_order: AOrder = self.__client.get_order_by_id(order.id)  # type: ignore
             order.size = Decimal(alpaca_order.qty)  # type: ignore
             order.fill = Decimal(alpaca_order.filled_qty)  # type: ignore
-            order.limit = float(alpaca_order.limit_price) if alpaca_order.limit_price else None
+            if alpaca_order.limit_price:
+                order.limit = float(alpaca_order.limit_price)
             match alpaca_order.status:
                 case AOrderStatus.FILLED:
                     order.status = OrderStatus.FILLED
@@ -92,20 +93,14 @@ class AlpacaBroker(LiveBroker):
                     self.__client.replace_order_by_id(order.id, req)
 
     def _get_order_request(self, order: Order):
-        side = OrderSide.BUY if order.size > 0 else OrderSide.SELL
-        if order.limit:
-            result = LimitOrderRequest(
-                symbol=order.symbol,
-                qty=abs(float(order.size)),
-                side=side,
-                limit_price=order.limit,
-                time_in_force=TimeInForce.GTC,
-            )
-        else:
-            result = MarketOrderRequest(
-                symbol=order.symbol, qty=abs(float(order.size)), side=side, time_in_force=TimeInForce.GTC
-            )
-        return result
+        side = OrderSide.BUY if order.is_buy else OrderSide.SELL
+        return LimitOrderRequest(
+            symbol=order.symbol,
+            qty=abs(float(order.size)),
+            side=side,
+            limit_price=order.limit,
+            time_in_force=TimeInForce.GTC,
+        )
 
     def _get_replace_request(self, order: Order):
         result = ReplaceOrderRequest(qty=int(abs(float(order.size))), limit_price=order.limit)

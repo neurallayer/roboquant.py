@@ -1,12 +1,12 @@
 from abc import abstractmethod
 
 from roboquant.event import Bar
-from roboquant.signal import Signal
+from roboquant.strategies.signal import Signal
 from roboquant.strategies.buffer import OHLCVBuffer
-from roboquant.strategies.strategy import Strategy
+from roboquant.strategies.signalstrategy import SignalStrategy
 
 
-class TaStrategy(Strategy):
+class TaStrategy(SignalStrategy):
     """Abstract base class for other strategies that helps to implement trading solutions
     based on technical indicators using bars.
 

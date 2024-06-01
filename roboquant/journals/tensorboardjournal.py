@@ -14,14 +14,15 @@ class TensorboardJournal(Journal):
             writer: a tensorboard writer instance (`tensorboard.summary.Writer`)
             metrics: the metrics that should be calculated and be added to the tensorboard writer
         """
+        super().__init__()
         self.__writer = writer
         self._step = 0
         self.metrics = metrics
 
-    def track(self, event, account, signals, orders):
+    def track(self, event, account, orders):
         time = event.time.timestamp()
         for metric in self.metrics:
-            result = metric.calc(event, account, signals, orders)
+            result = metric.calc(event, account, orders)
             for name, value in result.items():
                 self.__writer.add_scalar(name, value, self._step, wall_time=time)
 

@@ -1,3 +1,4 @@
+from datetime import datetime, timezone, timedelta
 import logging
 import time
 import unittest
@@ -21,7 +22,8 @@ class TestIBKR(unittest.TestCase):
         self.assertEqual(len(account.orders), 0)
 
         # Place an order
-        order = Order(symbol, 10, 150.0)
+        gtd = datetime.now(timezone.utc) + timedelta(days=10)
+        order = Order(symbol, 10, 150.0, gtd)
         broker.place_orders([order])
         time.sleep(5)
         self.assertEqual(len(account.orders), 0)

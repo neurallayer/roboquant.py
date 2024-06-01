@@ -1,5 +1,4 @@
 from dataclasses import dataclass
-from datetime import timedelta
 from decimal import Decimal
 import logging
 
@@ -123,8 +122,6 @@ class SimBroker(Broker):
 
         Overwrite this method in a subclass if you require more advanced behavior, like partial fills.
         """
-        if order.limit is None:
-            return order.remaining
         if order.is_buy and price <= order.limit:
             return order.remaining
         if order.is_sell and price >= order.limit:
@@ -177,8 +174,6 @@ class SimBroker(Broker):
                 order.status = OrderStatus.EXPIRED
             else:
                 if (item := prices.get(order.symbol)) is not None:
-                    if not order.gtd:
-                        order.gtd = self._account.last_update + timedelta(days=90)
                     trx = self._execute(order, item)
                     if trx is not None:
                         logger.info("executed order=%s trx=%s", order, trx)

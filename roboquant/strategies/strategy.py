@@ -1,7 +1,8 @@
 from abc import ABC, abstractmethod
 
+from roboquant.account import Account
 from roboquant.event import Event
-from roboquant.signal import Signal
+from roboquant.order import Order
 
 
 class Strategy(ABC):
@@ -11,7 +12,7 @@ class Strategy(ABC):
     """
 
     @abstractmethod
-    def create_signals(self, event: Event) -> list[Signal]:
+    def create_orders(self, event: Event, account: Account) -> list[Order]:
         """Create a signal for zero or more symbols. Signals are returned as a dictionary with key being the symbol and
         the value being the Signal.
         """

@@ -20,8 +20,6 @@ class BasicJournal(Journal):
 
     events: int = 0
     items: int = 0
-    buy_signals: int = 0
-    sell_signals: int = 0
     buy_orders: int = 0
     sell_orders: int = 0
     max_positions: int = 0
@@ -29,11 +27,9 @@ class BasicJournal(Journal):
     def __init__(self, log_level=logging.INFO):
         self.__log_level = log_level
 
-    def track(self, event, account, signals, orders):
+    def track(self, event, account, orders):
         self.items += len(event.items)
         self.events += 1
-        self.buy_signals += len([s for s in signals if s.is_buy])
-        self.sell_signals += len([s for s in signals if s.is_sell])
         self.buy_orders += len([o for o in orders if o.is_buy])
         self.sell_orders += len([o for o in orders if o.is_sell])
         self.max_positions = max(self.max_positions, len(account.positions))
@@ -43,8 +39,6 @@ class BasicJournal(Journal):
     def reset(self):
         self.events: int = 0
         self.items: int = 0
-        self.buy_signals: int = 0
-        self.sell_signals: int = 0
         self.buy_orders: int = 0
         self.sell_orders: int = 0
         self.max_positions: int = 0

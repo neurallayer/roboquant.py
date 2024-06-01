@@ -9,43 +9,17 @@ import torch
 from torch.utils.data import DataLoader, Dataset
 
 from roboquant.event import Event
-from roboquant.ml.envs import Action2Orders, Action2Signals, StrategyEnv, TraderEnv
+from roboquant.ml.envs import Action2Orders, StrategyEnv
 from roboquant.ml.features import Feature, NormalizeFeature
 from roboquant.order import Order
-from roboquant.signal import Signal
+from roboquant.strategies.signal import Signal
+from roboquant.strategies.signalstrategy import SignalStrategy
 from roboquant.strategies.strategy import Strategy
-from roboquant.traders.trader import Trader
 
 logger = logging.getLogger(__name__)
 
 
 class SB3PolicyStrategy(Strategy):
-
-    def __init__(self, obs_feature: Feature, action_2_signals: Action2Signals, policy: BasePolicy):
-        super().__init__()
-        self.obs_feature = obs_feature
-        self.action_2_signals = action_2_signals
-        self.policy = policy
-        self.state = None
-
-    @classmethod
-    def from_env(cls, env: StrategyEnv, policy):
-        return cls(env.obs_feature, env.action_2_signals, policy)
-
-    def create_signals(self, event):
-        obs = self.obs_feature.calc(event, None)
-        if np.any(np.isnan(obs)):
-            return []
-        action, self.state = self.policy.predict(obs, state=self.state, deterministic=True)  # type: ignore
-        logger.debug(action)
-        return self.action_2_signals.get_signals(action, event)
-
-    def reset(self):
-        self.state = None
-        self.obs_feature.reset()
-
-
-class SB3PolicyTrader(Trader):
 
     def __init__(self, obs_feature: Feature, action_2_orders: Action2Orders, policy: BasePolicy):
         super().__init__()
@@ -55,10 +29,10 @@ class SB3PolicyTrader(Trader):
         self.state = None
 
     @classmethod
-    def from_env(cls, env: TraderEnv, policy):
+    def from_env(cls, env: StrategyEnv, policy):
         return cls(env.obs_feature, env.action_2_orders, policy)
 
-    def create_orders(self, signals, event, account) -> list[Order]:
+    def create_orders(self, event, account) -> list[Order]:
         obs = self.obs_feature.calc(event, account)
         if np.any(np.isnan(obs)):
             return []
@@ -71,12 +45,13 @@ class SB3PolicyTrader(Trader):
         self.obs_feature.reset()
 
 
-class FeatureStrategy(Strategy):
+class FeatureStrategy(SignalStrategy):
     """Abstract base class for strategies wanting to use features
     for their input.
     """
 
     def __init__(self, input_feature: Feature, history: int, dtype="float32"):
+        super().__init__()
         self.input_feature = input_feature
         self.history = history
         self._hist = deque(maxlen=history)

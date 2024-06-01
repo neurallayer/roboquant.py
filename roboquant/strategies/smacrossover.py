@@ -2,11 +2,11 @@ import collections
 
 import numpy as np
 
-from roboquant.signal import Signal
-from roboquant.strategies.strategy import Strategy
+from roboquant.strategies.signal import Signal
+from roboquant.strategies.signalstrategy import SignalStrategy
 
 
-class SMACrossover(Strategy):
+class SMACrossover(SignalStrategy):
     """SMA Crossover Strategy"""
 
     def __init__(self, min_period: int = 13, max_period: int = 26):

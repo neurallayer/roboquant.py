@@ -4,15 +4,12 @@ from roboquant.brokers.simbroker import SimBroker
 from roboquant.feeds.feed import Feed
 from roboquant.journals.journal import Journal
 from roboquant.strategies.strategy import Strategy
-from roboquant.traders.flextrader import FlexTrader
-from roboquant.traders.trader import Trader
 from roboquant.timeframe import Timeframe
 
 
 def run(
     feed: Feed,
-    strategy: Strategy | None = None,
-    trader: Trader | None = None,
+    strategy: Strategy,
     broker: Broker | None = None,
     journal: Journal | None = None,
     timeframe: Timeframe | None = None,
@@ -23,8 +20,7 @@ def run(
 
     Args:
         feed: The feed to use for this run
-        strategy: Your strategy that you want to use. Default is None, meaning no signals will be created.
-        trader: The trader you want to use. If None is specified, the `FlexTrader` will be used with its default settings
+        strategy: Your strategy that you want to use
         broker: The broker you want to use. If None is specified, the `SimBroker` will be used with its default settings
         journal: Journal to use to log and/or store progress and metrics, default is None.
         timeframe: Optionally limit the run to events within this timeframe. The default is None
@@ -37,16 +33,14 @@ def run(
         The latest version of the account
     """
 
-    trader = trader or FlexTrader()
     broker = broker or SimBroker()
     channel = feed.play_background(timeframe, capacity)
 
     while event := channel.get(heartbeat_timeout):
         account = broker.sync(event)
-        signals = strategy.create_signals(event) if strategy else []
-        orders = trader.create_orders(signals, event, account)
+        orders = strategy.create_orders(event, account)
         broker.place_orders(orders)
         if journal:
-            journal.track(event, account, signals, orders)
+            journal.track(event, account, orders)
 
     return broker.sync()

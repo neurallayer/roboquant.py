@@ -12,6 +12,7 @@ class PNLMetric(Metric):
     """
 
     def __init__(self):
+        super().__init__()
         self.max_drawdown = 0.0
         self.max_gain = 0.0
         self.first_equity = None
@@ -19,7 +20,7 @@ class PNLMetric(Metric):
         self.max_equity = -10e10
         self.min_equity = 10e10
 
-    def calc(self, event, account, signals, orders) -> dict[str, float]:
+    def calc(self, event, account, orders) -> dict[str, float]:
         equity = account.equity()
 
         total, realized, unrealized = self.__get_pnl_values(equity, account)

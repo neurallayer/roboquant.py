@@ -1,9 +1,9 @@
 from roboquant.event import Event
-from roboquant.signal import Signal
-from roboquant.strategies.strategy import Strategy
+from roboquant.strategies.signal import Signal
+from roboquant.strategies.signalstrategy import SignalStrategy
 
 
-class EMACrossover(Strategy):
+class EMACrossover(SignalStrategy):
     """EMA Crossover Strategy"""
 
     def __init__(self, fast_period=13, slow_period=26, smoothing=2.0, price_type="DEFAULT"):

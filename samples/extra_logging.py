@@ -3,9 +3,9 @@ import logging
 import roboquant as rq
 
 # %%
-# Increase logging level to get better insights into the FlexTrader decision making 
+# Increase logging level to get better insights into the strategy decision making 
 logging.basicConfig()
-logging.getLogger("roboquant.traders.flextrader").setLevel(logging.INFO)
+logging.getLogger("roboquant.strategies").setLevel(logging.INFO)
 
 symbols = rq.feeds.get_sp500_symbols()[10:30]
 feed = rq.feeds.YahooFeed(*symbols, start_date="2000-01-01")

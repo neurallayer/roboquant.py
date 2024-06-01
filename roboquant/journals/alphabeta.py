@@ -18,6 +18,7 @@ class AlphaBeta(Metric):
         """
 
         # data stores both portfolio return and market return
+        super().__init__()
         self._data = np.ones((2, window_size))
         self.__cnt = 0
         self.__last_prices = {}
@@ -38,7 +39,7 @@ class AlphaBeta(Metric):
         self.__last_equity = equity
         self.__last_prices.update(prices)
 
-    def calc(self, event, account, signals, orders):
+    def calc(self, event, account, orders):
         prices = event.get_prices(self.price_type)
         equity = account.equity()
         if self.__last_equity is None:

@@ -1,7 +1,7 @@
 import logging
 import threading
 import time
-from datetime import datetime, timedelta
+from datetime import datetime, timedelta, timezone
 from decimal import Decimal
 
 from ibapi import VERSION
@@ -66,7 +66,8 @@ class _IBApi(EWrapper, EClient):
         )
         size = order.totalQuantity if order.action == "BUY" else -order.totalQuantity
         symbol = contract.localSymbol
-        rq_order = Order(symbol, size) if not order.lmtPrice else Order(symbol, size, order.lmtPrice)
+        gtd = datetime.now(timezone.utc)  # fix with correct gtd
+        rq_order = Order(symbol, size, order.lmtPrice, gtd)
         rq_order.id = str(orderId)
         self.orders[rq_order.id] = rq_order
 
@@ -247,17 +248,9 @@ class IBKRBroker(LiveBroker):
         o = IBKROrder()
         o.action = "BUY" if order.is_buy else "SELL"
         o.totalQuantity = abs(order.size)
-        if order.gtd:
-            o.tif = "GTD"
-            o.goodTillDate = order.gtd.strftime("%Y%m%d %H:%M:%S %Z")
-        else:
-            o.tif = "GTC"
-
-        if order.limit:
-            o.orderType = "LMT"
-            o.lmtPrice = order.limit
-        else:
-            o.orderType = "MKT"
+        o.tif = "GTD"
+        o.goodTillDate = order.gtd.strftime("%Y%m%d %H:%M:%S %Z")
+        o.orderType = "LMT"
 
         # Override attributes
         IBKRBroker.__update_ibkr_object(o, order.info.get("order"))

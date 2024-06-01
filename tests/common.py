@@ -4,9 +4,10 @@ from datetime import date, datetime, timedelta
 from unittest import TestCase
 
 from roboquant import PriceItem, Bar, Quote, Trade
+from roboquant.account import Account
 from roboquant.feeds import CSVFeed
 from roboquant.feeds.feed import Feed
-from roboquant.signal import Signal
+from roboquant.order import Order
 from roboquant.strategies.strategy import Strategy
 
 
@@ -62,16 +63,18 @@ def run_price_item_feed(feed: Feed, symbols: list[str], test_case: TestCase, tim
 def run_strategy(strategy: Strategy, test_case: TestCase):
     feed = get_feed()
     channel = feed.play_background()
-    tot_ratings = 0
+    total_orders = 0
+    account = Account()
+    account.cash = 1_000_000
+    account.buying_power = 1_000_000
     while event := channel.get():
-        signals = strategy.create_signals(event)
-        for signal in signals:
-            symbol = signal.symbol
-            test_case.assertEqual(type(signal), Signal)
+        orders = strategy.create_orders(event, account)
+        for order in orders:
+            symbol = order.symbol
+            test_case.assertEqual(type(order), Order)
             test_case.assertEqual(type(symbol), str)
             test_case.assertEqual(symbol, symbol.upper())
-            test_case.assertTrue(-1.0 <= signal.rating <= 1.0)
             test_case.assertIn(symbol, feed.symbols)
-        tot_ratings += len(signals)
+        total_orders += len(orders)
 
-    test_case.assertGreater(tot_ratings, 0)
+    test_case.assertGreater(total_orders, 0)

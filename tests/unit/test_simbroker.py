@@ -1,5 +1,5 @@
 import unittest
-from datetime import datetime, timezone
+from datetime import datetime, timedelta, timezone
 from decimal import Decimal
 
 from roboquant import Event, Order, Trade
@@ -15,11 +15,12 @@ class TestSimbroker(unittest.TestCase):
         return event
 
     def test_simbroker(self):
+        gtd = datetime.now(timezone.utc) + timedelta(days=10)
         broker = SimBroker(clean_up_orders=False)
         account = broker.sync()
         self.assertEqual(1_000_000.0, account.buying_power)
 
-        order = Order("AAPL", 100)
+        order = Order("AAPL", 100, 101.0, gtd)
         broker.place_orders([order])
         self.assertEqual(len(account.orders), 0)
 
@@ -42,7 +43,7 @@ class TestSimbroker(unittest.TestCase):
         self.assertEqual(order.size, order.fill)
         self.assertEqual(Decimal(100), account.positions["AAPL"].size)
 
-        order = Order("AAPL", -50)
+        order = Order("AAPL", -50,  99.0, gtd)
         broker.place_orders([order])
         account = broker.sync(event)
         self.assertEqual(len(account.orders), 2)
@@ -51,8 +52,9 @@ class TestSimbroker(unittest.TestCase):
         self.assertEqual(Decimal(50), account.positions["AAPL"].size)
 
     def test_simbroker_safeguards(self):
+        gtd = datetime.now(tz=timezone.utc) + timedelta(days=10)
         broker = SimBroker()
-        order = Order("AAPL", -50)
+        order = Order("AAPL", -50,  100.0, gtd)
         order.id = "NON_EXISTING"
         with self.assertRaises(AssertionError):
             broker.place_orders([order])

@@ -24,14 +24,13 @@ class TestBigFeed(unittest.TestCase):
         print(f"throughput = {throughput:.1f}M candles/s")
         print()
 
-    def _run(self, feed, journal):
+    def _run(self, feed, journal: rq.journals.BasicJournal):
         strategy = rq.strategies.EMACrossover(13, 26)
         start = time.time()
         account = rq.run(feed, strategy, journal=journal)
 
         self.assertTrue(journal.items > 1_000_000)
-        self.assertTrue(journal.signals > 100_000)
-        self.assertTrue(journal.orders > 1_000)
+        self.assertTrue(journal.buy_orders + journal.sell_orders > 1_000)
         self.assertTrue(journal.events > 1_000)
 
         return account, time.time() - start

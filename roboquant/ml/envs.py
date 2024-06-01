@@ -1,3 +1,4 @@
+from datetime import timedelta
 import math
 from decimal import Decimal
 import logging
@@ -14,11 +15,9 @@ from roboquant.event import Event
 from roboquant.feeds.eventchannel import EventChannel
 from roboquant.feeds.feed import Feed
 from roboquant.order import Order
-from roboquant.signal import Signal
+from roboquant.strategies.signal import Signal
 from roboquant.ml.features import Feature
 from roboquant.timeframe import Timeframe
-from roboquant.traders.flextrader import FlexTrader
-from roboquant.traders.trader import Trader
 
 
 register(id="roboquant/StrategyEnv-v0", entry_point="roboquant.ml.envs:StrategyEnv")
@@ -51,13 +50,15 @@ class Action2Orders:
     def __init__(self, symbols: list[str]):
         self.symbols = symbols
 
-    def _account_rebalance(self, account: Account, new_sizes: dict[str, Decimal]) -> list[Order]:
+    def _account_rebalance(self, account: Account, new_sizes: dict[str, Decimal], event: Event) -> list[Order]:
         orders = []
+        gtd = account.last_update + timedelta(days=5)
         for symbol, new_size in new_sizes.items():
             old_size = account.get_position_size(symbol)
             order_size = new_size - old_size
-            if order_size != Decimal(0):
-                order = Order(symbol, order_size)
+            limit = event.get_price(symbol)
+            if order_size != Decimal(0) and limit:
+                order = Order(symbol, order_size, limit, gtd)
                 orders.append(order)
 
         return orders
@@ -75,101 +76,13 @@ class Action2Orders:
             else:
                 new_positions[symbol] = Decimal()
 
-        return self._account_rebalance(account, new_positions)
+        return self._account_rebalance(account, new_positions, event)
 
     def get_action_space(self):
         return spaces.Box(-1.0, 1.0, shape=(len(self.symbols),), dtype=np.float32)
 
 
 class StrategyEnv(gym.Env):
-    # pylint: disable=too-many-instance-attributes,unused-argument
-
-    metadata = {"render_modes": ["human", "rgb_array"], "render_fps": 4}
-
-    def __init__(
-        self,
-        feed: Feed,
-        obs_feature: Feature,
-        reward_feature:  Feature,
-        action_2_signals: Action2Signals,
-        broker: Broker | None = None,
-        trader: Trader | None = None,
-        timeframe: Timeframe | None = None
-    ):
-        self.broker: Broker = broker or SimBroker()
-        self.trader: Trader = trader or FlexTrader()
-        self.channel = EventChannel()
-        self.feed = feed
-        self.action_2_signals = action_2_signals
-        self.event: Event | None = None
-        self.account: Account = self.broker.sync()
-        self.obs_feature = obs_feature
-        self.reward_feature = reward_feature
-        self.render_mode = None
-        self.timeframe = timeframe
-
-        self.observation_space = spaces.Box(-1.0, 1.0, shape=(self.obs_feature.size(),), dtype=np.float32)
-        self.action_space = action_2_signals.get_action_space()
-        logger.info("observation_space=%s action_space=%s", self.observation_space, self.action_space)
-
-    def get_observation(self, evt: Event) -> NDArray[np.float32]:
-        return self.obs_feature.calc(evt, None)
-
-    def get_reward(self, evt: Event, account: Account) -> NDArray[np.float32]:
-        return self.reward_feature.calc(evt, account)
-
-    def step(self, action):
-        assert self.event is not None
-        assert self.account is not None
-        signals = self.action_2_signals.get_signals(action, self.event)
-        logger.debug("time=%s signals=%s", self.event.time, signals)
-
-        orders = self.trader.create_orders(signals, self.event, self.account)
-        self.broker.place_orders(orders)
-        self.event = self.channel.get()
-
-        if self.event:
-            self.account = self.broker.sync(self.event)
-            observation = self.get_observation(self.event)
-            reward = self.get_reward(self.event, self.account)
-            return observation, reward, False, False, {}
-
-        return None, 0.0, True, False, {}
-
-    def reset(self, *, seed=None, options=None):
-        super().reset(seed=seed, options=options)
-        logger.info("environment resetting")
-        self.broker.reset()
-        self.trader.reset()
-        self.obs_feature.reset()
-        self.reward_feature.reset()
-
-        self.channel = self.feed.play_background(self.timeframe)
-
-        while True:
-            self.event = self.channel.get()
-            assert self.event is not None, "feed empty during warmup"
-            self.account = self.broker.sync(self.event)
-            self.trader.create_orders([], self.event, self.account)
-            observation = self.get_observation(self.event)
-            self.get_reward(self.event, self.account)
-            if not np.any(np.isnan(observation)):
-                return observation, {}
-
-    def render(self):
-        pass
-
-    def __repr__(self):
-        result = (
-            f"TradingEnv(\n\tbroker={self.broker}\n\ttrader={self.trader}\n\tfeed={self.feed}"
-            f"\n\tfeatures_size={self.obs_feature.size()}"
-            f"\n\tobservation_space={self.observation_space}\n\taction_space={self.action_space}"
-            "\n)"
-        )
-        return result
-
-
-class TraderEnv(gym.Env):
     # pylint: disable=too-many-instance-attributes,unused-argument
 
     metadata = {"render_modes": ["human", "rgb_array"], "render_fps": 4}

@@ -1,6 +1,6 @@
 import unittest
 
-from roboquant import Signal, SignalType
+from roboquant.strategies.signal import Signal, SignalType
 
 
 class TestSignal(unittest.TestCase):

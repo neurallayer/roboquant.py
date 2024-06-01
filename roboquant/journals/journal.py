@@ -1,12 +1,11 @@
-from typing import Protocol
+from abc import ABC, abstractmethod
 
 from roboquant.account import Account
 from roboquant.event import Event
 from roboquant.order import Order
-from roboquant.signal import Signal
 
 
-class Journal(Protocol):
+class Journal(ABC):
     """
     A journal enables the tracking and/or logging of one or more metrics during a run.
 
@@ -14,7 +13,8 @@ class Journal(Protocol):
     It serves as a tool to track and analyze their performance, decisions, and outcomes over time
     """
 
-    def track(self, event: Event, account: Account, signals: list[Signal], orders: list[Order]):
+    @abstractmethod
+    def track(self, event: Event, account: Account, orders: list[Order]):
         """invoked at each step of a run that provides the journal with the opportunity to
         track and log various metrics."""
         ...

@@ -1,6 +1,6 @@
 import unittest
 
-from roboquant.strategies import SMACrossover
+from roboquant.strategies import SMACrossover, EMACrossover
 from tests.common import run_strategy
 
 
@@ -11,7 +11,7 @@ class TestCrossover(unittest.TestCase):
         run_strategy(strategy, self)
 
     def test_ema_crossover(self):
-        strategy = SMACrossover(13, 26)
+        strategy = EMACrossover(13, 26)
         run_strategy(strategy, self)
 
 

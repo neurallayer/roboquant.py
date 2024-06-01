@@ -42,17 +42,15 @@ class OrderStatus(Flag):
 class Order:
     """
     A trading order.
-    Default is a market order when only the size is specified.
-    But optionally, a limit can be specified, making it a limit order.
-
+   
     The `id` is automatically assigned by the broker and should not be set manually.
     Also, the `status` and `fill` are managed by the broker and should not be manually set.
     """
 
     symbol: str
     size: Decimal
-    limit: float | None
-    gtd: datetime | None
+    limit: float
+    gtd: datetime
     info: dict[str, Any]
 
     id: str | None
@@ -60,7 +58,7 @@ class Order:
     fill: Decimal
 
     def __init__(
-        self, symbol: str, size: Decimal | str | int | float, limit: float | None = None, gtd: datetime | None = None, **kwargs
+        self, symbol: str, size: Decimal | str | int | float, limit: float, gtd: datetime, **kwargs
     ):
         self.symbol = symbol
         self.size = Decimal(size)

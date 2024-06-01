@@ -1,3 +1,4 @@
+from abc import abstractmethod
 from datetime import datetime, timedelta
 import logging
 from decimal import Decimal
@@ -6,8 +7,8 @@ import random
 
 from roboquant.event import Event
 from roboquant.order import Order
-from roboquant.signal import Signal
-from .trader import Trader
+from roboquant.strategies.signal import Signal
+from roboquant.strategies.strategy import Strategy
 from ..account import Account
 from ..event import PriceItem
 
@@ -64,8 +65,8 @@ class _Context:
             )
 
 
-class FlexTrader(Trader):
-    """Implementation of a Trader that has configurable rules to modify which signals are converted into orders.
+class SignalStrategy(Strategy):
+    """Implementation of a Stategy that has configurable rules to modify which signals are converted into orders.
     This implementation will not generate orders if there is not a price in the event for the underlying symbol.
 
     The configurable parameters include:
@@ -99,6 +100,7 @@ class FlexTrader(Trader):
         max_position_perc=0.1,
         price_type="DEFAULT",
         shuffle_signals=False,
+        order_valid_for=timedelta(days=3)
     ) -> None:
         super().__init__()
         self.one_order_only = one_order_only
@@ -110,6 +112,7 @@ class FlexTrader(Trader):
         self.max_position_perc = max_position_perc
         self.price_type = price_type
         self.shuffle_signals = shuffle_signals
+        self.order_valid_for = order_valid_for
 
     def _get_order_size(self, rating: float, contract_price: float, max_order_value: float) -> Decimal:
         """Return the order size"""
@@ -117,8 +120,17 @@ class FlexTrader(Trader):
         rounded_size = round(size, self.size_digits)
         return rounded_size
 
-    def create_orders(self, signals: list[Signal], event: Event, account: Account) -> list[Order]:
+    @abstractmethod
+    def create_signals(self, event: Event) -> list[Signal]:
+        """Create a signal for zero or more symbols. Signals are returned as a dictionary with key being the symbol and
+        the value being the Signal.
+        """
+        ...
+
+    def create_orders(self, event: Event, account: Account) -> list[Order]:
         # pylint: disable=too-many-branches,too-many-statements,too-many-locals
+        signals = self.create_signals(event)
+
         if not signals:
             return []
 
@@ -222,46 +234,10 @@ class FlexTrader(Trader):
 
         Default is a MarketOrder. Overwrite this method to create different order types.
         """
-
-        return [Order(symbol, size)]
+        limit = item.price(self.price_type)
+        gtd = time + self.order_valid_for
+        return [Order(symbol, size, limit, gtd)]
 
     def __repr__(self) -> str:
         attrs = " ".join([f"{k}={v}" for k, v in self.__dict__.items() if not k.startswith("_")])
         return f"FlexTrader({attrs})"
-
-
-class FlexLimitOrderTrader(FlexTrader):
-    """A FlexTrader version that returns a limit order"""
-
-    def __init__(
-        self,
-        one_order_only=True,
-        size_fractions=0,
-        safety_margin_perc=0.05,
-        shorting=False,
-        max_order_perc=0.05,
-        min_order_perc=0.02,
-        max_position_perc=0.05,
-        price_type="DEFAULT",
-        shuffle_signals=False,
-        gtd=timedelta(days=3),
-    ) -> None:
-        super().__init__(
-            one_order_only,
-            size_fractions,
-            safety_margin_perc,
-            shorting,
-            max_order_perc,
-            min_order_perc,
-            max_position_perc,
-            price_type,
-            shuffle_signals,
-        )
-        self.gtd_timedelta = gtd
-
-    def _get_orders(self, symbol: str, size: Decimal, item: PriceItem, signal: Signal, time: datetime) -> list[Order]:
-        # pylint: disable=unused-argument
-        """Return a single limit-order with the limit the current price a GTD with a configurable 3 days from now."""
-        gtd = time + self.gtd_timedelta
-        limit = item.price(self.price_type)
-        return [Order(symbol, size, limit, gtd)]
