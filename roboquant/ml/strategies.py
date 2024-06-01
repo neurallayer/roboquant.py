@@ -9,7 +9,7 @@ import torch
 from torch.utils.data import DataLoader, Dataset
 
 from roboquant.event import Event
-from roboquant.ml.envs import Action2Orders, StrategyEnv
+from roboquant.ml.envs import ActionTransformer, StrategyEnv
 from roboquant.ml.features import Feature, NormalizeFeature
 from roboquant.order import Order
 from roboquant.strategies.signal import Signal
@@ -21,23 +21,23 @@ logger = logging.getLogger(__name__)
 
 class SB3PolicyStrategy(Strategy):
 
-    def __init__(self, obs_feature: Feature, action_2_orders: Action2Orders, policy: BasePolicy):
+    def __init__(self, obs_feature: Feature, action_transformer: ActionTransformer, policy: BasePolicy):
         super().__init__()
         self.obs_feature = obs_feature
-        self.action_2_orders = action_2_orders
+        self.action_transformer = action_transformer
         self.policy = policy
         self.state = None
 
     @classmethod
     def from_env(cls, env: StrategyEnv, policy):
-        return cls(env.obs_feature, env.action_2_orders, policy)
+        return cls(env.obs_feature, env.action_transformer, policy)
 
     def create_orders(self, event, account) -> list[Order]:
         obs = self.obs_feature.calc(event, account)
         if np.any(np.isnan(obs)):
             return []
         action, self.state = self.policy.predict(obs, state=self.state, deterministic=True)  # type: ignore
-        return self.action_2_orders.get_orders(action, event, account)
+        return self.action_transformer.get_orders(action, event, account)
 
     def reset(self):
         super().reset()

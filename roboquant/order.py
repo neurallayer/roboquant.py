@@ -42,7 +42,6 @@ class OrderStatus(Flag):
 class Order:
     """
     A trading order.
-   
     The `id` is automatically assigned by the broker and should not be set manually.
     Also, the `status` and `fill` are managed by the broker and should not be manually set.
     """
@@ -86,7 +85,7 @@ class Order:
         """Create a cancellation order. You can only cancel orders that are still open and have an id.
         The returned order looks like a regular order, but with its size set to zero.
         """
-        assert self.id is not None, "Can only cancel orders with an id"
+        assert self.id is not None, "Can only cancel orders with an already assigned id"
         assert self.is_open, "Can only cancel open orders"
 
         result = copy(self)
@@ -100,10 +99,8 @@ class Order:
         You can only update existing orders that are still open and have an id.
         """
 
-        assert self.id is not None, "Can only update orders with an id"
+        assert self.id is not None, "Can only update an already assigned id"
         assert self.is_open, "Can only update open orders"
-        if limit:
-            assert self.limit, "Can only update the limit if it has already a limit defined"
 
         size = Decimal(size) if size is not None else None
         if size is not None:

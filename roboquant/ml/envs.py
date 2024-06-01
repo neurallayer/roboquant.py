@@ -1,10 +1,11 @@
+from abc import ABC, abstractmethod
 from datetime import timedelta
-import math
 from decimal import Decimal
 import logging
 import gymnasium as gym
 from gymnasium import spaces
 from gymnasium.envs.registration import register
+from gymnasium.spaces.space import Space
 import numpy as np
 from numpy.typing import NDArray
 from roboquant.account import Account
@@ -15,55 +16,100 @@ from roboquant.event import Event
 from roboquant.feeds.eventchannel import EventChannel
 from roboquant.feeds.feed import Feed
 from roboquant.order import Order
-from roboquant.strategies.signal import Signal
 from roboquant.ml.features import Feature
 from roboquant.timeframe import Timeframe
 
 
 register(id="roboquant/StrategyEnv-v0", entry_point="roboquant.ml.envs:StrategyEnv")
-register(id="roboquant/TraderEnv-v0", entry_point="roboquant.ml.envs:TraderEnv")
 logger = logging.getLogger(__name__)
 
 
-class Action2Signals:
-    """Transforms an action into signals"""
+class ActionTransformer(ABC):
+    """Transforms an action into orders"""
 
-    def __init__(self, symbols: list[str]):
-        self.symbols = symbols
+    @abstractmethod
+    def get_orders(self, actions: NDArray, event: Event, account: Account) -> list[Order]:
+        ...
 
-    @staticmethod
-    def __limit(rating):
-        rating = float(rating)
-        assert math.isfinite(rating), f"rating not finite rating={rating}"
-        return max(-1.0, min(1.0, rating))
-
-    def get_signals(self, action, _):
-        return [Signal(symbol, self.__limit(rating)) for symbol, rating in zip(self.symbols, action)]
-
-    def get_action_space(self):
-        return spaces.Box(-1.0, 1.0, shape=(len(self.symbols),), dtype=np.float32)
+    @abstractmethod
+    def get_action_space(self) -> Space:
+        ...
 
 
-class Action2Orders:
+class OrderMaker(ActionTransformer):
     """Transforms an action into orders"""
 
     def __init__(self, symbols: list[str]):
+        super().__init__()
         self.symbols = symbols
 
-    def _account_rebalance(self, account: Account, new_sizes: dict[str, Decimal], event: Event) -> list[Order]:
+    def get_orders(self, actions: NDArray, event: Event, account: Account) -> list[Order]:
         orders = []
-        gtd = account.last_update + timedelta(days=5)
+        gtd = event.time + timedelta(days=3)
+        equity = account.equity()
+        for symbol, fraction in zip(self.symbols, actions):
+            price = event.get_price(symbol)
+            if price:
+                rel_fraction = fraction / len(self.symbols)
+                contract_value = account.contract_value(symbol, Decimal(1), price)
+                size = equity * rel_fraction / contract_value
+                order = Order(symbol, size, price, gtd)
+                orders.append(order)
+        return orders
+
+    def get_action_space(self) -> Space:
+        return spaces.Box(-1.0, 1.0, shape=(len(self.symbols),), dtype=np.float32)
+
+
+class OrderWithLimitsMaker(ActionTransformer):
+    """Transforms an action into orders"""
+
+    def __init__(self, symbols: list[str]):
+        super().__init__()
+        self.symbols = symbols
+
+    def get_orders(self, actions: NDArray, event: Event, account: Account) -> list[Order]:
+        orders = []
+        gtd = event.time + timedelta(days=3)
+        equity = account.equity()
+        for symbol, (fraction, limit_perc) in zip(self.symbols, actions.reshape(-1, 2)):
+            price = event.get_price(symbol)
+            if price:
+                rel_fraction = fraction / len(self.symbols)
+                contract_value = account.contract_value(symbol, Decimal(1), price)
+                size = equity * rel_fraction / contract_value
+                limit = price * (1.0 + limit_perc/100.0)
+                order = Order(symbol, size, limit, gtd)
+                orders.append(order)
+        return orders
+
+    def get_action_space(self) -> Space:
+        return spaces.Box(-1.0, 1.0, shape=(len(self.symbols)*2,), dtype=np.float32)
+
+
+class Action2Orders(ActionTransformer):
+    """Transforms an action into orders"""
+
+    def __init__(self, symbols: list[str], price_type="DEFAULT", order_valid_till=timedelta(days=5)):
+        super().__init__()
+        self.symbols = symbols
+        self.price_type = price_type
+        self.order_valid_till = order_valid_till
+
+    def _rebalance(self, account: Account, new_sizes: dict[str, Decimal], event: Event) -> list[Order]:
+        orders = []
+        gtd = event.time + self.order_valid_till
         for symbol, new_size in new_sizes.items():
             old_size = account.get_position_size(symbol)
             order_size = new_size - old_size
-            limit = event.get_price(symbol)
+            limit = event.get_price(symbol, self.price_type)
             if order_size != Decimal(0) and limit:
                 order = Order(symbol, order_size, limit, gtd)
                 orders.append(order)
 
         return orders
 
-    def get_orders(self, actions, event: Event, account: Account) -> list[Order]:
+    def get_orders(self, actions: NDArray, event: Event, account: Account) -> list[Order]:
         new_positions = {}
         equity = account.equity()
         for symbol, fraction in zip(self.symbols, actions):
@@ -76,9 +122,9 @@ class Action2Orders:
             else:
                 new_positions[symbol] = Decimal()
 
-        return self._account_rebalance(account, new_positions, event)
+        return self._rebalance(account, new_positions, event)
 
-    def get_action_space(self):
+    def get_action_space(self) -> Space:
         return spaces.Box(-1.0, 1.0, shape=(len(self.symbols),), dtype=np.float32)
 
 
@@ -92,14 +138,14 @@ class StrategyEnv(gym.Env):
         feed: Feed,
         obs_feature: Feature,
         reward_feature:  Feature,
-        action_2_orders: Action2Orders,
+        action_transformer: ActionTransformer,
         broker: Broker | None = None,
         timeframe: Timeframe | None = None
     ):
         self.broker: Broker = broker or SimBroker()
         self.channel = EventChannel()
         self.feed = feed
-        self.action_2_orders = action_2_orders
+        self.action_transformer = action_transformer
         self.event: Event | None = None
         self.account: Account = self.broker.sync()
         self.obs_feature = obs_feature
@@ -107,7 +153,7 @@ class StrategyEnv(gym.Env):
         self.timefame = timeframe
 
         self.observation_space = spaces.Box(-1.0, 1.0, shape=(obs_feature.size(),), dtype=np.float32)
-        self.action_space = action_2_orders.get_action_space()
+        self.action_space = action_transformer.get_action_space()
 
         logger.info("observation_space=%s action_space=%s", self.observation_space, self.action_space)
 
@@ -124,7 +170,7 @@ class StrategyEnv(gym.Env):
         assert self.account is not None
         logger.debug("time=%s action=%s", self.event.time, action)
 
-        orders = self.action_2_orders.get_orders(action, self.event, self.account)
+        orders = self.action_transformer.get_orders(action, self.event, self.account)
         self.broker.place_orders(orders)
         self.event = self.channel.get()
 
