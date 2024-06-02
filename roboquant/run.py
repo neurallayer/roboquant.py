@@ -10,8 +10,8 @@ from roboquant.timeframe import Timeframe
 def run(
     feed: Feed,
     strategy: Strategy,
-    broker: Broker | None = None,
     journal: Journal | None = None,
+    broker: Broker | None = None,
     timeframe: Timeframe | None = None,
     capacity: int = 10,
     heartbeat_timeout: float | None = None,
