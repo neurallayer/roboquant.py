@@ -143,6 +143,7 @@ class SignalStrategy(Strategy):
         min_order_value = equity * self.min_order_perc
         max_pos_value = equity * self.max_position_perc
         available = account.buying_power - self.safety_margin_perc * equity
+        open_orders = account.open_order_symbols()
 
         for signal in signals:
             symbol = signal.symbol
@@ -153,7 +154,7 @@ class SignalStrategy(Strategy):
 
             logger.info("available=%s signal=%s pos=%s change=%s", available, signal, pos_size, change)
 
-            if self.one_order_only and account.has_open_order(symbol):
+            if self.one_order_only and symbol in open_orders:
                 ctx.log("one order only")
                 continue
 
@@ -198,14 +199,14 @@ class SignalStrategy(Strategy):
                     ctx.log("calculated available order value below minimum order value")
                     continue
 
-                contract_price = account.contract_value(symbol, Decimal(1), price)
+                contract_price = account.contract_value(symbol, price)
                 order_size = self._get_order_size(signal.rating, contract_price, available_order_value)
 
                 if order_size.is_zero():
                     ctx.log("calculated order size is zero")
                     continue
 
-                order_value = abs(account.contract_value(symbol, order_size, price))
+                order_value = abs(account.contract_value(symbol, price, order_size))
                 if abs(order_value) > available:
                     ctx.log(
                         "order value above available buying power",

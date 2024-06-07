@@ -59,6 +59,10 @@ class Quote(PriceItem):
         return self.data[3]
 
     @property
+    def spread(self) -> float:
+        return self.data[0] - self.data[2]
+
+    @property
     def midpoint_price(self) -> float:
         return (self.data[0] + self.data[2]) / 2.0
 

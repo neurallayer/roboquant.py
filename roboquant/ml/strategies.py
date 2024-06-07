@@ -29,7 +29,7 @@ class SB3PolicyStrategy(Strategy):
         self.state = None
 
     @classmethod
-    def from_env(cls, env: StrategyEnv, policy):
+    def from_env(cls, env: StrategyEnv, policy: BasePolicy):
         return cls(env.obs_feature, env.action_transformer, policy)
 
     def create_orders(self, event, account) -> list[Order]:

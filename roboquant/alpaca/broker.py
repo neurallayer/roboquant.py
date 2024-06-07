@@ -32,13 +32,15 @@ class AlpacaBroker(LiveBroker):
         self.sleep_after_cancel = 0.0
 
     def _sync_orders(self):
-        for order in self.__account.open_orders():
+        for order in self.__account.open_orders:
             assert order.id is not None
             alpaca_order: AOrder = self.__client.get_order_by_id(order.id)  # type: ignore
             order.size = Decimal(alpaca_order.qty)  # type: ignore
             order.fill = Decimal(alpaca_order.filled_qty)  # type: ignore
             if alpaca_order.limit_price:
                 order.limit = float(alpaca_order.limit_price)
+            else:
+                logger.warning("found order without limit specified id=%s", order.id)
             match alpaca_order.status:
                 case AOrderStatus.FILLED:
                     order.status = OrderStatus.FILLED

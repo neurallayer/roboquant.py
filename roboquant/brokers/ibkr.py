@@ -26,7 +26,7 @@ class _IBApi(EWrapper, EClient):
 
     def __init__(self):
         EClient.__init__(self, self)
-        self.orders: dict[str, Order] = {}
+        self.open_orders: dict[str, Order] = {}
         self.positions: dict[str, Position] = {}
         self.__account = {AccountSummaryTags.TotalCashValue: 0.0, AccountSummaryTags.BuyingPower: 0.0}
         self.__account_end = threading.Condition()
@@ -69,7 +69,7 @@ class _IBApi(EWrapper, EClient):
         gtd = datetime.now(timezone.utc)  # fix with correct gtd
         rq_order = Order(symbol, size, order.lmtPrice, gtd)
         rq_order.id = str(orderId)
-        self.orders[rq_order.id] = rq_order
+        self.open_orders[rq_order.id] = rq_order
 
     def request_account(self):
         """blocking call till account summary has been received"""
@@ -103,8 +103,8 @@ class _IBApi(EWrapper, EClient):
     ):
         logger.debug("order status orderId=%s status=%s fill=%s", orderId, status, filled)
         orderId = str(orderId)
-        if orderId in self.orders:
-            order = self.orders[orderId]
+        if orderId in self.open_orders:
+            order = self.open_orders[orderId]
             order.fill = filled
             match status:
                 case "Submitted":
@@ -114,7 +114,7 @@ class _IBApi(EWrapper, EClient):
                 case "Filled":
                     order.status = OrderStatus.FILLED
         else:
-            logger.warning("received status for unknown order id=%s status=%s", orderId, status)
+            logger.warning("received status for an order that is not open id=%s status=%s", orderId, status)
 
 
 class IBKRBroker(LiveBroker):
@@ -185,7 +185,7 @@ class IBKRBroker(LiveBroker):
             api.request_account()
 
             acc.positions = {k: v for k, v in api.positions.items() if not v.size.is_zero()}
-            acc.orders = list(api.orders.values())
+            acc.orders = list(api.open_orders.values())
             acc.buying_power = api.get_buying_power()
             acc.cash = api.get_cash()
 
@@ -210,7 +210,7 @@ class IBKRBroker(LiveBroker):
             else:
                 if order.id is None:
                     order.id = self.__api.get_next_order_id()
-                    self.__api.orders[order.id] = order
+                    self.__api.open_orders[order.id] = order
                 ibkr_order = self._get_order(order)
                 contract = self._get_contract(order)
                 self.__api.placeOrder(int(order.id), contract, ibkr_order)

@@ -167,7 +167,7 @@ class PositionSizeFeature(Feature):
         for idx, symbol in enumerate(self.symbols):
             position = account.positions.get(symbol)
             if position:
-                value = account.contract_value(symbol, position.size, position.mkt_price)
+                value = account.contract_value(symbol, position.mkt_price, position.size)
                 pos_size = value / equity - 1.0
                 result[idx] = pos_size
         return result

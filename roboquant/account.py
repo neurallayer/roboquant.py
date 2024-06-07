@@ -3,6 +3,7 @@ from dataclasses import dataclass
 from datetime import datetime
 from decimal import Decimal
 
+from roboquant.event import Event
 from roboquant.order import Order
 
 
@@ -104,7 +105,7 @@ class Account:
     The account maintains the following state during a run:
 
     - Available buying power for orders in the base currency of the account
-    - Cash available
+    - Cash available in the base currency of the account
     - The open positions
     - Orders
     - Calculated derived equity value of the account in the base currency of the account
@@ -127,27 +128,36 @@ class Account:
         """Register a converter"""
         Account.__converter = converter
 
-    def contract_value(self, symbol: str, size: Decimal, price: float) -> float:
+    def contract_value(self, symbol: str, price: float, size: Decimal = Decimal(1)) -> float:
         # pylint: disable=not-callable
-        """Return the total value of the provided contract size denoted in the base currency of the account."""
+        """Return the total value of a contract denoted in the base currency of the account.
+        Default is a size of 1.
+        """
         rate = 1.0 if not Account.__converter else Account.__converter(symbol, self.last_update)
         return float(size) * price * rate
 
     def mkt_value(self) -> float:
-        """Return the sum market values of the open positions in the account.
+        """Return the sum of the market values of the open positions in the account.
 
         The returned value is denoted in the base currency of the account.
         """
         return sum(
-            [self.contract_value(symbol, pos.size, pos.mkt_price) for symbol, pos in self.positions.items()],
+            [self.contract_value(symbol, pos.mkt_price, pos.size) for symbol, pos in self.positions.items()],
             0.0,
         )
 
     def position_value(self, symbol) -> float:
-        """Return position value denoted in the base currency of the account.
-        """
+        """Return position value denoted in the base currency of the account."""
         pos = self.positions.get(symbol)
-        return self.contract_value(symbol, pos.size, pos.mkt_price) if pos else 0.0
+        return self.contract_value(symbol, pos.mkt_price, pos.size) if pos else 0.0
+
+    def short_positions(self) -> dict[str, Position]:
+        """Return al the short positions in the account"""
+        return {symbol: position for (symbol, position) in self.positions.items() if position.is_short}
+
+    def long_positions(self) -> dict[str, Position]:
+        """Return al the short positions in the account"""
+        return {symbol: position for (symbol, position) in self.positions.items() if position.is_long}
 
     def equity(self) -> float:
         """Return the equity of the account.
@@ -163,36 +173,29 @@ class Account:
         The returned value is denoted in the base currency of the account.
         """
         return sum(
-            [self.contract_value(symbol, pos.size, pos.mkt_price - pos.avg_price) for symbol, pos in self.positions.items()],
+            [self.contract_value(symbol, pos.mkt_price - pos.avg_price, pos.size) for symbol, pos in self.positions.items()],
             0.0,
         )
 
-    def has_open_order(self, symbol: str) -> bool:
-        """Return True if there is at least one open order for the symbol, False otherwise"""
+    def open_order_symbols(self) -> set[str]:
+        """Return the set of symbols that have at least one open order"""
+        return {order.symbol for order in self.open_orders}
 
-        for order in self.orders:
-            if order.symbol == symbol and order.is_open:
-                return True
-        return False
-
-    def get_open_orders(self, symbol: str) -> list[Order]:
-        """Return a list of open orders for the provided symbol"""
-        return [order for order in self.orders if order.is_open and order.symbol == symbol]
+    @property
+    def open_orders(self) -> list[Order]:
+        """Return a list of all the open orders"""
+        return [order for order in self.orders if order.is_open]
 
     def get_position_size(self, symbol: str) -> Decimal:
         """Return the position size for a symbol"""
         pos = self.positions.get(symbol)
-        return pos.size if pos else Decimal(0)
-
-    def open_orders(self):
-        """Return a list with the open orders"""
-        return [order for order in self.orders if order.is_open]
+        return pos.size if pos else Decimal()
 
     def __repr__(self) -> str:
         p = [f"{v.size}@{k}" for k, v in self.positions.items()]
         p_str = ", ".join(p) or "none"
 
-        o = [f"{o.size}@{o.symbol}" for o in self.open_orders()]
+        o = [f"{o.size}@{o.symbol}" for o in self.open_orders]
         o_str = ", ".join(o) or "none"
 
         result = (
@@ -205,3 +208,25 @@ class Account:
             f"last update  : {self.last_update}"
         )
         return result
+
+    def _update(self, event: Event | None, price_type: str = "DEFAULT"):
+        """This is normally invoked by the broker during the sync.
+
+        This method will take care of:
+        - update the positions with the latest market prices as found in the event
+        - move recently closed orders from open_orders to closed_orders
+        """
+
+        # new_closed_orders = [order for order in account.open_orders if order.is_closed]
+        # if new_closed_orders:
+        #   self.closed_orders.add_all(new_closed_orders)
+        #   open_orders = [order for order in account.orders if order.is_open]
+
+        if not event:
+            return
+
+        self.last_update = event.time
+
+        for symbol, position in self.positions.items():
+            if price := event.get_price(symbol, price_type):
+                position.mkt_price = price

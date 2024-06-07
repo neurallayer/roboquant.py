@@ -39,19 +39,20 @@ class ActionTransformer(ABC):
 class OrderMaker(ActionTransformer):
     """Transforms an action into orders"""
 
-    def __init__(self, symbols: list[str]):
+    def __init__(self, symbols: list[str], order_valid_for=timedelta(days=3)):
         super().__init__()
         self.symbols = symbols
+        self.order_valid_for = order_valid_for
 
     def get_orders(self, actions: NDArray, event: Event, account: Account) -> list[Order]:
         orders = []
-        gtd = event.time + timedelta(days=3)
+        gtd = event.time + self.order_valid_for
         equity = account.equity()
         for symbol, fraction in zip(self.symbols, actions):
             price = event.get_price(symbol)
             if price:
                 rel_fraction = fraction / len(self.symbols)
-                contract_value = account.contract_value(symbol, Decimal(1), price)
+                contract_value = account.contract_value(symbol, price)
                 size = equity * rel_fraction / contract_value
                 order = Order(symbol, size, price, gtd)
                 orders.append(order)
@@ -76,7 +77,7 @@ class OrderWithLimitsMaker(ActionTransformer):
             price = event.get_price(symbol)
             if price:
                 rel_fraction = fraction / len(self.symbols)
-                contract_value = account.contract_value(symbol, Decimal(1), price)
+                contract_value = account.contract_value(symbol, price)
                 size = equity * rel_fraction / contract_value
                 limit = price * (1.0 + limit_perc/100.0)
                 order = Order(symbol, size, limit, gtd)
@@ -116,7 +117,7 @@ class Action2Orders(ActionTransformer):
             price = event.get_price(symbol)
             if price:
                 rel_fraction = fraction / len(self.symbols)
-                contract_value = account.contract_value(symbol, Decimal(1), price)
+                contract_value = account.contract_value(symbol, price)
                 size = equity * rel_fraction / contract_value
                 new_positions[symbol] = Decimal(size).quantize(Decimal(1))
             else:

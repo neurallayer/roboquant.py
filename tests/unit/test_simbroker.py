@@ -26,7 +26,7 @@ class TestSimbroker(unittest.TestCase):
 
         account = broker.sync()
         self.assertEqual(len(account.orders), 1)
-        self.assertEqual(len(account.open_orders()), 1)
+        self.assertEqual(len(account.open_orders), 1)
         order = account.orders[0]
         self.assertTrue(order.id is not None)
         self.assertTrue(order.is_open)
@@ -35,7 +35,7 @@ class TestSimbroker(unittest.TestCase):
         event = self._create_event()
         account = broker.sync(event)
         self.assertEqual(len(account.orders), 1)
-        self.assertEqual(len(account.open_orders()), 0)
+        self.assertEqual(len(account.open_orders), 0)
         self.assertEqual(len(account.positions), 1)
         order = account.orders[0]
         self.assertTrue(order.id is not None)
@@ -47,7 +47,7 @@ class TestSimbroker(unittest.TestCase):
         broker.place_orders([order])
         account = broker.sync(event)
         self.assertEqual(len(account.orders), 2)
-        self.assertEqual(len(account.open_orders()), 0)
+        self.assertEqual(len(account.open_orders), 0)
         self.assertEqual(len(account.positions), 1)
         self.assertEqual(Decimal(50), account.positions["AAPL"].size)
 

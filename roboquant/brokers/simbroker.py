@@ -4,7 +4,7 @@ import logging
 
 from roboquant.account import Account, Position
 from roboquant.brokers.broker import Broker, _update_positions
-from roboquant.event import Event, PriceItem, Quote
+from roboquant.event import Event, Quote
 from roboquant.order import Order, OrderStatus
 
 logger = logging.getLogger(__name__)
@@ -38,7 +38,6 @@ class SimBroker(Broker):
         self._create_orders: dict[str, Order] = {}
         self._account.cash = initial_deposit
         self._account.buying_power = initial_deposit
-        self._last_known_prices: dict[str, PriceItem] = {}
         self._order_id = 0
 
         self.slippage = slippage
@@ -52,14 +51,13 @@ class SimBroker(Broker):
         self._create_orders: dict[str, Order] = {}
         self._account.cash = self.initial_deposit
         self._account.buying_power = self.initial_deposit
-        self._last_known_prices = {}
         self._order_id = 0
 
     def _update_account(self, trx: _Trx):
         """Update a position and cash based on a new transaction"""
         acc = self._account
         symbol = trx.symbol
-        acc.cash -= acc.contract_value(symbol, trx.size, trx.price)
+        acc.cash -= acc.contract_value(symbol, trx.price, trx.size)
 
         size = acc.get_position_size(symbol)
 
@@ -182,33 +180,30 @@ class SimBroker(Broker):
                         if order.fill == order.size:
                             order.status = OrderStatus.FILLED
 
-    def _get_last_known_price(self, symbol):
-        item = self._last_known_prices.get(symbol)
-        return item.price(self.price_type) if item else None
-
     def _calculate_open_orders(self):
         reserved = 0.0
-        for order in self._account.open_orders():
+        for order in self._account.open_orders:
             old_pos = self._account.get_position_size(order.symbol)
             remaining = order.size - order.fill
 
             # only update reserved amount if remaining order size would increase position size
             if abs(old_pos + remaining) > abs(old_pos):
-                if price := (order.limit or self._get_last_known_price(order.symbol)):
-                    reserved += abs(self._account.contract_value(order.symbol, remaining, price))
+                reserved += abs(self._account.contract_value(order.symbol, order.limit, remaining))
 
         return reserved
 
     def _calculate_short_positions(self):
         reserved = 0.0
-        for symbol, position in self._account.positions.items():
-            if position.is_short:
-                short_value = self._account.contract_value(symbol, position.size, position.mkt_price)
-                reserved += abs(short_value)
+        for symbol, position in self._account.short_positions().items():
+            short_value = self._account.contract_value(symbol, position.mkt_price, position.size)
+            reserved += abs(short_value)
         return reserved
 
     def _calculate_buyingpower(self):
-        """Calculate buying power, based on the available cash minus the open orders and short positions"""
+        """Calculate buying power, based on:
+
+        buying_power = cash - open_orders - short_positions
+        """
         bp = self._account.cash
         bp -= self._calculate_open_orders()
         bp -= self._calculate_short_positions()
@@ -223,7 +218,6 @@ class SimBroker(Broker):
             acc.last_update = event.time
 
         prices = event.price_items if event else {}
-        self._last_known_prices.update(prices)
 
         if self.clean_up_orders:
             # only keep the open orders from the previous step
