@@ -4,7 +4,7 @@ import logging
 
 from roboquant.account import Account, Position
 from roboquant.brokers.broker import Broker, _update_positions
-from roboquant.event import Event, Quote
+from roboquant.event import Event, Quote, PriceItem
 from roboquant.order import Order, OrderStatus
 
 logger = logging.getLogger(__name__)
@@ -78,7 +78,7 @@ class SimBroker(Broker):
                 avg_price = (old_price * float(size) + trx.price * float(trx.size)) / (float(size + trx.size))
                 acc.positions[symbol] = Position(new_size, avg_price, trx.price)
 
-    def _get_execution_price(self, order, item) -> float:
+    def _get_execution_price(self, order: Order, item: PriceItem) -> float:
         """Return the execution price to use for an order based on the price item.
 
         The default implementation is a fixed slippage percentage based on the configured price_type.
@@ -110,7 +110,7 @@ class SimBroker(Broker):
             return False
         return self._account.last_update >= order.gtd
 
-    def _get_fill(self, order, price) -> Decimal:
+    def _get_fill(self, order: Order, price: float) -> Decimal:
         """Return the fill for the order given the provided price.
 
         The default implementation is:
@@ -127,7 +127,7 @@ class SimBroker(Broker):
 
         return Decimal(0)
 
-    def place_orders(self, orders):
+    def place_orders(self, orders: list[Order]):
         """Place new orders at this broker. The order gets assigned a unique order-id if it hasn't one already.
 
         Orders that are placed that have already an order-id are either update- or cancellation-orders.
@@ -163,7 +163,7 @@ class SimBroker(Broker):
 
         self._modify_orders = []
 
-    def _process_create_orders(self, prices):
+    def _process_create_orders(self, prices: dict[str, PriceItem]):
         for order in self._create_orders.values():
             if order.is_closed:
                 continue
@@ -220,8 +220,8 @@ class SimBroker(Broker):
         prices = event.price_items if event else {}
 
         if self.clean_up_orders:
-            # only keep the open orders from the previous step
-            # this improves performance for large back tests
+            # only keep the open orders from the previous step, remove the closed orders
+            # this improves performance for large back tests with many orders
             self._create_orders = {order_id: order for order_id, order in self._create_orders.items() if order.is_open}
 
         self._process_modify_order()
