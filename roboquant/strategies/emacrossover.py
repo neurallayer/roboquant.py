@@ -19,7 +19,7 @@ class EMACrossover(SignalStrategy):
         for symbol, price in event.get_prices(self.price_type).items():
 
             if symbol not in self._history:
-                self._history[symbol] = self._Calculator(self.fast, self.slow, price)
+                self._history[symbol] = self._Calculator(self.fast, self.slow, price=price)
             else:
                 calculator = self._history[symbol]
                 old_rating = calculator.is_above()
@@ -37,7 +37,7 @@ class EMACrossover(SignalStrategy):
 
         __slots__ = "momentum1", "momentum2", "price1", "price2", "step"
 
-        def __init__(self, momentum1, momentum2, price):
+        def __init__(self, momentum1: float, momentum2: float, price: float):
             self.momentum1 = momentum1
             self.momentum2 = momentum2
             self.price1 = price
@@ -45,6 +45,7 @@ class EMACrossover(SignalStrategy):
             self.step = 0
 
         def is_above(self):
+            """Return True is the first momentum is above the second momentum, False otherwise"""
             return self.price1 > self.price2
 
         def add_price(self, price: float):
@@ -53,36 +54,3 @@ class EMACrossover(SignalStrategy):
             self.price2 = m2 * self.price2 + (1.0 - m2) * price
             self.step += 1
             return self.step
-
-
-class _Calculator2:
-
-    __slots__ = "entries", "step"
-
-    def __init__(self, *momentums, price):
-        self.entries = [[m, price] for m in momentums]
-        self.step = 0
-
-    def is_above(self):
-        prev = None
-        for _, p in self.entries:
-            if prev is not None and p <= prev:
-                return False
-            prev = p
-        return True
-
-    def is_below(self):
-        prev = None
-        for _, p in self.entries:
-            if prev is not None and p >= prev:
-                return False
-            prev = p
-        return True
-
-    def add_price(self, price: float):
-        for entry in self.entries:
-            m, p = entry
-            entry[1] = m * p + (1 - m) * price
-
-        self.step += 1
-        return self.step
