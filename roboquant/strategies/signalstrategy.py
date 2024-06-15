@@ -9,8 +9,8 @@ from roboquant.event import Event
 from roboquant.order import Order
 from roboquant.strategies.signal import Signal
 from roboquant.strategies.strategy import Strategy
-from ..account import Account
-from ..event import PriceItem
+from roboquant.account import Account
+
 
 logger = logging.getLogger(__name__)
 
@@ -53,7 +53,7 @@ class _Context:
 
     def log(self, rule: str, **kwargs):
         if logger.isEnabledFor(logging.INFO):
-            extra = ' '.join(f"{k}={v}" for k, v in kwargs.items())
+            extra = " ".join(f"{k}={v}" for k, v in kwargs.items())
             logger.info(
                 "Discarded signal because %s [symbol=%s rating=%s type=%s position=%s %s]",
                 rule,
@@ -66,6 +66,7 @@ class _Context:
 
 
 class SignalStrategy(Strategy):
+    # pylint: disable=too-many-instance-attributes
     """Implementation of a Stategy that has configurable rules to modify which signals are converted into orders.
     This implementation will not generate orders if there is not a price in the event for the underlying symbol.
 
@@ -79,7 +80,8 @@ class SignalStrategy(Strategy):
     - max_order_perc: the max percentage of the equity to allocate to a new order, default is 0.05 (5%)
     - min_order_perc: the min percentage of the equity to allocate to a new order, default is 0.02 (2%)
     - shorting: allow orders that could result in a short position, default is false
-    - price_type: the price type to use when determining order value, for example "CLOSE". Default is "DEFAULT"
+    - ask_price_type: the price type to use when determining order value, for example "CLOSE". Default is "DEFAULT"
+    - bid_price_type: the price type to use when determining order value, for example "CLOSE". Default is "DEFAULT"
 
     It might be sometimes challenging to understand wby a signal isn't converted into an order. The flex-trader logs
     at INFO level when certain rules have been fired.
@@ -98,9 +100,11 @@ class SignalStrategy(Strategy):
         max_order_perc=0.05,
         min_order_perc=0.02,
         max_position_perc=0.1,
-        price_type="DEFAULT",
+        ask_price_type="DEFAULT",
+        bid_price_type="DEFAULT",
         shuffle_signals=False,
-        order_valid_for=timedelta(days=3)
+        order_valid_for=timedelta(days=3),
+        limit_perc=0.01,
     ) -> None:
         super().__init__()
         self.one_order_only = one_order_only
@@ -110,9 +114,11 @@ class SignalStrategy(Strategy):
         self.max_order_perc = max_order_perc
         self.min_order_perc = min_order_perc
         self.max_position_perc = max_position_perc
-        self.price_type = price_type
+        self.ask_price_type = ask_price_type
+        self.bid_price_type = bid_price_type
         self.shuffle_signals = shuffle_signals
         self.order_valid_for = order_valid_for
+        self.limit_perc = limit_perc
 
     def _get_order_size(self, rating: float, contract_price: float, max_order_value: float) -> Decimal:
         """Return the order size"""
@@ -122,9 +128,7 @@ class SignalStrategy(Strategy):
 
     @abstractmethod
     def create_signals(self, event: Event) -> list[Signal]:
-        """Create a signal for zero or more symbols. Signals are returned as a dictionary with key being the symbol and
-        the value being the Signal.
-        """
+        """Create signals for zero or more symbols. Signals are returned as a list."""
         ...
 
     def create_orders(self, event: Event, account: Account) -> list[Order]:
@@ -163,7 +167,7 @@ class SignalStrategy(Strategy):
                 ctx.log("no price is available")
                 continue
 
-            price = item.price(self.price_type)
+            price = item.price(self.ask_price_type) if signal.is_buy else item.price(self.bid_price_type)
 
             if not self.shorting and change == _PositionChange.ENTRY_SHORT:
                 ctx.log("no shorting")
@@ -179,7 +183,7 @@ class SignalStrategy(Strategy):
                 if rounded_size.is_zero():
                     ctx.log("cannot exit with order size zero")
                     continue
-                new_orders = self._get_orders(symbol, rounded_size, item, signal, event.time)
+                new_orders = self._get_orders(symbol, rounded_size, price, signal, event.time)
                 orders += new_orders
             else:
                 if available < 0:
@@ -222,20 +226,18 @@ class SignalStrategy(Strategy):
                     )
                     continue
 
-                new_orders = self._get_orders(symbol, order_size, item, signal, event.time)
+                new_orders = self._get_orders(symbol, order_size, price, signal, event.time)
                 if new_orders:
                     orders += new_orders
                     available -= order_value
 
         return orders
 
-    def _get_orders(self, symbol: str, size: Decimal, item: PriceItem, signal: Signal, time: datetime) -> list[Order]:
+    def _get_orders(self, symbol: str, size: Decimal, price: float, signal: Signal, time: datetime) -> list[Order]:
         # pylint: disable=unused-argument
-        """Return zero or more orders for the provided symbol and size.
+        """Return zero or more orders for the provided symbol and size."""
 
-        Default is a MarketOrder. Overwrite this method to create different order types.
-        """
-        limit = item.price(self.price_type)
+        limit = price * (1.0 + self.limit_perc) if size > 0 else price * (1.0 - self.limit_perc)
         gtd = time + self.order_valid_for
         return [Order(symbol, size, limit, gtd)]
 
