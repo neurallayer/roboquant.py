@@ -24,10 +24,12 @@ class RandomWalk(HistoricFeed):
         start_price_min: float = 50.0,
         start_price_max: float = 200.0,
         volume: float = 1000.0,
-        stdev=0.01,
+        price_dev=0.01,
+        spread_dev=0.001,
         seed=None,
         symbol_len=4,
     ):
+        # pylint: disable=too-many-locals
         super().__init__()
         rnd = np.random.default_rng(seed)
         symbols = self.__get_symbols(rnd, n_symbols, symbol_len)
@@ -36,7 +38,6 @@ class RandomWalk(HistoricFeed):
         start_date = start_date if isinstance(start_date, datetime) else datetime.fromisoformat(start_date)
         start_date = start_date.astimezone(timezone.utc)
         timeline = [start_date + frequency * i for i in range(n_prices)]
-        self.stdev = stdev
 
         match item_type:
             case "bar": item_gen = self.__get_bar
@@ -45,9 +46,9 @@ class RandomWalk(HistoricFeed):
             case _: raise ValueError("unsupported item_type", item_type)
 
         for symbol in symbols:
-            prices = self.__price_path(rnd, n_prices, stdev, start_price_min, start_price_max)
+            prices = self.__price_path(rnd, n_prices, price_dev, start_price_min, start_price_max)
             for i in range(n_prices):
-                item = item_gen(symbol, prices[i], volume, stdev/2.0)
+                item = item_gen(symbol, prices[i], volume, spread_dev)
                 self._add_item(timeline[i], item)
 
     @staticmethod
@@ -55,15 +56,15 @@ class RandomWalk(HistoricFeed):
         return Trade(symbol, price, volume)
 
     @staticmethod
-    def __get_bar(symbol, price, volume, spread):
-        high = price * (1.0 + abs(random.gauss(mu=0.0, sigma=spread)))
-        low = price * (1.0 - abs(random.gauss(mu=0.0, sigma=spread)))
+    def __get_bar(symbol, price, volume, spread_dev):
+        high = price * (1.0 + abs(random.gauss(mu=0.0, sigma=spread_dev)))
+        low = price * (1.0 - abs(random.gauss(mu=0.0, sigma=spread_dev)))
         close = random.uniform(low, high)
         return Bar(symbol, array("f", [price, high, low, close, volume]))
 
     @staticmethod
-    def __get_quote(symbol, price, volume, spread):
-        spread = abs(random.gauss(mu=0.0, sigma=spread)) * price / 2.0
+    def __get_quote(symbol, price, volume, spread_dev):
+        spread = abs(random.gauss(mu=0.0, sigma=spread_dev)) * price / 2.0
         ask = price + spread
         bid = price - spread
         return Quote(symbol, array("f", [price, ask, volume, bid, volume]))
