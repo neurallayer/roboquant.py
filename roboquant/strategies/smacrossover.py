@@ -2,11 +2,12 @@ import collections
 
 import numpy as np
 
-from roboquant.strategies.signal import Signal
-from roboquant.strategies.signalstrategy import SignalStrategy
+from roboquant.account import Account
+from roboquant.event import Event
+from roboquant.strategies.basestrategy import BaseStrategy
 
 
-class SMACrossover(SignalStrategy):
+class SMACrossover(BaseStrategy):
     """SMA Crossover Strategy"""
 
     def __init__(self, min_period: int = 13, max_period: int = 26):
@@ -16,22 +17,22 @@ class SMACrossover(SignalStrategy):
         self.min_period = min_period
         self.max_period = max_period
 
-    def __get_signal(self, symbol: str) -> None | Signal:
+    def _process(self, symbol: str):
         prices = np.asarray(self._history[symbol])
 
         # SMA(MIN) > SMA(MAX)
         new_rating: bool = prices[-self.min_period:].mean() > prices[-self.max_period:].mean()
-        result = None
         if symbol in self._prev_ratings:
             prev_rating = self._prev_ratings[symbol]
             if prev_rating != new_rating:
-                result = Signal.buy(symbol) if new_rating else Signal.sell(symbol)
+                if new_rating:
+                    self.add_buy_order(symbol)
+                else:
+                    self.add_sell_order(symbol)
 
         self._prev_ratings[symbol] = new_rating
-        return result
 
-    def create_signals(self, event):
-        signals: list[Signal] = []
+    def process(self, event: Event, account: Account):
         for (symbol, item) in event.price_items.items():
             h = self._history.get(symbol)
 
@@ -42,7 +43,4 @@ class SMACrossover(SignalStrategy):
 
             h.append(item.price())
             if len(h) == h.maxlen:
-                if signal := self.__get_signal(symbol):
-                    signals.append(signal)
-
-        return signals
+                self._process(symbol)

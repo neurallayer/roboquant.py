@@ -1,19 +1,20 @@
+import logging
 from abc import abstractmethod
 from collections import deque
 from datetime import datetime
-import logging
+
 import numpy as np
+import torch
 from numpy.typing import NDArray
 from stable_baselines3.common.policies import BasePolicy
-import torch
 from torch.utils.data import DataLoader, Dataset
 
+from roboquant.account import Account
 from roboquant.event import Event
 from roboquant.ml.envs import ActionTransformer, StrategyEnv
 from roboquant.ml.features import Feature, NormalizeFeature
 from roboquant.order import Order
-from roboquant.strategies.signal import Signal
-from roboquant.strategies.signalstrategy import SignalStrategy
+from roboquant.strategies.basestrategy import BaseStrategy
 from roboquant.strategies.strategy import Strategy
 
 logger = logging.getLogger(__name__)
@@ -45,7 +46,7 @@ class SB3PolicyStrategy(Strategy):
         self.obs_feature.reset()
 
 
-class FeatureStrategy(SignalStrategy):
+class FeatureStrategy(BaseStrategy):
     """Abstract base class for strategies wanting to use features
     for their input.
     """
@@ -57,17 +58,16 @@ class FeatureStrategy(SignalStrategy):
         self._hist = deque(maxlen=history)
         self._dtype = dtype
 
-    def create_signals(self, event: Event):
+    def process(self, event: Event, account: Account):
         h = self._hist
         row = self.input_feature.calc(event, None)
         h.append(row)
         if len(h) == h.maxlen:
             x = np.asarray(h, dtype=self._dtype)
-            return self.predict(x, event.time)
-        return []
+            self.predict(x, event.time)
 
     @abstractmethod
-    def predict(self, x: NDArray, time: datetime) -> list[Signal]: ...
+    def predict(self, x: NDArray, time: datetime): ...
 
 
 class SequenceDataset(Dataset):
@@ -128,11 +128,9 @@ class RNNStrategy(FeatureStrategy):
 
             logger.info("prediction p=%s time=%s", p, time)
             if p >= self.buy_pct:
-                return [Signal.buy(self.symbol)]
+                self.add_buy_order(self.symbol)
             if p <= self.sell_pct:
-                return [Signal.sell(self.symbol)]
-
-        return []
+                self.add_sell_order(self.symbol)
 
     def _get_dataloaders(self, x, y, prediction: int, validation_split: float, batch_size: int):
         # what is the border between train- and validation-data

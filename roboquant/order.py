@@ -2,7 +2,7 @@ from copy import copy
 from dataclasses import dataclass
 from datetime import datetime
 from decimal import Decimal
-from enum import Flag, auto
+from enum import Enum, Flag, auto
 from typing import Any
 
 
@@ -36,6 +36,29 @@ class OrderStatus(Flag):
 
     def __repr__(self):  # type: ignore
         return self.name
+
+
+class OrderType(Enum):
+
+    BUY = auto()
+    SELL = auto()
+
+    def is_closing(self, pos_size: Decimal):
+        if pos_size.is_zero():
+            return False
+        if self.is_buy and pos_size < 0:
+            return True
+        if self.is_sell and pos_size > 0:
+            return True
+        return False
+
+    @property
+    def is_buy(self):
+        return self == OrderType.BUY
+
+    @property
+    def is_sell(self):
+        return self == OrderType.SELL
 
 
 @dataclass(slots=True)
@@ -92,7 +115,7 @@ class Order:
         result.size = Decimal(0)
         return result
 
-    def update(self, size: Decimal | str | int | float | None = None, limit: float | None = None) -> "Order":
+    def modify(self, size: Decimal | str | int | float | None = None, limit: float | None = None) -> "Order":
         """Create an update-order. You can update the size and/or limit of an order. The returned order has the same id
         as the original order.
 
@@ -122,6 +145,11 @@ class Order:
     def is_cancellation(self):
         """Return True if this is a cancellation order, False otherwise"""
         return self.size.is_zero()
+
+    @property
+    def type(self) -> OrderType:
+        """Return the order type"""
+        return OrderType.BUY if self.is_buy else OrderType.SELL
 
     @property
     def is_buy(self):

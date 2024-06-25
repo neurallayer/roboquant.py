@@ -1,13 +1,12 @@
-from typing import Literal
-from itertools import groupby
-from statistics import mean
+from typing import List, Literal
 
+from roboquant.account import Account
 from roboquant.event import Event
-from roboquant.strategies.signal import Signal
-from roboquant.strategies.signalstrategy import SignalStrategy
+from roboquant.order import Order
+from roboquant.strategies.strategy import Strategy
 
 
-class MultiStrategy(SignalStrategy):
+class MultiStrategy(Strategy):
     """Combine one or more signal strategies. The MultiStrategy provides additional control on how to handle conflicting
     signals for the same symbols via the signal_filter:
 
@@ -17,31 +16,28 @@ class MultiStrategy(SignalStrategy):
     - none: return all signals. This is also the default.
     """
 
-    def __init__(self, *strategies: SignalStrategy, signal_filter: Literal["last", "first", "avg", "none"] = "none"):
+    def __init__(
+        self,
+        *strategies: Strategy,
+        order_filter: Literal["last", "first", "none"] = "none"
+    ):
         super().__init__()
         self.strategies = list(strategies)
-        self.signal_filter = signal_filter
+        self.filter = order_filter
 
-    def create_signals(self, event: Event):
-        signals: list[Signal] = []
+    def create_orders(self, event: Event, account: Account) -> List[Order]:
+        orders: list[Order] = []
         for strategy in self.strategies:
-            signals += strategy.create_signals(event)
+            orders += strategy.create_orders(event, account)
 
-        match self.signal_filter:
+        match self.filter:
             case "none":
-                return signals
+                return orders
             case "last":
-                s = {s.symbol: s for s in signals}
+                s = {s.symbol: s for s in orders}
                 return list(s.values())
             case "first":
-                s = {s.symbol: s for s in reversed(signals)}
+                s = {s.symbol: s for s in reversed(orders)}
                 return list(s.values())
-            case "avg":
-                result = []
-                g = groupby(signals, lambda x: x.symbol)
-                for symbol, v in g:
-                    rating = mean(s.rating for s in v)
-                    result.append(Signal(symbol, rating))
-                return result
 
         raise ValueError("unsupported signal filter")

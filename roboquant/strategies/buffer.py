@@ -1,8 +1,11 @@
 from array import array
+from collections import UserDict
 from typing import Any
 
 import numpy as np
 from numpy.typing import NDArray
+
+from roboquant.event import Bar, Event
 
 
 class NumpyBuffer:
@@ -73,3 +76,27 @@ class OHLCVBuffer(NumpyBuffer):
     def volume(self) -> NDArray:
         """Return the volumes"""
         return self._get(4)
+
+
+class OHLCVBuffers(UserDict[str, OHLCVBuffer]):
+
+    def __init__(self, size: int):
+        super().__init__()
+        self.size = size
+
+    def add_event(self, event: Event) -> set[str]:
+        """Add a new event and return all the symbols that have been added and are ready to be processed"""
+        symbols: set[str] = set()
+        for item in event.items:
+            if isinstance(item, Bar):
+                symbol = item.symbol
+                if symbol not in self:
+                    self[symbol] = OHLCVBuffer(self.size)
+                ohlcv = self[symbol]
+                ohlcv.append(item.ohlcv)
+                if ohlcv.is_full():
+                    symbols.add(symbol)
+        return symbols
+
+    def ready(self):
+        return {symbol for symbol, ohlcv in self.items() if ohlcv.is_full()}

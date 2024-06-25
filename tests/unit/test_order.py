@@ -20,7 +20,7 @@ class TestOrder(unittest.TestCase):
         self.assertIn("tif", info)
 
         order.id = "test"
-        update = order.update(size=50)
+        update = order.modify(size=50)
         info = update.info
         self.assertIn("tif", info)
 
@@ -28,7 +28,7 @@ class TestOrder(unittest.TestCase):
         order = Order("AAPL", 100, 120.0, self.gtd)
         order.id = "update1"
 
-        update_order = order.update(size=50)
+        update_order = order.modify(size=50)
         self.assertEqual(Decimal(100), order.size)
         self.assertEqual(Decimal(50), update_order.size)
         self.assertEqual(order.id, update_order.id)

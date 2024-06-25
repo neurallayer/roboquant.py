@@ -34,7 +34,7 @@ class TestIBKR(unittest.TestCase):
         self.assertEqual(symbol, account.orders[0].symbol)
 
         # Update an order
-        update_order = order.update(size=5, limit=160.0)
+        update_order = order.modify(size=5, limit=160.0)
         broker.place_orders([update_order])
         time.sleep(5)
         account = broker.sync()

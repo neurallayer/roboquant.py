@@ -1,4 +1,3 @@
-from abc import abstractmethod
 from datetime import datetime, timedelta
 import logging
 from decimal import Decimal
@@ -7,8 +6,6 @@ import random
 
 from roboquant.event import Event
 from roboquant.order import Order
-from roboquant.strategies.signal import Signal
-from roboquant.strategies.strategy import Strategy
 from roboquant.account import Account
 
 
@@ -47,7 +44,7 @@ class _PositionChange(Flag):
 
 class _Context:
 
-    def __init__(self, signal: Signal, position: Decimal) -> None:
+    def __init__(self, signal, position: Decimal) -> None:
         self.signal = signal
         self.position = position
 
@@ -65,7 +62,7 @@ class _Context:
             )
 
 
-class SignalStrategy(Strategy):
+class _FlexTrader:
     # pylint: disable=too-many-instance-attributes
     """Implementation of a Stategy that has configurable rules to modify which signals are converted into orders.
     This implementation will not generate orders if there is not a price in the event for the underlying symbol.
@@ -126,15 +123,8 @@ class SignalStrategy(Strategy):
         rounded_size = round(size, self.size_digits)
         return rounded_size
 
-    @abstractmethod
-    def create_signals(self, event: Event) -> list[Signal]:
-        """Create signals for zero or more symbols. Signals are returned as a list."""
-        ...
-
-    def create_orders(self, event: Event, account: Account) -> list[Order]:
+    def create_orders(self, signals, event: Event, account: Account) -> list[Order]:
         # pylint: disable=too-many-branches,too-many-statements,too-many-locals
-        signals = self.create_signals(event)
-
         if not signals:
             return []
 
@@ -233,7 +223,7 @@ class SignalStrategy(Strategy):
 
         return orders
 
-    def _get_orders(self, symbol: str, size: Decimal, price: float, signal: Signal, time: datetime) -> list[Order]:
+    def _get_orders(self, symbol: str, size: Decimal, price: float, signal, time: datetime) -> list[Order]:
         # pylint: disable=unused-argument
         """Return zero or more orders for the provided symbol and size."""
 

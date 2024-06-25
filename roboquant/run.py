@@ -14,7 +14,7 @@ def run(
     broker: Broker | None = None,
     timeframe: Timeframe | None = None,
     capacity: int = 10,
-    heartbeat_timeout: float | None = None,
+    heartbeat_timeout: float | None = None
 ) -> Account:
     """Start a new run.
 
