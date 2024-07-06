@@ -3,7 +3,7 @@ from decimal import Decimal
 import logging
 
 from roboquant.event import Event
-from roboquant.order import Order, OrderType
+from roboquant.order import Order
 from roboquant.strategies.strategy import Strategy
 from roboquant.account import Account
 
@@ -51,25 +51,25 @@ class BaseStrategy(Strategy):
         return abs(self.account.contract_value(symbol, limit, size))
 
     def add_buy_order(self, symbol: str, limit: float | None = None):
-        if limit := limit or self._get_limit(symbol, OrderType.BUY):
+        if limit := limit or self._get_limit(symbol, True):
             if size := self._get_size(symbol, limit):
                 return self.add_order(symbol, size, limit)
         return False
 
     def add_exit_order(self, symbol: str, limit: float | None = None):
-        if limit := limit or self._get_limit(symbol, OrderType.BUY):
-            if size := - self.account.get_position_size(symbol):
+        if size := - self.account.get_position_size(symbol):
+            if limit := limit or self._get_limit(symbol, size > 0):
                 return self.add_order(symbol, size, limit)
         return False
 
     def add_sell_order(self, symbol: str, limit: float | None = None):
-        if limit := limit or self._get_limit(symbol, OrderType.SELL):
+        if limit := limit or self._get_limit(symbol, False):
             if size := self._get_size(symbol, limit) * -1:
                 return self.add_order(symbol, size, limit)
         return False
 
-    def _get_limit(self, symbol: str, order_type: OrderType) -> float | None:
-        price_type = self.buy_price if order_type.is_buy else self.sell_price
+    def _get_limit(self, symbol: str, is_buy: bool) -> float | None:
+        price_type = self.buy_price if is_buy else self.sell_price
         limit_price = self.event.get_price(symbol, price_type)
         return round(limit_price, 2) if limit_price else None
 

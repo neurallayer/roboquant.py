@@ -1,31 +1,7 @@
 from copy import copy
 from dataclasses import dataclass
 from decimal import Decimal
-from enum import Enum, auto
 from typing import Any
-
-
-class OrderType(Enum):
-
-    BUY = auto()
-    SELL = auto()
-
-    def is_closing(self, pos_size: Decimal):
-        if pos_size.is_zero():
-            return False
-        if self.is_buy and pos_size < 0:
-            return True
-        if self.is_sell and pos_size > 0:
-            return True
-        return False
-
-    @property
-    def is_buy(self):
-        return self == OrderType.BUY
-
-    @property
-    def is_sell(self):
-        return self == OrderType.SELL
 
 
 @dataclass(slots=True)
@@ -52,7 +28,6 @@ class Order:
         assert not self.size.is_zero(), "Cannot create a new order with size is zero"
 
         self.limit = limit
-
         self.id: str | None = None
         self.fill = Decimal(0)
         self.info = kwargs

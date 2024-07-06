@@ -27,12 +27,10 @@ class ActionTransformer(ABC):
     """Transforms an action into orders"""
 
     @abstractmethod
-    def get_orders(self, actions: NDArray, event: Event, account: Account) -> list[Order]:
-        ...
+    def get_orders(self, actions: NDArray, event: Event, account: Account) -> list[Order]: ...
 
     @abstractmethod
-    def get_action_space(self) -> Space:
-        ...
+    def get_action_space(self) -> Space: ...
 
 
 class OrderMaker(ActionTransformer):
@@ -46,12 +44,15 @@ class OrderMaker(ActionTransformer):
     def get_orders(self, actions: NDArray, event: Event, account: Account) -> list[Order]:
         orders = []
         equity = account.equity()
+        symbols = {o.symbol for o in account.orders}
         for symbol, fraction in zip(self.symbols, actions):
+            if symbol in symbols:
+                continue
             price = event.get_price(symbol)
             if price:
                 rel_fraction = fraction / len(self.symbols)
                 contract_value = account.contract_value(symbol, price)
-                size = equity * rel_fraction / contract_value
+                size = round(equity * rel_fraction / contract_value)
                 order = Order(symbol, size, price)
                 orders.append(order)
         return orders
@@ -70,19 +71,25 @@ class OrderWithLimitsMaker(ActionTransformer):
     def get_orders(self, actions: NDArray, event: Event, account: Account) -> list[Order]:
         orders = []
         equity = account.equity()
+        bp = account.buying_power
         for symbol, (fraction, limit_perc) in zip(self.symbols, actions.reshape(-1, 2)):
             price = event.get_price(symbol)
             if price:
-                rel_fraction = fraction / len(self.symbols)
+                rel_fraction = fraction / (10 * len(self.symbols))
                 contract_value = account.contract_value(symbol, price)
-                size = equity * rel_fraction / contract_value
-                limit = price * (1.0 + limit_perc/100.0)
-                order = Order(symbol, size, limit)
-                orders.append(order)
+                size = round(equity * rel_fraction / contract_value)
+                limit = price * (1.0 + limit_perc / 100.0)
+                required = abs(account.contract_value(symbol, limit, size))
+                if size and required < bp:
+                    if order := next((o for o in account.orders if o.symbol == symbol), None):
+                        orders.append(order.cancel())
+                    new_order = Order(symbol, size, limit)
+                    orders.append(new_order)
+                    bp -= required
         return orders
 
     def get_action_space(self) -> Space:
-        return spaces.Box(-1.0, 1.0, shape=(len(self.symbols)*2,), dtype=np.float32)
+        return spaces.Box(-1.0, 1.0, shape=(len(self.symbols) * 2,), dtype=np.float32)
 
 
 class Action2Orders(ActionTransformer):
@@ -110,8 +117,7 @@ class Action2Orders(ActionTransformer):
         new_positions = {}
         equity = account.equity()
         for symbol, fraction in zip(self.symbols, actions):
-            price = event.get_price(symbol)
-            if price:
+            if price := event.get_price(symbol):
                 rel_fraction = fraction / len(self.symbols)
                 contract_value = account.contract_value(symbol, price)
                 size = equity * rel_fraction / contract_value
@@ -134,10 +140,10 @@ class TradingEnv(gym.Env):
         self,
         feed: Feed,
         obs_feature: Feature,
-        reward_feature:  Feature,
+        reward_feature: Feature,
         action_transformer: ActionTransformer,
         broker: SimBroker | None = None,
-        timeframe: Timeframe | None = None
+        timeframe: Timeframe | None = None,
     ):
         self.broker: SimBroker = broker or SimBroker()
         self.channel = EventChannel()
