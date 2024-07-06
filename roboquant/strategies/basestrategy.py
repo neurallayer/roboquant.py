@@ -1,5 +1,4 @@
 from abc import abstractmethod
-from datetime import datetime, timedelta
 from decimal import Decimal
 import logging
 
@@ -13,6 +12,7 @@ logger = logging.getLogger(__name__)
 
 
 class BaseStrategy(Strategy):
+    # pylint: disable=too-many-instance-attributes
     """Simplified version of strategy where you only have to implement the logic to generate signals and
     can leave the logic for orders to a trader.
     """
@@ -27,7 +27,6 @@ class BaseStrategy(Strategy):
         self.order_value_perc = 0.1
         self.buy_price = "DEFAULT"
         self.sell_price = "DEFAULT"
-        self.order_valid_for = timedelta(days=3)
         self.fractional_order_digits = 0
         self.short_selling = False
 
@@ -47,13 +46,9 @@ class BaseStrategy(Strategy):
 
         pos_size = self.account.get_position_size(symbol)
         if order_type.is_closing(pos_size) and abs(size) > abs(pos_size):
-            return - pos_size
+            return -pos_size
 
         return size if order_type.is_buy else size * -1
-
-    def _get_gtc(self) -> datetime:
-        """return the Good Till Cancelled datetime to be used for an order"""
-        return self.event.time + self.order_valid_for
 
     def _required_buyingpower(self, symbol: str, size: Decimal, limit: float) -> float:
         pos_size = self.account.get_position_size(symbol)
@@ -62,40 +57,42 @@ class BaseStrategy(Strategy):
         return abs(self.account.contract_value(symbol, limit, size))
 
     def add_buy_order(self, symbol: str, limit: float | None = None):
-        self.add_order(symbol, OrderType.BUY, limit)
+        if limit := limit or self._get_limit(symbol, OrderType.BUY):
+            if size := self._get_size(symbol, OrderType.BUY, limit):
+                return self.add_order(symbol, size, limit)
+        return False
+
+    def add_exit_order(self, symbol: str, limit: float | None = None):
+        if limit := limit or self._get_limit(symbol, OrderType.BUY):
+            if size := - self.account.get_position_size(symbol):
+                return self.add_order(symbol, size, limit)
+        return False
 
     def add_sell_order(self, symbol: str, limit: float | None = None):
-        self.add_order(symbol, OrderType.SELL, limit)
+        if limit := limit or self._get_limit(symbol, OrderType.SELL):
+            if size := self._get_size(symbol, OrderType.SELL, limit):
+                return self.add_order(symbol, size, limit)
+        return False
 
-    def get_limit_price(self, symbol: str, order_type: OrderType):
+    def _get_limit(self, symbol: str, order_type: OrderType) -> float | None:
         price_type = self.buy_price if order_type.is_buy else self.sell_price
         limit_price = self.event.get_price(symbol, price_type)
         return round(limit_price, 2) if limit_price else None
 
-    def add_order(self, symbol: str, order_type: OrderType, limit: float | None) -> bool:
-        if not self.short_selling and order_type.is_sell and self.account.get_position_size(symbol) <= 0:
+    def add_order(self, symbol: str, size: Decimal, limit: float) -> bool:
+        if not self.short_selling and size < 0 and self.account.get_position_size(symbol) <= 0:
             logger.info("no short selling allowed")
             return False
 
-        limit = limit or self.get_limit_price(symbol, order_type)
-        if not limit:
-            logger.info("couldn't determine limit for order")
+        bp = self._required_buyingpower(symbol, size, limit)
+        if bp and bp > self.buying_power:
+            logger.info("not enough buying power remaining")
             return False
 
-        size = self._get_size(symbol, order_type, limit)
-        if size:
-            bp = self._required_buyingpower(symbol, size, limit)
-            if bp and bp > self.buying_power:
-                logger.info("not enough buying power remaining")
-                return False
-
-            self.buying_power -= bp
-            order = Order(symbol, size, limit)
-            self.orders.append(order)
-            return True
-
-        logger.info("size is zero")
-        return False
+        self.buying_power -= bp
+        order = Order(symbol, size, limit)
+        self.orders.append(order)
+        return True
 
     def cancel_open_orders(self, *symbols):
         for order in self.account.orders:

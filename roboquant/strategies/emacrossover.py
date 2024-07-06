@@ -4,7 +4,7 @@ from roboquant.strategies.basestrategy import BaseStrategy
 
 
 class EMACrossover(BaseStrategy):
-    """EMA Crossover Strategy"""
+    """EMA Crossover Strategy that server as an example strategy."""
 
     def __init__(self, fast_period=13, slow_period=26, smoothing=2.0, price_type="DEFAULT"):
         super().__init__()
@@ -30,7 +30,7 @@ class EMACrossover(BaseStrategy):
                         if new_rating:
                             self.add_buy_order(symbol)
                         else:
-                            self.add_sell_order(symbol)
+                            self.add_exit_order(symbol)
 
     class _Calculator:
 

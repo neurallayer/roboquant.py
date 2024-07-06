@@ -1,4 +1,3 @@
-from datetime import datetime, timedelta, timezone
 import unittest
 from alpaca.data.timeframe import TimeFrame
 
@@ -41,8 +40,7 @@ class TestAlpaca(unittest.TestCase):
         account = broker.sync()
         self.assertTrue(account.buying_power > 0)
         self.assertTrue(account.equity() > 0)
-        gtd = datetime.now(timezone.utc) + timedelta(days=10)
-        order = Order("TSLA", 1, 100.0, gtd)
+        order = Order("TSLA", 1, 100.0)
         broker.place_orders([order])
         account = broker.sync()
 

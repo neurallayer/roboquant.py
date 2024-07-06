@@ -1,10 +1,9 @@
-from datetime import datetime, timezone, timedelta
 import logging
 import time
 import unittest
 from decimal import Decimal
 
-from roboquant import OrderStatus, Order
+from roboquant import Order
 from roboquant.brokers.ibkr import IBKRBroker
 
 
@@ -22,15 +21,13 @@ class TestIBKR(unittest.TestCase):
         self.assertEqual(len(account.orders), 0)
 
         # Place an order
-        gtd = datetime.now(timezone.utc) + timedelta(days=10)
-        order = Order(symbol, 10, 150.0, gtd)
+        order = Order(symbol, 10, 150.0)
         broker.place_orders([order])
         time.sleep(5)
         self.assertEqual(len(account.orders), 0)
         account = broker.sync()
         self.assertEqual(len(account.orders), 1)
         self.assertEqual(account.orders[0].size, Decimal(10))
-        self.assertTrue(account.orders[0].is_open)
         self.assertEqual(symbol, account.orders[0].symbol)
 
         # Update an order
@@ -41,18 +38,13 @@ class TestIBKR(unittest.TestCase):
         self.assertEqual(len(account.orders), 1)
         self.assertEqual(account.orders[0].size, Decimal(5))
         self.assertEqual(account.orders[0].limit, 160.0)
-        self.assertTrue(account.orders[0].is_open)
 
         # Cancel an order
         cancel_order = update_order.cancel()
         broker.place_orders([cancel_order])
         time.sleep(5)
         account = broker.sync()
-        self.assertEqual(len(account.orders), 1)
-        order = account.orders[0]
-        self.assertTrue(order.is_closed)
-        self.assertEqual(OrderStatus.CANCELLED, order.status)
-        print()
+        self.assertEqual(len(account.orders), 0)
         print(account)
         broker.disconnect()
 
