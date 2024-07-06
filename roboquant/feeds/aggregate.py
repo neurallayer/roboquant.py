@@ -10,15 +10,15 @@ from .feed import Feed
 class AggregatorFeed(Feed):
     """Aggregates Trades or Quotes of another feed into a `Bar` prices.
 
-    When trades are used, the actual trade prices and volumes are used to create the aggregated bars.
-    When quotes are used, the midpoint prices and no volumes are used to create the aggregated bars.
+    When trades are selected, the actual trade prices and volumes are used to create the aggregated bars.
+    When quotes are selected, the midpoint prices and no volumes are used to create the aggregated bars.
     """
 
     def __init__(
         self,
         feed: Feed,
         frequency: timedelta,
-        price_type: Literal["trade", "quote"] = "trade",
+        price_type: Literal["trade", "quote"] = "quote",
         send_remaining=False,
         continuation=True,
     ):

@@ -11,7 +11,7 @@ from torch.utils.data import DataLoader, Dataset
 
 from roboquant.account import Account
 from roboquant.event import Event
-from roboquant.ml.envs import ActionTransformer, StrategyEnv
+from roboquant.ml.envs import ActionTransformer, TradingEnv
 from roboquant.ml.features import Feature, NormalizeFeature
 from roboquant.order import Order
 from roboquant.strategies.basestrategy import BaseStrategy
@@ -30,7 +30,7 @@ class SB3PolicyStrategy(Strategy):
         self.state = None
 
     @classmethod
-    def from_env(cls, env: StrategyEnv, policy: BasePolicy):
+    def from_env(cls, env: TradingEnv, policy: BasePolicy):
         return cls(env.obs_feature, env.action_transformer, policy)
 
     def create_orders(self, event, account) -> list[Order]:
@@ -41,7 +41,6 @@ class SB3PolicyStrategy(Strategy):
         return self.action_transformer.get_orders(action, event, account)
 
     def reset(self):
-        super().reset()
         self.state = None
         self.obs_feature.reset()
 

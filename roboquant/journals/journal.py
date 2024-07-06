@@ -18,6 +18,3 @@ class Journal(ABC):
         """invoked at each step of a run that provides the journal with the opportunity to
         track and log various metrics."""
         ...
-
-    def reset(self):
-        """reset the state of the journal, default is to do nothing"""

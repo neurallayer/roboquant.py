@@ -39,7 +39,7 @@ class _MyStrategy2(Strategy):
                 self.om.add_buy_order(symbol)
             if sma12 < sma26:
                 self.om.add_sell_order(symbol)
-        
+
         return self.om.get_orders()
 
 

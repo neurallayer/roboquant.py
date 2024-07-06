@@ -14,13 +14,13 @@ account = broker.sync()
 print(account)
 
 # %%
-# Connect to Alpaca and subscribe to popular S&P-500 stocks
+# Connect to Alpaca and subscribe to some popular stocks
 alpaca_feed = AlpacaLiveFeed(market="iex")
 symbols = ["TSLA", "MSFT", "NVDA", "AMD", "AAPL", "AMZN", "META", "GOOG", "XOM", "JPM", "NLFX", "BA", "INTC", "V"]
 alpaca_feed.subscribe_trades(*symbols)
 
 # Convert the trades into 15-second candles
-feed = rq.feeds.AggregatorFeed(alpaca_feed, timedelta(seconds=15))
+feed = rq.feeds.AggregatorFeed(alpaca_feed, timedelta(seconds=15), price_type="trade")
 
 # %%
 strategy = rq.strategies.EMACrossover(13, 26)

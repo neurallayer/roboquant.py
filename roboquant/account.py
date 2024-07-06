@@ -107,7 +107,7 @@ class Account:
     - Available buying power for orders in the base currency of the account
     - Cash available in the base currency of the account
     - The open positions
-    - Orders
+    - The open orders
     - Calculated derived equity value of the account in the base currency of the account
     - The last time the account was updated
 
@@ -177,15 +177,6 @@ class Account:
             0.0,
         )
 
-    def open_order_symbols(self) -> set[str]:
-        """Return the set of symbols that have at least one open order"""
-        return {order.symbol for order in self.open_orders}
-
-    @property
-    def open_orders(self) -> list[Order]:
-        """Return a list of all the open orders"""
-        return [order for order in self.orders if order.is_open]
-
     def get_position_size(self, symbol: str) -> Decimal:
         """Return the position size for a symbol"""
         pos = self.positions.get(symbol)
@@ -195,7 +186,7 @@ class Account:
         p = [f"{v.size}@{k}" for k, v in self.positions.items()]
         p_str = ", ".join(p) or "none"
 
-        o = [f"{o.size}@{o.symbol}" for o in self.open_orders]
+        o = [f"{o.size}@{o.symbol}" for o in self.orders]
         o_str = ", ".join(o) or "none"
 
         result = (
@@ -204,7 +195,7 @@ class Account:
             f"equity       : {self.equity():_.2f}\n"
             f"positions    : {p_str}\n"
             f"mkt value    : {self.mkt_value():_.2f}\n"
-            f"open orders  : {o_str}\n"
+            f"orders       : {o_str}\n"
             f"last update  : {self.last_update}"
         )
         return result

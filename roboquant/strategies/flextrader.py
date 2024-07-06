@@ -1,8 +1,9 @@
+import math
+from dataclasses import dataclass
 from datetime import datetime, timedelta
 import logging
 from decimal import Decimal
 from enum import Flag, auto
-import random
 
 from roboquant.event import Event
 from roboquant.order import Order
@@ -42,27 +43,26 @@ class _PositionChange(Flag):
         return _PositionChange.EXIT_SHORT if is_buy else _PositionChange.ENTRY_SHORT
 
 
+@dataclass
 class _Context:
-
-    def __init__(self, signal, position: Decimal) -> None:
-        self.signal = signal
-        self.position = position
+    symbol: str
+    rating: float
+    position: Decimal
 
     def log(self, rule: str, **kwargs):
         if logger.isEnabledFor(logging.INFO):
             extra = " ".join(f"{k}={v}" for k, v in kwargs.items())
             logger.info(
-                "Discarded signal because %s [symbol=%s rating=%s type=%s position=%s %s]",
+                "Discarded signal because %s [symbol=%s rating=%s position=%s %s]",
                 rule,
-                self.signal.symbol,
-                self.signal.rating,
-                self.signal.type,
+                self.symbol,
+                self.rating,
                 self.position,
                 extra,
             )
 
 
-class _FlexTrader:
+class FlexConverter:
     # pylint: disable=too-many-instance-attributes
     """Implementation of a Stategy that has configurable rules to modify which signals are converted into orders.
     This implementation will not generate orders if there is not a price in the event for the underlying symbol.
@@ -99,7 +99,6 @@ class _FlexTrader:
         max_position_perc=0.1,
         ask_price_type="DEFAULT",
         bid_price_type="DEFAULT",
-        shuffle_signals=False,
         order_valid_for=timedelta(days=3),
         limit_perc=0.01,
     ) -> None:
@@ -113,42 +112,46 @@ class _FlexTrader:
         self.max_position_perc = max_position_perc
         self.ask_price_type = ask_price_type
         self.bid_price_type = bid_price_type
-        self.shuffle_signals = shuffle_signals
         self.order_valid_for = order_valid_for
         self.limit_perc = limit_perc
+        self.account: Account
+        self.equity: float
 
-    def _get_order_size(self, rating: float, contract_price: float, max_order_value: float) -> Decimal:
+    def _get_order_size(self, symbol: str, rating: float, contract_price: float, max_order_value: float) -> Decimal:
         """Return the order size"""
+        if symbol in self.account.positions:
+            pos_size = self.account.get_position_size(symbol)
+            if math.copysign(1.0, rating) != math.copysign(1.0, pos_size):
+                return - pos_size
+
         size = Decimal(rating * max_order_value / contract_price)
         rounded_size = round(size, self.size_digits)
         return rounded_size
 
-    def create_orders(self, signals, event: Event, account: Account) -> list[Order]:
+    def convert(self, signals: dict[str, float], event: Event, account: Account) -> list[Order]:
         # pylint: disable=too-many-branches,too-many-statements,too-many-locals
         if not signals:
             return []
 
-        if self.shuffle_signals:
-            random.shuffle(signals)
-
         orders: list[Order] = []
         equity = account.equity()
+        self.equity = equity
+        self.account = account
         max_order_value = equity * self.max_order_perc
         min_order_value = equity * self.min_order_perc
         max_pos_value = equity * self.max_position_perc
         available = account.buying_power - self.safety_margin_perc * equity
-        open_orders = account.open_order_symbols()
+        open_order_symbols: set[str] = {order.symbol for order in account.orders}
 
-        for signal in signals:
-            symbol = signal.symbol
+        for symbol, rating in signals.items():
             pos_size = account.get_position_size(symbol)
-            ctx = _Context(signal, pos_size)
+            ctx = _Context(symbol, rating, pos_size)
 
-            change = _PositionChange.get_change(signal.is_buy, pos_size)
+            change = _PositionChange.get_change(rating > 0, pos_size)
 
-            logger.info("available=%s signal=%s pos=%s change=%s", available, signal, pos_size, change)
+            logger.info("available=%s rating=%s pos=%s change=%s", available, rating, pos_size, change)
 
-            if self.one_order_only and symbol in open_orders:
+            if self.one_order_only and symbol in open_order_symbols:
                 ctx.log("one order only")
                 continue
 
@@ -157,31 +160,22 @@ class _FlexTrader:
                 ctx.log("no price is available")
                 continue
 
-            price = item.price(self.ask_price_type) if signal.is_buy else item.price(self.bid_price_type)
+            price = item.price(self.ask_price_type) if rating > 0 else item.price(self.bid_price_type)
 
             if not self.shorting and change == _PositionChange.ENTRY_SHORT:
                 ctx.log("no shorting")
                 continue
 
             if change.is_exit:
-                # Closing orders don't require or use buying power
-                if not signal.is_exit:
-                    ctx.log("no exit signal")
-                    continue
-
-                rounded_size = round(-pos_size * abs(Decimal(signal.rating)), self.size_digits)
+                rounded_size = round(-pos_size * abs(Decimal(rating)), self.size_digits)
                 if rounded_size.is_zero():
                     ctx.log("cannot exit with order size zero")
                     continue
-                new_orders = self._get_orders(symbol, rounded_size, price, signal, event.time)
+                new_orders = self._get_orders(symbol, rounded_size, price, event.time)
                 orders += new_orders
             else:
                 if available < 0:
                     ctx.log("no more available buying power")
-                    continue
-
-                if not signal.is_entry:
-                    ctx.log("no entry signal")
                     continue
 
                 if available < min_order_value:
@@ -194,7 +188,7 @@ class _FlexTrader:
                     continue
 
                 contract_price = account.contract_value(symbol, price)
-                order_size = self._get_order_size(signal.rating, contract_price, available_order_value)
+                order_size = self._get_order_size(rating, contract_price, available_order_value)
 
                 if order_size.is_zero():
                     ctx.log("calculated order size is zero")
@@ -216,14 +210,14 @@ class _FlexTrader:
                     )
                     continue
 
-                new_orders = self._get_orders(symbol, order_size, price, signal, event.time)
+                new_orders = self._get_orders(symbol, order_size, price, event.time)
                 if new_orders:
                     orders += new_orders
                     available -= order_value
 
         return orders
 
-    def _get_orders(self, symbol: str, size: Decimal, price: float, signal, time: datetime) -> list[Order]:
+    def _get_orders(self, symbol: str, size: Decimal, price: float, time: datetime) -> list[Order]:
         # pylint: disable=unused-argument
         """Return zero or more orders for the provided symbol and size."""
 

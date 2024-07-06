@@ -9,8 +9,8 @@ from tests.common import run_price_item_feed
 class TestCandleFeed(unittest.TestCase):
 
     def test_candle_feed(self):
-        feed = RandomWalk(item_type="trade", frequency=timedelta(seconds=1))
-        candle_feed = AggregatorFeed(feed, timedelta(seconds=60))
+        feed = RandomWalk(price_type="trade", frequency=timedelta(seconds=1))
+        candle_feed = AggregatorFeed(feed, timedelta(seconds=60), price_type="trade")
         run_price_item_feed(candle_feed, feed.symbols, self)
 
 

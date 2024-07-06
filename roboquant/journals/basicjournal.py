@@ -9,8 +9,9 @@ logger = logging.getLogger(__name__)
 @dataclass
 class BasicJournal(Journal):
     """Track the following metrics:
-    - total number of events, items, buy and sell signals, buy and sell orders
-    - the max open positions.
+    - total number of events, and items,
+    - the total number of buy and sell orders
+    - the maximum open positions
 
     It will also log these values at each step in the run at `info` level.
 
@@ -35,10 +36,3 @@ class BasicJournal(Journal):
         self.max_positions = max(self.max_positions, len(account.positions))
 
         logger.log(self.__log_level, "time=%s info=%s", event.time, self)
-
-    def reset(self):
-        self.events: int = 0
-        self.items: int = 0
-        self.buy_orders: int = 0
-        self.sell_orders: int = 0
-        self.max_positions: int = 0

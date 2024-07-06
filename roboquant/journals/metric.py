@@ -10,5 +10,5 @@ class Metric(ABC):
 
     @abstractmethod
     def calc(self, event: Event, account: Account, orders: list[Order]) -> dict[str, float]:
-        """Calculate zero or more metrics and return the result as a dict."""
+        """Calculate zero or more metrics and return the result as a dictionary"""
         ...

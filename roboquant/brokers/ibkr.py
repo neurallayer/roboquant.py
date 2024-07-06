@@ -1,7 +1,7 @@
 import logging
 import threading
 import time
-from datetime import datetime, timedelta, timezone
+from datetime import datetime, timedelta
 from decimal import Decimal
 
 from ibapi import VERSION
@@ -13,7 +13,7 @@ from ibapi.wrapper import EWrapper
 
 from roboquant.account import Account, Position
 from roboquant.event import Event
-from roboquant.order import Order, OrderStatus
+from roboquant.order import Order
 from roboquant.brokers.broker import LiveBroker, _update_positions
 
 assert VERSION["major"] == 10 and VERSION["minor"] == 19, "Wrong version of the IBAPI found"
@@ -66,8 +66,7 @@ class _IBApi(EWrapper, EClient):
         )
         size = order.totalQuantity if order.action == "BUY" else -order.totalQuantity
         symbol = contract.localSymbol
-        gtd = datetime.now(timezone.utc)  # fix with correct gtd
-        rq_order = Order(symbol, size, order.lmtPrice, gtd)
+        rq_order = Order(symbol, size, order.lmtPrice)
         rq_order.id = str(orderId)
         self.open_orders[rq_order.id] = rq_order
 
@@ -107,12 +106,10 @@ class _IBApi(EWrapper, EClient):
             order = self.open_orders[orderId]
             order.fill = filled
             match status:
-                case "Submitted":
-                    order.status = OrderStatus.ACTIVE
                 case "Cancelled":
-                    order.status = OrderStatus.CANCELLED
+                    del self.open_orders[orderId]
                 case "Filled":
-                    order.status = OrderStatus.FILLED
+                    del self.open_orders[orderId]
         else:
             logger.warning("received status for an order that is not open id=%s status=%s", orderId, status)
 
@@ -201,7 +198,6 @@ class IBKRBroker(LiveBroker):
                 # avoid to many API calls
                 time.sleep(1)
 
-            assert order.is_open, "can only place open orders"
             if order.size.is_zero():
                 assert order.id is not None, "can only cancel orders with an id"
                 self.__api.cancelOrder(int(order.id), "")
@@ -248,8 +244,7 @@ class IBKRBroker(LiveBroker):
         o = IBKROrder()
         o.action = "BUY" if order.is_buy else "SELL"
         o.totalQuantity = abs(order.size)
-        o.tif = "GTD"
-        o.goodTillDate = order.gtd.strftime("%Y%m%d %H:%M:%S %Z")
+        o.tif = "GTC"
         o.orderType = "LMT"
 
         # Override attributes

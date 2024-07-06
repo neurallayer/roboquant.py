@@ -2,19 +2,17 @@ import logging
 import time
 from decimal import Decimal
 from alpaca.trading.client import TradingClient
-from alpaca.trading.enums import OrderSide, TimeInForce
+from alpaca.trading.enums import OrderSide, QueryOrderStatus, TimeInForce
 from alpaca.trading.models import TradeAccount
 from alpaca.trading.models import Position as APosition
 from alpaca.trading.models import Order as AOrder
-from alpaca.trading.models import OrderStatus as AOrderStatus
 
-from alpaca.trading.requests import LimitOrderRequest, ReplaceOrderRequest
+from alpaca.trading.requests import GetOrdersRequest, LimitOrderRequest, ReplaceOrderRequest
 from roboquant.account import Account, Position
 from roboquant.config import Config
 from roboquant.event import Event
 from roboquant.brokers.broker import LiveBroker
-from roboquant.order import Order, OrderStatus
-
+from roboquant.order import Order
 
 logger = logging.getLogger(__name__)
 
@@ -32,24 +30,20 @@ class AlpacaBroker(LiveBroker):
         self.sleep_after_cancel = 0.0
 
     def _sync_orders(self):
-        for order in self.__account.open_orders:
-            assert order.id is not None
-            alpaca_order: AOrder = self.__client.get_order_by_id(order.id)  # type: ignore
-            order.size = Decimal(alpaca_order.qty)  # type: ignore
+        orders = []
+        request = GetOrdersRequest(status=QueryOrderStatus.OPEN)
+        alpaca_orders: list[AOrder] = self.__client.get_orders(request)  # type: ignore
+        for alpaca_order in alpaca_orders:
+            order = Order(
+                alpaca_order.symbol,
+                Decimal(alpaca_order.qty),  # type: ignore
+                float(alpaca_order.limit_price),  # type: ignore
+            )
             order.fill = Decimal(alpaca_order.filled_qty)  # type: ignore
-            if alpaca_order.limit_price:
-                order.limit = float(alpaca_order.limit_price)
-            else:
-                logger.warning("found order without limit specified id=%s", order.id)
-            match alpaca_order.status:
-                case AOrderStatus.FILLED:
-                    order.status = OrderStatus.FILLED
-                case AOrderStatus.REJECTED:
-                    order.status = OrderStatus.REJECTED
-                case AOrderStatus.EXPIRED:
-                    order.status = OrderStatus.EXPIRED
-                case _:
-                    order.status = OrderStatus.ACTIVE
+            order.id = str(alpaca_order.id)
+            orders.append(order)
+
+        self.__account.orders = orders
 
     def _sync_positions(self):
         open_pos: list[APosition] = self.__client.get_all_positions()  # type: ignore
@@ -78,7 +72,6 @@ class AlpacaBroker(LiveBroker):
 
         for order in orders:
 
-            assert order.is_open, "can only place open orders"
             if order.size.is_zero():
                 assert order.id is not None, "can only cancel orders with an id"
                 self.__client.cancel_order_by_id(order.id)

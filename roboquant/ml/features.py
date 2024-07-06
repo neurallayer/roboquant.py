@@ -329,6 +329,27 @@ class FillFeature(Feature):
         return self.feature.size()
 
 
+class FillZeroFeature(Feature):
+    """If a feature contains a nan value, use the last known value instead"""
+
+    def __init__(self, feature: Feature) -> None:
+        super().__init__()
+        self.feature: Feature = feature
+        self.fill = self._zeros()
+
+    def calc(self, evt, account):
+        values = self.feature.calc(evt, account)
+        mask = np.isnan(values)
+        values[mask] = self.fill[mask]
+        return values
+
+    def reset(self):
+        self.feature.reset()
+
+    def size(self) -> int:
+        return self.feature.size()
+
+
 class CacheFeature(Feature):
     """Cache the results of a feature. This requires the feed to have an always increasing time value
     and the feature to produce the same output at a given time.

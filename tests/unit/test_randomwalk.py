@@ -7,13 +7,13 @@ from tests.common import run_price_item_feed
 class TestRandomWalk(unittest.TestCase):
 
     def test_randomwalk_bar(self):
-        feed = RandomWalk(n_prices=333, n_symbols=13, item_type="bar")
+        feed = RandomWalk(n_prices=333, n_symbols=13, price_type="bar")
         self.assertEqual(333, len(feed.timeline()))
         self.assertEqual(13, len(feed.symbols))
         run_price_item_feed(feed, feed.symbols, self)
 
     def test_randomwalk_trade(self):
-        feed = RandomWalk(n_prices=333, n_symbols=13, item_type="trade")
+        feed = RandomWalk(n_prices=333, n_symbols=13, price_type="trade")
         self.assertEqual(333, len(feed.timeline()))
         self.assertEqual(13, len(feed.symbols))
         run_price_item_feed(feed, feed.symbols, self)

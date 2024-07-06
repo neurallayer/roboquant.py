@@ -10,7 +10,6 @@ import numpy as np
 from numpy.typing import NDArray
 from roboquant.account import Account
 
-from roboquant.brokers.broker import Broker
 from roboquant.brokers.simbroker import SimBroker
 from roboquant.event import Event
 from roboquant.feeds.eventchannel import EventChannel
@@ -46,7 +45,6 @@ class OrderMaker(ActionTransformer):
 
     def get_orders(self, actions: NDArray, event: Event, account: Account) -> list[Order]:
         orders = []
-        gtd = event.time + self.order_valid_for
         equity = account.equity()
         for symbol, fraction in zip(self.symbols, actions):
             price = event.get_price(symbol)
@@ -54,7 +52,7 @@ class OrderMaker(ActionTransformer):
                 rel_fraction = fraction / len(self.symbols)
                 contract_value = account.contract_value(symbol, price)
                 size = equity * rel_fraction / contract_value
-                order = Order(symbol, size, price, gtd)
+                order = Order(symbol, size, price)
                 orders.append(order)
         return orders
 
@@ -71,7 +69,6 @@ class OrderWithLimitsMaker(ActionTransformer):
 
     def get_orders(self, actions: NDArray, event: Event, account: Account) -> list[Order]:
         orders = []
-        gtd = event.time + timedelta(days=3)
         equity = account.equity()
         for symbol, (fraction, limit_perc) in zip(self.symbols, actions.reshape(-1, 2)):
             price = event.get_price(symbol)
@@ -80,7 +77,7 @@ class OrderWithLimitsMaker(ActionTransformer):
                 contract_value = account.contract_value(symbol, price)
                 size = equity * rel_fraction / contract_value
                 limit = price * (1.0 + limit_perc/100.0)
-                order = Order(symbol, size, limit, gtd)
+                order = Order(symbol, size, limit)
                 orders.append(order)
         return orders
 
@@ -99,13 +96,12 @@ class Action2Orders(ActionTransformer):
 
     def _rebalance(self, account: Account, new_sizes: dict[str, Decimal], event: Event) -> list[Order]:
         orders = []
-        gtd = event.time + self.order_valid_till
         for symbol, new_size in new_sizes.items():
             old_size = account.get_position_size(symbol)
             order_size = new_size - old_size
             limit = event.get_price(symbol, self.price_type)
             if order_size != Decimal(0) and limit:
-                order = Order(symbol, order_size, limit, gtd)
+                order = Order(symbol, order_size, limit)
                 orders.append(order)
 
         return orders
@@ -129,7 +125,7 @@ class Action2Orders(ActionTransformer):
         return spaces.Box(-1.0, 1.0, shape=(len(self.symbols),), dtype=np.float32)
 
 
-class StrategyEnv(gym.Env):
+class TradingEnv(gym.Env):
     # pylint: disable=too-many-instance-attributes,unused-argument
 
     metadata = {"render_modes": ["human", "rgb_array"], "render_fps": 4}
@@ -140,10 +136,10 @@ class StrategyEnv(gym.Env):
         obs_feature: Feature,
         reward_feature:  Feature,
         action_transformer: ActionTransformer,
-        broker: Broker | None = None,
+        broker: SimBroker | None = None,
         timeframe: Timeframe | None = None
     ):
-        self.broker: Broker = broker or SimBroker()
+        self.broker: SimBroker = broker or SimBroker()
         self.channel = EventChannel()
         self.feed = feed
         self.action_transformer = action_transformer
@@ -177,6 +173,11 @@ class StrategyEnv(gym.Env):
 
         if self.event:
             self.account = self.broker.sync(self.event)
+
+            if self.account.equity() < 0.0:
+                logger.info("Account equity < 0, done=True")
+                return None, 0.0, True, False, {}
+
             observation = self.get_observation(self.event, self.account)
             reward = self.get_reward(self.event, self.account)
             return observation, reward, False, False, {}
@@ -193,7 +194,7 @@ class StrategyEnv(gym.Env):
 
         while True:
             self.event = self.channel.get()
-            assert self.event is not None, "feed empty during warmup"
+            assert self.event is not None, "empty event during warmup"
             self.account = self.broker.sync(self.event)
             observation = self.get_observation(self.event, self.account)
             self.get_reward(self.event, self.account)

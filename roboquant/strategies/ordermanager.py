@@ -86,7 +86,7 @@ class FlexOrderManager:
                 return False
 
             self._buying_power -= bp
-            order = Order(symbol, size, limit, self._get_gtc())
+            order = Order(symbol, size, limit)
             self._orders.append(order)
             logger.info("added order %s", order)
             return True
@@ -98,7 +98,7 @@ class FlexOrderManager:
         return self._orders
 
     def cancel_open_orders(self, *symbols):
-        for order in self._account.open_orders:
+        for order in self._account.orders:
             if not symbols or order.symbol in symbols:
                 self.cancel_order(order)
 

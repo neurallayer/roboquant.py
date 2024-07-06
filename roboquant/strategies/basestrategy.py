@@ -69,7 +69,8 @@ class BaseStrategy(Strategy):
 
     def get_limit_price(self, symbol: str, order_type: OrderType):
         price_type = self.buy_price if order_type.is_buy else self.sell_price
-        return self.event.get_price(symbol, price_type)
+        limit_price = self.event.get_price(symbol, price_type)
+        return round(limit_price, 2) if limit_price else None
 
     def add_order(self, symbol: str, order_type: OrderType, limit: float | None) -> bool:
         if not self.short_selling and order_type.is_sell and self.account.get_position_size(symbol) <= 0:
@@ -89,7 +90,7 @@ class BaseStrategy(Strategy):
                 return False
 
             self.buying_power -= bp
-            order = Order(symbol, size, limit, self._get_gtc())
+            order = Order(symbol, size, limit)
             self.orders.append(order)
             return True
 
@@ -97,7 +98,7 @@ class BaseStrategy(Strategy):
         return False
 
     def cancel_open_orders(self, *symbols):
-        for order in self.account.open_orders:
+        for order in self.account.orders:
             if not symbols or order.symbol in symbols:
                 self.cancel_order(order)
 

@@ -38,9 +38,6 @@ class Broker(ABC):
         """
         ...
 
-    def reset(self):
-        """Reset the state"""
-
 
 class BaseBroker(Broker):
     """A broker accepts orders and communicates its state through the account object"""
@@ -74,13 +71,8 @@ class BaseBroker(Broker):
         """
         ...
 
-    def reset(self):
-        """Reset the state"""
-
 
 def _update_account(account: Account, event: Event | None, price_type: str = "DEFAULT"):
-    # new_closed_orders = [order for order in account.orders if order.is_closed]
-    # open_orders = [order for order in account.orders if order.is_open]
 
     if not event:
         return

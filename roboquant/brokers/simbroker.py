@@ -5,7 +5,7 @@ import logging
 from roboquant.account import Account, Position
 from roboquant.brokers.broker import Broker, _update_positions
 from roboquant.event import Event, Quote, PriceItem
-from roboquant.order import Order, OrderStatus
+from roboquant.order import Order
 
 logger = logging.getLogger(__name__)
 
@@ -35,7 +35,7 @@ class SimBroker(Broker):
         super().__init__()
         self._account = Account()
         self._modify_orders: list[Order] = []
-        self._create_orders: dict[str, Order] = {}
+        self._create_orders: list[Order] = []
         self._account.cash = initial_deposit
         self._account.buying_power = initial_deposit
         self._order_id = 0
@@ -48,7 +48,7 @@ class SimBroker(Broker):
     def reset(self):
         self._account = Account()
         self._modify_orders: list[Order] = []
-        self._create_orders: dict[str, Order] = {}
+        self._create_orders: list[Order] = []
         self._account.cash = self.initial_deposit
         self._account.buying_power = self.initial_deposit
         self._order_id = 0
@@ -104,12 +104,6 @@ class SimBroker(Broker):
         self._order_id += 1
         return result
 
-    def _has_expired(self, order: Order) -> bool:
-        """Returns true if the order has expired, false otherwise"""
-        if not order.gtd:
-            return False
-        return self._account.last_update >= order.gtd
-
     def _get_fill(self, order: Order, price: float) -> Decimal:
         """Return the fill for the order given the provided price.
 
@@ -136,26 +130,23 @@ class SimBroker(Broker):
         processed during time `t+1`. This protects against future bias.
         """
         for order in orders:
-            assert not order.is_closed, "cannot place a closed order"
             if order.id is None:
                 order.id = self.__next_order_id()
-                assert order.id not in self._create_orders
-                self._create_orders[order.id] = order
+                self._create_orders.append(order)
             else:
-                assert order.id in self._create_orders, "existing order id is not found"
                 self._modify_orders.append(order)
 
-    def _process_modify_order(self):
+    def remove_order(self, order):
+        self._account.orders.remove(order)
+
+    def _process_modify_orders(self):
         for order in self._modify_orders:
-            orig_order = self._create_orders.get(order.id)  # type: ignore
+            orig_order = next((o for o in self._account.orders if o.id == order.id), None)
             if not orig_order:
                 logger.info("couldn't find order with id %s", order.id)
                 continue
-            if orig_order.is_closed:
-                logger.info("cannot modify order because order is already closed %s", orig_order)
-                continue
             if order.is_cancellation:
-                orig_order.status = OrderStatus.CANCELLED
+                self.remove_order(orig_order)
             else:
                 orig_order.size = order.size or orig_order.size
                 orig_order.limit = order.limit or orig_order.limit
@@ -163,26 +154,21 @@ class SimBroker(Broker):
 
         self._modify_orders = []
 
-    def _process_create_orders(self, prices: dict[str, PriceItem]):
-        for order in self._create_orders.values():
-            if order.is_closed:
-                continue
-            if self._has_expired(order):
-                logger.info("order expired order=%s time=%s", order, self._account.last_update)
-                order.status = OrderStatus.EXPIRED
-            else:
-                if (item := prices.get(order.symbol)) is not None:
-                    trx = self._execute(order, item)
-                    if trx is not None:
-                        logger.info("executed order=%s trx=%s", order, trx)
-                        self._update_account(trx)
-                        order.fill += trx.size
-                        if order.fill == order.size:
-                            order.status = OrderStatus.FILLED
+    def _process_open_orders(self, prices: dict[str, PriceItem]):
+        for order in self._account.orders:
+
+            if (item := prices.get(order.symbol)) is not None:
+                trx = self._execute(order, item)
+                if trx is not None:
+                    logger.info("executed order=%s trx=%s", order, trx)
+                    self._update_account(trx)
+                    order.fill += trx.size
+                    if order.fill == order.size:
+                        self.remove_order(order)
 
     def _calculate_open_orders(self):
         reserved = 0.0
-        for order in self._account.open_orders:
+        for order in self._account.orders:
             old_pos = self._account.get_position_size(order.symbol)
             remaining = order.size - order.fill
 
@@ -219,16 +205,12 @@ class SimBroker(Broker):
 
         prices = event.price_items if event else {}
 
-        if self.clean_up_orders:
-            # only keep the open orders from the previous step, remove the closed orders
-            # this improves performance for large back tests with many orders
-            self._create_orders = {order_id: order for order_id, order in self._create_orders.items() if order.is_open}
+        acc.orders += self._create_orders
+        self._create_orders = []
 
-        self._process_modify_order()
-        self._process_create_orders(prices)
+        self._process_modify_orders()
+        self._process_open_orders(prices)
         _update_positions(acc, event, self.price_type)
-
-        acc.orders = list(self._create_orders.values())
         acc.buying_power = self._calculate_buyingpower()
         return acc
 

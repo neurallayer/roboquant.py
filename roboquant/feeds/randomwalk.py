@@ -18,7 +18,7 @@ class RandomWalk(HistoricFeed):
         self,
         n_symbols: int = 10,
         n_prices: int = 1_000,
-        item_type: Literal["bar", "trade", "quote"] = "bar",
+        price_type: Literal["bar", "trade", "quote"] = "bar",
         start_date: str | datetime = "2020-01-01T00:00:00+00:00",
         frequency=timedelta(days=1),
         start_price_min: float = 50.0,
@@ -39,11 +39,11 @@ class RandomWalk(HistoricFeed):
         start_date = start_date.astimezone(timezone.utc)
         timeline = [start_date + frequency * i for i in range(n_prices)]
 
-        match item_type:
+        match price_type:
             case "bar": item_gen = self.__get_bar
             case "trade": item_gen = self.__get_trade
             case "quote": item_gen = self.__get_quote
-            case _: raise ValueError("unsupported item_type", item_type)
+            case _: raise ValueError("unsupported item_type", price_type)
 
         for symbol in symbols:
             prices = self.__price_path(rnd, n_prices, price_dev, start_price_min, start_price_max)
