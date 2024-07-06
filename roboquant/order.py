@@ -41,8 +41,8 @@ class Order:
     limit: float
     info: dict[str, Any]
 
-    id: str | None
-    fill: Decimal
+    id: str | None = None
+    fill: Decimal = Decimal(0)
 
     def __init__(
         self, symbol: str, size: Decimal | str | int | float, limit: float, **kwargs
@@ -78,7 +78,7 @@ class Order:
         You can only update existing orders that are still open and have an id.
         """
 
-        assert self.id is not None, "Can only update an already assigned id"
+        assert self.id, "Can only update an already assigned id"
         size = Decimal(size) if size is not None else None
         if size is not None:
             assert not size.is_zero(), "size cannot be set to zero, use order.cancel() to cancel an order"
@@ -98,11 +98,6 @@ class Order:
     def is_cancellation(self):
         """Return True if this is a cancellation order, False otherwise"""
         return self.size.is_zero()
-
-    @property
-    def type(self) -> OrderType:
-        """Return the order type"""
-        return OrderType.BUY if self.is_buy else OrderType.SELL
 
     @property
     def is_buy(self):

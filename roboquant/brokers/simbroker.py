@@ -29,8 +29,7 @@ class SimBroker(Broker):
         self,
         initial_deposit=1_000_000.0,
         price_type="OPEN",
-        slippage=0.001,
-        clean_up_orders=True,
+        slippage=0.001
     ):
         super().__init__()
         self._account = Account()
@@ -42,7 +41,6 @@ class SimBroker(Broker):
 
         self.slippage = slippage
         self.price_type = price_type
-        self.clean_up_orders = clean_up_orders
         self.initial_deposit = initial_deposit
 
     def reset(self):
@@ -156,7 +154,6 @@ class SimBroker(Broker):
 
     def _process_open_orders(self, prices: dict[str, PriceItem]):
         for order in self._account.orders:
-
             if (item := prices.get(order.symbol)) is not None:
                 trx = self._execute(order, item)
                 if trx is not None:
@@ -204,7 +201,6 @@ class SimBroker(Broker):
             acc.last_update = event.time
 
         prices = event.price_items if event else {}
-
         acc.orders += self._create_orders
         self._create_orders = []
 

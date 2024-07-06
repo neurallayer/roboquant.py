@@ -21,7 +21,7 @@ class TestSimbroker(unittest.TestCase):
             self.assertTrue(o.fill < o.size if o.is_buy else o.fill > o.size)
 
     def test_simbroker(self):
-        broker = SimBroker(clean_up_orders=False)
+        broker = SimBroker()
         account = broker.sync()
         self.assertEqual(1_000_000.0, account.buying_power)
 

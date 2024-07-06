@@ -28,6 +28,7 @@ class BaseStrategy(Strategy):
         self.buy_price = "DEFAULT"
         self.sell_price = "DEFAULT"
         self.fractional_order_digits = 0
+        self.cancel_existing_orders = True
 
     def create_orders(self, event: Event, account: Account) -> list[Order]:
         self.orders = []
@@ -39,15 +40,9 @@ class BaseStrategy(Strategy):
         self.process(event, account)
         return self.orders
 
-    def _get_size(self, symbol: str, order_type: OrderType, limit: float) -> Decimal:
+    def _get_size(self, symbol: str, limit: float) -> Decimal:
         value_one = self.account.contract_value(symbol, limit)
-        size = round(Decimal(self.order_value / value_one), self.fractional_order_digits)
-
-        pos_size = self.account.get_position_size(symbol)
-        if order_type.is_closing(pos_size) and abs(size) > abs(pos_size):
-            return -pos_size
-
-        return size if order_type.is_buy else size * -1
+        return round(Decimal(self.order_value / value_one), self.fractional_order_digits)
 
     def _required_buyingpower(self, symbol: str, size: Decimal, limit: float) -> float:
         pos_size = self.account.get_position_size(symbol)
@@ -57,7 +52,7 @@ class BaseStrategy(Strategy):
 
     def add_buy_order(self, symbol: str, limit: float | None = None):
         if limit := limit or self._get_limit(symbol, OrderType.BUY):
-            if size := self._get_size(symbol, OrderType.BUY, limit):
+            if size := self._get_size(symbol, limit):
                 return self.add_order(symbol, size, limit)
         return False
 
@@ -69,7 +64,7 @@ class BaseStrategy(Strategy):
 
     def add_sell_order(self, symbol: str, limit: float | None = None):
         if limit := limit or self._get_limit(symbol, OrderType.SELL):
-            if size := self._get_size(symbol, OrderType.SELL, limit):
+            if size := self._get_size(symbol, limit) * -1:
                 return self.add_order(symbol, size, limit)
         return False
 
@@ -80,12 +75,14 @@ class BaseStrategy(Strategy):
 
     def add_order(self, symbol: str, size: Decimal, limit: float) -> bool:
         bp = self._required_buyingpower(symbol, size, limit)
-        print(f"symbol={symbol} size={size} limit={limit} required={bp} available={self.buying_power}")
+        logger.info("symbol=%s size=%s limit=%s required=%s available=%s", symbol, size, limit, bp, self.buying_power)
         if bp and bp > self.buying_power:
             logger.info("not enough buying power remaining")
             return False
 
         self.buying_power -= bp
+        if self.cancel_existing_orders:
+            self.cancel_open_orders(symbol)
         order = Order(symbol, size, limit)
         self.orders.append(order)
         return True
