@@ -27,10 +27,10 @@ class TaStrategy(BaseStrategy):
                 ohlcv = self._data[symbol]
                 ohlcv.append(item.ohlcv)
                 if ohlcv.is_full():
-                    self.process_symbol(symbol, ohlcv, item)
+                    self.process_symbol(symbol, ohlcv)
 
     @abstractmethod
-    def process_symbol(self, symbol: str, ohlcv: OHLCVBuffer, item: Bar):
+    def process_symbol(self, symbol: str, ohlcv: OHLCVBuffer):
         """
         Create zero or more orders for the provided symbol
         """

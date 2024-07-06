@@ -28,7 +28,6 @@ class BaseStrategy(Strategy):
         self.buy_price = "DEFAULT"
         self.sell_price = "DEFAULT"
         self.fractional_order_digits = 0
-        self.short_selling = False
 
     def create_orders(self, event: Event, account: Account) -> list[Order]:
         self.orders = []
@@ -52,7 +51,7 @@ class BaseStrategy(Strategy):
 
     def _required_buyingpower(self, symbol: str, size: Decimal, limit: float) -> float:
         pos_size = self.account.get_position_size(symbol)
-        if abs(pos_size - size) < abs(pos_size):
+        if abs(pos_size + size) < abs(pos_size):
             return 0.0
         return abs(self.account.contract_value(symbol, limit, size))
 
@@ -80,11 +79,8 @@ class BaseStrategy(Strategy):
         return round(limit_price, 2) if limit_price else None
 
     def add_order(self, symbol: str, size: Decimal, limit: float) -> bool:
-        if not self.short_selling and size < 0 and self.account.get_position_size(symbol) <= 0:
-            logger.info("no short selling allowed")
-            return False
-
         bp = self._required_buyingpower(symbol, size, limit)
+        print(f"symbol={symbol} size={size} limit={limit} required={bp} available={self.buying_power}")
         if bp and bp > self.buying_power:
             logger.info("not enough buying power remaining")
             return False

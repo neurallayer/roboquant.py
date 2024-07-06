@@ -1,6 +1,5 @@
 import unittest
 
-from roboquant.event import Bar
 from roboquant.strategies import TaStrategy, OHLCVBuffer
 from roboquant.strategies.buffer import OHLCVBuffers
 from roboquant.strategies.basestrategy import BaseStrategy
@@ -10,7 +9,7 @@ from tests.common import run_strategy
 class _MyStrategy(TaStrategy):
     """Example using CandleStrategy to create a custom strategy"""
 
-    def process_symbol(self, symbol, ohlcv: OHLCVBuffer, item: Bar):
+    def process_symbol(self, symbol, ohlcv: OHLCVBuffer):
         close = ohlcv.close()
         sma12 = close[-12:].mean()
         sma26 = close[-26:].mean()
