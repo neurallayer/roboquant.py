@@ -1,5 +1,6 @@
 from abc import abstractmethod
 
+from roboquant.asset import Asset
 from roboquant.event import Bar
 from roboquant.strategies.basestrategy import BaseStrategy
 from roboquant.strategies.buffer import OHLCVBuffer
@@ -15,22 +16,22 @@ class TaStrategy(BaseStrategy):
 
     def __init__(self, size: int) -> None:
         super().__init__()
-        self._data: dict[str, OHLCVBuffer] = {}
+        self._data: dict[Asset, OHLCVBuffer] = {}
         self.size = size
 
     def process(self, event, account):
         for item in event.items:
             if isinstance(item, Bar):
-                symbol = item.symbol
-                if symbol not in self._data:
-                    self._data[symbol] = OHLCVBuffer(self.size)
-                ohlcv = self._data[symbol]
+                asset = item.asset
+                if asset not in self._data:
+                    self._data[asset] = OHLCVBuffer(self.size)
+                ohlcv = self._data[asset]
                 ohlcv.append(item.ohlcv)
                 if ohlcv.is_full():
-                    self.process_symbol(symbol, ohlcv)
+                    self.process_asset(asset, ohlcv)
 
     @abstractmethod
-    def process_symbol(self, symbol: str, ohlcv: OHLCVBuffer):
+    def process_asset(self, asset: Asset, ohlcv: OHLCVBuffer):
         """
         Create zero or more orders for the provided symbol
         """

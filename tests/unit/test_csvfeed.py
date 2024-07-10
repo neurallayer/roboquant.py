@@ -1,6 +1,7 @@
 import pathlib
 import unittest
 
+from roboquant.asset import Stock
 from roboquant.feeds import CSVFeed
 from tests.common import run_price_item_feed
 
@@ -15,17 +16,19 @@ class TestCSVFeed(unittest.TestCase):
     def test_csv_feed_yahoo(self):
         root = self._get_root_dir("yahoo")
         feed = CSVFeed.yahoo(root)
-        run_price_item_feed(feed, ["META", "AAPL", "AMZN", "TSLA"], self)
+        symbols = ["META", "AAPL", "AMZN", "TSLA"]
+        assets = [Stock(symbol, "USD") for symbol in symbols]
+        run_price_item_feed(feed, assets, self)
 
     def test_csv_feed_stooq_daily(self):
         root = self._get_root_dir("stooq", "daily")
         feed = CSVFeed.stooq_us_daily(root)
-        run_price_item_feed(feed, ["IBM"], self)
+        run_price_item_feed(feed, [Stock("IBM", "USD")], self)
 
     def test_csv_feed_stooq_intraday(self):
         root = self._get_root_dir("stooq", "5_min")
         feed = CSVFeed.stooq_us_intraday(root)
-        run_price_item_feed(feed, ["IBM"], self)
+        run_price_item_feed(feed, [Stock("IBM", "USD")], self)
 
 
 if __name__ == "__main__":

@@ -2,17 +2,19 @@ import logging
 import time
 from decimal import Decimal
 from alpaca.trading.client import TradingClient
-from alpaca.trading.enums import OrderSide, QueryOrderStatus, TimeInForce
+from alpaca.trading.enums import AssetClass, OrderSide, QueryOrderStatus, TimeInForce
 from alpaca.trading.models import TradeAccount
 from alpaca.trading.models import Position as APosition
 from alpaca.trading.models import Order as AOrder
 
 from alpaca.trading.requests import GetOrdersRequest, LimitOrderRequest, ReplaceOrderRequest
 from roboquant.account import Account, Position
+from roboquant.asset import Asset, Crypto, Option, Stock
 from roboquant.config import Config
 from roboquant.event import Event
 from roboquant.brokers.broker import LiveBroker
 from roboquant.order import Order
+from roboquant.wallet import Wallet, Amount
 
 logger = logging.getLogger(__name__)
 
@@ -21,7 +23,7 @@ class AlpacaBroker(LiveBroker):
 
     def __init__(self, api_key=None, secret_key=None) -> None:
         super().__init__()
-        self.__account = Account()
+        self.__account: Account = Account("USD")
         config = Config()
         api_key = api_key or config.get("alpaca.public.key")
         secret_key = secret_key or config.get("alpaca.secret.key")
@@ -29,13 +31,23 @@ class AlpacaBroker(LiveBroker):
         self.price_type = "DEFAULT"
         self.sleep_after_cancel = 0.0
 
+    def get_asset(self, symbol: str, asset_class: AssetClass) -> Asset:
+        match asset_class:
+            case AssetClass.US_EQUITY:
+                return Stock(symbol, "USD")
+            case AssetClass.US_OPTION:
+                return Option(symbol, "USD")
+            case AssetClass.CRYPTO:
+                return Crypto.from_symbol(symbol)
+
     def _sync_orders(self):
         orders = []
         request = GetOrdersRequest(status=QueryOrderStatus.OPEN)
         alpaca_orders: list[AOrder] = self.__client.get_orders(request)  # type: ignore
         for alpaca_order in alpaca_orders:
+            asset = self.get_asset(alpaca_order.symbol, alpaca_order.asset_class)
             order = Order(
-                alpaca_order.symbol,
+                asset,
                 Decimal(alpaca_order.qty),  # type: ignore
                 float(alpaca_order.limit_price),  # type: ignore
             )
@@ -53,7 +65,8 @@ class AlpacaBroker(LiveBroker):
             if p.side == "short":
                 size = -size
             new_pos = Position(size, float(p.avg_entry_price), float(p.current_price or "nan"))
-            self.__account.positions[p.symbol] = new_pos
+            asset = self.get_asset(p.symbol, p.asset_class)
+            self.__account.positions[asset] = new_pos
 
     def sync(self, event: Event | None = None) -> Account:
         now = self.guard(event)
@@ -61,7 +74,7 @@ class AlpacaBroker(LiveBroker):
         client = self.__client
         acc: TradeAccount = client.get_account()  # type: ignore
         self.__account.buying_power = float(acc.buying_power)  # type: ignore
-        self.__account.cash = float(acc.cash)  # type: ignore
+        self.__account.cash = Wallet(Amount("USD", float(acc.cash)))  # type: ignore
         self.__account.last_update = now
 
         self._sync_positions()
@@ -90,7 +103,7 @@ class AlpacaBroker(LiveBroker):
     def _get_order_request(self, order: Order):
         side = OrderSide.BUY if order.is_buy else OrderSide.SELL
         return LimitOrderRequest(
-            symbol=order.symbol,
+            symbol=order.asset.symbol,
             qty=abs(float(order.size)),
             side=side,
             limit_price=order.limit,

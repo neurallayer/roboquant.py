@@ -7,6 +7,7 @@ import numpy as np
 from numpy.typing import NDArray
 
 from roboquant.account import Account
+from roboquant.asset import Asset
 from roboquant.event import Event, Bar, Quote
 from roboquant.strategies.buffer import OHLCVBuffer
 
@@ -81,15 +82,15 @@ class SlicedFeature(Feature):
 
 
 class TrueRangeFeature(Feature):
-    """Calculates the true range value for a symbol"""
+    """Calculates the true range value for a asset"""
 
-    def __init__(self, symbol: str) -> None:
+    def __init__(self, asset: Asset) -> None:
         super().__init__()
         self.prev_close = None
-        self.symbol = symbol
+        self.asset = asset
 
     def calc(self, evt, account):
-        item = evt.price_items.get(self.symbol)
+        item = evt.price_items.get(self.asset)
         if item is None or not isinstance(item, Bar):
             return np.array([float("nan")])
 
@@ -126,19 +127,19 @@ class FixedValueFeature(Feature):
 
 
 class PriceFeature(Feature):
-    """Extract a single price for one or more symbols"""
+    """Extract a single price for one or more assets"""
 
-    def __init__(self, *symbols: str, price_type: str = "DEFAULT") -> None:
+    def __init__(self, *assets: Asset, price_type: str = "DEFAULT") -> None:
         super().__init__()
-        self.symbols = symbols
+        self.assets = assets
         self.price_type = price_type
 
     def calc(self, evt, account):
-        prices = [evt.get_price(symbol, self.price_type) for symbol in self.symbols]
+        prices = [evt.get_price(asset, self.price_type) for asset in self.assets]
         return np.array(prices, dtype=np.float32)
 
     def size(self) -> int:
-        return len(self.symbols)
+        return len(self.assets)
 
 
 class EquityFeature(Feature):
@@ -154,61 +155,61 @@ class EquityFeature(Feature):
 
 
 class PositionSizeFeature(Feature):
-    """Extract the position value for one or more symbols as the fraction of the total equity"""
+    """Extract the position value for one or more assets as the fraction of the total equity"""
 
-    def __init__(self, *symbols: str) -> None:
+    def __init__(self, *assets: Asset) -> None:
         super().__init__()
-        self.symbols = symbols
+        self.assets = assets
 
     def calc(self, evt, account):
         assert account is not None
         result = self._zeros()
-        equity = account.equity()
-        for idx, symbol in enumerate(self.symbols):
-            position = account.positions.get(symbol)
+        equity = account.equity_value()
+        for idx, asset in enumerate(self.assets):
+            position = account.positions.get(asset)
             if position:
-                value = account.contract_value(symbol, position.mkt_price, position.size)
+                value = asset.contract_amount(position.size, position.mkt_price).convert(account.base_currency, evt.time)
                 pos_size = value / equity - 1.0
                 result[idx] = pos_size
         return result
 
     def size(self) -> int:
-        return len(self.symbols)
+        return len(self.assets)
 
 
 class PositionPNLFeature(Feature):
-    """Extract the pnl percentage for an open position for one or more symbols.
-    Returns 0.0 if there is no open position for a symbol"""
+    """Extract the pnl percentage for an open position for one or more assets.
+    Returns 0.0 if there is no open position for a asset"""
 
-    def __init__(self, *symbols: str) -> None:
+    def __init__(self, *assets: Asset) -> None:
         super().__init__()
-        self.symbols = symbols
+        self.assets = assets
 
     def calc(self, evt, account):
         assert account is not None
         result = self._zeros()
-        for idx, symbol in enumerate(self.symbols):
-            position = account.positions.get(symbol)
+        for idx, asset in enumerate(self.assets):
+            position = account.positions.get(asset)
             if position:
                 pnl = position.mkt_price / position.avg_price - 1.0
                 result[idx] = pnl
         return result
 
     def size(self) -> int:
-        return len(self.symbols)
+        return len(self.assets)
 
 
 class BarFeature(Feature):
-    """Extract the ohlcv values from bars for one or more symbols"""
+    """Extract the ohlcv values from bars for one or more assets"""
 
-    def __init__(self, *symbols: str) -> None:
+    def __init__(self, *assets: Asset) -> None:
         super().__init__()
-        self.symbols = symbols
+        self.assets = assets
 
     def calc(self, evt, account):
         result = self._full_nan()
-        for idx, symbol in enumerate(self.symbols):
-            item = evt.price_items.get(symbol)
+        for idx, asset in enumerate(self.assets):
+            item = evt.price_items.get(asset)
             if isinstance(item, Bar):
                 offset = idx * 5
                 result[offset: offset + 5] = item.ohlcv
@@ -216,20 +217,20 @@ class BarFeature(Feature):
         return result
 
     def size(self) -> int:
-        return 5 * len(self.symbols)
+        return 5 * len(self.assets)
 
 
 class QuoteFeature(Feature):
-    """Extract the values from quotes for one or more symbols"""
+    """Extract the values from quotes for one or more assets"""
 
-    def __init__(self, *symbols: str) -> None:
+    def __init__(self, *assets: Asset) -> None:
         super().__init__()
-        self.symbols = symbols
+        self.assets = assets
 
     def calc(self, evt, account):
         result = self._full_nan()
-        for idx, symbol in enumerate(self.symbols):
-            item = evt.price_items.get(symbol)
+        for idx, asset in enumerate(self.assets):
+            item = evt.price_items.get(asset)
             if isinstance(item, Quote):
                 offset = idx * 4
                 result[offset: offset + 4] = item.data
@@ -237,7 +238,7 @@ class QuoteFeature(Feature):
         return result
 
     def size(self) -> int:
-        return 4 * len(self.symbols)
+        return 4 * len(self.assets)
 
 
 class CombinedFeature(Feature):
@@ -391,19 +392,19 @@ class CacheFeature(Feature):
 
 
 class VolumeFeature(Feature):
-    """Extract the volume for one or more symbols"""
+    """Extract the volume for one or more assets"""
 
-    def __init__(self, *symbols: str, volume_type: str = "DEFAULT") -> None:
+    def __init__(self, *assets: Asset, volume_type: str = "DEFAULT") -> None:
         super().__init__()
-        self.symbols = symbols
+        self.assets = assets
         self.volume_type = volume_type
 
     def calc(self, evt: Event, account):
-        volumes = [evt.get_volume(symbol, self.volume_type) for symbol in self.symbols]
+        volumes = [evt.get_volume(asset, self.volume_type) for asset in self.assets]
         return np.array(volumes, dtype=np.float32)
 
     def size(self) -> int:
-        return len(self.symbols)
+        return len(self.assets)
 
 
 class ReturnsFeature(Feature):
@@ -623,37 +624,36 @@ class TimeDifference(Feature):
 class TaFeature(Feature):
     """Base class for technical analysis features"""
 
-    def __init__(self, *symbols: str, history_size: int) -> None:
+    def __init__(self, *assets: Asset, history_size: int) -> None:
         super().__init__()
-        self._data: dict[str, OHLCVBuffer] = {}
+        self._data: dict[Asset, OHLCVBuffer] = {}
         self._size = history_size
-        self.symbols = list(symbols)
+        self.assets = list(assets)
 
     def calc(self, evt, account):
         result = []
         nan = float("nan")
-        for symbol in self.symbols:
+        for asset in self.assets:
             value = nan
-            item = evt.price_items.get(symbol)
+            item = evt.price_items.get(asset)
             if isinstance(item, Bar):
-                symbol = item.symbol
-                if symbol not in self._data:
-                    self._data[symbol] = OHLCVBuffer(self._size)
-                ohlcv = self._data[symbol]
+                if asset not in self._data:
+                    self._data[asset] = OHLCVBuffer(self._size)
+                ohlcv = self._data[asset]
                 ohlcv.append(item.ohlcv)
                 if ohlcv.is_full():
-                    value = self._calc(symbol, ohlcv)
+                    value = self._calc(asset, ohlcv)
 
             result.append(value)
         return np.asarray(result, dtype=np.float32)
 
     @abstractmethod
-    def _calc(self, symbol: str, ohlcv: OHLCVBuffer) -> float:
+    def _calc(self, asset: Asset, ohlcv: OHLCVBuffer) -> float:
         """Override this method with technical analysis logic"""
         ...
 
     def size(self) -> int:
-        return len(self.symbols)
+        return len(self.assets)
 
     def reset(self):
         self._data = {}

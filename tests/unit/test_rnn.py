@@ -4,6 +4,7 @@ from torch import nn
 import torch.nn.functional as F
 
 import roboquant as rq
+from roboquant.asset import Stock
 from roboquant.ml.features import BarFeature, CombinedFeature, PriceFeature, SMAFeature
 from roboquant.ml.strategies import RNNStrategy
 from tests.common import get_feed
@@ -30,16 +31,17 @@ class TestRNN(unittest.TestCase):
         # logging.getLogger("roboquant.strategies").setLevel(level=logging.INFO)
         # Setup
         symbol = "AAPL"
+        asset = Stock(symbol, "USD")
         prediction = 10
         feed = get_feed()
         model = _MyModel()
 
         input_feature = CombinedFeature(
-            BarFeature(symbol),
-            SMAFeature(PriceFeature(symbol, price_type="HIGH"), 10)
+            BarFeature(asset),
+            SMAFeature(PriceFeature(asset, price_type="HIGH"), 10)
         ).returns().normalize()
 
-        label_feature = PriceFeature(symbol, price_type="CLOSE").returns(prediction)
+        label_feature = PriceFeature(asset, price_type="CLOSE").returns(prediction)
 
         strategy = RNNStrategy(input_feature, label_feature, model, symbol, sequences=20, buy_pct=0.01)
 

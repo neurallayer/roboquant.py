@@ -4,48 +4,55 @@ import unittest
 from decimal import Decimal
 
 from roboquant import Order
+from roboquant.asset import Stock
 from roboquant.brokers.ibkr import IBKRBroker
+from roboquant.wallet import Amount, One2OneConversion
 
 
 class TestIBKR(unittest.TestCase):
 
     def test_ibkr_order(self):
+        Amount.converter = One2OneConversion()
         logging.basicConfig(level=logging.DEBUG)
         logging.getLogger("ibapi").setLevel(logging.WARNING)
-        symbol = "JPM"
+        asset = Stock("JPM", "USD")
+        limit = 205
 
         broker = IBKRBroker()
 
         account = broker.sync()
-        self.assertGreater(account.equity(), 0)
+        self.assertGreater(account.equity_value(), 0)
         self.assertEqual(len(account.orders), 0)
 
         # Place an order
-        order = Order(symbol, 10, 150.0)
+        order = Order(asset, 10, limit)
         broker.place_orders([order])
         time.sleep(5)
         self.assertEqual(len(account.orders), 0)
         account = broker.sync()
+        print(account)
         self.assertEqual(len(account.orders), 1)
         self.assertEqual(account.orders[0].size, Decimal(10))
-        self.assertEqual(symbol, account.orders[0].symbol)
+        self.assertEqual(account.orders[0].limit, limit)
+        self.assertEqual(asset, account.orders[0].asset)
 
         # Update an order
-        update_order = order.modify(size=5, limit=160.0)
+        update_order = order.modify(size=5, limit=limit-1)
         broker.place_orders([update_order])
         time.sleep(5)
         account = broker.sync()
+        print(account)
         self.assertEqual(len(account.orders), 1)
         self.assertEqual(account.orders[0].size, Decimal(5))
-        self.assertEqual(account.orders[0].limit, 160.0)
+        self.assertEqual(account.orders[0].limit, limit-1)
 
         # Cancel an order
         cancel_order = update_order.cancel()
         broker.place_orders([cancel_order])
         time.sleep(5)
         account = broker.sync()
-        self.assertEqual(len(account.orders), 0)
         print(account)
+        self.assertEqual(len(account.orders), 0)
         broker.disconnect()
 
 

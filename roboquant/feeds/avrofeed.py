@@ -11,7 +11,8 @@ from roboquant.event import Quote, Bar, Trade
 from roboquant.event import Event
 from roboquant.feeds.eventchannel import EventChannel
 from roboquant.feeds.feed import Feed
-from roboquant.feeds.feedutil import count_events
+from roboquant.feeds.feedutil import count_events, print_feed_items
+from roboquant.asset import Asset
 
 logger = logging.getLogger(__name__)
 
@@ -24,7 +25,7 @@ class AvroFeed(Feed):
         "name": "PriceItemV2",
         "fields": [
             {"name": "timestamp", "type": "string"},
-            {"name": "symbol", "type": "string"},
+            {"name": "asset", "type": "string"},
             {"name": "type", "type": {"type": "enum", "name": "item_type", "symbols": ["BAR", "TRADE", "QUOTE", "BOOK"]}},
             {"name": "values", "type": {"type": "array", "items": "double"}},
             {"name": "meta", "type": ["null", "string"], "default": None},
@@ -56,16 +57,17 @@ class AvroFeed(Feed):
                     t_old = t
 
                 price_type = str(row["type"])  # type: ignore
+                asset = Asset.deserialize(str(row["asset"]))  # type: ignore
                 match (price_type):
                     case "QUOTE":
-                        item = Quote(row["symbol"], array("f", row["values"]))  # type: ignore
+                        item = Quote(asset, array("f", row["values"]))  # type: ignore
                         items.append(item)
                     case "BAR":
-                        item = Bar(row["symbol"], array("f", row["values"]), row["other"])  # type: ignore
+                        item = Bar(asset, array("f", row["values"]), row["other"])  # type: ignore
                         items.append(item)
                     case "TRADE":
                         prices = row["values"]  # type: ignore
-                        item = Trade(row["symbol"], prices[0], prices[1])  # type: ignore
+                        item = Trade(asset, prices[0], prices[1])  # type: ignore
                         items.append(item)
                     case _:
                         raise ValueError(f"Unsupported priceItem type={price_type}")
@@ -77,16 +79,16 @@ class AvroFeed(Feed):
         while event := channel.get():
             t = event.time.isoformat()
             for item in event.items:
-
+                asset_str = item.asset.serialize()
                 match item:
                     case Quote():
-                        data = {"timestamp": t, "type": "QUOTE", "symbol": item.symbol, "values": list(item.data)}
+                        data = {"timestamp": t, "type": "QUOTE", "asset": asset_str, "values": list(item.data)}
                         records.append(data)
                     case Trade():
                         data = {
                             "timestamp": t,
                             "type": "TRADE",
-                            "symbol": item.symbol,
+                            "asset": asset_str,
                             "values": [item.trade_price, item.trade_volume],
                         }
                         records.append(data)
@@ -94,7 +96,7 @@ class AvroFeed(Feed):
                         data = {
                             "timestamp": t,
                             "type": "BAR",
-                            "symbol": item.symbol,
+                            "asset": asset_str,
                             "values": list(item.ohlcv),
                             "meta": item.frequency,
                         }
@@ -112,9 +114,9 @@ if __name__ == "__main__":
     avroFeed = AvroFeed("/tmp/test.avro")
     if not avroFeed.exists():
         alpaca_feed = AlpacaHistoricStockFeed()
-        alpaca_feed.retrieve_quotes("AAPL", start="2024-05-24T00:00:00Z", end="2024-05-25T00:00:00Z")
+        alpaca_feed.retrieve_quotes("AAPL", start="2024-05-24T18:00:00Z", end="2024-05-24T18:15:00Z")
         avroFeed.record(alpaca_feed)
 
     start = time.time()
     print("events=", count_events(avroFeed), "time=", time.time() - start)
-    # print_feed_items(feed)
+    print_feed_items(avroFeed)

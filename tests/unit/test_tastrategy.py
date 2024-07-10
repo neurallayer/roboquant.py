@@ -9,14 +9,14 @@ from tests.common import run_strategy
 class _MyStrategy(TaStrategy):
     """Example using CandleStrategy to create a custom strategy"""
 
-    def process_symbol(self, symbol, ohlcv: OHLCVBuffer):
+    def process_asset(self, asset, ohlcv: OHLCVBuffer):
         close = ohlcv.close()
         sma12 = close[-12:].mean()
         sma26 = close[-26:].mean()
         if sma12 > sma26:
-            self.add_buy_order(symbol)
+            self.add_buy_order(asset)
         if sma12 < sma26:
-            self.add_exit_order(symbol)
+            self.add_exit_order(asset)
 
 
 class _MyStrategy2(BaseStrategy):

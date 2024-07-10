@@ -10,6 +10,7 @@ from stable_baselines3.common.policies import BasePolicy
 from torch.utils.data import DataLoader, Dataset
 
 from roboquant.account import Account
+from roboquant.asset import Asset
 from roboquant.event import Event
 from roboquant.ml.envs import ActionTransformer, TradingEnv
 from roboquant.ml.features import Feature, NormalizeFeature
@@ -100,7 +101,7 @@ class RNNStrategy(FeatureStrategy):
         input_feature: Feature,
         label_feature: Feature,
         model: torch.nn.Module,
-        symbol: str,
+        asset: Asset,
         sequences: int = 20,
         buy_pct: float = 0.01,
         sell_pct=0.0,
@@ -110,7 +111,7 @@ class RNNStrategy(FeatureStrategy):
         self.model = model
         self.buy_pct = buy_pct
         self.sell_pct = sell_pct
-        self.symbol = symbol
+        self.asset = asset
 
     def predict(self, x, time):
         x = torch.asarray(x)
@@ -127,9 +128,9 @@ class RNNStrategy(FeatureStrategy):
 
             logger.info("prediction p=%s time=%s", p, time)
             if p >= self.buy_pct:
-                self.add_buy_order(self.symbol)
+                self.add_buy_order(self.asset)
             if p <= self.sell_pct:
-                self.add_sell_order(self.symbol)
+                self.add_sell_order(self.asset)
 
     def _get_dataloaders(self, x, y, prediction: int, validation_split: float, batch_size: int):
         # what is the border between train- and validation-data

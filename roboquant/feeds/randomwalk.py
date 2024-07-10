@@ -6,6 +6,7 @@ from typing import Literal
 
 import numpy as np
 
+from roboquant.asset import Stock
 from roboquant.event import Bar, Trade, Quote
 from .historic import HistoricFeed
 
@@ -32,8 +33,8 @@ class RandomWalk(HistoricFeed):
         # pylint: disable=too-many-locals
         super().__init__()
         rnd = np.random.default_rng(seed)
-        symbols = self.__get_symbols(rnd, n_symbols, symbol_len)
-        assert len(symbols) == n_symbols
+        assets = self.__get_assets(rnd, n_symbols, symbol_len)
+        assert len(assets) == n_symbols
 
         start_date = start_date if isinstance(start_date, datetime) else datetime.fromisoformat(start_date)
         start_date = start_date.astimezone(timezone.utc)
@@ -45,10 +46,10 @@ class RandomWalk(HistoricFeed):
             case "quote": item_gen = self.__get_quote
             case _: raise ValueError("unsupported item_type", price_type)
 
-        for symbol in symbols:
+        for asset in assets:
             prices = self.__price_path(rnd, n_prices, price_dev, start_price_min, start_price_max)
             for i in range(n_prices):
-                item = item_gen(symbol, prices[i], volume, spread_dev)
+                item = item_gen(asset, prices[i], volume, spread_dev)
                 self._add_item(timeline[i], item)
 
     @staticmethod
@@ -56,11 +57,12 @@ class RandomWalk(HistoricFeed):
         return Trade(symbol, price, volume)
 
     @staticmethod
-    def __get_bar(symbol, price, volume, spread_dev):
+    def __get_bar(asset, price, volume, spread_dev):
         high = price * (1.0 + abs(random.gauss(mu=0.0, sigma=spread_dev)))
         low = price * (1.0 - abs(random.gauss(mu=0.0, sigma=spread_dev)))
         close = random.uniform(low, high)
-        return Bar(symbol, array("f", [price, high, low, close, volume]))
+        prices = array("f", [price, high, low, close, volume])
+        return Bar(asset, prices)
 
     @staticmethod
     def __get_quote(symbol, price, volume, spread_dev):
@@ -70,7 +72,7 @@ class RandomWalk(HistoricFeed):
         return Quote(symbol, array("f", [price, ask, volume, bid, volume]))
 
     @staticmethod
-    def __get_symbols(
+    def __get_assets(
         rnd,
         n_symbols,
         symbol_len,
@@ -79,7 +81,8 @@ class RandomWalk(HistoricFeed):
         alphabet = np.array(list(string.ascii_uppercase))
         while len(symbols) < n_symbols:
             symbol = "".join(rnd.choice(alphabet, size=symbol_len))
-            symbols.add(symbol)
+            asset = Stock(symbol, "USD")
+            symbols.add(asset)
         return symbols
 
     @staticmethod

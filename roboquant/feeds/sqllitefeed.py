@@ -4,6 +4,7 @@ from array import array
 from datetime import datetime
 from typing import Literal
 
+from roboquant.asset import Asset
 from roboquant.event import Bar, PriceItem, Quote
 from roboquant.event import Event
 from roboquant.timeframe import Timeframe
@@ -17,10 +18,10 @@ class SQLFeed(Feed):
     _sql_select_by_date = "SELECT * from prices where Date >= ? and Date <= ? order by Date"
     _sql_select_timeframe = "SELECT min(Date), max(Date) from prices"
     _sql_count_items = "SELECT count(*) from prices"
-    _sql_select_symbols = "SELECT DISTINCT symbol from prices"
+    _sql_select_assets = "SELECT DISTINCT asset from prices"
     _sql_drop_table = "DROP TABLE IF EXISTS prices"
-    _sql_create_bar_table = "CREATE TABLE IF NOT EXISTS prices(date, symbol, open, high, low, close, volume, frequency)"
-    _sql_create_quote_table = "CREATE TABLE IF NOT EXISTS prices(date, symbol, ap, av, bp, bv)"
+    _sql_create_bar_table = "CREATE TABLE IF NOT EXISTS prices(date, asset, open, high, low, close, volume, frequency)"
+    _sql_create_quote_table = "CREATE TABLE IF NOT EXISTS prices(date, asset, ap, av, bp, bv)"
     _sql_insert_bar = "INSERT into prices VALUES(?,?,?,?,?,?,?,?)"
     _sql_insert_quote = "INSERT into prices VALUES(?,?,?,?,?,?)"
     _sql_create_index = "CREATE INDEX IF NOT EXISTS date_idx ON prices(date)"
@@ -54,23 +55,24 @@ class SQLFeed(Feed):
         tf = Timeframe.fromisoformat(row[0], row[1], True)
         return tf
 
-    def symbols(self):
+    def assets(self):
         con = sqlite3.connect(self.db_file)
-        result = con.execute(SQLFeed._sql_select_symbols).fetchall()
+        result = con.execute(SQLFeed._sql_select_assets).fetchall()
         con.commit()
-        symbols = [columns[0] for columns in result]
-        return symbols
+        assets = {Asset.deserialize(columns[0]) for columns in result}
+        return assets
 
     def get_item(self, row) -> PriceItem:
         if self.is_bar:
-            symbol = row[1]
+            asset_str = row[1]
+            asset = Asset.deserialize(asset_str)
             prices = row[2:7]
             freq = row[7]
-            return Bar(symbol, array("f", prices), freq)
+            return Bar(asset, array("f", prices), freq)
 
-        symbol = row[1]
+        asset = row[1]
         data = row[2:6]
-        return Quote(symbol, array("f", data))
+        return Quote(asset, array("f", data))
 
     def play(self, channel: EventChannel):
         con = sqlite3.connect(self.db_file)
@@ -122,14 +124,14 @@ class SQLFeed(Feed):
             t = event.time
             for item in event.items:
                 if isinstance(item, Bar) and price_type == "bar":
-                    elem = (t.isoformat(), item.symbol, *item.ohlcv, item.frequency)
+                    elem = (t.isoformat(), item.asset.serialize(), *item.ohlcv, item.frequency)
                     data.append(elem)
                 elif isinstance(item, Quote) and price_type == "quote":
-                    elem = (t.isoformat(), item.symbol, *item.data)
+                    elem = (t.isoformat(), item.asset.serialize(), *item.data)
                     data.append(elem)
 
         cur.executemany(insert_sql, data)
         con.commit()
 
     def __repr__(self) -> str:
-        return f"SQLFeed(timeframe={self.timeframe()} items={self.items()} symbols={len(self.symbols())})"
+        return f"SQLFeed(timeframe={self.timeframe()} items={self.items()} assets={len(self.assets())})"

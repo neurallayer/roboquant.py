@@ -2,6 +2,7 @@ from abc import abstractmethod
 from decimal import Decimal
 import logging
 
+from roboquant.asset import Asset
 from roboquant.event import Event
 from roboquant.order import Order
 from roboquant.strategies.strategy import Strategy
@@ -32,64 +33,78 @@ class BaseStrategy(Strategy):
 
     def create_orders(self, event: Event, account: Account) -> list[Order]:
         self.orders = []
-        self.buying_power = account.buying_power
+        self.buying_power = round(account.buying_power.value, 2)
         self.account = account
         self.event = event
-        self.order_value = account.equity() * self.order_value_perc
+        self.order_value = round(account.equity_value() * self.order_value_perc, 2)
 
         self.process(event, account)
         return self.orders
 
-    def _get_size(self, symbol: str, limit: float) -> Decimal:
-        value_one = self.account.contract_value(symbol, limit)
+    def _get_size(self, asset: Asset, limit: float) -> Decimal:
+        if self.order_value < 0.1:
+            return Decimal()
+        value_one = asset.contract_amount(Decimal(1), limit).convert(self.account.base_currency, self.account.last_update)
         return round(Decimal(self.order_value / value_one), self.fractional_order_digits)
 
-    def _required_buyingpower(self, symbol: str, size: Decimal, limit: float) -> float:
-        pos_size = self.account.get_position_size(symbol)
-        if abs(pos_size + size) < abs(pos_size):
+    def _required_buyingpower(self, order: Order) -> float:
+        """How much buying power is required for the order"""
+        pos_size = self.account.get_position_size(order.asset)
+        if abs(pos_size + order.size) < abs(pos_size):
             return 0.0
-        return abs(self.account.contract_value(symbol, limit, size))
+        return abs(self.account.convert(order.amount()))
 
-    def add_buy_order(self, symbol: str, limit: float | None = None):
-        if limit := limit or self._get_limit(symbol, True):
-            if size := self._get_size(symbol, limit):
-                return self.add_order(symbol, size, limit)
+    def add_buy_order(self, asset: Asset, limit: float | None = None):
+        if limit := limit or self._get_limit(asset, True):
+            if size := self._get_size(asset, limit):
+                order = Order(asset, size, limit)
+                return self.add_order(order)
         return False
 
-    def add_exit_order(self, symbol: str, limit: float | None = None):
-        if size := - self.account.get_position_size(symbol):
-            if limit := limit or self._get_limit(symbol, size > 0):
-                return self.add_order(symbol, size, limit)
+    def add_exit_order(self, asset: Asset, limit: float | None = None):
+        if size := -self.account.get_position_size(asset):
+            if limit := limit or self._get_limit(asset, size > 0):
+                order = Order(asset, size, limit)
+                return self.add_order(order)
         return False
 
-    def add_sell_order(self, symbol: str, limit: float | None = None):
-        if limit := limit or self._get_limit(symbol, False):
-            if size := self._get_size(symbol, limit) * -1:
-                return self.add_order(symbol, size, limit)
+    def add_sell_order(self, asset: Asset, limit: float | None = None):
+        if limit := limit or self._get_limit(asset, False):
+            if size := self._get_size(asset, limit) * -1:
+                order = Order(asset, size, limit)
+                return self.add_order(order)
         return False
 
-    def _get_limit(self, symbol: str, is_buy: bool) -> float | None:
+    def _get_limit(self, asset: Asset, is_buy: bool) -> float | None:
         price_type = self.buy_price if is_buy else self.sell_price
-        limit_price = self.event.get_price(symbol, price_type)
+        limit_price = self.event.get_price(asset, price_type)
         return round(limit_price, 2) if limit_price else None
 
-    def add_order(self, symbol: str, size: Decimal, limit: float) -> bool:
-        bp = self._required_buyingpower(symbol, size, limit)
-        logger.info("symbol=%s size=%s limit=%s required=%s available=%s", symbol, size, limit, bp, self.buying_power)
+    def add_order(self, order: Order) -> bool:
+        """Add an order if there is enough remaining buying power"""
+        bp = self._required_buyingpower(order)
+        if logger.isEnabledFor(level=logging.INFO):
+            logger.info(
+                "order=%s required=%s available=%s max_order_value=%s default_price=%s",
+                order,
+                bp,
+                self.buying_power,
+                self.order_value,
+                self.event.get_price(order.asset),
+            )
         if bp and bp > self.buying_power:
             logger.info("not enough buying power remaining")
             return False
 
         self.buying_power -= bp
         if self.cancel_existing_orders:
-            self.cancel_open_orders(symbol)
-        order = Order(symbol, size, limit)
+            self.cancel_open_orders(order.asset)
         self.orders.append(order)
         return True
 
-    def cancel_open_orders(self, *symbols):
+    def cancel_open_orders(self, *assets):
         for order in self.account.orders:
-            if not symbols or order.symbol in symbols:
+            if not assets or order.asset in assets:
                 self.cancel_order(order)
 
     def cancel_order(self, order: Order):

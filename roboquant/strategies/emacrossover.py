@@ -15,12 +15,12 @@ class EMACrossover(BaseStrategy):
         self.min_steps = max(fast_period, slow_period)
 
     def process(self, event: Event, account: Account):
-        for symbol, price in event.get_prices(self.price_type).items():
+        for asset, price in event.get_prices(self.price_type).items():
 
-            if symbol not in self._history:
-                self._history[symbol] = self._Calculator(self.fast, self.slow, price=price)
+            if asset not in self._history:
+                self._history[asset] = self._Calculator(self.fast, self.slow, price=price)
             else:
-                calculator = self._history[symbol]
+                calculator = self._history[asset]
                 old_rating = calculator.is_above()
                 step = calculator.add_price(price)
 
@@ -28,9 +28,9 @@ class EMACrossover(BaseStrategy):
                     new_rating = calculator.is_above()
                     if old_rating != new_rating:
                         if new_rating:
-                            self.add_buy_order(symbol)
+                            self.add_buy_order(asset)
                         else:
-                            self.add_exit_order(symbol)
+                            self.add_exit_order(asset)
 
     class _Calculator:
 

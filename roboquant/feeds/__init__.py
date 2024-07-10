@@ -7,7 +7,6 @@ from .feed import Feed
 from .historic import HistoricFeed
 from .randomwalk import RandomWalk
 from .sqllitefeed import SQLFeed
-from .tiingo import TiingoLiveFeed, TiingoHistoricFeed
 from .feedutil import get_sp500_symbols, print_feed_items, count_events
 
 try:

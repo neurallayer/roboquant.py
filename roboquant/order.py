@@ -3,16 +3,19 @@ from dataclasses import dataclass
 from decimal import Decimal
 from typing import Any
 
+from roboquant.asset import Asset
+from roboquant.wallet import Amount
+
 
 @dataclass(slots=True)
 class Order:
     """
     A trading order.
     The `id` is automatically assigned by the broker and should not be set manually.
-    Also, the `status` and `fill` are managed by the broker and should not be manually set.
+    Also, the `fill` are managed by the broker and should not be manually set.
     """
 
-    symbol: str
+    asset: Asset
     size: Decimal
     limit: float
     info: dict[str, Any]
@@ -21,9 +24,9 @@ class Order:
     fill: Decimal = Decimal(0)
 
     def __init__(
-        self, symbol: str, size: Decimal | str | int | float, limit: float, **kwargs
+        self, asset: Asset, size: Decimal | str | int | float, limit: float, **kwargs
     ):
-        self.symbol = symbol
+        self.asset = asset
         self.size = Decimal(size)
         assert not self.size.is_zero(), "Cannot create a new order with size is zero"
 
@@ -31,11 +34,6 @@ class Order:
         self.id: str | None = None
         self.fill = Decimal(0)
         self.info = kwargs
-
-    def required_funding(self, position: Decimal = Decimal()) -> float:
-        if abs(self.remaining + position) < abs(position):
-            return 0.0
-        return abs(self.limit * float(self.remaining))
 
     def cancel(self) -> "Order":
         """Create a cancellation order. You can only cancel orders that are still open and have an id.
@@ -64,10 +62,16 @@ class Order:
         return result
 
     def __copy__(self):
-        result = Order(self.symbol, self.size, self.limit, **self.info)
+        result = Order(self.asset, self.size, self.limit, **self.info)
         result.id = self.id
         result.fill = self.fill
         return result
+
+    def value(self):
+        return self.asset.contract_value(self.size, self.limit)
+
+    def amount(self):
+        return Amount(self.asset.currency, self.value())
 
     @property
     def is_cancellation(self):

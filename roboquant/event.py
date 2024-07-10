@@ -5,13 +5,15 @@ from datetime import datetime, timezone
 from functools import cached_property
 from typing import Any
 
+from roboquant.asset import Asset
+
 
 @dataclass(slots=True)
 class PriceItem:
     """Different types of price-items subclass this class"""
 
-    symbol: str
-    """the symbol for this price-item"""
+    asset: Asset
+    """the asset for this price-item"""
 
     @abstractmethod
     def price(self, price_type: str = "DEFAULT") -> float:
@@ -101,10 +103,10 @@ class Bar(PriceItem):
     frequency: str = ""  # f.e 1s , 15m, 4h, 1d
 
     @classmethod
-    def from_adj_close(cls, symbol, ohlcv: array, adj_close: float, frequency=""):
+    def from_adj_close(cls, asset: Asset, ohlcv: array, adj_close: float, frequency=""):
         adj = adj_close / ohlcv[3]
         ohlcv = array("f", [ohlcv[0] * adj, ohlcv[1] * adj, ohlcv[2] * adj, adj_close, ohlcv[4] / adj])
-        return cls(symbol, ohlcv, frequency)
+        return cls(asset, ohlcv, frequency)
 
     def price(self, price_type: str = "DEFAULT") -> float:
         match price_type:
@@ -148,28 +150,28 @@ class Event:
     #    return len(self.items)
 
     @cached_property
-    def price_items(self) -> dict[str, PriceItem]:
-        """Returns the price-items in this event for each symbol.
+    def price_items(self) -> dict[Asset, PriceItem]:
+        """Returns the price-items in this event for each asset.
 
         The first time this method is invoked, the result is calculated and cached.
         """
-        return {item.symbol: item for item in self.items if isinstance(item, PriceItem)}
+        return {item.asset: item for item in self.items if isinstance(item, PriceItem)}
 
-    def get_prices(self, price_type: str = "DEFAULT") -> dict[str, float]:
+    def get_prices(self, price_type: str = "DEFAULT") -> dict[Asset, float]:
         """Return all the prices of a certain price_type"""
         return {k: v.price(price_type) for k, v in self.price_items.items()}
 
-    def get_price(self, symbol: str, price_type: str = "DEFAULT") -> float | None:
-        """Return the price for the symbol, or None if not found."""
+    def get_price(self, asset: Asset, price_type: str = "DEFAULT") -> float | None:
+        """Return the price for the asset, or None if not found."""
 
-        if item := self.price_items.get(symbol):
+        if item := self.price_items.get(asset):
             return item.price(price_type)
         return None
 
-    def get_volume(self, symbol: str, volume_type: str = "DEFAULT") -> float | None:
-        """Return the volume for the symbol, or None if not found."""
+    def get_volume(self, asset: Asset, volume_type: str = "DEFAULT") -> float | None:
+        """Return the volume for the asset, or None if not found."""
 
-        if item := self.price_items.get(symbol):
+        if item := self.price_items.get(asset):
             return item.volume(volume_type)
         return None
 

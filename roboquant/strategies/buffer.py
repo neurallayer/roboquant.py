@@ -5,6 +5,7 @@ from typing import Any
 import numpy as np
 from numpy.typing import NDArray
 
+from roboquant.asset import Asset
 from roboquant.event import Bar, Event
 
 
@@ -78,24 +79,24 @@ class OHLCVBuffer(NumpyBuffer):
         return self._get(4)
 
 
-class OHLCVBuffers(UserDict[str, OHLCVBuffer]):
+class OHLCVBuffers(UserDict[Asset, OHLCVBuffer]):
 
     def __init__(self, size: int):
         super().__init__()
         self.size = size
 
-    def add_event(self, event: Event) -> set[str]:
+    def add_event(self, event: Event) -> set[Asset]:
         """Add a new event and return all the symbols that have been added and are ready to be processed"""
-        symbols: set[str] = set()
+        symbols: set[Asset] = set()
         for item in event.items:
             if isinstance(item, Bar):
-                symbol = item.symbol
-                if symbol not in self:
-                    self[symbol] = OHLCVBuffer(self.size)
-                ohlcv = self[symbol]
+                asset = item.asset
+                if asset not in self:
+                    self[asset] = OHLCVBuffer(self.size)
+                ohlcv = self[asset]
                 ohlcv.append(item.ohlcv)
                 if ohlcv.is_full():
-                    symbols.add(symbol)
+                    symbols.add(asset)
         return symbols
 
     def ready(self):

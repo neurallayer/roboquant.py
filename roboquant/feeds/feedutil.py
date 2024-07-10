@@ -1,13 +1,14 @@
 import json
 import pathlib
 
+from roboquant.asset import Asset
 from roboquant.event import Bar
 from roboquant.feeds.feed import Feed
 from roboquant.timeframe import Timeframe
 
 
-def get_ohlcv(feed: Feed, symbol: str, timeframe: Timeframe | None = None) -> dict[str, list]:
-    """Get the OHLCV values for a symbol from a feed.
+def get_ohlcv(feed: Feed, asset: Asset, timeframe: Timeframe | None = None) -> dict[str, list]:
+    """Get the OHLCV values for a asset from a feed.
     The returned value is a dict with the keys being "Date", "Open", "High", "Low", "Close", "Volume"
     and the values a list.
     """
@@ -15,7 +16,7 @@ def get_ohlcv(feed: Feed, symbol: str, timeframe: Timeframe | None = None) -> di
     result = {column: [] for column in ["Date", "Open", "High", "Low", "Close", "Volume"]}
     channel = feed.play_background(timeframe)
     while event := channel.get():
-        item = event.price_items.get(symbol)
+        item = event.price_items.get(asset)
         if item and isinstance(item, Bar):
             result["Date"].append(event.time)
             result["Open"].append(item.ohlcv[0])

@@ -12,9 +12,11 @@ from ibapi.order import Order as IBKROrder
 from ibapi.wrapper import EWrapper
 
 from roboquant.account import Account, Position
+from roboquant.asset import Asset, Stock
 from roboquant.event import Event
 from roboquant.order import Order
 from roboquant.brokers.broker import LiveBroker, _update_positions
+from roboquant.wallet import Amount, Wallet
 
 assert VERSION["major"] == 10 and VERSION["minor"] == 19, "Wrong version of the IBAPI found"
 
@@ -27,8 +29,11 @@ class _IBApi(EWrapper, EClient):
     def __init__(self):
         EClient.__init__(self, self)
         self.open_orders: dict[str, Order] = {}
-        self.positions: dict[str, Position] = {}
-        self.__account = {AccountSummaryTags.TotalCashValue: 0.0, AccountSummaryTags.BuyingPower: 0.0}
+        self.positions: dict[Asset, Position] = {}
+        self.__account = {
+            AccountSummaryTags.TotalCashValue: Amount("USD", 0.0),
+            AccountSummaryTags.BuyingPower: Amount("USD", 0.0),
+        }
         self.__account_end = threading.Condition()
         self.__order_id = 0
 
@@ -44,13 +49,15 @@ class _IBApi(EWrapper, EClient):
     def position(self, account: str, contract: Contract, position: Decimal, avgCost: float):
         logger.debug("position=%s symbol=%s  avgCost=%s", position, contract.localSymbol, avgCost)
         symbol = contract.localSymbol or contract.symbol
-        old_position = self.positions.get(symbol)
+        asset = Stock(symbol, contract.currency)
+        old_position = self.positions.get(asset)
         mkt_price = old_position.mkt_price if old_position else avgCost
-        self.positions[symbol] = Position(position, avgCost, mkt_price)
+        self.positions[asset] = Position(position, avgCost, mkt_price)
 
     def accountSummary(self, reqId: int, account: str, tag: str, value: str, currency: str):
         logger.debug("account %s=%s", tag, value)
-        self.__account[tag] = float(value)
+        if tag in self.__account:
+            self.__account[tag] = Amount(currency, float(value))
 
     def accountSummaryEnd(self, reqId: int):
         with self.__account_end:
@@ -66,7 +73,8 @@ class _IBApi(EWrapper, EClient):
         )
         size = order.totalQuantity if order.action == "BUY" else -order.totalQuantity
         symbol = contract.localSymbol
-        rq_order = Order(symbol, size, order.lmtPrice)
+        asset = Stock(symbol, contract.currency)
+        rq_order = Order(asset, size, order.lmtPrice)
         rq_order.id = str(orderId)
         self.open_orders[rq_order.id] = rq_order
 
@@ -79,12 +87,10 @@ class _IBApi(EWrapper, EClient):
             self.__account_end.wait()
 
     def get_buying_power(self):
-        buyingpower_tag = AccountSummaryTags.BuyingPower
-        return self.__account[buyingpower_tag] or 0.0
+        return self.__account[AccountSummaryTags.BuyingPower] or Amount("USD", 0.0)
 
     def get_cash(self):
-        cash_tag = AccountSummaryTags.TotalCashValue
-        return self.__account[cash_tag] or 0.0
+        return self.__account[AccountSummaryTags.TotalCashValue] or Amount("USD", 0.0)
 
     def orderStatus(
         self,
@@ -137,7 +143,7 @@ class IBKRBroker(LiveBroker):
     def __init__(self, host="127.0.0.1", port=4002, client_id=123) -> None:
         super().__init__()
         self.__account = Account()
-        self.contract_mapping: dict[str, Contract] = {}
+        self.contract_mapping: dict[Asset, Contract] = {}
         api = _IBApi()
         api.connect(host, port, client_id)
         self.__api = api
@@ -184,7 +190,7 @@ class IBKRBroker(LiveBroker):
             acc.positions = {k: v for k, v in api.positions.items() if not v.size.is_zero()}
             acc.orders = list(api.open_orders.values())
             acc.buying_power = api.get_buying_power()
-            acc.cash = api.get_cash()
+            acc.cash = Wallet(api.get_cash())
 
         _update_positions(acc, event)
         return acc
@@ -199,7 +205,10 @@ class IBKRBroker(LiveBroker):
                 time.sleep(1)
 
             if order.size.is_zero():
-                assert order.id is not None, "can only cancel orders with an id"
+                if order.id is None:
+                    logger.warning("can only cancel orders with an id")
+                    continue
+
                 self.__api.cancelOrder(int(order.id), "")
                 if self.sleep_after_cancel:
                     time.sleep(self.sleep_after_cancel)
@@ -225,13 +234,13 @@ class IBKRBroker(LiveBroker):
     def _get_contract(self, order: Order) -> Contract:
         """Map an order to a IBKR contract."""
 
-        c = self.contract_mapping.get(order.symbol)
+        c = self.contract_mapping.get(order.asset)
 
         if not c:
             c = Contract()
-            c.symbol = order.symbol
+            c.symbol = order.asset.symbol
             c.secType = "STK"
-            c.currency = "USD"
+            c.currency = order.asset.currency
             c.exchange = "SMART"  # use smart routing by default
 
         # Override attributes
@@ -246,6 +255,7 @@ class IBKRBroker(LiveBroker):
         o.totalQuantity = abs(order.size)
         o.tif = "GTC"
         o.orderType = "LMT"
+        o.lmtPrice = order.limit
 
         # Override attributes
         IBKRBroker.__update_ibkr_object(o, order.info.get("order"))

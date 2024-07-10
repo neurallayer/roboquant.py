@@ -2,6 +2,7 @@ from array import array
 from datetime import timedelta
 from typing import Literal
 
+from roboquant.asset import Asset
 from roboquant.event import Event, Bar, Trade, Quote
 from .eventchannel import EventChannel
 from .feed import Feed
@@ -29,7 +30,7 @@ class AggregatorFeed(Feed):
         self.continuation = continuation
         self.price_type = price_type
 
-    def __aggr_trade2bar(self, evt: Event, bars: dict[str, Bar], freq: str):
+    def __aggr_trade2bar(self, evt: Event, bars: dict[Asset, Bar], freq: str):
 
         for item in evt.items:
 
@@ -42,7 +43,7 @@ class AggregatorFeed(Feed):
             else:
                 continue
 
-            symbol = item.symbol
+            symbol = item.asset
             b = bars.get(symbol)
             if b:
                 ohlcv = b.ohlcv
@@ -55,7 +56,7 @@ class AggregatorFeed(Feed):
             else:
                 bars[symbol] = Bar(symbol, array("f", [price, price, price, price, volume]), freq)
 
-    def __get_continued_bars(self, bars: dict[str, Bar]) -> dict[str, Bar]:
+    def __get_continued_bars(self, bars: dict[Asset, Bar]) -> dict[Asset, Bar]:
         result = {}
         for symbol, item in bars.items():
             p = item.price("CLOSE")
@@ -65,7 +66,7 @@ class AggregatorFeed(Feed):
         return result
 
     def play(self, channel: EventChannel):
-        bars: dict[str, Bar] = {}
+        bars: dict[Asset, Bar] = {}
         src_channel = self.feed.play_background(channel.timeframe, channel.maxsize)
         next_time = None
         bar_freq = str(self.freq)

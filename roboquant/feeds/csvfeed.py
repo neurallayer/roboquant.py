@@ -7,6 +7,7 @@ import pathlib
 from array import array
 from datetime import datetime, time, timezone
 
+from roboquant.asset import Stock
 from roboquant.event import Bar
 from roboquant.feeds.historic import HistoricFeed
 
@@ -106,11 +107,12 @@ class CSVFeed(HistoricFeed):
                         dt = datetime.combine(dt, time_offset)
 
                     ohlcv = array("f", [float(row[column]) for column in ohlcv_columns])
+                    asset = Stock(symbol, "USD")
                     if adj_close_column:
                         adj_close = float(row[adj_close_column])
-                        pb = Bar.from_adj_close(symbol, ohlcv, adj_close, freq)
+                        pb = Bar.from_adj_close(asset, ohlcv, adj_close, freq)
                     else:
-                        pb = Bar(symbol, ohlcv, freq)
+                        pb = Bar(asset, ohlcv, freq)
 
                     self._add_item(dt.astimezone(timezone.utc), pb)
 

@@ -3,9 +3,11 @@ from decimal import Decimal
 import logging
 
 from roboquant.account import Account, Position
+from roboquant.asset import Asset
 from roboquant.brokers.broker import Broker, _update_positions
 from roboquant.event import Event, Quote, PriceItem
 from roboquant.order import Order
+from roboquant.wallet import Amount, Wallet
 
 logger = logging.getLogger(__name__)
 
@@ -14,7 +16,7 @@ logger = logging.getLogger(__name__)
 class _Trx:
     """transaction for an executed trade"""
 
-    symbol: str
+    asset: Asset
     size: Decimal
     price: float  # denoted in the currency of the symbol
 
@@ -27,15 +29,15 @@ class SimBroker(Broker):
 
     def __init__(
         self,
-        initial_deposit=1_000_000.0,
+        initial_deposit=Amount("USD", 1_000_000.0),
         price_type="OPEN",
         slippage=0.001
     ):
         super().__init__()
-        self._account = Account()
+        self._account = Account(initial_deposit.currency)
         self._modify_orders: list[Order] = []
         self._create_orders: list[Order] = []
-        self._account.cash = initial_deposit
+        self._account.cash = Wallet(initial_deposit)
         self._account.buying_power = initial_deposit
         self._order_id = 0
 
@@ -44,37 +46,37 @@ class SimBroker(Broker):
         self.initial_deposit = initial_deposit
 
     def reset(self):
-        self._account = Account()
+        self._account = Account(self.initial_deposit.currency)
         self._modify_orders: list[Order] = []
         self._create_orders: list[Order] = []
-        self._account.cash = self.initial_deposit
+        self._account.cash = Wallet(self.initial_deposit)
         self._account.buying_power = self.initial_deposit
         self._order_id = 0
 
     def _update_account(self, trx: _Trx):
         """Update a position and cash based on a new transaction"""
         acc = self._account
-        symbol = trx.symbol
-        acc.cash -= acc.contract_value(symbol, trx.price, trx.size)
+        asset = trx.asset
+        acc.cash -= asset.contract_amount(trx.size, trx.price)
 
-        size = acc.get_position_size(symbol)
+        size = acc.get_position_size(asset)
 
         if size.is_zero():
             # opening of position
-            acc.positions[symbol] = Position(trx.size, trx.price, trx.price)
+            acc.positions[asset] = Position(trx.size, trx.price, trx.price)
         else:
             new_size: Decimal = size + trx.size
             if new_size.is_zero():
                 # closing of position
-                del acc.positions[symbol]
+                del acc.positions[asset]
             elif new_size.is_signed() != size.is_signed():
                 # reverse of position
-                acc.positions[symbol] = Position(new_size, trx.price, trx.price)
+                acc.positions[asset] = Position(new_size, trx.price, trx.price)
             else:
                 # increase of position size
-                old_price = acc.positions[symbol].avg_price
+                old_price = acc.positions[asset].avg_price
                 avg_price = (old_price * float(size) + trx.price * float(trx.size)) / (float(size + trx.size))
-                acc.positions[symbol] = Position(new_size, avg_price, trx.price)
+                acc.positions[asset] = Position(new_size, avg_price, trx.price)
 
     def _get_execution_price(self, order: Order, item: PriceItem) -> float:
         """Return the execution price to use for an order based on the price item.
@@ -94,7 +96,7 @@ class SimBroker(Broker):
         price = self._get_execution_price(order, item)
         fill = self._get_fill(order, price)
         if fill:
-            return _Trx(order.symbol, fill, price)
+            return _Trx(order.asset, fill, price)
         return None
 
     def __next_order_id(self):
@@ -152,9 +154,9 @@ class SimBroker(Broker):
 
         self._modify_orders = []
 
-    def _process_open_orders(self, prices: dict[str, PriceItem]):
+    def _process_open_orders(self, prices: dict[Asset, PriceItem]):
         for order in self._account.orders:
-            if (item := prices.get(order.symbol)) is not None:
+            if (item := prices.get(order.asset)) is not None:
                 trx = self._execute(order, item)
                 if trx is not None:
                     logger.info("executed order=%s trx=%s", order, trx)
@@ -164,22 +166,22 @@ class SimBroker(Broker):
                         self.remove_order(order)
 
     def _calculate_open_orders(self):
-        reserved = 0.0
+        reserved = Wallet()
         for order in self._account.orders:
-            old_pos = self._account.get_position_size(order.symbol)
+            old_pos = self._account.get_position_size(order.asset)
             remaining = order.size - order.fill
 
             # only update reserved amount if remaining order size would increase position size
             if abs(old_pos + remaining) > abs(old_pos):
-                reserved += abs(self._account.contract_value(order.symbol, order.limit, remaining))
+                reserved += order.asset.contract_amount(abs(remaining), order.limit)
 
         return reserved
 
     def _calculate_short_positions(self):
-        reserved = 0.0
-        for symbol, position in self._account.short_positions().items():
-            short_value = self._account.contract_value(symbol, position.mkt_price, position.size)
-            reserved += abs(short_value)
+        reserved = Wallet()
+        for asset, position in self._account.short_positions().items():
+            short_value = asset.contract_amount(-position.size, position.mkt_price)
+            reserved += short_value
         return reserved
 
     def _calculate_buyingpower(self):
@@ -187,10 +189,11 @@ class SimBroker(Broker):
 
         buying_power = cash - open_orders - short_positions
         """
-        bp = self._account.cash
-        bp -= self._calculate_open_orders()
-        bp -= self._calculate_short_positions()
-        return bp
+        result = Wallet()
+        result += self._account.cash
+        result -= self._calculate_open_orders()
+        result -= self._calculate_short_positions()
+        return Amount(self._account.base_currency, self._account.convert(result))
 
     def sync(self, event: Event | None = None) -> Account:
         """This will perform the order-execution simulation for the open orders and

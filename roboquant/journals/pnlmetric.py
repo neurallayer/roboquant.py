@@ -1,3 +1,4 @@
+from roboquant.account import Account
 from roboquant.journals.metric import Metric
 
 
@@ -21,7 +22,7 @@ class PNLMetric(Metric):
         self.min_equity = 10e10
 
     def calc(self, event, account, orders) -> dict[str, float]:
-        equity = account.equity()
+        equity = account.equity_value()
 
         total, realized, unrealized = self.__get_pnl_values(equity, account)
 
@@ -35,11 +36,11 @@ class PNLMetric(Metric):
             "pnl/unrealized": unrealized,
         }
 
-    def __get_pnl_values(self, equity, account):
+    def __get_pnl_values(self, equity, account: Account):
         if self.first_equity is None:
             self.first_equity = equity
 
-        unrealized = account.unrealized_pnl()
+        unrealized = account.unrealized_pnl_value()
         total = equity - self.first_equity
         realized = total - unrealized
         return total, realized, unrealized

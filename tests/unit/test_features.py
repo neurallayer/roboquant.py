@@ -22,16 +22,16 @@ class TestFeatures(unittest.TestCase):
 
     def test_all_features(self):
         feed = get_feed()
-        symbols = feed.symbols
+        symbols = list(feed.assets)
         symbol1 = symbols[0]
         symbol2 = symbols[1]
 
         feature = CombinedFeature(
-            PriceFeature(symbol1, "CLOSE"),
-            PriceFeature(symbol1, "OPEN"),
+            PriceFeature(symbol1, price_type="CLOSE"),
+            PriceFeature(symbol1, price_type="OPEN"),
             SMAFeature(FixedValueFeature(np.ones((3,))), 8),
-            SMAFeature(PriceFeature(symbol2, "CLOSE"), 10),
-            ReturnsFeature(PriceFeature(symbol1, "OPEN")),
+            SMAFeature(PriceFeature(symbol2, price_type="CLOSE"), 10),
+            ReturnsFeature(PriceFeature(symbol1, price_type="OPEN")),
             VolumeFeature(symbol2),
             DayOfWeekFeature(),
         )
@@ -45,7 +45,7 @@ class TestFeatures(unittest.TestCase):
         feed = get_feed()
 
         feature = CacheFeature(
-            PriceFeature(*feed.symbols),
+            PriceFeature(*feed.assets),
         )
 
         account = Account()
@@ -64,7 +64,7 @@ class TestFeatures(unittest.TestCase):
         feed = get_feed()
 
         feature = CombinedFeature(
-            PriceFeature(*feed.symbols).returns(),
+            PriceFeature(*feed.assets).returns(),
         )
 
         norm_feature = NormalizeFeature(feature, 10)

@@ -10,6 +10,7 @@ import numpy as np
 from numpy.typing import NDArray
 from roboquant.account import Account
 
+from roboquant.asset import Asset
 from roboquant.brokers.simbroker import SimBroker
 from roboquant.event import Event
 from roboquant.feeds.eventchannel import EventChannel
@@ -36,99 +37,99 @@ class ActionTransformer(ABC):
 class OrderMaker(ActionTransformer):
     """Transforms an action into orders"""
 
-    def __init__(self, symbols: list[str], order_valid_for=timedelta(days=3)):
+    def __init__(self, assets: list[Asset], order_valid_for=timedelta(days=3)):
         super().__init__()
-        self.symbols = symbols
+        self.assets = assets
         self.order_valid_for = order_valid_for
 
     def get_orders(self, actions: NDArray, event: Event, account: Account) -> list[Order]:
         orders = []
         equity = account.equity()
-        symbols = {o.symbol for o in account.orders}
-        for symbol, fraction in zip(self.symbols, actions):
-            if symbol in symbols:
+        assets = {o.asset for o in account.orders}
+        for asset, fraction in zip(self.assets, actions):
+            if asset in assets:
                 continue
-            price = event.get_price(symbol)
+            price = event.get_price(asset)
             if price:
-                rel_fraction = fraction / len(self.symbols)
-                contract_value = account.contract_value(symbol, price)
+                rel_fraction = fraction / len(self.assets)
+                contract_value = asset.contract_value(Decimal(1), price)
                 size = round(equity * rel_fraction / contract_value)
-                order = Order(symbol, size, price)
+                order = Order(asset, size, price)
                 orders.append(order)
         return orders
 
     def get_action_space(self) -> Space:
-        return spaces.Box(-1.0, 1.0, shape=(len(self.symbols),), dtype=np.float32)
+        return spaces.Box(-1.0, 1.0, shape=(len(self.assets),), dtype=np.float32)
 
 
 class OrderWithLimitsMaker(ActionTransformer):
     """Transforms an action into orders"""
 
-    def __init__(self, symbols: list[str]):
+    def __init__(self, assets: list[Asset]):
         super().__init__()
-        self.symbols = symbols
+        self.assets = assets
 
     def get_orders(self, actions: NDArray, event: Event, account: Account) -> list[Order]:
         orders = []
         equity = account.equity()
-        bp = account.buying_power
-        for symbol, (fraction, limit_perc) in zip(self.symbols, actions.reshape(-1, 2)):
-            price = event.get_price(symbol)
+        bp = account.buying_power.value
+        for asset, (fraction, limit_perc) in zip(self.assets, actions.reshape(-1, 2)):
+            price = event.get_price(asset)
             if price:
-                rel_fraction = fraction / (10 * len(self.symbols))
-                contract_value = account.contract_value(symbol, price)
+                rel_fraction = fraction / (10 * len(self.assets))
+                contract_value = asset.contract_value(Decimal(1), price)
                 size = round(equity * rel_fraction / contract_value)
                 limit = price * (1.0 + limit_perc / 100.0)
-                required = abs(account.contract_value(symbol, limit, size))
+                required = abs(asset.contract_value(size, limit))
                 if size and required < bp:
-                    if order := next((o for o in account.orders if o.symbol == symbol), None):
+                    if order := next((o for o in account.orders if o.asset == asset), None):
                         orders.append(order.cancel())
-                    new_order = Order(symbol, size, limit)
+                    new_order = Order(asset, size, limit)
                     orders.append(new_order)
                     bp -= required
         return orders
 
     def get_action_space(self) -> Space:
-        return spaces.Box(-1.0, 1.0, shape=(len(self.symbols) * 2,), dtype=np.float32)
+        return spaces.Box(-1.0, 1.0, shape=(len(self.assets) * 2,), dtype=np.float32)
 
 
 class Action2Orders(ActionTransformer):
     """Transforms an action into orders"""
 
-    def __init__(self, symbols: list[str], price_type="DEFAULT", order_valid_till=timedelta(days=5)):
+    def __init__(self, assets: list[Asset], price_type="DEFAULT", order_valid_till=timedelta(days=5)):
         super().__init__()
-        self.symbols = symbols
+        self.assets = assets
         self.price_type = price_type
         self.order_valid_till = order_valid_till
 
-    def _rebalance(self, account: Account, new_sizes: dict[str, Decimal], event: Event) -> list[Order]:
+    def _rebalance(self, account: Account, new_sizes: dict[Asset, Decimal], event: Event) -> list[Order]:
         orders = []
-        for symbol, new_size in new_sizes.items():
-            old_size = account.get_position_size(symbol)
+        for asset, new_size in new_sizes.items():
+            old_size = account.get_position_size(asset)
             order_size = new_size - old_size
-            limit = event.get_price(symbol, self.price_type)
-            if order_size != Decimal(0) and limit:
-                order = Order(symbol, order_size, limit)
+            limit = event.get_price(asset, self.price_type)
+            if order_size and limit:
+                order = Order(asset, order_size, limit)
                 orders.append(order)
 
         return orders
 
     def get_orders(self, actions: NDArray, event: Event, account: Account) -> list[Order]:
         new_positions = {}
-        equity = account.equity()
-        for symbol, fraction in zip(self.symbols, actions):
-            if price := event.get_price(symbol):
-                rel_fraction = fraction / len(self.symbols)
-                contract_value = account.contract_value(symbol, price)
+        equity = account.equity_value()
+        for asset, fraction in zip(self.assets, actions):
+            if price := event.get_price(asset):
+                rel_fraction = fraction / len(self.assets)
+                contract_value = asset.contract_value(Decimal(1), price)
                 size = equity * rel_fraction / contract_value
-                new_positions[symbol] = Decimal(size).quantize(Decimal(1))
+                new_positions[asset] = Decimal(size).quantize(Decimal(1))
             else:
-                new_positions[symbol] = Decimal()
+                new_positions[asset] = Decimal()
 
         return self._rebalance(account, new_positions, event)
 
     def get_action_space(self) -> Space:
-        return spaces.Box(-1.0, 1.0, shape=(len(self.symbols),), dtype=np.float32)
+        return spaces.Box(-1.0, 1.0, shape=(len(self.assets),), dtype=np.float32)
 
 
 class TradingEnv(gym.Env):
@@ -180,7 +181,7 @@ class TradingEnv(gym.Env):
         if self.event:
             self.account = self.broker.sync(self.event)
 
-            if self.account.equity() < 0.0:
+            if self.account.equity_value() < 0.0:
                 logger.info("Account equity < 0, done=True")
                 return None, 0.0, True, False, {}
 

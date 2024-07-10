@@ -6,7 +6,7 @@ import roboquant as rq
 
 
 class TestBigFeed(unittest.TestCase):
-    """Run two large bast tests, one over daily bars and one over 5-minutes bars"""
+    """Run two large back tests, one over daily bars and one over 5-minutes bars"""
 
     @staticmethod
     def _print(account, journal, feed, load_time, runtime):

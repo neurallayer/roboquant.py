@@ -11,7 +11,7 @@ class TestRoboquant(unittest.TestCase):
         self.feed = get_feed()
 
     def test_single_run(self):
-        account = rq.run(self.feed, rq.strategies.EMACrossover(), )
+        account = rq.run(self.feed, rq.strategies.EMACrossover())
         self.assertEqual(self.feed.timeframe().end, account.last_update)
 
     def test_walkforward_run(self):

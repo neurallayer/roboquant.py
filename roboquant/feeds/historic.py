@@ -1,8 +1,8 @@
 from abc import ABC
 from datetime import datetime
 from itertools import chain
-from typing import List
 
+from roboquant.asset import Asset
 from roboquant.event import Event, PriceItem
 from roboquant.timeframe import EMPTY_TIMEFRAME, Timeframe
 from .eventchannel import EventChannel
@@ -19,7 +19,7 @@ class HistoricFeed(Feed, ABC):
         super().__init__()
         self.__data: dict[datetime, list[PriceItem]] = {}
         self.__modified = False
-        self.__symbols = []
+        self.__assets: set[Asset] = set()
 
     def _add_item(self, time: datetime, item: PriceItem):
         """Add a price-item at a moment in time to this feed.
@@ -38,17 +38,17 @@ class HistoricFeed(Feed, ABC):
             items.append(item)
 
     @property
-    def symbols(self):
+    def assets(self):
         """Return the list of unique symbols available in this feed"""
         self.__update()
-        return self.__symbols
+        return self.__assets
 
     @property
     def events(self):
         """Return the total number of events"""
         return len(self.__data)
 
-    def timeline(self) -> List[datetime]:
+    def timeline(self) -> list[datetime]:
         """Return the timeline of this feed as a list of datatime objects"""
         self.__update()
         return list(self.__data.keys())
@@ -61,17 +61,17 @@ class HistoricFeed(Feed, ABC):
 
         return EMPTY_TIMEFRAME
 
-    def get_ohlcv(self, symbol: str, timeframe=None) -> dict[str, list]:
+    def get_ohlcv(self, asset: Asset, timeframe=None) -> dict[str, list]:
         """Get the OHLCV values for a symbol for the (optional) provided timeframe.
         This makes it easy to plot prices and use them in a dataframe.
         """
-        return get_ohlcv(self, symbol, timeframe)
+        return get_ohlcv(self, asset, timeframe)
 
     def __update(self):
         if self.__modified:
             self.__data = dict(sorted(self.__data.items()))
             price_items = chain.from_iterable(self.__data.values())
-            self.__symbols = list({item.symbol for item in price_items})
+            self.__assets = {item.asset for item in price_items}
             self.__modified = False
 
     def play(self, channel: EventChannel):
@@ -82,4 +82,4 @@ class HistoricFeed(Feed, ABC):
 
     def __repr__(self) -> str:
         feed = self.__class__.__name__
-        return f"{feed}(events={self.events} symbols={len(self.symbols)} timeframe={self.timeframe()})"
+        return f"{feed}(events={self.events} assets={len(self.assets)} timeframe={self.timeframe()})"

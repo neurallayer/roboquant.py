@@ -3,7 +3,7 @@ import unittest
 from statistics import mean, stdev
 
 from roboquant import Timeframe
-from roboquant.feeds import TiingoLiveFeed, Feed
+from roboquant.feeds import Feed
 from roboquant.alpaca import AlpacaLiveFeed
 
 
@@ -19,9 +19,7 @@ class TestDelay(unittest.TestCase):
     - From the access-point to your computer (f.e lan or Wi-Fi)
     """
 
-    def __get_symbols(self):
-        # Popular stocks
-        return ["TSLA", "MSFT", "NVDA", "AMD", "AAPL", "AMZN", "META", "GOOG", "XOM", "JPM", "NLFX", "BA", "INTC", "V"]
+    __symbols = ["TSLA", "MSFT", "NVDA", "AMD", "AAPL", "AMZN", "META", "GOOG", "XOM", "JPM", "NLFX", "BA", "INTC", "V"]
 
     def __run_feed(self, feed: Feed):
         timeframe = Timeframe.next(minutes=1)
@@ -44,15 +42,9 @@ class TestDelay(unittest.TestCase):
         else:
             print(f"Didn't receive any items from {name}, is it perhaps outside trading hours?")
 
-    def test_tiingo_delay(self):
-        feed = TiingoLiveFeed(market="iex")
-        feed.subscribe(*self.__get_symbols(), threshold_level=0)
-        self.__run_feed(feed)
-        feed.close()
-
     def test_alpaca_delay(self):
         feed = AlpacaLiveFeed(market="iex")
-        feed.subscribe_quotes(*self.__get_symbols())
+        feed.subscribe_quotes(*TestDelay.__symbols)
         self.__run_feed(feed)
 
 
