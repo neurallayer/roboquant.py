@@ -5,7 +5,7 @@ requests>=2.32.0
 
 # Part of optional 
 yfinance~=0.2.38
-torch>=2.1.0
+torch>=2.3.0
 tensorboard>=2.15.1
 nautilus-ibapi~=10.19.2
 alpaca-py~=0.28.0
