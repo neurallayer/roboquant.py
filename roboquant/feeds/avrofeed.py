@@ -2,16 +2,13 @@ import logging
 import os.path
 from datetime import datetime
 from array import array
-import time
 
 from fastavro import writer, reader, parse_schema
 
-from roboquant.alpaca.feed import AlpacaHistoricStockFeed
 from roboquant.event import Quote, Bar, Trade
 from roboquant.event import Event
 from roboquant.feeds.eventchannel import EventChannel
 from roboquant.feeds.feed import Feed
-from roboquant.feeds.feedutil import count_events, print_feed_items
 from roboquant.asset import Asset
 
 logger = logging.getLogger(__name__)
@@ -107,16 +104,3 @@ class AvroFeed(Feed):
 
     def __repr__(self) -> str:
         return f"AvroFeed(path={self.avro_file})"
-
-
-if __name__ == "__main__":
-
-    avroFeed = AvroFeed("/tmp/test.avro")
-    if not avroFeed.exists():
-        alpaca_feed = AlpacaHistoricStockFeed()
-        alpaca_feed.retrieve_quotes("AAPL", start="2024-05-24T18:00:00Z", end="2024-05-24T18:15:00Z")
-        avroFeed.record(alpaca_feed)
-
-    start = time.time()
-    print("events=", count_events(avroFeed), "time=", time.time() - start)
-    print_feed_items(avroFeed)

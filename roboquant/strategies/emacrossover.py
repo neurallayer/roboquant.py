@@ -1,4 +1,5 @@
 from roboquant.account import Account
+from roboquant.asset import Asset
 from roboquant.event import Event
 from roboquant.strategies.basestrategy import BaseStrategy
 
@@ -8,7 +9,7 @@ class EMACrossover(BaseStrategy):
 
     def __init__(self, fast_period=13, slow_period=26, smoothing=2.0, price_type="DEFAULT"):
         super().__init__()
-        self._history = {}
+        self._history: dict[Asset, EMACrossover._Calculator] = {}
         self.fast = 1.0 - (smoothing / (fast_period + 1))
         self.slow = 1.0 - (smoothing / (slow_period + 1))
         self.price_type = price_type

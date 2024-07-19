@@ -15,8 +15,8 @@ class TestBigFeed(unittest.TestCase):
         # Print statistics
         print()
         print(f"load time  = {load_time:.1f}s")
-        print("files      =", len(feed.symbols))
-        print(f"throughput = {len(feed.symbols) / load_time:.0f} files/s")
+        print("files      =", len(feed.assets))
+        print(f"throughput = {len(feed.assets) / load_time:.0f} files/s")
         print(f"run time   = {runtime:.1f}s")
         candles = journal.items / 1_000_000.0
         print(f"candles    = {candles:.1f}M")

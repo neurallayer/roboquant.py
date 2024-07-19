@@ -9,6 +9,7 @@ from ibapi.account_summary_tags import AccountSummaryTags
 from ibapi.client import EClient
 from ibapi.contract import Contract
 from ibapi.order import Order as IBKROrder
+from ibapi.order_state import OrderState
 from ibapi.wrapper import EWrapper
 
 from roboquant.account import Account, Position
@@ -28,7 +29,8 @@ class _IBApi(EWrapper, EClient):
 
     def __init__(self):
         EClient.__init__(self, self)
-        self.open_orders: dict[str, Order] = {}
+        self.__tmp_orders: dict[str, Order] = {}
+        self.orders: list[Order] = []
         self.positions: dict[Asset, Position] = {}
         self.__account = {
             AccountSummaryTags.TotalCashValue: Amount("USD", 0.0),
@@ -63,7 +65,7 @@ class _IBApi(EWrapper, EClient):
         with self.__account_end:
             self.__account_end.notify_all()
 
-    def openOrder(self, orderId: int, contract, order: IBKROrder, orderState):
+    def openOrder(self, orderId: int, contract, order: IBKROrder, orderState: OrderState):
         logger.debug(
             "openOrder orderId=%s status=%s size=%s limit=%s",
             orderId,
@@ -76,7 +78,13 @@ class _IBApi(EWrapper, EClient):
         asset = Stock(symbol, contract.currency)
         rq_order = Order(asset, size, order.lmtPrice)
         rq_order.id = str(orderId)
-        self.open_orders[rq_order.id] = rq_order
+        rq_order.created_at = datetime.fromisoformat(order.activeStartTime)
+        self.__tmp_orders[rq_order.id] = rq_order
+
+    def openOrderEnd(self):
+        logger.debug("openn orde ended")
+        self.orders = list(self.__tmp_orders.values())
+        self.__tmp_orders.clear()
 
     def request_account(self):
         """blocking call till account summary has been received"""
@@ -91,33 +99,6 @@ class _IBApi(EWrapper, EClient):
 
     def get_cash(self):
         return self.__account[AccountSummaryTags.TotalCashValue] or Amount("USD", 0.0)
-
-    def orderStatus(
-        self,
-        orderId,
-        status,
-        filled,
-        remaining,
-        avgFillPrice,
-        permId,
-        parentId,
-        lastFillPrice,
-        clientId,
-        whyHeld,
-        mktCapPrice,
-    ):
-        logger.debug("order status orderId=%s status=%s fill=%s", orderId, status, filled)
-        orderId = str(orderId)
-        if orderId in self.open_orders:
-            order = self.open_orders[orderId]
-            order.fill = filled
-            match status:
-                case "Cancelled":
-                    del self.open_orders[orderId]
-                case "Filled":
-                    del self.open_orders[orderId]
-        else:
-            logger.warning("received status for an order that is not open id=%s status=%s", orderId, status)
 
 
 class IBKRBroker(LiveBroker):
@@ -188,7 +169,7 @@ class IBKRBroker(LiveBroker):
             api.request_account()
 
             acc.positions = {k: v for k, v in api.positions.items() if not v.size.is_zero()}
-            acc.orders = list(api.open_orders.values())
+            acc.orders = list(api.orders)
             acc.buying_power = api.get_buying_power()
             acc.cash = Wallet(api.get_cash())
 
@@ -215,7 +196,6 @@ class IBKRBroker(LiveBroker):
             else:
                 if order.id is None:
                     order.id = self.__api.get_next_order_id()
-                    self.__api.open_orders[order.id] = order
                 ibkr_order = self._get_order(order)
                 contract = self._get_contract(order)
                 self.__api.placeOrder(int(order.id), contract, ibkr_order)

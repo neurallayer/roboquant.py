@@ -41,7 +41,7 @@ class AlpacaBroker(LiveBroker):
                 return Crypto.from_symbol(symbol)
 
     def _sync_orders(self):
-        orders = []
+        orders: list[Order] = []
         request = GetOrdersRequest(status=QueryOrderStatus.OPEN)
         alpaca_orders: list[AOrder] = self.__client.get_orders(request)  # type: ignore
         for alpaca_order in alpaca_orders:
@@ -52,6 +52,7 @@ class AlpacaBroker(LiveBroker):
                 float(alpaca_order.limit_price),  # type: ignore
             )
             order.fill = Decimal(alpaca_order.filled_qty)  # type: ignore
+            order.created_at = alpaca_order.created_at
             order.id = str(alpaca_order.id)
             orders.append(order)
 
@@ -73,8 +74,11 @@ class AlpacaBroker(LiveBroker):
 
         client = self.__client
         acc: TradeAccount = client.get_account()  # type: ignore
-        self.__account.buying_power = float(acc.buying_power)  # type: ignore
-        self.__account.cash = Wallet(Amount("USD", float(acc.cash)))  # type: ignore
+        if acc.buying_power:
+            self.__account.buying_power = Amount("USD", float(acc.buying_power))
+        if acc.cash:
+            self.__account.cash = Wallet(Amount("USD", float(acc.cash)))
+
         self.__account.last_update = now
 
         self._sync_positions()

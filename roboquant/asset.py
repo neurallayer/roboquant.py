@@ -1,3 +1,4 @@
+from abc import ABC
 from dataclasses import dataclass
 from decimal import Decimal
 from typing import ClassVar
@@ -6,9 +7,10 @@ from roboquant.wallet import Amount
 
 
 @dataclass(frozen=True, slots=True)
-class Asset:
+class Asset(ABC):
+
     symbol: str
-    currency: str
+    currency: str = "USD"
 
     __cache: ClassVar[dict[str, "Asset"]] = {}
 
@@ -31,6 +33,9 @@ class Asset:
 
         return False
 
+    def __hash__(self):
+        return hash(self.symbol)
+
     def serialize(self):
         return self.type() + ":" + self.symbol + ":" + self.currency
 
@@ -47,11 +52,16 @@ class Asset:
 
 @dataclass(frozen=True, slots=True)
 class Stock(Asset):
-    pass
+
+    def serialize(self):
+        return "Stock" + ":" + self.symbol + ":" + self.currency
 
 
 @dataclass(frozen=True, slots=True)
 class Crypto(Asset):
+
+    symbol: str  # type: ignore
+    currency: str  # type: ignore
 
     @staticmethod
     def from_symbol(symbol: str, sep="/"):

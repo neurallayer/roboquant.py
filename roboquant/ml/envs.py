@@ -2,6 +2,7 @@ from abc import ABC, abstractmethod
 from datetime import timedelta
 from decimal import Decimal
 import logging
+from typing import Callable, Sequence
 import gymnasium as gym
 from gymnasium import spaces
 from gymnasium.envs.registration import register
@@ -15,6 +16,7 @@ from roboquant.brokers.simbroker import SimBroker
 from roboquant.event import Event
 from roboquant.feeds.eventchannel import EventChannel
 from roboquant.feeds.feed import Feed
+from roboquant.journals.journal import Journal
 from roboquant.order import Order
 from roboquant.ml.features import Feature
 from roboquant.timeframe import Timeframe
@@ -44,18 +46,21 @@ class OrderMaker(ActionTransformer):
 
     def get_orders(self, actions: NDArray, event: Event, account: Account) -> list[Order]:
         orders = []
-        equity = account.equity()
+        equity = account.equity_value()
         assets = {o.asset for o in account.orders}
+        bp = account.buying_power.value
         for asset, fraction in zip(self.assets, actions):
             if asset in assets:
                 continue
-            price = event.get_price(asset)
-            if price:
+            if price := event.get_price(asset):
                 rel_fraction = fraction / len(self.assets)
                 contract_value = asset.contract_value(Decimal(1), price)
-                size = round(equity * rel_fraction / contract_value)
-                order = Order(asset, size, price)
-                orders.append(order)
+                if size := round(equity * rel_fraction / contract_value):
+                    order = Order(asset, size, price)
+                    required_bp = account.required_buying_power(order).value
+                    if required_bp < bp:
+                        orders.append(order)
+                        bp -= required_bp
         return orders
 
     def get_action_space(self) -> Space:
@@ -65,13 +70,13 @@ class OrderMaker(ActionTransformer):
 class OrderWithLimitsMaker(ActionTransformer):
     """Transforms an action into orders"""
 
-    def __init__(self, assets: list[Asset]):
+    def __init__(self, assets: Sequence[Asset]):
         super().__init__()
-        self.assets = assets
+        self.assets = list(assets)
 
     def get_orders(self, actions: NDArray, event: Event, account: Account) -> list[Order]:
         orders = []
-        equity = account.equity()
+        equity = account.equity_value()
         bp = account.buying_power.value
         for asset, (fraction, limit_perc) in zip(self.assets, actions.reshape(-1, 2)):
             price = event.get_price(asset)
@@ -145,6 +150,7 @@ class TradingEnv(gym.Env):
         action_transformer: ActionTransformer,
         broker: SimBroker | None = None,
         timeframe: Timeframe | None = None,
+        journal_factory: Callable[[str], Journal] | None = None
     ):
         self.broker: SimBroker = broker or SimBroker()
         self.channel = EventChannel()
@@ -155,6 +161,9 @@ class TradingEnv(gym.Env):
         self.obs_feature = obs_feature
         self.reward_feature = reward_feature
         self.timefame = timeframe
+        self.journal_factory = journal_factory
+        self.journal: Journal | None = None
+        self.epoch = 0
 
         self.observation_space = spaces.Box(-1.0, 1.0, shape=(obs_feature.size(),), dtype=np.float32)
         self.action_space = action_transformer.get_action_space()
@@ -176,6 +185,10 @@ class TradingEnv(gym.Env):
 
         orders = self.action_transformer.get_orders(action, self.event, self.account)
         self.broker.place_orders(orders)
+
+        if self.journal:
+            self.journal.track(self.event, self.account, orders)
+
         self.event = self.channel.get()
 
         if self.event:
@@ -196,8 +209,11 @@ class TradingEnv(gym.Env):
         self.broker.reset()
         self.obs_feature.reset()
         self.reward_feature.reset()
+        self.epoch += 1
 
         self.channel = self.feed.play_background(self.timefame)
+        if self.journal_factory:
+            self.journal = self.journal_factory(f"epoch-{self.epoch}")
 
         while True:
             self.event = self.channel.get()

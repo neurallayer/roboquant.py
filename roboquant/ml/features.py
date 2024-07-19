@@ -147,7 +147,7 @@ class EquityFeature(Feature):
 
     def calc(self, evt, account):
         assert account is not None
-        equity = account.equity()
+        equity = account.equity_value()
         return np.asarray([equity], dtype=np.float32)
 
     def size(self) -> int:

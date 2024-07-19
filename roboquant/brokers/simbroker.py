@@ -154,9 +154,13 @@ class SimBroker(Broker):
 
         self._modify_orders = []
 
-    def _process_open_orders(self, prices: dict[Asset, PriceItem]):
+    def _process_open_orders(self, event: Event | None):
+        if not event or not self._account.orders:
+            return
+        prices = event.price_items
         for order in self._account.orders:
-            if (item := prices.get(order.asset)) is not None:
+            if item := prices.get(order.asset):
+                order.created_at = order.created_at or event.time
                 trx = self._execute(order, item)
                 if trx is not None:
                     logger.info("executed order=%s trx=%s", order, trx)
@@ -166,16 +170,10 @@ class SimBroker(Broker):
                         self.remove_order(order)
 
     def _calculate_open_orders(self):
-        reserved = Wallet()
+        result = Wallet()
         for order in self._account.orders:
-            old_pos = self._account.get_position_size(order.asset)
-            remaining = order.size - order.fill
-
-            # only update reserved amount if remaining order size would increase position size
-            if abs(old_pos + remaining) > abs(old_pos):
-                reserved += order.asset.contract_amount(abs(remaining), order.limit)
-
-        return reserved
+            result += self._account.required_buying_power(order)
+        return result
 
     def _calculate_short_positions(self):
         reserved = Wallet()
@@ -203,12 +201,11 @@ class SimBroker(Broker):
         if event:
             acc.last_update = event.time
 
-        prices = event.price_items if event else {}
         acc.orders += self._create_orders
         self._create_orders = []
 
         self._process_modify_orders()
-        self._process_open_orders(prices)
+        self._process_open_orders(event)
         _update_positions(acc, event, self.price_type)
         acc.buying_power = self._calculate_buyingpower()
         return acc

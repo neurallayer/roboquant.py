@@ -3,6 +3,7 @@ from torch import nn
 import torch.nn.functional as F
 
 import roboquant as rq
+from roboquant.asset import Stock
 from roboquant.journals.basicjournal import BasicJournal
 from roboquant.ml.features import BarFeature, CombinedFeature, MaxReturnFeature, PriceFeature, SMAFeature
 from roboquant.ml.strategies import RNNStrategy
@@ -25,24 +26,24 @@ class MyModel(nn.Module):
 
 # %%
 # Config
-symbol = "AAPL"
+apple = Stock("AAPL", "USD")
 prediction = 10
 start_date = "2010-01-01"
-feed = rq.feeds.YahooFeed(symbol, start_date=start_date)
+feed = rq.feeds.YahooFeed(apple.symbol, start_date=start_date)
 
 # %%
 # Define the strategy
 model = MyModel()
 
 input_feature = CombinedFeature(
-    BarFeature(symbol).returns(),
-    SMAFeature(BarFeature(symbol), 10).returns(),
-    SMAFeature(BarFeature(symbol), 20).returns(),
+    BarFeature(apple).returns(),
+    SMAFeature(BarFeature(apple), 10).returns(),
+    SMAFeature(BarFeature(apple), 20).returns(),
 ).normalize()
 
-label_feature = MaxReturnFeature(PriceFeature(symbol, price_type="HIGH"), 10)
+label_feature = MaxReturnFeature(PriceFeature(apple, price_type="HIGH"), 10)
 
-strategy = RNNStrategy(input_feature, label_feature, model, symbol, sequences=20, buy_pct=0.04, sell_pct=0.01)
+strategy = RNNStrategy(input_feature, label_feature, model, apple, sequences=20, buy_pct=0.04, sell_pct=0.01)
 
 # %%
 # Train the model

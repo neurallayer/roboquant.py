@@ -103,6 +103,15 @@ class Account:
             result += asset.contract_amount(position.size, position.mkt_price - position.avg_price)
         return result
 
+    def required_buying_power(self, order: Order) -> Amount:
+        pos_size = self.get_position_size(order.asset)
+
+        # only additional required if remaining order size would increase position size
+        if abs(pos_size + order.remaining) > abs(pos_size):
+            return order.asset.contract_amount(abs(order.remaining), order.limit)
+
+        return Amount(order.asset.currency, 0.0)
+
     def unrealized_pnl_value(self) -> float:
         return self.convert(self.unrealized_pnl())
 

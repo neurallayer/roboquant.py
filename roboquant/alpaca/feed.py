@@ -14,9 +14,13 @@ from alpaca.data.live.stock import StockDataStream
 from alpaca.data.models.bars import BarSet
 from alpaca.data.models.quotes import QuoteSet
 from alpaca.data.models.trades import TradeSet
-from alpaca.data.requests import (CryptoBarsRequest, CryptoTradesRequest,
-                                  StockBarsRequest, StockQuotesRequest,
-                                  StockTradesRequest)
+from alpaca.data.requests import (
+    CryptoBarsRequest,
+    CryptoTradesRequest,
+    StockBarsRequest,
+    StockQuotesRequest,
+    StockTradesRequest,
+)
 from alpaca.data.timeframe import TimeFrame, TimeFrameUnit
 from alpaca.trading.enums import AssetClass
 
@@ -145,14 +149,7 @@ class AlpacaHistoricStockFeed(_AlpacaHistoricFeed):
         self.client = StockHistoricalDataClient(api_key, secret_key, url_override=data_api_url)
         self.feed = feed
 
-    def retrieve_bars(
-        self,
-        *symbols,
-        start=None,
-        end=None,
-        resolution: TimeFrame | None = None,
-        adjustment=Adjustment.ALL
-    ):
+    def retrieve_bars(self, *symbols, start=None, end=None, resolution: TimeFrame | None = None, adjustment=Adjustment.ALL):
         resolution = resolution or TimeFrame(amount=1, unit=TimeFrameUnit.Day)
         req = StockBarsRequest(
             symbol_or_symbols=list(symbols), timeframe=resolution, start=start, end=end, adjustment=adjustment, feed=self.feed
@@ -168,7 +165,7 @@ class AlpacaHistoricStockFeed(_AlpacaHistoricFeed):
         assert isinstance(res, TradeSet)
         self._process_trades(res.data, AssetClass.US_EQUITY)
 
-    def retrieve_quotes(self, *symbols, start=None, end=None):
+    def retrieve_quotes(self, *symbols: str, start=None, end=None):
         req = StockQuotesRequest(symbol_or_symbols=list(symbols), start=start, end=end, feed=self.feed)
         res = self.client.get_stock_quotes(req)
         assert isinstance(res, QuoteSet)

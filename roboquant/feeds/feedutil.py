@@ -57,3 +57,13 @@ def count_events(feed: Feed, timeframe: Timeframe | None = None, timeout: float 
         if evt.items or include_empty:
             events += 1
     return events
+
+
+def count_items(feed: Feed, timeframe: Timeframe | None = None, timeout: float | None = None):
+    """Count the number of events in a feed"""
+
+    channel = feed.play_background(timeframe)
+    items = 0
+    while evt := channel.get(timeout):
+        items += len(evt.items)
+    return items

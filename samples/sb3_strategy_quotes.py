@@ -1,33 +1,48 @@
 # %%
+from roboquant.feeds.feedutil import count_events
 from sb3_contrib import RecurrentPPO
 from sb3_contrib.common.recurrent.policies import RecurrentActorCriticPolicy
 from roboquant import run
 from roboquant.alpaca.feed import AlpacaHistoricStockFeed
-from roboquant.feeds.yahoo import YahooFeed
+from roboquant.asset import Stock
 from roboquant.ml.features import EquityFeature, QuoteFeature
 from roboquant.ml.envs import OrderMaker, TradingEnv, OrderWithLimitsMaker
 from roboquant.ml.strategies import SB3PolicyStrategy
+from roboquant.feeds.parquetfeed import ParquetFeed
+from roboquant.timeframe import Timeframe
 
 # %%
-symbols = ["JPM"]
+asset = Stock("JPM", "USD")
+start = "2024-05-01T00:00:00Z"
+border = "2024-05-01T20:00:00Z"
+end = "2024-06-01T00:00:00Z"
+
+assert start < border < end
 
 # %%
-feed = AlpacaHistoricStockFeed()
-feed.retrieve_quotes(*symbols, start="2024-05-01T18:00:00Z", end="2024-05-01T18:30:00Z")
-print("events=",feed.events)
+feed = ParquetFeed("/tmp/jpm.parquet")
+if not feed.exists():
+    inputFeed = AlpacaHistoricStockFeed()
+    inputFeed.retrieve_quotes(asset.symbol, start=start, end=end)
+    feed.record(inputFeed)
 
-obs_feature = QuoteFeature(*symbols).returns().normalize(20)
+print("feed timeframe=", feed.timeframe())
+
+obs_feature = QuoteFeature(asset).returns().normalize(20)
 reward_feature = EquityFeature().returns().normalize(20)
 
-action_transformer = OrderMaker(symbols)
-env = TradingEnv(feed, obs_feature, reward_feature, action_transformer)
+action_transformer = OrderMaker([asset])
+train_tf = Timeframe.fromisoformat(start, border)
+env = TradingEnv(feed, obs_feature, reward_feature, action_transformer, timeframe=train_tf)
 model = RecurrentPPO("MlpLstmPolicy", env)
 
 # %%
-model.learn(total_timesteps=20_000, progress_bar=True)
+steps = count_events(feed, train_tf) * 5
+model.learn(total_timesteps=steps, progress_bar=True)
+model.policy.save("/tmp/jpm_quotes.zip")
 
 # %%
 strategy = SB3PolicyStrategy.from_env(env, model.policy)
-feed = YahooFeed(*symbols, start_date="2021-01-01")
-account = run(feed, strategy)
+test_tf = Timeframe.fromisoformat(border, end)
+account = run(feed, strategy, timeframe=test_tf)
 print(account)

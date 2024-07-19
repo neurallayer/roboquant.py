@@ -110,6 +110,8 @@ class Bar(PriceItem):
 
     def price(self, price_type: str = "DEFAULT") -> float:
         match price_type:
+            case "DEFAULT":
+                return self.ohlcv[3]
             case "OPEN":
                 return self.ohlcv[0]
             case "HIGH":

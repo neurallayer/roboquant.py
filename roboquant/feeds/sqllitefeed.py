@@ -1,3 +1,4 @@
+import logging
 import os.path
 import sqlite3
 from array import array
@@ -7,9 +8,11 @@ from typing import Literal
 from roboquant.asset import Asset
 from roboquant.event import Bar, PriceItem, Quote
 from roboquant.event import Event
-from roboquant.timeframe import Timeframe
+from roboquant.timeframe import EMPTY_TIMEFRAME, Timeframe
 from .eventchannel import EventChannel
 from .feed import Feed
+
+logger = logging.getLogger(__name__)
 
 
 class SQLFeed(Feed):
@@ -40,7 +43,7 @@ class SQLFeed(Feed):
         con.execute(SQLFeed._sql_create_index)
         con.commit()
 
-    def items(self):
+    def number_items(self):
         con = sqlite3.connect(self.db_file)
         result = con.execute(SQLFeed._sql_count_items).fetchall()
         con.commit()
@@ -52,8 +55,9 @@ class SQLFeed(Feed):
         result = con.execute(SQLFeed._sql_select_timeframe).fetchall()
         con.commit()
         row = result[0]
-        tf = Timeframe.fromisoformat(row[0], row[1], True)
-        return tf
+        if row[0]:
+            return Timeframe.fromisoformat(row[0], row[1], True)
+        return EMPTY_TIMEFRAME
 
     def assets(self):
         con = sqlite3.connect(self.db_file)
@@ -77,7 +81,6 @@ class SQLFeed(Feed):
     def play(self, channel: EventChannel):
         con = sqlite3.connect(self.db_file)
         cur = con.cursor()
-        cnt = 0
         t_old = ""
         items = []
         tf = channel.timeframe
@@ -100,12 +103,18 @@ class SQLFeed(Feed):
 
             item = self.get_item(row)
             items.append(item)
-            cnt += 1
+
+        # are there leftovers
+        if items:
+            dt = datetime.fromisoformat(t_old)
+            event = Event(dt, items)
+            channel.put(event)
+
         con.commit()
 
     def record(self, feed: Feed, timeframe=None, append=False):
         """Record another feed to this SQLite database.
-        It only supports Bars and not types of prices."""
+        It only supports Bars and Quotes"""
         con = sqlite3.connect(self.db_file)
         cur = con.cursor()
 
@@ -129,9 +138,15 @@ class SQLFeed(Feed):
                 elif isinstance(item, Quote) and price_type == "quote":
                     elem = (t.isoformat(), item.asset.serialize(), *item.data)
                     data.append(elem)
+            if len(data) > 10_000:
+                cur.executemany(insert_sql, data)
 
-        cur.executemany(insert_sql, data)
+        if data:
+            cur.executemany(insert_sql, data)
+
         con.commit()
+        con.close()
+        logger.info("inserted rows=%s", len(data))
 
     def __repr__(self) -> str:
-        return f"SQLFeed(timeframe={self.timeframe()} items={self.items()} assets={len(self.assets())})"
+        return f"SQLFeed(timeframe={self.timeframe()} items={self.number_items()} assets={len(self.assets())})"

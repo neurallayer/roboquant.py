@@ -1,5 +1,6 @@
 from copy import copy
 from dataclasses import dataclass
+from datetime import datetime, timedelta
 from decimal import Decimal
 from typing import Any
 
@@ -20,12 +21,11 @@ class Order:
     limit: float
     info: dict[str, Any]
 
-    id: str | None = None
-    fill: Decimal = Decimal(0)
+    id: str | None
+    fill: Decimal
+    created_at: datetime | None
 
-    def __init__(
-        self, asset: Asset, size: Decimal | str | int | float, limit: float, **kwargs
-    ):
+    def __init__(self, asset: Asset, size: Decimal | str | int | float, limit: float, **kwargs):
         self.asset = asset
         self.size = Decimal(size)
         assert not self.size.is_zero(), "Cannot create a new order with size is zero"
@@ -34,6 +34,7 @@ class Order:
         self.id: str | None = None
         self.fill = Decimal(0)
         self.info = kwargs
+        self.created_at = None
 
     def cancel(self) -> "Order":
         """Create a cancellation order. You can only cancel orders that are still open and have an id.
@@ -46,9 +47,7 @@ class Order:
 
     def modify(self, size: Decimal | str | int | float | None = None, limit: float | None = None) -> "Order":
         """Create an update-order. You can update the size and/or limit of an order. The returned order has the same id
-        as the original order.
-
-        You can only update existing orders that are still open and have an id.
+        as the original order. You can only update existing orders that have an id.
         """
 
         assert self.id, "Can only update an already assigned id"
@@ -65,6 +64,7 @@ class Order:
         result = Order(self.asset, self.size, self.limit, **self.info)
         result.id = self.id
         result.fill = self.fill
+        result.created_at = self.created_at
         return result
 
     def value(self):
@@ -95,3 +95,17 @@ class Order:
         In case of a sell order, the remaining can be a negative number.
         """
         return self.size - self.fill
+
+
+class OrderUtil:
+    """Set of utils for dealing with orders"""
+
+    @staticmethod
+    def cancel_old_orders(orders: list[Order], now: datetime, older_than: timedelta):
+        result = [order.cancel() for order in orders if order.created_at + older_than < now]
+        return result
+
+    @staticmethod
+    def find_orders(orders: list[Order], *symbols: str):
+        result = [order for order in orders if order.asset.symbol in symbols]
+        return result

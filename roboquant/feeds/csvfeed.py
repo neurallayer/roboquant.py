@@ -7,7 +7,7 @@ import pathlib
 from array import array
 from datetime import datetime, time, timezone
 
-from roboquant.asset import Stock
+from roboquant.asset import Asset, Stock
 from roboquant.event import Bar
 from roboquant.feeds.historic import HistoricFeed
 
@@ -46,7 +46,7 @@ class CSVFeed(HistoricFeed):
         date_fmt: str | None = None,
         time_fmt: str | None = None,
         endswith=".csv",
-        frequency="",
+        frequency=""
     ):
         super().__init__()
         columns = columns or ["Date", "Open", "High", "Low", "Close", "Volume", "Adj Close", "Time"]
@@ -75,9 +75,10 @@ class CSVFeed(HistoricFeed):
             files.extend(selected_files)
         return files
 
-    def _get_symbol(self, filename: str):
+    def _get_asset(self, filename: str) -> Asset:
         """Return the symbol based on the filename"""
-        return pathlib.Path(filename).stem.upper()
+        symbol = pathlib.Path(filename).stem.upper()
+        return Stock(symbol, "USD")
 
     def _parse_csvfiles(self, filenames: list[str]):
         # pylint: disable=too-many-locals
@@ -91,7 +92,7 @@ class CSVFeed(HistoricFeed):
         time_offset = self.time_offset
 
         for filename in filenames:
-            symbol = self._get_symbol(filename)
+            asset = self._get_asset(filename)
             with open(filename, encoding="utf8") as csvfile:
                 reader = csv.DictReader(csvfile)
 
@@ -107,7 +108,6 @@ class CSVFeed(HistoricFeed):
                         dt = datetime.combine(dt, time_offset)
 
                     ohlcv = array("f", [float(row[column]) for column in ohlcv_columns])
-                    asset = Stock(symbol, "USD")
                     if adj_close_column:
                         adj_close = float(row[adj_close_column])
                         pb = Bar.from_adj_close(asset, ohlcv, adj_close, freq)
@@ -136,9 +136,9 @@ class CSVFeed(HistoricFeed):
                         frequency="1d",
                     )
 
-            def _get_symbol(self, filename: str):
+            def _get_asset(self, filename: str):
                 base = pathlib.Path(filename).stem
-                return base.split(".")[0].upper()
+                return Stock(base.split(".")[0].upper(), "USD")
 
         return StooqDailyFeed()
 
@@ -162,9 +162,9 @@ class CSVFeed(HistoricFeed):
                         endswith=".txt"
                     )
 
-            def _get_symbol(self, filename: str):
+            def _get_asset(self, filename: str):
                 base = pathlib.Path(filename).stem
-                return base.split(".")[0].upper()
+                return Stock(base.split(".")[0].upper(), "USD")
 
         return StooqIntradayFeed()
 
