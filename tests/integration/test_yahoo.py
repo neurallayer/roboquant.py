@@ -11,10 +11,10 @@ class TestYahoo(unittest.TestCase):
     def test_yahoo_feed(self):
         symbols = {"MSFT", "JPM"}
         feed = YahooFeed(*symbols, start_date="2018-01-01", end_date="2020-01-01")
-        self.assertEqual(2, len(feed.assets))
+        self.assertEqual(2, len(feed.assets()))
 
         assets = {Stock(symbol, "USD") for symbol in symbols}
-        self.assertEqual(assets, set(feed.assets))
+        self.assertEqual(assets, set(feed.assets()))
 
         tf = feed.timeframe()
         assert tf
@@ -26,7 +26,7 @@ class TestYahoo(unittest.TestCase):
     def test_yahoo_feed_wrong_symbol(self):
         # expect some error logging due to parsing an invalid symbol
         feed = YahooFeed("INVALID_TICKER_NAME", start_date="2010-01-01", end_date="2020-01-01")
-        self.assertEqual(0, len(feed.assets))
+        self.assertEqual(0, len(feed.assets()))
 
 
 if __name__ == "__main__":

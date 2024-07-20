@@ -22,7 +22,7 @@ class TestFeatures(unittest.TestCase):
 
     def test_all_features(self):
         feed = get_feed()
-        symbols = list(feed.assets)
+        symbols = list(feed.assets())
         symbol1 = symbols[0]
         symbol2 = symbols[1]
 
@@ -45,7 +45,7 @@ class TestFeatures(unittest.TestCase):
         feed = get_feed()
 
         feature = CacheFeature(
-            PriceFeature(*feed.assets),
+            PriceFeature(*feed.assets()),
         )
 
         account = Account()
@@ -64,7 +64,7 @@ class TestFeatures(unittest.TestCase):
         feed = get_feed()
 
         feature = CombinedFeature(
-            PriceFeature(*feed.assets).returns(),
+            PriceFeature(*feed.assets()).returns(),
         )
 
         norm_feature = NormalizeFeature(feature, 10)

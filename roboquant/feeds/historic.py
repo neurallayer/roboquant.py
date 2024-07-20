@@ -7,7 +7,6 @@ from roboquant.event import Event, PriceItem
 from roboquant.timeframe import EMPTY_TIMEFRAME, Timeframe
 from .eventchannel import EventChannel
 from .feed import Feed
-from .feedutil import get_ohlcv
 
 
 class HistoricFeed(Feed, ABC):
@@ -37,16 +36,10 @@ class HistoricFeed(Feed, ABC):
             items = self.__data[time]
             items.append(item)
 
-    @property
     def assets(self):
         """Return the list of unique symbols available in this feed"""
         self.__update()
         return self.__assets
-
-    @property
-    def events(self):
-        """Return the total number of events"""
-        return len(self.__data)
 
     def timeline(self) -> list[datetime]:
         """Return the timeline of this feed as a list of datatime objects"""
@@ -60,12 +53,6 @@ class HistoricFeed(Feed, ABC):
             return Timeframe(tl[0], tl[-1], inclusive=True)
 
         return EMPTY_TIMEFRAME
-
-    def get_ohlcv(self, asset: Asset, timeframe=None) -> dict[str, list]:
-        """Get the OHLCV values for a symbol for the (optional) provided timeframe.
-        This makes it easy to plot prices and use them in a dataframe.
-        """
-        return get_ohlcv(self, asset, timeframe)
 
     def __update(self):
         if self.__modified:
@@ -82,4 +69,4 @@ class HistoricFeed(Feed, ABC):
 
     def __repr__(self) -> str:
         feed = self.__class__.__name__
-        return f"{feed}(events={self.events} assets={len(self.assets)} timeframe={self.timeframe()})"
+        return f"{feed}(assets={len(self.assets())} timeframe={self.timeframe()})"

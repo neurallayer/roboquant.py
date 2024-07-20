@@ -1,7 +1,6 @@
 import logging
 import os.path
 from array import array
-import time
 from typing import Any
 
 import pyarrow as pa
@@ -10,11 +9,9 @@ import pyarrow.parquet as pq
 
 from roboquant.event import Quote, Bar, Trade
 from roboquant.event import Event
-from roboquant.feeds.csvfeed import CSVFeed
 from roboquant.feeds.eventchannel import EventChannel
 from roboquant.feeds.feed import Feed
 from roboquant.asset import Asset
-from roboquant.feeds.feedutil import count_items
 from roboquant.timeframe import EMPTY_TIMEFRAME, Timeframe
 
 logger = logging.getLogger(__name__)
@@ -170,17 +167,3 @@ class ParquetFeed(Feed):
             if items:
                 batch = pa.RecordBatch.from_pylist(items, schema=ParquetFeed.__schema)
                 writer.write_batch(batch)
-
-
-if __name__ == "__main__":
-
-    parquet_feed = ParquetFeed("/tmp/us.parquet")
-
-    if not parquet_feed.exists():
-        input_feed = CSVFeed.stooq_us_daily("/tmp/us/")
-        parquet_feed.record(input_feed)
-
-    print(parquet_feed.timeframe())
-    start_time = time.time()
-    count_items(parquet_feed)
-    print("time=", time.time() - start_time)

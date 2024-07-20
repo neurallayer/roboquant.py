@@ -1,3 +1,4 @@
+import logging
 import threading
 from array import array
 from datetime import timedelta
@@ -29,6 +30,9 @@ from roboquant.config import Config
 from roboquant.event import Bar, Event, Quote, Trade
 from roboquant.feeds.historic import HistoricFeed
 from roboquant.feeds.live import LiveFeed
+
+
+logger = logging.getLogger(__name__)
 
 
 def _get_asset(symbol: str, asset_class: AssetClass) -> Asset:
@@ -101,7 +105,10 @@ class AlpacaLiveFeed(LiveFeed):
         self.stream.subscribe_quotes(self.__handle_quotes, *symbols)
 
     def subscribe_bars(self, *symbols: str):
-        self.stream.subscribe_bars(self.__handle_bars, *symbols)
+        if not isinstance(self.stream, OptionDataStream):
+            self.stream.subscribe_bars(self.__handle_bars, *symbols)
+        else:
+            logger.warning("cannot subscribe to bars to options")
 
 
 class _AlpacaHistoricFeed(HistoricFeed):

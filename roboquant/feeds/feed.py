@@ -1,12 +1,12 @@
-import logging
 from datetime import datetime
+import logging
 import threading
 from abc import ABC, abstractmethod
 
+from roboquant.asset import Asset
+from roboquant.event import Bar
 from roboquant.feeds.eventchannel import EventChannel, ChannelClosed
 from roboquant.timeframe import Timeframe
-
-logger = logging.getLogger(__name__)
 
 
 class Feed(ABC):
@@ -58,7 +58,7 @@ class Feed(ABC):
                 # this exception we can expect
                 pass
             except Exception as e:
-                logging.error('Error at playback', exc_info=e)
+                logging.error("Error at playback", exc_info=e)
             finally:
                 channel.close()
 
@@ -66,7 +66,56 @@ class Feed(ABC):
         thread.start()
         return channel
 
-    def plot(self, plt, symbol: str, price_type: str = "DEFAULT", timeframe: Timeframe | None = None, **kwargs):
+    def get_ohlcv(self, asset: Asset, timeframe: Timeframe | None = None) -> dict[str, list]:
+        """Get the OHLCV values for an asset in this feed.
+        The returned value is a dict with the keys being "Date", "Open", "High", "Low", "Close", "Volume"
+        and the values a list.
+        """
+
+        result = {column: [] for column in ["Date", "Open", "High", "Low", "Close", "Volume"]}
+        channel = self.play_background(timeframe)
+        while event := channel.get():
+            item = event.price_items.get(asset)
+            if item and isinstance(item, Bar):
+                result["Date"].append(event.time)
+                result["Open"].append(item.ohlcv[0])
+                result["High"].append(item.ohlcv[1])
+                result["Low"].append(item.ohlcv[2])
+                result["Close"].append(item.ohlcv[3])
+                result["Volume"].append(item.ohlcv[4])
+        return result
+
+    def print_items(self, timeframe: Timeframe | None = None, timeout: float | None = None):
+        """Print the items in a feed to the console.
+        This is mostly useful for debugging purposes to see what items a feed generates.
+        """
+
+        channel = self.play_background(timeframe)
+        while event := channel.get(timeout):
+            print(event.time)
+            for item in event.items:
+                print("======> ", item)
+
+    def count_events(self, timeframe: Timeframe | None = None, timeout: float | None = None, include_empty=False):
+        """Count the number of events in a feed"""
+
+        channel = self.play_background(timeframe)
+        events = 0
+        while evt := channel.get(timeout):
+            if evt.items or include_empty:
+                events += 1
+        return events
+
+    def count_items(self, timeframe: Timeframe | None = None, timeout: float | None = None):
+        """Count the number of events in a feed"""
+
+        channel = self.play_background(timeframe)
+        items = 0
+        while evt := channel.get(timeout):
+            items += len(evt.items)
+        return items
+
+    def plot(self, plt, asset: Asset, price_type: str = "DEFAULT", timeframe: Timeframe | None = None, **kwargs):
         """
         Plot the prices of a symbol.
 
@@ -84,22 +133,21 @@ class Feed(ABC):
             Additional keyword arguments to pass to the plt.plot() function.
         """
         plt = plt.subplot() if hasattr(plt, "subplot") else plt
-        times, prices = get_symbol_prices(self, symbol, price_type, timeframe)
+        times, prices = self.get_asset_prices(asset, price_type, timeframe)
         plt.plot(times, prices, **kwargs)
-        plt.set_title(symbol)
+        plt.set_title(asset.symbol)
 
+    def get_asset_prices(
+        self, asset: Asset, price_type="DEFAULT", timeframe: Timeframe | None = None
+    ) -> tuple[list[datetime], list[float]]:
+        """Get prices for a single asset from the feed by replaying the feed."""
 
-def get_symbol_prices(
-        feed: Feed, symbol: str, price_type="DEFAULT", timeframe: Timeframe | None = None
-) -> tuple[list[datetime], list[float]]:
-    """Get prices for a single symbol from a feed"""
-
-    x = []
-    y = []
-    channel = feed.play_background(timeframe)
-    while event := channel.get():
-        price = event.get_price(symbol, price_type)
-        if price:
-            x.append(event.time)
-            y.append(price)
-    return x, y
+        x = []
+        y = []
+        channel = self.play_background(timeframe)
+        while event := channel.get():
+            price = event.get_price(asset, price_type)
+            if price:
+                x.append(event.time)
+                y.append(price)
+        return x, y

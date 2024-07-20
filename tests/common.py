@@ -76,7 +76,7 @@ def run_strategy(strategy: Strategy, test_case: TestCase):
             asset = order.asset
             test_case.assertEqual(type(order), Order)
             test_case.assertEqual(asset.symbol, asset.symbol.upper())
-            test_case.assertIn(asset, feed.assets)
+            test_case.assertIn(asset, feed.assets())
         total_orders += len(orders)
 
     test_case.assertGreater(total_orders, 0)
