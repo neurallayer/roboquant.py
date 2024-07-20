@@ -30,20 +30,19 @@ class TestRNN(unittest.TestCase):
         # logging.basicConfig()
         # logging.getLogger("roboquant.strategies").setLevel(level=logging.INFO)
         # Setup
-        symbol = "AAPL"
-        asset = Stock(symbol, "USD")
+        apple = Stock("AAPL")
         prediction = 10
         feed = get_feed()
         model = _MyModel()
 
         input_feature = CombinedFeature(
-            BarFeature(asset),
-            SMAFeature(PriceFeature(asset, price_type="HIGH"), 10)
+            BarFeature(apple),
+            SMAFeature(PriceFeature(apple, price_type="HIGH"), 10)
         ).returns().normalize()
 
-        label_feature = PriceFeature(asset, price_type="CLOSE").returns(prediction)
+        label_feature = PriceFeature(apple, price_type="CLOSE").returns(prediction)
 
-        strategy = RNNStrategy(input_feature, label_feature, model, symbol, sequences=20, buy_pct=0.01)
+        strategy = RNNStrategy(input_feature, label_feature, model, apple, sequences=20, buy_pct=0.01)
 
         # Train the model with 10 years of data
         tf = rq.Timeframe.fromisoformat("2010-01-01", "2020-01-01")

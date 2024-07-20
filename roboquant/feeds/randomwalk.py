@@ -6,7 +6,7 @@ from typing import Literal
 
 import numpy as np
 
-from roboquant.asset import Stock
+from roboquant.asset import Asset, Stock
 from roboquant.event import Bar, Trade, Quote
 from .historic import HistoricFeed
 
@@ -76,14 +76,14 @@ class RandomWalk(HistoricFeed):
         rnd,
         n_symbols,
         symbol_len,
-    ):
-        symbols = set()
+    ) -> list[Asset]:
+        assets = set()
         alphabet = np.array(list(string.ascii_uppercase))
-        while len(symbols) < n_symbols:
+        while len(assets) < n_symbols:
             symbol = "".join(rnd.choice(alphabet, size=symbol_len))
             asset = Stock(symbol, "USD")
-            symbols.add(asset)
-        return symbols
+            assets.add(asset)
+        return list(assets)
 
     @staticmethod
     def __price_path(rnd, n, scale, min_price, max_price):

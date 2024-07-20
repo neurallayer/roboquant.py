@@ -15,7 +15,7 @@ class TestIBKR(unittest.TestCase):
         Amount.converter = One2OneConversion()
         logging.basicConfig(level=logging.DEBUG)
         logging.getLogger("ibapi").setLevel(logging.WARNING)
-        asset = Stock("JPM", "USD")
+        asset = Stock("JPM")
         limit = 205
 
         broker = IBKRBroker()

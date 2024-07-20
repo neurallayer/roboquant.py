@@ -4,7 +4,6 @@ from array import array
 from typing import Any
 
 import pyarrow as pa
-import pyarrow.dataset as ds
 import pyarrow.parquet as pq
 
 from roboquant.event import Quote, Bar, Trade
@@ -72,45 +71,6 @@ class ParquetFeed(Feed):
             event = Event(now, items)
             channel.put(event)
 
-    def _generator(self, feed: Feed, timeframe: Timeframe | None):
-        channel = feed.play_background(timeframe)
-        t_old = ""
-        items = []
-        cnt = 0
-        while event := channel.get():
-            t = event.time
-
-            if t != t_old and cnt > 10_000:
-                if items:
-                    batch = pa.RecordBatch.from_pylist(items, schema=ParquetFeed.__schema)
-                    yield batch
-                items = []
-                t_old = t
-                cnt = 0
-
-            for item in event.items:
-                match item:
-                    case Quote():
-                        cnt += 1
-                        items.append({"time": t, "type": 1, "asset": item.asset.serialize(), "prices": item.data.tolist()})
-                    case Bar():
-                        cnt += 1
-                        items.append({"time": t, "type": 2, "asset": item.asset.serialize(), "prices": item.ohlcv.tolist()})
-                    case Trade():
-                        cnt += 1
-                        items.append(
-                            {
-                                "time": t,
-                                "type": 3,
-                                "asset": item.asset.serialize(),
-                                "prices": [item.trade_price, item.trade_volume],
-                            }
-                        )
-
-        if items:
-            batch = pa.RecordBatch.from_pylist(items, schema=ParquetFeed.__schema)
-            yield batch
-
     def timeframe(self) -> Timeframe:
         d = pq.read_metadata(self.parquet_path).to_dict()
         if d["row_groups"]:
@@ -122,15 +82,6 @@ class ParquetFeed(Feed):
 
     def meta(self):
         return pq.read_metadata(self.parquet_path)
-
-    def record2(self, feed: Feed, timeframe: Timeframe | None = None):
-        ds.write_dataset(
-            self._generator(feed, timeframe),
-            self.parquet_path,
-            format="parquet",
-            schema=ParquetFeed.__schema,
-            existing_data_behavior="overwrite_or_ignore",
-        )
 
     def __repr__(self) -> str:
         return f"ParquetFeed(path={self.parquet_path})"

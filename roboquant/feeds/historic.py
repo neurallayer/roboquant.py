@@ -36,10 +36,10 @@ class HistoricFeed(Feed, ABC):
             items = self.__data[time]
             items.append(item)
 
-    def assets(self):
+    def assets(self) -> list[Asset]:
         """Return the list of unique symbols available in this feed"""
         self.__update()
-        return self.__assets
+        return list(self.__assets)
 
     def timeline(self) -> list[datetime]:
         """Return the timeline of this feed as a list of datatime objects"""
