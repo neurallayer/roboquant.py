@@ -1,7 +1,7 @@
 from abc import ABC
 from dataclasses import dataclass
 from decimal import Decimal
-from typing import ClassVar
+from typing import ClassVar, Type
 
 from roboquant.wallet import Amount
 
@@ -77,7 +77,7 @@ class Option(Asset):
         return float(size) * price * self.multiplier
 
 
-def __default_deserializer(clazz):
+def __default_deserializer(clazz: Type[Asset]):
 
     __cache: dict[str, Asset] = {}
 

@@ -15,8 +15,7 @@ logger = logging.getLogger(__name__)
 
 class BaseStrategy(Strategy):
     # pylint: disable=too-many-instance-attributes
-    """Base version of strategy that contains several methods to make it easier to create orders.
-    """
+    """Base version of strategy that contains several methods to make it easier to manage orders."""
 
     def __init__(self) -> None:
         super().__init__()
@@ -24,7 +23,7 @@ class BaseStrategy(Strategy):
         self.buy_price = "DEFAULT"
         self.sell_price = "DEFAULT"
         self.fractional_order_digits = 0
-        self.cancel_existing_orders = True
+        self.cancel_orders_older_than = timedelta(days=30)
 
         self._orders: list[Order]
         self._order_value: float
@@ -39,6 +38,7 @@ class BaseStrategy(Strategy):
         self._event = event
         self._order_value = round(account.equity_value() * self.order_value_perc, 2)
 
+        self.cancel_old_orders()
         self.process(event, account)
         return self._orders
 
@@ -53,6 +53,8 @@ class BaseStrategy(Strategy):
             if size := self._get_size(asset, limit):
                 order = Order(asset, size, limit)
                 return self.add_order(order)
+
+        logger.info("rejected buy order asset %s", asset)
         return False
 
     def add_exit_order(self, asset: Asset, limit: float | None = None):
@@ -60,6 +62,8 @@ class BaseStrategy(Strategy):
             if limit := limit or self._get_limit(asset, size > 0):
                 order = Order(asset, size, limit)
                 return self.add_order(order)
+
+        logger.info("rejected exit order asset %s", asset)
         return False
 
     def add_sell_order(self, asset: Asset, limit: float | None = None):
@@ -67,6 +71,8 @@ class BaseStrategy(Strategy):
             if size := self._get_size(asset, limit) * -1:
                 order = Order(asset, size, limit)
                 return self.add_order(order)
+
+        logger.info("rejected sell order asset %s", asset)
         return False
 
     def _get_limit(self, asset: Asset, is_buy: bool) -> float | None:
@@ -91,14 +97,14 @@ class BaseStrategy(Strategy):
             return False
 
         self._remaining_buying_power -= bp
-        if self.cancel_existing_orders:
-            self.cancel_open_orders(order.asset)
         self._orders.append(order)
         return True
 
-    def cancel_old_orders(self, older_than: timedelta):
+    def cancel_old_orders(self):
         for order in self._account.orders:
-            if order.created_at + older_than < self._event.time:
+            if not order.created_at:
+                continue
+            if order.created_at + self.cancel_orders_older_than < self._event.time:
                 self.cancel_order(order)
 
     def cancel_open_orders(self, *assets):

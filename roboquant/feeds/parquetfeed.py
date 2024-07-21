@@ -1,7 +1,7 @@
 import logging
 import os.path
 from array import array
-from typing import Any
+from typing import Any, Iterable
 
 import pyarrow as pa
 import pyarrow.parquet as pq
@@ -36,10 +36,16 @@ class ParquetFeed(Feed):
         return os.path.exists(self.parquet_path)
 
     def play(self, channel: EventChannel):
+        # pylint: disable=too-many-locals
         dataset = pq.ParquetFile(self.parquet_path)
         last_time: Any = None
         items = []
-        for batch in dataset.iter_batches():
+
+        row_group_indexes = self.__get_row_group_indexes(channel.timeframe)
+
+        # for batch in dataset.iter_batches():
+        for idx in row_group_indexes:
+            batch = dataset.read_row_group(idx)
             times = batch.column("time")
             assets = batch.column("asset")
             prices = batch.column("prices")
@@ -71,6 +77,18 @@ class ParquetFeed(Feed):
             event = Event(now, items)
             channel.put(event)
 
+    def __get_row_group_indexes(self, timeframe: Timeframe | None) -> Iterable[int]:
+        md = pq.read_metadata(self.parquet_path)
+        time = timeframe.start if timeframe else None
+
+        if not time:
+            return range(0, md.num_row_groups)
+        for idx in range(md.num_row_groups):
+            stat = md.row_group(idx).column(0).statistics
+            if stat.max >= time:
+                return range(idx, md.num_row_groups)
+        return []
+
     def timeframe(self) -> Timeframe:
         d = pq.read_metadata(self.parquet_path).to_dict()
         if d["row_groups"]:
@@ -79,6 +97,15 @@ class ParquetFeed(Feed):
             tf = Timeframe(start, end, True)
             return tf
         return EMPTY_TIMEFRAME
+
+    def assets(self) -> list[Asset]:
+        if not self.exists():
+            return []
+
+        result_table = pq.read_table(self.parquet_path, columns=["asset"], schema=ParquetFeed.__schema)
+        assets_list = result_table["asset"].to_pylist()
+        assets_set = set(assets_list)
+        return list({Asset.deserialize(s) for s in assets_set})
 
     def meta(self):
         return pq.read_metadata(self.parquet_path)

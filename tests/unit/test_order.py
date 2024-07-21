@@ -2,17 +2,22 @@ import unittest
 from decimal import Decimal
 
 from roboquant import Order
+from roboquant.asset import Stock
+
+
+apple = Stock("AAPL")
 
 
 class TestOrder(unittest.TestCase):
 
     def test_order_create(self):
-        order = Order("AAPL", 100, 120.0)
+        order = Order(apple, 100, 120.0)
         self.assertEqual(120.0, order.limit)
         self.assertEqual(None, order.id)
+        self.assertEqual(apple, order.asset)
 
     def test_order_info(self):
-        order = Order("AAPL", 100,  120.0, tif="ABC")
+        order = Order(apple, 100,  120.0, tif="ABC")
         info = order.info
         self.assertIn("tif", info)
 
@@ -22,7 +27,7 @@ class TestOrder(unittest.TestCase):
         self.assertIn("tif", info)
 
     def test_order_update(self):
-        order = Order("AAPL", 100, 120.0)
+        order = Order(apple, 100, 120.0)
         order.id = "update1"
 
         update_order = order.modify(size=50)
@@ -31,7 +36,7 @@ class TestOrder(unittest.TestCase):
         self.assertEqual(order.id, update_order.id)
 
     def test_order_cancel(self):
-        order = Order("AAPL", 100, 120.0)
+        order = Order(apple, 100, 120.0)
         order.id = "cancel1"
 
         cancel_order = order.cancel()

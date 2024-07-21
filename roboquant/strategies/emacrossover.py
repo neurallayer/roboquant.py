@@ -1,3 +1,4 @@
+from datetime import timedelta
 from roboquant.account import Account
 from roboquant.asset import Asset
 from roboquant.event import Event
@@ -14,6 +15,7 @@ class EMACrossover(BaseStrategy):
         self.slow = 1.0 - (smoothing / (slow_period + 1))
         self.price_type = price_type
         self.min_steps = max(fast_period, slow_period)
+        self.cancel_orders_older_than = timedelta(days=5)
 
     def process(self, event: Event, account: Account):
         for asset, price in event.get_prices(self.price_type).items():
