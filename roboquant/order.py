@@ -1,6 +1,6 @@
 from copy import copy
 from dataclasses import dataclass
-from datetime import datetime, timedelta
+from datetime import datetime
 from decimal import Decimal
 from typing import Any
 
@@ -95,17 +95,3 @@ class Order:
         In case of a sell order, the remaining can be a negative number.
         """
         return self.size - self.fill
-
-
-class OrderUtil:
-    """Set of utils for dealing with orders"""
-
-    @staticmethod
-    def cancel_old_orders(orders: list[Order], now: datetime, older_than: timedelta):
-        result = [order.cancel() for order in orders if order.created_at + older_than < now]
-        return result
-
-    @staticmethod
-    def find_orders(orders: list[Order], *symbols: str):
-        result = [order for order in orders if order.asset.symbol in symbols]
-        return result
