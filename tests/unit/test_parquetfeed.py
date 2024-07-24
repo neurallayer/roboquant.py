@@ -8,7 +8,7 @@ from tests.common import get_feed, run_price_item_feed
 
 class TestParquetFeed(unittest.TestCase):
 
-    def test_sql_feed(self):
+    def test_parquet_feed(self):
         path = tempfile.gettempdir()
         db_file = Path(path).joinpath("tmp.parquet")
         db_file.unlink(missing_ok=True)
@@ -25,6 +25,8 @@ class TestParquetFeed(unittest.TestCase):
         self.assertEqual(origin_feed.timeframe(), feed.timeframe())
 
         run_price_item_feed(feed, origin_feed.assets(), self)
+
+        run_price_item_feed(feed, origin_feed.assets(), self, timeframe=feed.timeframe())
         db_file.unlink(missing_ok=True)
 
 

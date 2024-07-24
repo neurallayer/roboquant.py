@@ -62,7 +62,7 @@ class Timeframe:
         end = start + td
         return Timeframe(start, end, inclusive)
 
-    def __contains__(self, time):
+    def __contains__(self, time: datetime):
         if self.inclusive:
             return self.start <= time <= self.end
         return self.start <= time < self.end

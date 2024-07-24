@@ -1,12 +1,11 @@
 # %%
 from roboquant.feeds.feedutil import count_events
 from sb3_contrib import RecurrentPPO
-from sb3_contrib.common.recurrent.policies import RecurrentActorCriticPolicy
 from roboquant import run
 from roboquant.alpaca.feed import AlpacaHistoricStockFeed
 from roboquant.asset import Stock
 from roboquant.ml.features import EquityFeature, QuoteFeature
-from roboquant.ml.envs import OrderMaker, TradingEnv, OrderWithLimitsMaker
+from roboquant.ml.envs import OrderMaker, TradingEnv
 from roboquant.ml.strategies import SB3PolicyStrategy
 from roboquant.feeds.parquetfeed import ParquetFeed
 from roboquant.timeframe import Timeframe

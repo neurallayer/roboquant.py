@@ -43,9 +43,7 @@ class ParquetFeed(Feed):
 
         row_group_indexes = self.__get_row_group_indexes(channel.timeframe)
 
-        # for batch in dataset.iter_batches():
-        for idx in row_group_indexes:
-            batch = dataset.read_row_group(idx)
+        for batch in dataset.iter_batches(row_groups=row_group_indexes):
             times = batch.column("time")
             assets = batch.column("asset")
             prices = batch.column("prices")
@@ -79,15 +77,18 @@ class ParquetFeed(Feed):
 
     def __get_row_group_indexes(self, timeframe: Timeframe | None) -> Iterable[int]:
         md = pq.read_metadata(self.parquet_path)
-        time = timeframe.start if timeframe else None
-
-        if not time:
+        if not timeframe:
             return range(0, md.num_row_groups)
+
+        start: int | None = None
         for idx in range(md.num_row_groups):
             stat = md.row_group(idx).column(0).statistics
-            if stat.max >= time:
-                return range(idx, md.num_row_groups)
-        return []
+            if start is None and stat.max >= timeframe.start:
+                start = idx
+            if stat.min > timeframe.end:
+                return range(start, idx)  # type: ignore
+
+        return [] if start is None else range(start, md.num_row_groups)
 
     def timeframe(self) -> Timeframe:
         d = pq.read_metadata(self.parquet_path).to_dict()

@@ -13,7 +13,8 @@ class PriceItemMetric(Metric):
 
     def calc(self, event, account, orders) -> dict[str, float]:
         result = {}
-        for symbol, item in event.price_items.items():
+        for asset, item in event.price_items.items():
+            symbol = asset.symbol
             if symbol in self.symbols or not self.symbols:
                 prefix = f"item/{symbol.lower()}"
                 result[f"{prefix}/price"] = item.price(self.price_type)

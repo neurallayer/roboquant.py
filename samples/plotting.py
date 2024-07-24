@@ -9,8 +9,8 @@ mpl.rcParams['figure.facecolor'] = '#202020'
 feed = rq.feeds.YahooFeed("JPM", "IBM", "F", start_date="2010-01-01")
 _, axs = plt.subplots(2, figsize=(10, 10))
 
-feed.plot(axs[0], "JPM")
-feed.plot(axs[1], "IBM")
+feed.plot(axs[0], feed.assets()[0])
+feed.plot(axs[1], feed.assets()[1])
 plt.show()
 
 # %%

@@ -12,7 +12,7 @@ ibkr = IBKRBroker.use_tws()
 account = ibkr.sync()
 print(account)
 
-orders = [Order(symbol, - pos.size) for symbol, pos in account.positions.items()]
+orders = [Order(asset, -pos.size, pos.mkt_price) for asset, pos in account.positions.items()]
 
 # close all but the first 10 positions
 ibkr.place_orders(orders[10:])

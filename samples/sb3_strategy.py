@@ -13,7 +13,7 @@ path = "/tmp/trained_recurrent_policy.zip"
 
 # %%
 yahoo = YahooFeed(*symbols, start_date="2000-01-01", end_date="2020-12-31")
-assets = list(yahoo.assets)
+assets = yahoo.assets()
 
 obs_feature = BarFeature(*assets).returns().normalize(20)
 reward_feature = EquityFeature().returns().normalize(20)

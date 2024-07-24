@@ -8,10 +8,10 @@ from roboquant.strategies.buffer import OHLCVBuffer
 
 class TaStrategy(BaseStrategy):
     """Abstract base class for other strategies that helps to implement trading solutions
-    based on technical indicators using bars.
+    based on technical indicators using a history of bars/candlesticks.
 
-    Subclasses should implement the _create_signal method. This method is only invoked once
-    there is at least `size` history for an individual symbol.
+    Subclasses should implement the `process_asset` method. This method is only invoked once
+    there is at least `size` history for an individual asset.
     """
 
     def __init__(self, size: int) -> None:

@@ -1,7 +1,6 @@
 # %%
 import roboquant as rq
 from roboquant.alpaca import AlpacaHistoricStockFeed
-from roboquant.feeds.feedutil import count_events
 from roboquant.feeds.sqllitefeed import SQLFeed
 
 # %%
@@ -18,4 +17,4 @@ if not feed.exists():
 
 # Info on recorded feed
 print(feed)
-print(count_events(feed))
+print(feed.count_events())

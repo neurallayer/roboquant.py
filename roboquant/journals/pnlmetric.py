@@ -1,3 +1,5 @@
+import sys
+
 from roboquant.account import Account
 from roboquant.journals.metric import Metric
 
@@ -18,8 +20,8 @@ class PNLMetric(Metric):
         self.max_gain = 0.0
         self.first_equity = None
         self.prev_equity = None
-        self.max_equity = -10e10
-        self.min_equity = 10e10
+        self.max_equity = sys.float_info.min
+        self.min_equity = sys.float_info.max
 
     def calc(self, event, account, orders) -> dict[str, float]:
         equity = account.equity_value()
