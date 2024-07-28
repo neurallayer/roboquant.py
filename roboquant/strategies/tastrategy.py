@@ -26,8 +26,7 @@ class TaStrategy(BaseStrategy):
                 if asset not in self._data:
                     self._data[asset] = OHLCVBuffer(self.size)
                 ohlcv = self._data[asset]
-                ohlcv.append(item.ohlcv)
-                if ohlcv.is_full():
+                if ohlcv.append(item.ohlcv):
                     self.process_asset(asset, ohlcv)
 
     @abstractmethod

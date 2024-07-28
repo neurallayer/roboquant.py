@@ -4,6 +4,7 @@ from datetime import datetime
 from array import array
 
 from fastavro import writer, reader, parse_schema
+from fastavro._read_py import block_reader
 
 from roboquant.event import Quote, Bar, Trade
 from roboquant.event import Event
@@ -37,13 +38,23 @@ class AvroFeed(Feed):
     def exists(self):
         return os.path.exists(self.avro_file)
 
+    def index(self):
+        with open(self.avro_file, "rb") as fo:
+            for idx, block in enumerate(block_reader(fo)):
+                for row in block:
+                    print(idx, row["timestamp"])  # type: ignore
+                    break
+
     def play(self, channel: EventChannel):
         t_old = ""
         items = []
+        start_time = channel.timeframe.start.isoformat() if channel.timeframe else "1900-01-01T00:00:00Z"
 
         with open(self.avro_file, "rb") as fo:
             for row in reader(fo):
                 t = row["timestamp"]  # type: ignore
+                if t < start_time:
+                    continue
 
                 if t != t_old:
                     if items:
@@ -60,7 +71,7 @@ class AvroFeed(Feed):
                         item = Quote(asset, array("f", row["values"]))  # type: ignore
                         items.append(item)
                     case "BAR":
-                        item = Bar(asset, array("f", row["values"]), row["other"])  # type: ignore
+                        item = Bar(asset, array("f", row["values"]), row["meta"])  # type: ignore
                         items.append(item)
                     case "TRADE":
                         prices = row["values"]  # type: ignore
@@ -69,38 +80,47 @@ class AvroFeed(Feed):
                     case _:
                         raise ValueError(f"Unsupported priceItem type={price_type}")
 
-    def record(self, feed: Feed, timeframe=None):
+    def record(self, feed: Feed, timeframe=None, append=False, batch_size=10_000):
         schema = parse_schema(AvroFeed._schema)
         channel = feed.play_background(timeframe)
-        records = []
-        while event := channel.get():
-            t = event.time.isoformat()
-            for item in event.items:
-                asset_str = item.asset.serialize()
-                match item:
-                    case Quote():
-                        data = {"timestamp": t, "type": "QUOTE", "asset": asset_str, "values": list(item.data)}
-                        records.append(data)
-                    case Trade():
-                        data = {
-                            "timestamp": t,
-                            "type": "TRADE",
-                            "asset": asset_str,
-                            "values": [item.trade_price, item.trade_volume],
-                        }
-                        records.append(data)
-                    case Bar():
-                        data = {
-                            "timestamp": t,
-                            "type": "BAR",
-                            "asset": asset_str,
-                            "values": list(item.ohlcv),
-                            "meta": item.frequency,
-                        }
-                        records.append(data)
 
-        with open(self.avro_file, "wb") as out:
-            writer(out, schema, records)
+        if not append and self.exists():
+            os.remove(self.avro_file)
+
+        with open(self.avro_file, "a+b") as out:
+            records = []
+            while event := channel.get():
+                t = event.time.isoformat()
+                for item in event.items:
+                    asset_str = item.asset.serialize()
+                    match item:
+                        case Quote():
+                            data = {"timestamp": t, "type": "QUOTE", "asset": asset_str, "values": list(item.data)}
+                            records.append(data)
+                        case Trade():
+                            data = {
+                                "timestamp": t,
+                                "type": "TRADE",
+                                "asset": asset_str,
+                                "values": [item.trade_price, item.trade_volume],
+                            }
+                            records.append(data)
+                        case Bar():
+                            data = {
+                                "timestamp": t,
+                                "type": "BAR",
+                                "asset": asset_str,
+                                "values": list(item.ohlcv),
+                                "meta": item.frequency,
+                            }
+                            records.append(data)
+
+                if len(records) > batch_size:
+                    writer(out, schema, records)
+                    records = []
+
+            if records:
+                writer(out, schema, records)
 
     def __repr__(self) -> str:
         return f"AvroFeed(path={self.avro_file})"

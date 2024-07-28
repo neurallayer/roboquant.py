@@ -9,7 +9,6 @@ from roboquant.asset import Asset
 from roboquant.event import Bar, PriceItem, Quote
 from roboquant.event import Event
 from roboquant.timeframe import EMPTY_TIMEFRAME, Timeframe
-from roboquant.alpaca import AlpacaHistoricStockFeed
 from roboquant.feeds.eventchannel import EventChannel
 from roboquant.feeds.feed import Feed
 

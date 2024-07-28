@@ -65,6 +65,7 @@ def run_price_item_feed(feed: Feed, assets: Iterable[Asset], test_case: TestCase
 
 def run_strategy(strategy: Strategy, test_case: TestCase):
     feed = get_feed()
+    all_assets = feed.assets()
     channel = feed.play_background()
     total_orders = 0
     account = Account()
@@ -76,7 +77,9 @@ def run_strategy(strategy: Strategy, test_case: TestCase):
             asset = order.asset
             test_case.assertEqual(type(order), Order)
             test_case.assertEqual(asset.symbol, asset.symbol.upper())
-            test_case.assertIn(asset, feed.assets())
+            test_case.assertIn(asset, all_assets)
+            test_case.assertTrue(order.size)
+            test_case.assertTrue(order.limit)
         total_orders += len(orders)
 
     test_case.assertGreater(total_orders, 0)

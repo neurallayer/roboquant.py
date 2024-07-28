@@ -8,13 +8,12 @@ yfinance~=0.2.38
 torch>=2.3.0
 tensorboard>=2.15.1
 nautilus-ibapi~=10.19.2
-alpaca-py~=0.28.0
+alpaca-py~=0.28.1
 stable-baselines3[extra_no_roms]~=2.3.2
 sb3-contrib~=2.3.0
 gymnasium~=0.29.1
 fastavro~=1.9.4
 pyarrow~=16.1.0
-questdb~=2.0.3
 # TA-Lib~=0.4.28
 
 # Build tools

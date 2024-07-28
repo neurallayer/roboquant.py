@@ -23,13 +23,14 @@ class NumpyBuffer:
         self._idx = 0
         self.rows = rows
 
-    def append(self, data: array | NDArray | list | tuple):
+    def append(self, data: array | NDArray | list | tuple) -> bool:
         if self._idx >= len(self._data):
             self._data[0: self.rows] = self._data[-self.rows:]
             self._idx = self.rows
 
         self._data[self._idx] = data
         self._idx += 1
+        return self._idx >= self.rows
 
     def __array__(self):
         start = max(0, self._idx - self.rows)
