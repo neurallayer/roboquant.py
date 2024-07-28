@@ -46,7 +46,7 @@ class Amount:
         return Amount.converter.convert(self.currency, currency, self.value, time)
 
     def __repr__(self) -> str:
-        return f"{self.value:_} {self.currency}"
+        return f"{self.value:,.2f} {self.currency}"
 
 
 class Wallet(defaultdict[str, float]):

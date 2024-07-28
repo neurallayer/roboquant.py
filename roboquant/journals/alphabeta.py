@@ -2,6 +2,8 @@ from typing import Tuple
 
 import numpy as np
 
+from roboquant.asset import Asset
+
 from .metric import Metric
 
 
@@ -22,11 +24,11 @@ class AlphaBeta(Metric):
         self._data = np.ones((2, window_size))
         self.__cnt = 0
         self.__last_prices = {}
-        self.__last_equity = None
+        self.__last_equity: float | None = None
         self.risk_free_return = risk_free_return
         self.price_type = price_type
 
-    def __get_market_value(self, prices: dict[str, float]):
+    def __get_market_value(self, prices: dict[Asset, float]):
         cnt = 0
         result = 0.0
         for symbol in prices.keys():
@@ -41,7 +43,7 @@ class AlphaBeta(Metric):
 
     def calc(self, event, account, orders):
         prices = event.get_prices(self.price_type)
-        equity = account.equity()
+        equity = account.equity_value()
         if self.__last_equity is None:
             self.__update(equity, prices)
             return {}

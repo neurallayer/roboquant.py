@@ -330,13 +330,14 @@ class FillFeature(Feature):
         return self.feature.size()
 
 
-class FillZeroFeature(Feature):
-    """If a feature contains a nan value, use the last known value instead"""
+class FillWithConstantFeature(Feature):
+    """If a feature contains a nan value, fill with a constant value"""
 
-    def __init__(self, feature: Feature) -> None:
+    def __init__(self, feature: Feature, constant: float = 0.0) -> None:
         super().__init__()
         self.feature: Feature = feature
         self.fill = self._zeros()
+        self.fill = np.full(self._shape(), constant, dtype=np.float32)
 
     def calc(self, evt, account):
         values = self.feature.calc(evt, account)
