@@ -7,6 +7,7 @@ from .historic import HistoricFeed
 from .randomwalk import RandomWalk
 from .sqllitefeed import SQLFeed
 from .parquetfeed import ParquetFeed
+from .avrofeed import AvroFeed
 
 try:
     from .yahoo import YahooFeed

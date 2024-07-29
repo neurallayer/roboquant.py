@@ -39,11 +39,14 @@ class AvroFeed(Feed):
         return os.path.exists(self.avro_file)
 
     def index(self):
-        with open(self.avro_file, "rb") as fo:
-            for idx, block in enumerate(block_reader(fo)):
-                for row in block:
-                    print(idx, row["timestamp"])  # type: ignore
-                    break
+        result = []
+        if self.exists():
+            with open(self.avro_file, "rb") as fo:
+                for block in block_reader(fo):
+                    for row in block:
+                        t = row["timestamp"]  # type: ignore
+                        result.append(datetime.fromisoformat(t))
+        return result
 
     def play(self, channel: EventChannel):
         t_old = ""
