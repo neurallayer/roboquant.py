@@ -1,5 +1,4 @@
 from abc import abstractmethod
-from datetime import timedelta
 from decimal import Decimal
 import logging
 
@@ -23,7 +22,6 @@ class BaseStrategy(Strategy):
         self.buy_price = "DEFAULT"
         self.sell_price = "DEFAULT"
         self.fractional_order_digits = 0
-        self.cancel_orders_older_than = timedelta(days=30)
 
         self._orders: list[Order]
         self._order_value: float
@@ -37,8 +35,6 @@ class BaseStrategy(Strategy):
         self._account = account
         self._event = event
         self._order_value = round(account.equity_value() * self.order_value_perc, 2)
-
-        self.cancel_old_orders()
         self.process(event, account)
         return self._orders
 
@@ -99,13 +95,6 @@ class BaseStrategy(Strategy):
         self._remaining_buying_power -= bp
         self._orders.append(order)
         return True
-
-    def cancel_old_orders(self):
-        for order in self._account.orders:
-            if not order.gtd:
-                continue
-            if order.gtd + self.cancel_orders_older_than < self._event.time:
-                self.cancel_order(order)
 
     def cancel_open_orders(self, *assets):
         for order in self._account.orders:
