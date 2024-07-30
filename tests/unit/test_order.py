@@ -1,3 +1,4 @@
+from datetime import datetime, timedelta, timezone
 import unittest
 from decimal import Decimal
 
@@ -15,9 +16,20 @@ class TestOrder(unittest.TestCase):
         self.assertEqual(120.0, order.limit)
         self.assertEqual(None, order.id)
         self.assertEqual(apple, order.asset)
+        self.assertEqual(None, order.gtd)
+
+    def test_order_gtd(self):
+        now = datetime.now(timezone.utc)
+
+        order = Order(apple, 100, 120.0)
+        self.assertFalse(order.is_expired(now))
+
+        order = Order(apple, 100, 120.0, now + timedelta(days=1))
+        self.assertFalse(order.is_expired(now))
+        self.assertTrue(order.is_expired(now + timedelta(days=2)))
 
     def test_order_info(self):
-        order = Order(apple, 100,  120.0, tif="ABC")
+        order = Order(apple, 100, 120.0, tif="ABC")
         info = order.info
         self.assertIn("tif", info)
 
