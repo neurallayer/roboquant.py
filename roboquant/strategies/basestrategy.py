@@ -102,9 +102,9 @@ class BaseStrategy(Strategy):
 
     def cancel_old_orders(self):
         for order in self._account.orders:
-            if not order.created_at:
+            if not order.gtd:
                 continue
-            if order.created_at + self.cancel_orders_older_than < self._event.time:
+            if order.gtd + self.cancel_orders_older_than < self._event.time:
                 self.cancel_order(order)
 
     def cancel_open_orders(self, *assets):

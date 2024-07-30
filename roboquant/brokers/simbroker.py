@@ -27,12 +27,7 @@ class SimBroker(Broker):
     This class can be extended to support different types of use-cases, like margin trading.
     """
 
-    def __init__(
-        self,
-        initial_deposit=Amount("USD", 1_000_000.0),
-        price_type="OPEN",
-        slippage=0.001
-    ):
+    def __init__(self, initial_deposit=Amount("USD", 1_000_000.0), price_type="OPEN", slippage=0.001):
         super().__init__()
         self._account = Account(initial_deposit.currency)
         self._modify_orders: list[Order] = []
@@ -159,8 +154,10 @@ class SimBroker(Broker):
             return
         prices = event.price_items
         for order in self._account.orders:
-            if item := prices.get(order.asset):
-                order.created_at = order.created_at or event.time
+
+            if order.is_expired(event.time):
+                self.remove_order(order)
+            elif item := prices.get(order.asset):
                 trx = self._execute(order, item)
                 if trx is not None:
                     logger.info("executed order=%s trx=%s", order, trx)

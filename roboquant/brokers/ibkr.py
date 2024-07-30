@@ -78,11 +78,11 @@ class _IBApi(EWrapper, EClient):
         asset = Stock(symbol, contract.currency)
         rq_order = Order(asset, size, order.lmtPrice)
         rq_order.id = str(orderId)
-        rq_order.created_at = datetime.fromisoformat(order.activeStartTime)
+        # rq_order.created_at = datetime.fromisoformat(order.activeStartTime)
         self.__tmp_orders[rq_order.id] = rq_order
 
     def openOrderEnd(self):
-        logger.debug("openn orde ended")
+        logger.debug("open orders ended")
         self.orders = list(self.__tmp_orders.values())
         self.__tmp_orders.clear()
 

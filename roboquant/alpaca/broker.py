@@ -52,7 +52,7 @@ class AlpacaBroker(LiveBroker):
                 float(alpaca_order.limit_price),  # type: ignore
             )
             order.fill = Decimal(alpaca_order.filled_qty)  # type: ignore
-            order.created_at = alpaca_order.created_at
+            order.gtd = alpaca_order.created_at
             order.id = str(alpaca_order.id)
             orders.append(order)
 
@@ -88,6 +88,8 @@ class AlpacaBroker(LiveBroker):
     def place_orders(self, orders):
 
         for order in orders:
+
+            assert not order.gtd, "alpaca doesn't support GTD type of orders"
 
             if order.size.is_zero():
                 assert order.id is not None, "can only cancel orders with an id"

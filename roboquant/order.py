@@ -19,13 +19,13 @@ class Order:
     asset: Asset
     size: Decimal
     limit: float
+    gtd: datetime | None
     info: dict[str, Any]
 
     id: str | None
     fill: Decimal
-    created_at: datetime | None
 
-    def __init__(self, asset: Asset, size: Decimal | str | int | float, limit: float, **kwargs):
+    def __init__(self, asset: Asset, size: Decimal | str | int | float, limit: float, gtd: datetime | None = None, **kwargs):
         self.asset = asset
         self.size = Decimal(size)
         assert not self.size.is_zero(), "Cannot create a new order with size is zero"
@@ -34,7 +34,7 @@ class Order:
         self.id: str | None = None
         self.fill = Decimal(0)
         self.info = kwargs
-        self.created_at = None
+        self.gtd = gtd
 
     def cancel(self) -> "Order":
         """Create a cancellation order. You can only cancel orders that are still open and have an id.
@@ -44,6 +44,9 @@ class Order:
         result = copy(self)
         result.size = Decimal(0)
         return result
+
+    def is_expired(self, time: datetime) -> bool:
+        return time <= self.gtd if self.gtd else False
 
     def modify(self, size: Decimal | str | int | float | None = None, limit: float | None = None) -> "Order":
         """Create an update-order. You can update the size and/or limit of an order. The returned order has the same id
@@ -61,10 +64,9 @@ class Order:
         return result
 
     def __copy__(self):
-        result = Order(self.asset, self.size, self.limit, **self.info)
+        result = Order(self.asset, self.size, self.limit, self.gtd, **self.info)
         result.id = self.id
         result.fill = self.fill
-        result.created_at = self.created_at
         return result
 
     def value(self):
