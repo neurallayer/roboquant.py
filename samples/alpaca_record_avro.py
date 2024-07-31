@@ -1,5 +1,4 @@
 # %%
-import roboquant as rq
 from roboquant.alpaca import AlpacaHistoricStockFeed
 from roboquant.feeds.avrofeed import AvroFeed
 

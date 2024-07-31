@@ -1,5 +1,4 @@
 # %%
-
 from roboquant.alpaca import AlpacaLiveFeed
 from roboquant import Timeframe
 

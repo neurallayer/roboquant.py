@@ -1,4 +1,5 @@
 from abc import abstractmethod
+from datetime import timedelta
 from decimal import Decimal
 import logging
 
@@ -22,6 +23,8 @@ class BaseStrategy(Strategy):
         self.buy_price = "DEFAULT"
         self.sell_price = "DEFAULT"
         self.fractional_order_digits = 0
+        self.valid_for: timedelta | None = timedelta(days=3)
+        self.min_order_value = 100
 
         self._orders: list[Order]
         self._order_value: float
@@ -39,7 +42,7 @@ class BaseStrategy(Strategy):
         return self._orders
 
     def _get_size(self, asset: Asset, limit: float) -> Decimal:
-        if self._order_value < 0.1:
+        if self._order_value < self.min_order_value:
             return Decimal()
         value_one = asset.contract_amount(Decimal(1), limit).convert(self._account.base_currency, self._account.last_update)
         return round(Decimal(self._order_value / value_one), self.fractional_order_digits)
@@ -47,16 +50,19 @@ class BaseStrategy(Strategy):
     def add_buy_order(self, asset: Asset, limit: float | None = None):
         if limit := limit or self._get_limit(asset, True):
             if size := self._get_size(asset, limit):
-                order = Order(asset, size, limit)
+                order = Order(asset, size, limit, self._get_gtd())
                 return self.add_order(order)
 
         logger.info("rejected buy order asset %s", asset)
         return False
 
+    def _get_gtd(self):
+        return None if not self.valid_for else self._event.time + self.valid_for
+
     def add_exit_order(self, asset: Asset, limit: float | None = None):
         if size := -self._account.get_position_size(asset):
             if limit := limit or self._get_limit(asset, size > 0):
-                order = Order(asset, size, limit)
+                order = Order(asset, size, limit, self._get_gtd())
                 return self.add_order(order)
 
         logger.info("rejected exit order asset %s", asset)
@@ -65,7 +71,7 @@ class BaseStrategy(Strategy):
     def add_sell_order(self, asset: Asset, limit: float | None = None):
         if limit := limit or self._get_limit(asset, False):
             if size := self._get_size(asset, limit) * -1:
-                order = Order(asset, size, limit)
+                order = Order(asset, size, limit, self._get_gtd())
                 return self.add_order(order)
 
         logger.info("rejected sell order asset %s", asset)

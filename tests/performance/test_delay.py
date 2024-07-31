@@ -9,11 +9,14 @@ from roboquant.alpaca import AlpacaLiveFeed
 
 class TestDelay(unittest.TestCase):
     """
-    Measure the delay of receiving live prices from IEX using Tiingo and Alpaca.
+    Measure the delay of receiving live prices from IEX using Alpaca.
+
+    It requires that the system clock of your computer is correct and accurate.
+    You can navigate to https://time.is/ to get a rought idea about its accuracy.
 
     This route includes the following paths if you run this script from home:
 
-    - From IEX to the market data provider (Tiingo or Alpaca)
+    - From IEX to the market data provider (Alpaca)
     - Provider holds it for 15ms (requirement from IEX)
     - From provider to the modem/access-point in your house
     - From the access-point to your computer (f.e lan or Wi-Fi)
