@@ -14,16 +14,16 @@ from roboquant.strategies.buffer import OHLCVBuffer
 
 class Feature(ABC):
     """Features allows to:
-    - extract features from an event and/or account.
+    - extract features from an event or account.
     - transform other features.
     """
 
     @abstractmethod
-    def calc(self, evt: Event, account: Account | None) -> NDArray:
+    def calc(self, evt: Event, account: Account) -> NDArray:
         """
         Return the result as a 1-dimensional NDArray.
         The result should always be the same size. If a value cannot be calculated at a certain
-        tiem, it should return a float NaN.
+        item, it should return a float NaN.
         """
 
     @abstractmethod
@@ -167,7 +167,7 @@ class PositionSizeFeature(Feature):
         equity = account.equity_value()
         for idx, asset in enumerate(self.assets):
             position = account.positions.get(asset)
-            if position:
+            if position and position.size:
                 value = asset.contract_amount(position.size, position.mkt_price).convert(account.base_currency, evt.time)
                 pos_size = value / equity - 1.0
                 result[idx] = pos_size
