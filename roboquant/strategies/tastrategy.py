@@ -2,11 +2,12 @@ from abc import abstractmethod
 
 from roboquant.asset import Asset
 from roboquant.event import Bar
-from roboquant.strategies.basestrategy import BaseStrategy
+from roboquant.signal import Signal
 from roboquant.strategies.buffer import OHLCVBuffer
+from roboquant.strategies.strategy import Strategy
 
 
-class TaStrategy(BaseStrategy):
+class TaStrategy(Strategy):
     """Abstract base class for other strategies that helps to implement trading solutions
     based on technical indicators using a history of bars/candlesticks.
 
@@ -19,7 +20,8 @@ class TaStrategy(BaseStrategy):
         self._data: dict[Asset, OHLCVBuffer] = {}
         self.size = size
 
-    def process(self, event, account):
+    def create_signals(self, event):
+        result = []
         for item in event.items:
             if isinstance(item, Bar):
                 asset = item.asset
@@ -27,10 +29,12 @@ class TaStrategy(BaseStrategy):
                     self._data[asset] = OHLCVBuffer(self.size)
                 ohlcv = self._data[asset]
                 if ohlcv.append(item.ohlcv):
-                    self.process_asset(asset, ohlcv)
+                    if signal := self.process_asset(asset, ohlcv):
+                        result.append(signal)
+        return result
 
     @abstractmethod
-    def process_asset(self, asset: Asset, ohlcv: OHLCVBuffer):
+    def process_asset(self, asset: Asset, ohlcv: OHLCVBuffer) -> Signal | None:
         """
         Create zero or more orders for the provided symbol
         """

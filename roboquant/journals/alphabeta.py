@@ -41,7 +41,7 @@ class AlphaBeta(Metric):
         self.__last_equity = equity
         self.__last_prices.update(prices)
 
-    def calc(self, event, account, orders):
+    def calc(self, event, account, signals, orders):
         prices = event.get_prices(self.price_type)
         equity = account.equity_value()
         if self.__last_equity is None:

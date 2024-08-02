@@ -1,7 +1,6 @@
 import unittest
 
 import numpy as np
-from roboquant.account import Account
 from roboquant.event import Event
 
 from roboquant.ml.features import (
@@ -35,10 +34,9 @@ class TestFeatures(unittest.TestCase):
             VolumeFeature(symbol2),
             DayOfWeekFeature(),
         )
-        account = Account()
         channel = feed.play_background()
         while evt := channel.get():
-            result = feature.calc(evt, account)
+            result = feature.calc(evt)
             self.assertTrue(len(result) == feature.size())
 
     def test_cache(self):
@@ -48,11 +46,10 @@ class TestFeatures(unittest.TestCase):
             PriceFeature(*feed.assets()),
         )
 
-        account = Account()
         channel = feed.play_background()
         while evt := channel.get():
-            result1 = feature.calc(evt, account).sum()
-            result2 = feature.calc(evt, account).sum()
+            result1 = feature.calc(evt).sum()
+            result2 = feature.calc(evt).sum()
             if not np.isnan(result1):
                 self.assertEqual(result1, result2)
 
@@ -68,16 +65,14 @@ class TestFeatures(unittest.TestCase):
         )
 
         norm_feature = NormalizeFeature(feature, 10)
-        account = Account()
         channel = feed.play_background()
         while evt := channel.get():
-            result = norm_feature.calc(evt, account)
+            result = norm_feature.calc(evt)
             self.assertTrue(len(result) == feature.size())
 
     def test_core_feature(self):
-        account = Account()
         f = FixedValueFeature(np.ones((10,)))[2:5]
-        values = f.calc(Event.empty(), account)
+        values = f.calc(Event.empty())
         self.assertEqual(3, len(values))
 
         f = FixedValueFeature(
@@ -85,8 +80,8 @@ class TestFeatures(unittest.TestCase):
                 10,
             )
         ).returns()
-        f.calc(Event.empty(), account)
-        values = f.calc(Event.empty(), account)
+        f.calc(Event.empty())
+        values = f.calc(Event.empty())
         self.assertEqual(0, values[0])
 
 

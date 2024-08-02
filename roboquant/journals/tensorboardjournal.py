@@ -19,10 +19,10 @@ class TensorboardJournal(Journal):
         self._step = 0
         self.metrics = metrics
 
-    def track(self, event, account, orders):
+    def track(self, event, account, signals, orders):
         time = event.time.timestamp()
         for metric in self.metrics:
-            result = metric.calc(event, account, orders)
+            result = metric.calc(event, account, signals, orders)
             for name, value in result.items():
                 self.__writer.add_scalar(name, value, self._step, wall_time=time)
 

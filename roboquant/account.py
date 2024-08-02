@@ -82,6 +82,9 @@ class Account:
         """Return al the short positions in the account"""
         return {symbol: position for (symbol, position) in self.positions.items() if position.is_long}
 
+    def contract_value(self, asset, size, price):
+        return asset.contract_amount(size, price).convert(self.base_currency, self.last_update)
+
     def equity(self) -> Wallet:
         """Return the equity of the account.
         It calculates the sum mkt values of each open position and adds the available cash.

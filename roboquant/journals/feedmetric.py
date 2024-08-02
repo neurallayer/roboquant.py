@@ -9,7 +9,7 @@ class FeedMetric(Metric):
         self.price_type = price_type
         self._last_total = 1.0
 
-    def calc(self, event, account, orders):
+    def calc(self, event, account, signals, orders):
         mkt_return = 0.0
         n = 0
         for asset, price in event.get_prices(self.price_type).items():

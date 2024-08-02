@@ -1,11 +1,12 @@
 from datetime import timedelta
-from roboquant.account import Account
+
+from roboquant.signal import Signal
 from roboquant.asset import Asset
 from roboquant.event import Event
-from roboquant.strategies.basestrategy import BaseStrategy
+from roboquant.strategies.strategy import Strategy
 
 
-class EMACrossover(BaseStrategy):
+class EMACrossover(Strategy):
     """EMA Crossover Strategy that server as an example strategy."""
 
     def __init__(self, fast_period=13, slow_period=26, smoothing=2.0, price_type="DEFAULT"):
@@ -17,7 +18,8 @@ class EMACrossover(BaseStrategy):
         self.min_steps = max(fast_period, slow_period)
         self.cancel_orders_older_than = timedelta(days=5)
 
-    def process(self, event: Event, account: Account):
+    def create_signals(self, event: Event) -> list[Signal]:
+        result = []
         for asset, price in event.get_prices(self.price_type).items():
 
             if asset not in self._history:
@@ -31,9 +33,10 @@ class EMACrossover(BaseStrategy):
                     new_rating = calculator.is_above()
                     if old_rating != new_rating:
                         if new_rating:
-                            self.add_buy_order(asset)
+                            result.append(Signal.buy(asset))
                         else:
-                            self.add_exit_order(asset)
+                            result.append(Signal.sell(asset))
+        return result
 
     class _Calculator:
 

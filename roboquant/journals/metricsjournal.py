@@ -21,10 +21,10 @@ class MetricsJournal(Journal):
     def pnl(cls):
         return cls(PNLMetric())
 
-    def track(self, event, account, orders):
+    def track(self, event, account, signals, orders):
         result = {}
         for metric in self.metrics:
-            new_result = metric.calc(event, account, orders)
+            new_result = metric.calc(event, account, signals, orders)
             result.update(new_result)
 
         self._history.append((event.time, result))

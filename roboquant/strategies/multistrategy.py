@@ -1,8 +1,7 @@
 from typing import Literal
 
-from roboquant.account import Account
 from roboquant.event import Event
-from roboquant.order import Order
+from roboquant.signal import Signal
 from roboquant.strategies.strategy import Strategy
 
 
@@ -25,19 +24,19 @@ class MultiStrategy(Strategy):
         self.strategies = list(strategies)
         self.filter = order_filter
 
-    def create_orders(self, event: Event, account: Account) -> list[Order]:
-        orders: list[Order] = []
+    def create_signals(self, event: Event) -> list[Signal]:
+        signals: list[Signal] = []
         for strategy in self.strategies:
-            orders += strategy.create_orders(event, account)
+            signals += strategy.create_signals(event)
 
         match self.filter:
             case "none":
-                return orders
+                return signals
             case "last":
-                s = {s.asset: s for s in orders}
+                s = {s.asset: s for s in signals}
                 return list(s.values())
             case "first":
-                s = {s.asset: s for s in reversed(orders)}
+                s = {s.asset: s for s in reversed(signals)}
                 return list(s.values())
 
         raise ValueError("unsupported signal filter")

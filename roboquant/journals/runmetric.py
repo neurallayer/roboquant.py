@@ -13,7 +13,7 @@ class RunMetric(Metric):
         self.signals = 0
         self.events = 0
 
-    def calc(self, event, account, orders) -> dict[str, float]:
+    def calc(self, event, account, signals, orders) -> dict[str, float]:
         self.items += len(event.items)
         self.orders += len(orders)
         self.events += 1

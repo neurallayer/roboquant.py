@@ -6,68 +6,42 @@ from datetime import datetime
 import numpy as np
 import torch
 from numpy.typing import NDArray
-from stable_baselines3.common.policies import BasePolicy
+
 from torch.utils.data import DataLoader, Dataset
 
-from roboquant.account import Account
 from roboquant.asset import Asset
 from roboquant.event import Event
-from roboquant.ml.envs import ActionTransformer, TradingEnv
-from roboquant.ml.features import Feature, NormalizeFeature
-from roboquant.order import Order
-from roboquant.strategies.basestrategy import BaseStrategy
+from roboquant.ml.features import EventFeature, NormalizeFeature
+from roboquant.signal import Signal
 from roboquant.strategies.strategy import Strategy
 
 logger = logging.getLogger(__name__)
 
 
-class SB3PolicyStrategy(Strategy):
-
-    def __init__(self, obs_feature: Feature, action_transformer: ActionTransformer, policy: BasePolicy):
-        super().__init__()
-        self.obs_feature = obs_feature
-        self.action_transformer = action_transformer
-        self.policy = policy
-        self.state = None
-
-    @classmethod
-    def from_env(cls, env: TradingEnv, policy: BasePolicy):
-        return cls(env.obs_feature, env.action_transformer, policy)
-
-    def create_orders(self, event, account) -> list[Order]:
-        obs = self.obs_feature.calc(event, account)
-        if np.any(np.isnan(obs)):
-            return []
-        action, self.state = self.policy.predict(obs, state=self.state, deterministic=True)  # type: ignore
-        return self.action_transformer.get_orders(action, event, account)
-
-    def reset(self):
-        self.state = None
-        self.obs_feature.reset()
-
-
-class FeatureStrategy(BaseStrategy):
+class FeatureStrategy(Strategy):
     """Abstract base class for strategies wanting to use features
     for their input.
     """
 
-    def __init__(self, input_feature: Feature, history: int, dtype="float32"):
+    def __init__(self, input_feature: EventFeature, history: int, dtype="float32"):
         super().__init__()
         self.input_feature = input_feature
         self.history = history
         self._hist = deque(maxlen=history)
         self._dtype = dtype
 
-    def process(self, event: Event, account: Account):
+    def create_signals(self, event: Event) -> list[Signal]:
         h = self._hist
-        row = self.input_feature.calc(event, None)
+        row = self.input_feature.calc(event)
         h.append(row)
         if len(h) == h.maxlen:
             x = np.asarray(h, dtype=self._dtype)
-            self.predict(x, event.time)
+            if signal := self.predict(x, event.time):
+                return [signal]
+        return []
 
     @abstractmethod
-    def predict(self, x: NDArray, time: datetime): ...
+    def predict(self, x: NDArray, time: datetime) -> Signal | None: ...
 
 
 class SequenceDataset(Dataset):
@@ -98,8 +72,8 @@ class RNNStrategy(FeatureStrategy):
 
     def __init__(
         self,
-        input_feature: Feature,
-        label_feature: Feature,
+        input_feature: EventFeature,
+        label_feature: EventFeature,
         model: torch.nn.Module,
         asset: Asset,
         sequences: int = 20,
@@ -113,7 +87,7 @@ class RNNStrategy(FeatureStrategy):
         self.sell_pct = sell_pct
         self.asset = asset
 
-    def predict(self, x, time):
+    def predict(self, x, time) -> Signal | None:
         x = torch.asarray(x)
         x = torch.unsqueeze(x, dim=0)  # add the batch dimension
 
@@ -128,9 +102,10 @@ class RNNStrategy(FeatureStrategy):
 
             logger.info("prediction p=%s time=%s", p, time)
             if p >= self.buy_pct:
-                self.add_buy_order(self.asset)
+                return Signal.buy(self.asset)
             if p <= self.sell_pct:
-                self.add_sell_order(self.asset)
+                return Signal.sell(self.asset)
+        return None
 
     def _get_dataloaders(self, x, y, prediction: int, validation_split: float, batch_size: int):
         # what is the border between train- and validation-data
@@ -157,12 +132,12 @@ class RNNStrategy(FeatureStrategy):
         y = []
         while evt := channel.get():
             if warmup:
-                self.label_feature.calc(evt, None)
-                self.input_feature.calc(evt, None)
+                self.label_feature.calc(evt)
+                self.input_feature.calc(evt)
                 warmup -= 1
             else:
-                x.append(self.input_feature.calc(evt, None))
-                y.append(self.label_feature.calc(evt, None))
+                x.append(self.input_feature.calc(evt))
+                y.append(self.label_feature.calc(evt))
 
         return np.asarray(x, dtype=self._dtype), np.asarray(y, dtype=self._dtype)
 

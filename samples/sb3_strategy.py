@@ -4,8 +4,7 @@ from sb3_contrib.common.recurrent.policies import RecurrentActorCriticPolicy
 from roboquant import run
 from roboquant.feeds.yahoo import YahooFeed
 from roboquant.ml.features import BarFeature, EquityFeature
-from roboquant.ml.envs import TradingEnv, OrderWithLimitsMaker
-from roboquant.ml.strategies import SB3PolicyStrategy
+from roboquant.ml.rl import TradingEnv, SB3PolicyStrategy
 
 # %%
 symbols = ["IBM", "JPM", "MSFT", "BA"]
@@ -16,10 +15,9 @@ yahoo = YahooFeed(*symbols, start_date="2000-01-01", end_date="2020-12-31")
 assets = yahoo.assets()
 
 obs_feature = BarFeature(*assets).returns().normalize(20)
-reward_feature = EquityFeature().returns().normalize(20)
+reward_feature = EquityFeature()
 
-action_transformer = OrderWithLimitsMaker(assets)
-env = TradingEnv(yahoo, obs_feature, reward_feature, action_transformer)
+env = TradingEnv(yahoo, obs_feature, reward_feature, assets)
 model = RecurrentPPO("MlpLstmPolicy", env)
 
 # %%

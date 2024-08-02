@@ -5,13 +5,11 @@ from typing import Iterable
 from unittest import TestCase
 
 from roboquant import PriceItem, Bar, Quote, Trade
-from roboquant.account import Account
 from roboquant.asset import Asset
 from roboquant.feeds import CSVFeed
 from roboquant.feeds.feed import Feed
-from roboquant.order import Order
+from roboquant.signal import Signal
 from roboquant.strategies.strategy import Strategy
-from roboquant.wallet import Wallet, Amount
 
 
 def get_feed() -> CSVFeed:
@@ -67,19 +65,14 @@ def run_strategy(strategy: Strategy, test_case: TestCase):
     feed = get_feed()
     all_assets = feed.assets()
     channel = feed.play_background()
-    total_orders = 0
-    account = Account()
-    account.cash = Wallet(Amount("USD", 1_000_000.0))
-    account.buying_power = Amount("USD", 1_000_000.0)
+    total_signals = 0
     while event := channel.get():
-        orders = strategy.create_orders(event, account)
-        for order in orders:
-            asset = order.asset
-            test_case.assertEqual(type(order), Order)
+        signals = strategy.create_signals(event)
+        for signal in signals:
+            asset = signal.asset
+            test_case.assertEqual(type(signal), Signal)
             test_case.assertEqual(asset.symbol, asset.symbol.upper())
             test_case.assertIn(asset, all_assets)
-            test_case.assertTrue(order.size)
-            test_case.assertTrue(order.limit)
-        total_orders += len(orders)
+        total_signals += len(signals)
 
-    test_case.assertGreater(total_orders, 0)
+    test_case.assertGreater(total_signals, 0)

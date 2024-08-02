@@ -3,6 +3,7 @@ from abc import ABC, abstractmethod
 from roboquant.account import Account
 from roboquant.event import Event
 from roboquant.order import Order
+from roboquant.signal import Signal
 
 
 class Journal(ABC):
@@ -14,7 +15,7 @@ class Journal(ABC):
     """
 
     @abstractmethod
-    def track(self, event: Event, account: Account, orders: list[Order]):
+    def track(self, event: Event, account: Account, signals: list[Signal], orders: list[Order]):
         """invoked at each step of a run that provides the journal with the opportunity to
         track and log various metrics."""
         ...

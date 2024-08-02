@@ -11,7 +11,7 @@ class PriceItemMetric(Metric):
         self.price_type = price_type
         self.volume_type = volume_type
 
-    def calc(self, event, account, orders) -> dict[str, float]:
+    def calc(self, event, account, signals, orders) -> dict[str, float]:
         result = {}
         for asset, item in event.price_items.items():
             symbol = asset.symbol

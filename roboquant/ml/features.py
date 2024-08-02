@@ -12,14 +12,40 @@ from roboquant.event import Event, Bar, Quote
 from roboquant.strategies.buffer import OHLCVBuffer
 
 
-class Feature(ABC):
+class AccountFeature(ABC):
+
+    @abstractmethod
+    def calc(self, account: Account) -> np.float32:
+        ...
+
+    def reset(self):
+        """Reset the state of the feature"""
+
+
+class EquityFeature(AccountFeature):
+    """Returns the total equity value of the account"""
+
+    def __init__(self):
+        self.prev_equity = float("nan")
+
+    def calc(self, account):
+        equity = account.equity_value()
+        result = equity/self.prev_equity - 1.0
+        self.prev_equity = equity
+        return np.float32(result)
+
+    def reset(self):
+        self.prev_equity = float("nan")
+
+
+class EventFeature(ABC):
     """Features allows to:
     - extract features from an event or account.
     - transform other features.
     """
 
     @abstractmethod
-    def calc(self, evt: Event, account: Account) -> NDArray:
+    def calc(self, evt: Event) -> NDArray:
         """
         Return the result as a 1-dimensional NDArray.
         The result should always be the same size. If a value cannot be calculated at a certain
@@ -61,17 +87,17 @@ class Feature(ABC):
         return np.full(self._shape(), float("nan"), dtype=np.float32)
 
 
-class SlicedFeature(Feature):
+class SlicedFeature(EventFeature):
     """Calculate a slice from another feature"""
 
-    def __init__(self, feature: Feature, args) -> None:
+    def __init__(self, feature: EventFeature, args) -> None:
         super().__init__()
         self.args = args
         self.feature = feature
         self._size = len(feature._zeros()[args])
 
-    def calc(self, evt, account):
-        values = self.feature.calc(evt, account)
+    def calc(self, evt):
+        values = self.feature.calc(evt)
         return values[self.args]
 
     def size(self):
@@ -81,7 +107,7 @@ class SlicedFeature(Feature):
         return self.feature.reset()
 
 
-class TrueRangeFeature(Feature):
+class TrueRangeFeature(EventFeature):
     """Calculates the true range value for a asset"""
 
     def __init__(self, asset: Asset) -> None:
@@ -89,7 +115,7 @@ class TrueRangeFeature(Feature):
         self.prev_close = None
         self.asset = asset
 
-    def calc(self, evt, account):
+    def calc(self, evt):
         item = evt.price_items.get(self.asset)
         if item is None or not isinstance(item, Bar):
             return np.array([float("nan")])
@@ -113,7 +139,7 @@ class TrueRangeFeature(Feature):
         self.prev_close = None
 
 
-class FixedValueFeature(Feature):
+class FixedValueFeature(EventFeature):
 
     def __init__(self, value: Any) -> None:
         super().__init__()
@@ -122,11 +148,11 @@ class FixedValueFeature(Feature):
     def size(self) -> int:
         return len(self.value)
 
-    def calc(self, evt, account):
+    def calc(self, evt):
         return self.value
 
 
-class PriceFeature(Feature):
+class PriceFeature(EventFeature):
     """Extract a single price for one or more assets"""
 
     def __init__(self, *assets: Asset, price_type: str = "DEFAULT") -> None:
@@ -134,7 +160,7 @@ class PriceFeature(Feature):
         self.assets = assets
         self.price_type = price_type
 
-    def calc(self, evt, account):
+    def calc(self, evt):
         prices = [evt.get_price(asset, self.price_type) for asset in self.assets]
         return np.array(prices, dtype=np.float32)
 
@@ -142,71 +168,14 @@ class PriceFeature(Feature):
         return len(self.assets)
 
 
-class EquityFeature(Feature):
-    """Returns the total equity value of the account"""
-
-    def calc(self, evt, account):
-        assert account is not None
-        equity = account.equity_value()
-        return np.asarray([equity], dtype=np.float32)
-
-    def size(self) -> int:
-        return 1
-
-
-class PositionSizeFeature(Feature):
-    """Extract the position value for one or more assets as the fraction of the total equity"""
-
-    def __init__(self, *assets: Asset) -> None:
-        super().__init__()
-        self.assets = assets
-
-    def calc(self, evt, account):
-        assert account is not None
-        result = self._zeros()
-        equity = account.equity_value()
-        for idx, asset in enumerate(self.assets):
-            position = account.positions.get(asset)
-            if position and position.size:
-                value = asset.contract_amount(position.size, position.mkt_price).convert(account.base_currency, evt.time)
-                pos_size = value / equity - 1.0
-                result[idx] = pos_size
-        return result
-
-    def size(self) -> int:
-        return len(self.assets)
-
-
-class PositionPNLFeature(Feature):
-    """Extract the pnl percentage for an open position for one or more assets.
-    Returns 0.0 if there is no open position for a asset"""
-
-    def __init__(self, *assets: Asset) -> None:
-        super().__init__()
-        self.assets = assets
-
-    def calc(self, evt, account):
-        assert account is not None
-        result = self._zeros()
-        for idx, asset in enumerate(self.assets):
-            position = account.positions.get(asset)
-            if position:
-                pnl = position.mkt_price / position.avg_price - 1.0
-                result[idx] = pnl
-        return result
-
-    def size(self) -> int:
-        return len(self.assets)
-
-
-class BarFeature(Feature):
+class BarFeature(EventFeature):
     """Extract the ohlcv values from bars for one or more assets"""
 
     def __init__(self, *assets: Asset) -> None:
         super().__init__()
         self.assets = assets
 
-    def calc(self, evt, account):
+    def calc(self, evt):
         result = self._full_nan()
         for idx, asset in enumerate(self.assets):
             item = evt.price_items.get(asset)
@@ -220,14 +189,14 @@ class BarFeature(Feature):
         return 5 * len(self.assets)
 
 
-class QuoteFeature(Feature):
+class QuoteFeature(EventFeature):
     """Extract the values from quotes for one or more assets"""
 
     def __init__(self, *assets: Asset) -> None:
         super().__init__()
         self.assets = assets
 
-    def calc(self, evt, account):
+    def calc(self, evt):
         result = self._full_nan()
         for idx, asset in enumerate(self.assets):
             item = evt.price_items.get(asset)
@@ -241,16 +210,16 @@ class QuoteFeature(Feature):
         return 4 * len(self.assets)
 
 
-class CombinedFeature(Feature):
+class CombinedFeature(EventFeature):
     """Combine multiple features into one single feature by stacking them."""
 
-    def __init__(self, *features: Feature) -> None:
+    def __init__(self, *features: EventFeature) -> None:
         super().__init__()
         self.features = features
         self._size = sum(feature.size() for feature in self.features)
 
-    def calc(self, evt, account):
-        data = [feature.calc(evt, account) for feature in self.features]
+    def calc(self, evt):
+        data = [feature.calc(evt) for feature in self.features]
         return np.hstack(data, dtype=np.float32)
 
     def size(self) -> int:
@@ -261,10 +230,10 @@ class CombinedFeature(Feature):
             feature.reset()
 
 
-class NormalizeFeature(Feature):
+class NormalizeFeature(EventFeature):
     """online normalization calculator"""
 
-    def __init__(self, feature: Feature, min_count: int = 3) -> None:
+    def __init__(self, feature: EventFeature, min_count: int = 3) -> None:
         super().__init__()
         self.feature = feature
         self.min_count = min_count
@@ -294,8 +263,8 @@ class NormalizeFeature(Feature):
         stdev[mask] = np.sqrt(m2[mask] / count[mask]) + 1e-12
         return (values - mean) / stdev
 
-    def calc(self, evt, account):
-        values = self.feature.calc(evt, account)
+    def calc(self, evt):
+        values = self.feature.calc(evt)
         self.__update(values)
         return self.__normalize_values(values)
 
@@ -307,16 +276,16 @@ class NormalizeFeature(Feature):
         self.feature.reset()
 
 
-class FillFeature(Feature):
+class FillFeature(EventFeature):
     """If a feature contains a nan value, use the last known value instead"""
 
-    def __init__(self, feature: Feature) -> None:
+    def __init__(self, feature: EventFeature) -> None:
         super().__init__()
-        self.feature: Feature = feature
+        self.feature: EventFeature = feature
         self.fill = self._full_nan()
 
-    def calc(self, evt, account):
-        values = self.feature.calc(evt, account)
+    def calc(self, evt):
+        values = self.feature.calc(evt)
         mask = np.isnan(values)
         values[mask] = self.fill[mask]
         self.fill = np.copy(values)
@@ -330,17 +299,17 @@ class FillFeature(Feature):
         return self.feature.size()
 
 
-class FillWithConstantFeature(Feature):
+class FillWithConstantFeature(EventFeature):
     """If a feature contains a nan value, fill with a constant value"""
 
-    def __init__(self, feature: Feature, constant: float = 0.0) -> None:
+    def __init__(self, feature: EventFeature, constant: float = 0.0) -> None:
         super().__init__()
-        self.feature: Feature = feature
+        self.feature: EventFeature = feature
         self.fill = self._zeros()
         self.fill = np.full(self._shape(), constant, dtype=np.float32)
 
-    def calc(self, evt, account):
-        values = self.feature.calc(evt, account)
+    def calc(self, evt):
+        values = self.feature.calc(evt)
         mask = np.isnan(values)
         values[mask] = self.fill[mask]
         return values
@@ -352,31 +321,31 @@ class FillWithConstantFeature(Feature):
         return self.feature.size()
 
 
-class CacheFeature(Feature):
+class CacheFeature(EventFeature):
     """Cache the results of a feature. This requires the feed to have an always increasing time value
     and the feature to produce the same output at a given time.
 
     Typically, this doesn't work for features that depend on account values.
     """
 
-    def __init__(self, feature: Feature, validate=False) -> None:
+    def __init__(self, feature: EventFeature, validate=False) -> None:
         super().__init__()
-        self.feature: Feature = feature
+        self.feature: EventFeature = feature
         self._cache: dict[datetime, NDArray] = {}
         self.validate = validate
 
-    def calc(self, evt, account):
+    def calc(self, evt):
         time = evt.time
         if time in self._cache:
             values = self._cache[time]
             if self.validate:
-                calc_values = self.feature.calc(evt, account)
+                calc_values = self.feature.calc(evt)
                 assert np.array_equal(
                     values, calc_values, equal_nan=True
                 ), f"Wrong cache time={time} cache={values} calculated={calc_values}"
             return values
 
-        values = self.feature.calc(evt, account)
+        values = self.feature.calc(evt)
         self._cache[time] = values
         return values
 
@@ -392,7 +361,7 @@ class CacheFeature(Feature):
         return self.feature.size()
 
 
-class VolumeFeature(Feature):
+class VolumeFeature(EventFeature):
     """Extract the volume for one or more assets"""
 
     def __init__(self, *assets: Asset, volume_type: str = "DEFAULT") -> None:
@@ -400,7 +369,7 @@ class VolumeFeature(Feature):
         self.assets = assets
         self.volume_type = volume_type
 
-    def calc(self, evt: Event, account):
+    def calc(self, evt: Event):
         volumes = [evt.get_volume(asset, self.volume_type) for asset in self.assets]
         return np.array(volumes, dtype=np.float32)
 
@@ -408,15 +377,15 @@ class VolumeFeature(Feature):
         return len(self.assets)
 
 
-class ReturnsFeature(Feature):
+class ReturnsFeature(EventFeature):
 
-    def __init__(self, feature: Feature) -> None:
+    def __init__(self, feature: EventFeature) -> None:
         super().__init__()
-        self.feature: Feature = feature
+        self.feature: EventFeature = feature
         self.history = self._full_nan()
 
-    def calc(self, evt, account):
-        values = self.feature.calc(evt, account)
+    def calc(self, evt):
+        values = self.feature.calc(evt)
         r = values / self.history - 1.0
         self.history = values
         return r
@@ -429,15 +398,15 @@ class ReturnsFeature(Feature):
         self.feature.reset()
 
 
-class LongReturnsFeature(Feature):
+class LongReturnsFeature(EventFeature):
 
-    def __init__(self, feature: Feature, period: int) -> None:
+    def __init__(self, feature: EventFeature, period: int) -> None:
         super().__init__()
         self.history = deque(maxlen=period)
-        self.feature: Feature = feature
+        self.feature: EventFeature = feature
 
-    def calc(self, evt, account):
-        values = self.feature.calc(evt, account)
+    def calc(self, evt):
+        values = self.feature.calc(evt)
         h = self.history
 
         if len(h) < h.maxlen:  # type: ignore
@@ -456,19 +425,19 @@ class LongReturnsFeature(Feature):
         self.feature.reset()
 
 
-class MaxReturnFeature(Feature):
+class MaxReturnFeature(EventFeature):
     """Calculate the maximum return over a certain period.
     This will only work on features that return a single value.
     """
 
-    def __init__(self, feature: Feature, period: int) -> None:
+    def __init__(self, feature: EventFeature, period: int) -> None:
         super().__init__()
         assert feature.size() == 1
         self.history = deque(maxlen=period)
-        self.feature: Feature = feature
+        self.feature: EventFeature = feature
 
-    def calc(self, evt, account):
-        values = self.feature.calc(evt, account)
+    def calc(self, evt):
+        values = self.feature.calc(evt)
         h = self.history
 
         if len(h) < h.maxlen:  # type: ignore
@@ -487,18 +456,18 @@ class MaxReturnFeature(Feature):
         self.feature.reset()
 
 
-class MaxReturnFeature2(Feature):
+class MaxReturnFeature2(EventFeature):
     """Calculate the maximum return over a certain period."""
 
-    def __init__(self, feature: Feature, period: int) -> None:
+    def __init__(self, feature: EventFeature, period: int) -> None:
         super().__init__()
-        self.feature: Feature = feature
+        self.feature: EventFeature = feature
         self.history = np.full((period, self.size()), float("nan"), dtype=np.float32)
         self.idx = -1
 
-    def calc(self, evt, account):
+    def calc(self, evt):
         self.idx += 1
-        values = self.feature.calc(evt, account)
+        values = self.feature.calc(evt)
         h = self.history
         h[self.idx] = values
 
@@ -519,18 +488,18 @@ class MaxReturnFeature2(Feature):
         self.feature.reset()
 
 
-class MinReturnFeature(Feature):
+class MinReturnFeature(EventFeature):
     """Calculate the minimum return over a certain period.
     This will only work on features that return a single value.
     """
 
-    def __init__(self, feature: Feature, period: int) -> None:
+    def __init__(self, feature: EventFeature, period: int) -> None:
         super().__init__()
         self.history = deque(maxlen=period)
-        self.feature: Feature = feature
+        self.feature: EventFeature = feature
 
-    def calc(self, evt, account):
-        values = self.feature.calc(evt, account)
+    def calc(self, evt):
+        values = self.feature.calc(evt)
         h = self.history
 
         if len(h) < h.maxlen:  # type: ignore
@@ -549,17 +518,17 @@ class MinReturnFeature(Feature):
         self.feature.reset()
 
 
-class SMAFeature(Feature):
+class SMAFeature(EventFeature):
 
-    def __init__(self, feature: Feature, period: int) -> None:
+    def __init__(self, feature: EventFeature, period: int) -> None:
         super().__init__()
         self.period = period
-        self.feature: Feature = feature
+        self.feature: EventFeature = feature
         self.history = None
         self._cnt = 0
 
-    def calc(self, evt, account):
-        values = self.feature.calc(evt, account)
+    def calc(self, evt):
+        values = self.feature.calc(evt)
         if self.history is None:
             self.history = np.zeros((self.period, values.size))
 
@@ -581,14 +550,14 @@ class SMAFeature(Feature):
         self._cnt = 0
 
 
-class DayOfWeekFeature(Feature):
+class DayOfWeekFeature(EventFeature):
     """Calculate a one-hot-encoded day of the week where Monday == 0 and Sunday == 6"""
 
     def __init__(self, tz=timezone.utc) -> None:
         super().__init__()
         self.tz = tz
 
-    def calc(self, evt, account):
+    def calc(self, evt):
         dt = datetime.astimezone(evt.time, self.tz)
         weekday = dt.weekday()
         result = np.zeros(7, dtype=np.float32)
@@ -599,14 +568,14 @@ class DayOfWeekFeature(Feature):
         return 7
 
 
-class TimeDifference(Feature):
+class TimeDifference(EventFeature):
     """Calculate the time difference in seconds between two consecutive events."""
 
     def __init__(self) -> None:
         super().__init__()
         self._last_time: datetime | None = None
 
-    def calc(self, evt, account):
+    def calc(self, evt):
         if self._last_time:
             diff = evt.time - self._last_time
             self._last_time = evt.time
@@ -622,7 +591,7 @@ class TimeDifference(Feature):
         self._last_time = None
 
 
-class TaFeature(Feature):
+class TaFeature(EventFeature):
     """Base class for technical analysis features"""
 
     def __init__(self, *assets: Asset, history_size: int) -> None:
@@ -631,7 +600,7 @@ class TaFeature(Feature):
         self._size = history_size
         self.assets = list(assets)
 
-    def calc(self, evt, account):
+    def calc(self, evt):
         result = []
         nan = float("nan")
         for asset in self.assets:
