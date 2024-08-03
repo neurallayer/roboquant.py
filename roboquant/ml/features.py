@@ -59,17 +59,8 @@ class Feature(Generic[T]):
         return SlicedFeature(self, args)  # type: ignore
 
 
-class AccountFeature(Feature[Account]):
-
-    @abstractmethod
-    def calc(self, value: Account) -> NDArray: ...
-
-
-class EquityFeature(AccountFeature):
+class EquityFeature(Feature[Account]):
     """Returns the total equity value of the account"""
-
-    def __init__(self):
-        self.prev_equity = float("nan")
 
     def calc(self, value):
         return np.array(value.equity_value(), dtype=np.float32)
@@ -78,25 +69,10 @@ class EquityFeature(AccountFeature):
         return 1
 
 
-class EventFeature(Feature[Event]):
-    """Features allows to:
-    - extract features from an event or account.
-    - transform other features.
-    """
-
-    @abstractmethod
-    def calc(self, value: Event) -> NDArray:
-        """
-        Return the result as a 1-dimensional NDArray.
-        The result should always be the same size. If a value cannot be calculated at a certain
-        item, it should return a float NaN.
-        """
-
-
-class SlicedFeature(EventFeature):
+class SlicedFeature(Feature):
     """Calculate a slice from another feature"""
 
-    def __init__(self, feature: EventFeature, args) -> None:
+    def __init__(self, feature: Feature, args) -> None:
         super().__init__()
         self.args = args
         self.feature = feature
@@ -145,7 +121,7 @@ class TrueRangeFeature(Feature[Event]):
         self.prev_close = None
 
 
-class FixedValueFeature(EventFeature):
+class FixedValueFeature(Feature):
 
     def __init__(self, value: Any) -> None:
         super().__init__()
@@ -158,7 +134,7 @@ class FixedValueFeature(EventFeature):
         return self.value
 
 
-class PriceFeature(EventFeature):
+class PriceFeature(Feature[Event]):
     """Extract a single price for one or more assets"""
 
     def __init__(self, *assets: Asset, price_type: str = "DEFAULT") -> None:
@@ -174,7 +150,7 @@ class PriceFeature(EventFeature):
         return len(self.assets)
 
 
-class BarFeature(EventFeature):
+class BarFeature(Feature[Event]):
     """Extract the ohlcv values from bars for one or more assets"""
 
     def __init__(self, *assets: Asset) -> None:
@@ -195,7 +171,7 @@ class BarFeature(EventFeature):
         return 5 * len(self.assets)
 
 
-class QuoteFeature(EventFeature):
+class QuoteFeature(Feature[Event]):
     """Extract the values from quotes for one or more assets"""
 
     def __init__(self, *assets: Asset) -> None:
@@ -216,10 +192,10 @@ class QuoteFeature(EventFeature):
         return 4 * len(self.assets)
 
 
-class CombinedFeature(EventFeature):
+class CombinedFeature(Feature):
     """Combine multiple features into one single feature by stacking them."""
 
-    def __init__(self, *features: EventFeature) -> None:
+    def __init__(self, *features: Feature) -> None:
         super().__init__()
         self.features = features
         self._size = sum(feature.size() for feature in self.features)
@@ -282,12 +258,12 @@ class NormalizeFeature(Feature):
         self.feature.reset()
 
 
-class FillFeature(EventFeature):
+class FillFeature(Feature):
     """If a feature contains a nan value, use the last known value instead"""
 
-    def __init__(self, feature: EventFeature) -> None:
+    def __init__(self, feature: Feature) -> None:
         super().__init__()
-        self.feature: EventFeature = feature
+        self.feature: Feature = feature
         self.fill = self._full_nan()
 
     def calc(self, value):
@@ -305,12 +281,12 @@ class FillFeature(EventFeature):
         return self.feature.size()
 
 
-class FillWithConstantFeature(EventFeature):
+class FillWithConstantFeature(Feature):
     """If a feature contains a nan value, fill with a constant value"""
 
-    def __init__(self, feature: EventFeature, constant: float = 0.0) -> None:
+    def __init__(self, feature: Feature, constant: float = 0.0) -> None:
         super().__init__()
-        self.feature: EventFeature = feature
+        self.feature: Feature = feature
         self.fill = self._zeros()
         self.fill = np.full(self._shape(), constant, dtype=np.float32)
 
@@ -367,7 +343,7 @@ class CacheFeature(Feature):
         return self.feature.size()
 
 
-class VolumeFeature(EventFeature):
+class VolumeFeature(Feature[Event]):
     """Extract the volume for one or more assets"""
 
     def __init__(self, *assets: Asset, volume_type: str = "DEFAULT") -> None:
@@ -404,12 +380,12 @@ class ReturnsFeature(Feature):
         self.feature.reset()
 
 
-class LongReturnsFeature(EventFeature):
+class LongReturnsFeature(Feature):
 
-    def __init__(self, feature: EventFeature, period: int) -> None:
+    def __init__(self, feature: Feature, period: int) -> None:
         super().__init__()
         self.history = deque(maxlen=period)
-        self.feature: EventFeature = feature
+        self.feature: Feature = feature
 
     def calc(self, value):
         values = self.feature.calc(value)
@@ -431,16 +407,16 @@ class LongReturnsFeature(EventFeature):
         self.feature.reset()
 
 
-class MaxReturnFeature(EventFeature):
+class MaxReturnFeature(Feature):
     """Calculate the maximum return over a certain period.
     This will only work on features that return a single value.
     """
 
-    def __init__(self, feature: EventFeature, period: int) -> None:
+    def __init__(self, feature: Feature, period: int) -> None:
         super().__init__()
         assert feature.size() == 1
         self.history = deque(maxlen=period)
-        self.feature: EventFeature = feature
+        self.feature: Feature = feature
 
     def calc(self, value):
         values = self.feature.calc(value)
@@ -462,12 +438,12 @@ class MaxReturnFeature(EventFeature):
         self.feature.reset()
 
 
-class MaxReturnFeature2(EventFeature):
+class MaxReturnFeature2(Feature):
     """Calculate the maximum return over a certain period."""
 
-    def __init__(self, feature: EventFeature, period: int) -> None:
+    def __init__(self, feature: Feature, period: int) -> None:
         super().__init__()
-        self.feature: EventFeature = feature
+        self.feature: Feature = feature
         self.history = np.full((period, self.size()), float("nan"), dtype=np.float32)
         self.idx = -1
 
@@ -494,7 +470,7 @@ class MaxReturnFeature2(EventFeature):
         self.feature.reset()
 
 
-class MinReturnFeature(EventFeature):
+class MinReturnFeature(Feature):
     """Calculate the minimum return over a certain period.
     This will only work on features that return a single value.
     """
@@ -524,12 +500,12 @@ class MinReturnFeature(EventFeature):
         self.feature.reset()
 
 
-class SMAFeature(EventFeature):
+class SMAFeature(Feature):
 
-    def __init__(self, feature: EventFeature, period: int) -> None:
+    def __init__(self, feature: Feature, period: int) -> None:
         super().__init__()
         self.period = period
-        self.feature: EventFeature = feature
+        self.feature: Feature = feature
         self.history = None
         self._cnt = 0
 
@@ -556,7 +532,7 @@ class SMAFeature(EventFeature):
         self._cnt = 0
 
 
-class DayOfWeekFeature(EventFeature):
+class DayOfWeekFeature(Feature[Event]):
     """Calculate a one-hot-encoded day of the week where Monday == 0 and Sunday == 6"""
 
     def __init__(self, tz=timezone.utc) -> None:
@@ -574,7 +550,7 @@ class DayOfWeekFeature(EventFeature):
         return 7
 
 
-class TimeDifference(EventFeature):
+class TimeDifference(Feature[Event]):
     """Calculate the time difference in seconds between two consecutive events."""
 
     def __init__(self) -> None:
