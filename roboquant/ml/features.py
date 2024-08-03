@@ -1,7 +1,7 @@
-from abc import ABC, abstractmethod
+from abc import abstractmethod
 from collections import deque
 from datetime import datetime, timezone
-from typing import Any
+from typing import Any, TypeVar, Generic
 
 import numpy as np
 from numpy.typing import NDArray
@@ -11,41 +11,13 @@ from roboquant.asset import Asset
 from roboquant.event import Event, Bar, Quote
 from roboquant.strategies.buffer import OHLCVBuffer
 
-
-class AccountFeature(ABC):
-
-    @abstractmethod
-    def calc(self, account: Account) -> np.float32:
-        ...
-
-    def reset(self):
-        """Reset the state of the feature"""
+T = TypeVar("T")
 
 
-class EquityFeature(AccountFeature):
-    """Returns the total equity value of the account"""
-
-    def __init__(self):
-        self.prev_equity = float("nan")
-
-    def calc(self, account):
-        equity = account.equity_value()
-        result = equity/self.prev_equity - 1.0
-        self.prev_equity = equity
-        return np.float32(result)
-
-    def reset(self):
-        self.prev_equity = float("nan")
-
-
-class EventFeature(ABC):
-    """Features allows to:
-    - extract features from an event or account.
-    - transform other features.
-    """
+class Feature(Generic[T]):
 
     @abstractmethod
-    def calc(self, evt: Event) -> NDArray:
+    def calc(self, value: T) -> NDArray:
         """
         Return the result as a 1-dimensional NDArray.
         The result should always be the same size. If a value cannot be calculated at a certain
@@ -56,26 +28,12 @@ class EventFeature(ABC):
     def size(self) -> int:
         """return the size of this feature"""
 
+    def reset(self):
+        """Reset the state of the feature"""
+
     def _shape(self):
         """return the shape of this feature as a tuple"""
         return (self.size(),)
-
-    def returns(self, period=1):
-        if period == 1:
-            return ReturnsFeature(self)
-        return LongReturnsFeature(self, period)
-
-    def normalize(self, min_period=3):
-        return NormalizeFeature(self, min_period)
-
-    def cache(self, validate=False):
-        return CacheFeature(self, validate)
-
-    def __getitem__(self, *args):
-        return SlicedFeature(self, args)
-
-    def reset(self):
-        """Reset the state of the feature"""
 
     def _zeros(self):
         return np.zeros(self._shape(), dtype=np.float32)
@@ -85,6 +43,54 @@ class EventFeature(ABC):
 
     def _full_nan(self):
         return np.full(self._shape(), float("nan"), dtype=np.float32)
+
+    def cache(self, validate=False) -> "Feature[T]":
+        return CacheFeature(self, validate)
+
+    def returns(self, period=1) -> "Feature[T]":
+        if period == 1:
+            return ReturnsFeature(self)  # type: ignore
+        return LongReturnsFeature(self, period)  # type: ignore
+
+    def normalize(self, min_period=3) -> "Feature[T]":
+        return NormalizeFeature(self, min_period)  # type: ignore
+
+    def __getitem__(self, *args) -> "Feature[T]":
+        return SlicedFeature(self, args)  # type: ignore
+
+
+class AccountFeature(Feature[Account]):
+
+    @abstractmethod
+    def calc(self, value: Account) -> NDArray: ...
+
+
+class EquityFeature(AccountFeature):
+    """Returns the total equity value of the account"""
+
+    def __init__(self):
+        self.prev_equity = float("nan")
+
+    def calc(self, value):
+        return np.array(value.equity_value(), dtype=np.float32)
+
+    def size(self):
+        return 1
+
+
+class EventFeature(Feature[Event]):
+    """Features allows to:
+    - extract features from an event or account.
+    - transform other features.
+    """
+
+    @abstractmethod
+    def calc(self, value: Event) -> NDArray:
+        """
+        Return the result as a 1-dimensional NDArray.
+        The result should always be the same size. If a value cannot be calculated at a certain
+        item, it should return a float NaN.
+        """
 
 
 class SlicedFeature(EventFeature):
@@ -96,8 +102,8 @@ class SlicedFeature(EventFeature):
         self.feature = feature
         self._size = len(feature._zeros()[args])
 
-    def calc(self, evt):
-        values = self.feature.calc(evt)
+    def calc(self, value):
+        values = self.feature.calc(value)
         return values[self.args]
 
     def size(self):
@@ -107,7 +113,7 @@ class SlicedFeature(EventFeature):
         return self.feature.reset()
 
 
-class TrueRangeFeature(EventFeature):
+class TrueRangeFeature(Feature[Event]):
     """Calculates the true range value for a asset"""
 
     def __init__(self, asset: Asset) -> None:
@@ -115,8 +121,8 @@ class TrueRangeFeature(EventFeature):
         self.prev_close = None
         self.asset = asset
 
-    def calc(self, evt):
-        item = evt.price_items.get(self.asset)
+    def calc(self, value: Event):
+        item = value.price_items.get(self.asset)
         if item is None or not isinstance(item, Bar):
             return np.array([float("nan")])
 
@@ -148,7 +154,7 @@ class FixedValueFeature(EventFeature):
     def size(self) -> int:
         return len(self.value)
 
-    def calc(self, evt):
+    def calc(self, value):
         return self.value
 
 
@@ -160,8 +166,8 @@ class PriceFeature(EventFeature):
         self.assets = assets
         self.price_type = price_type
 
-    def calc(self, evt):
-        prices = [evt.get_price(asset, self.price_type) for asset in self.assets]
+    def calc(self, value):
+        prices = [value.get_price(asset, self.price_type) for asset in self.assets]
         return np.array(prices, dtype=np.float32)
 
     def size(self) -> int:
@@ -175,10 +181,10 @@ class BarFeature(EventFeature):
         super().__init__()
         self.assets = assets
 
-    def calc(self, evt):
+    def calc(self, value):
         result = self._full_nan()
         for idx, asset in enumerate(self.assets):
-            item = evt.price_items.get(asset)
+            item = value.price_items.get(asset)
             if isinstance(item, Bar):
                 offset = idx * 5
                 result[offset: offset + 5] = item.ohlcv
@@ -196,10 +202,10 @@ class QuoteFeature(EventFeature):
         super().__init__()
         self.assets = assets
 
-    def calc(self, evt):
+    def calc(self, value):
         result = self._full_nan()
         for idx, asset in enumerate(self.assets):
-            item = evt.price_items.get(asset)
+            item = value.price_items.get(asset)
             if isinstance(item, Quote):
                 offset = idx * 4
                 result[offset: offset + 4] = item.data
@@ -218,8 +224,8 @@ class CombinedFeature(EventFeature):
         self.features = features
         self._size = sum(feature.size() for feature in self.features)
 
-    def calc(self, evt):
-        data = [feature.calc(evt) for feature in self.features]
+    def calc(self, value):
+        data = [feature.calc(value) for feature in self.features]
         return np.hstack(data, dtype=np.float32)
 
     def size(self) -> int:
@@ -230,10 +236,10 @@ class CombinedFeature(EventFeature):
             feature.reset()
 
 
-class NormalizeFeature(EventFeature):
+class NormalizeFeature(Feature):
     """online normalization calculator"""
 
-    def __init__(self, feature: EventFeature, min_count: int = 3) -> None:
+    def __init__(self, feature: Feature, min_count: int = 3) -> None:
         super().__init__()
         self.feature = feature
         self.min_count = min_count
@@ -263,8 +269,8 @@ class NormalizeFeature(EventFeature):
         stdev[mask] = np.sqrt(m2[mask] / count[mask]) + 1e-12
         return (values - mean) / stdev
 
-    def calc(self, evt):
-        values = self.feature.calc(evt)
+    def calc(self, value):
+        values = self.feature.calc(value)
         self.__update(values)
         return self.__normalize_values(values)
 
@@ -284,8 +290,8 @@ class FillFeature(EventFeature):
         self.feature: EventFeature = feature
         self.fill = self._full_nan()
 
-    def calc(self, evt):
-        values = self.feature.calc(evt)
+    def calc(self, value):
+        values = self.feature.calc(value)
         mask = np.isnan(values)
         values[mask] = self.fill[mask]
         self.fill = np.copy(values)
@@ -308,8 +314,8 @@ class FillWithConstantFeature(EventFeature):
         self.fill = self._zeros()
         self.fill = np.full(self._shape(), constant, dtype=np.float32)
 
-    def calc(self, evt):
-        values = self.feature.calc(evt)
+    def calc(self, value):
+        values = self.feature.calc(value)
         mask = np.isnan(values)
         values[mask] = self.fill[mask]
         return values
@@ -321,31 +327,31 @@ class FillWithConstantFeature(EventFeature):
         return self.feature.size()
 
 
-class CacheFeature(EventFeature):
+class CacheFeature(Feature):
     """Cache the results of a feature. This requires the feed to have an always increasing time value
     and the feature to produce the same output at a given time.
 
     Typically, this doesn't work for features that depend on account values.
     """
 
-    def __init__(self, feature: EventFeature, validate=False) -> None:
+    def __init__(self, feature: Feature, validate=False) -> None:
         super().__init__()
-        self.feature: EventFeature = feature
+        self.feature: Feature = feature
         self._cache: dict[datetime, NDArray] = {}
         self.validate = validate
 
-    def calc(self, evt):
-        time = evt.time
+    def calc(self, value):
+        time = value.time
         if time in self._cache:
             values = self._cache[time]
             if self.validate:
-                calc_values = self.feature.calc(evt)
+                calc_values = self.feature.calc(value)
                 assert np.array_equal(
                     values, calc_values, equal_nan=True
                 ), f"Wrong cache time={time} cache={values} calculated={calc_values}"
             return values
 
-        values = self.feature.calc(evt)
+        values = self.feature.calc(value)
         self._cache[time] = values
         return values
 
@@ -369,23 +375,23 @@ class VolumeFeature(EventFeature):
         self.assets = assets
         self.volume_type = volume_type
 
-    def calc(self, evt: Event):
-        volumes = [evt.get_volume(asset, self.volume_type) for asset in self.assets]
+    def calc(self, value: Event):
+        volumes = [value.get_volume(asset, self.volume_type) for asset in self.assets]
         return np.array(volumes, dtype=np.float32)
 
     def size(self) -> int:
         return len(self.assets)
 
 
-class ReturnsFeature(EventFeature):
+class ReturnsFeature(Feature):
 
-    def __init__(self, feature: EventFeature) -> None:
+    def __init__(self, feature: Feature) -> None:
         super().__init__()
-        self.feature: EventFeature = feature
+        self.feature: Feature = feature
         self.history = self._full_nan()
 
-    def calc(self, evt):
-        values = self.feature.calc(evt)
+    def calc(self, value):
+        values = self.feature.calc(value)
         r = values / self.history - 1.0
         self.history = values
         return r
@@ -405,8 +411,8 @@ class LongReturnsFeature(EventFeature):
         self.history = deque(maxlen=period)
         self.feature: EventFeature = feature
 
-    def calc(self, evt):
-        values = self.feature.calc(evt)
+    def calc(self, value):
+        values = self.feature.calc(value)
         h = self.history
 
         if len(h) < h.maxlen:  # type: ignore
@@ -436,8 +442,8 @@ class MaxReturnFeature(EventFeature):
         self.history = deque(maxlen=period)
         self.feature: EventFeature = feature
 
-    def calc(self, evt):
-        values = self.feature.calc(evt)
+    def calc(self, value):
+        values = self.feature.calc(value)
         h = self.history
 
         if len(h) < h.maxlen:  # type: ignore
@@ -465,9 +471,9 @@ class MaxReturnFeature2(EventFeature):
         self.history = np.full((period, self.size()), float("nan"), dtype=np.float32)
         self.idx = -1
 
-    def calc(self, evt):
+    def calc(self, value):
         self.idx += 1
-        values = self.feature.calc(evt)
+        values = self.feature.calc(value)
         h = self.history
         h[self.idx] = values
 
@@ -493,13 +499,13 @@ class MinReturnFeature(EventFeature):
     This will only work on features that return a single value.
     """
 
-    def __init__(self, feature: EventFeature, period: int) -> None:
+    def __init__(self, feature: Feature, period: int) -> None:
         super().__init__()
         self.history = deque(maxlen=period)
-        self.feature: EventFeature = feature
+        self.feature: Feature = feature
 
-    def calc(self, evt):
-        values = self.feature.calc(evt)
+    def calc(self, value):
+        values = self.feature.calc(value)
         h = self.history
 
         if len(h) < h.maxlen:  # type: ignore
@@ -527,8 +533,8 @@ class SMAFeature(EventFeature):
         self.history = None
         self._cnt = 0
 
-    def calc(self, evt):
-        values = self.feature.calc(evt)
+    def calc(self, value):
+        values = self.feature.calc(value)
         if self.history is None:
             self.history = np.zeros((self.period, values.size))
 
@@ -557,8 +563,8 @@ class DayOfWeekFeature(EventFeature):
         super().__init__()
         self.tz = tz
 
-    def calc(self, evt):
-        dt = datetime.astimezone(evt.time, self.tz)
+    def calc(self, value):
+        dt = datetime.astimezone(value.time, self.tz)
         weekday = dt.weekday()
         result = np.zeros(7, dtype=np.float32)
         result[weekday] = 1.0
@@ -575,13 +581,13 @@ class TimeDifference(EventFeature):
         super().__init__()
         self._last_time: datetime | None = None
 
-    def calc(self, evt):
+    def calc(self, value):
         if self._last_time:
-            diff = evt.time - self._last_time
-            self._last_time = evt.time
+            diff = value.time - self._last_time
+            self._last_time = value.time
             return np.asarray([diff.total_seconds()], dtype="float32")
 
-        self._last_time = evt.time
+        self._last_time = value.time
         return self._full_nan()
 
     def size(self) -> int:
@@ -591,7 +597,7 @@ class TimeDifference(EventFeature):
         self._last_time = None
 
 
-class TaFeature(EventFeature):
+class TaFeature(Feature[Event]):
     """Base class for technical analysis features"""
 
     def __init__(self, *assets: Asset, history_size: int) -> None:
@@ -600,21 +606,21 @@ class TaFeature(EventFeature):
         self._size = history_size
         self.assets = list(assets)
 
-    def calc(self, evt):
+    def calc(self, value: Event):
         result = []
         nan = float("nan")
         for asset in self.assets:
-            value = nan
-            item = evt.price_items.get(asset)
+            v = nan
+            item = value.price_items.get(asset)
             if isinstance(item, Bar):
                 if asset not in self._data:
                     self._data[asset] = OHLCVBuffer(self._size)
                 ohlcv = self._data[asset]
                 ohlcv.append(item.ohlcv)
                 if ohlcv.is_full():
-                    value = self._calc(asset, ohlcv)
+                    v = self._calc(asset, ohlcv)
 
-            result.append(value)
+            result.append(v)
         return np.asarray(result, dtype=np.float32)
 
     @abstractmethod

@@ -26,5 +26,5 @@ account = rq.Account()
 channel = feed.play_background()
 
 while evt := channel.get():
-    result = feature.calc(evt, account)
+    result = feature.calc(evt)
     print(result)

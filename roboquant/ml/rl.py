@@ -16,7 +16,7 @@ from roboquant.event import Event
 from roboquant.feeds.eventchannel import EventChannel
 from roboquant.feeds.feed import Feed
 from roboquant.journals.journal import Journal
-from roboquant.ml.features import AccountFeature, EventFeature
+from roboquant.ml.features import Feature
 from roboquant.signal import Signal
 from roboquant.strategies.strategy import Strategy
 from roboquant.timeframe import Timeframe
@@ -36,8 +36,8 @@ class TradingEnv(gym.Env):
     def __init__(
         self,
         feed: Feed,
-        obs_feature: EventFeature,
-        reward_feature: AccountFeature,
+        obs_feature: Feature[Event],
+        reward_feature: Feature[Account],
         assets: list[Asset],
         trader: Trader | None = None,
         broker: SimBroker | None = None,
@@ -135,7 +135,7 @@ class TradingEnv(gym.Env):
 
 class SB3PolicyStrategy(Strategy):
 
-    def __init__(self, obs_feature: EventFeature, assets: list[Asset], policy: BasePolicy):
+    def __init__(self, obs_feature: Feature[Event], assets: list[Asset], policy: BasePolicy):
         super().__init__()
         self.obs_feature = obs_feature
         self.assets = assets
