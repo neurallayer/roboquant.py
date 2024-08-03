@@ -11,7 +11,7 @@ from torch.utils.data import DataLoader, Dataset
 
 from roboquant.asset import Asset
 from roboquant.event import Event
-from roboquant.ml.features import EventFeature, NormalizeFeature
+from roboquant.ml.features import Feature, NormalizeFeature
 from roboquant.signal import Signal
 from roboquant.strategies.strategy import Strategy
 
@@ -23,7 +23,7 @@ class FeatureStrategy(Strategy):
     for their input.
     """
 
-    def __init__(self, input_feature: EventFeature, history: int, dtype="float32"):
+    def __init__(self, input_feature: Feature[Event], history: int, dtype="float32"):
         super().__init__()
         self.input_feature = input_feature
         self.history = history
@@ -72,8 +72,8 @@ class RNNStrategy(FeatureStrategy):
 
     def __init__(
         self,
-        input_feature: EventFeature,
-        label_feature: EventFeature,
+        input_feature: Feature[Event],
+        label_feature: Feature[Event],
         model: torch.nn.Module,
         asset: Asset,
         sequences: int = 20,
