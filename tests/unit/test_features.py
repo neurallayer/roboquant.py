@@ -1,3 +1,4 @@
+from datetime import datetime, timezone
 import unittest
 
 import numpy as np
@@ -72,7 +73,8 @@ class TestFeatures(unittest.TestCase):
 
     def test_core_feature(self):
         f = FixedValueFeature(np.ones((10,)))[2:5]
-        values = f.calc(Event.empty())
+        now = datetime.now(timezone.utc)
+        values = f.calc(Event.empty(now))
         self.assertEqual(3, len(values))
 
         f = FixedValueFeature(
@@ -80,8 +82,8 @@ class TestFeatures(unittest.TestCase):
                 10,
             )
         ).returns()
-        f.calc(Event.empty())
-        values = f.calc(Event.empty())
+        f.calc(Event.empty(now))
+        values = f.calc(Event.empty(now))
         self.assertEqual(0, values[0])
 
 

@@ -51,16 +51,20 @@ class Signal:
 
     @property
     def is_buy(self) -> bool:
+        """return True is this is a BUY signal, False otherwise"""
         return self.rating > 0.0
 
     @property
     def is_sell(self) -> bool:
+        """return True is this is a SELL signal, False otherwise"""
         return self.rating < 0.0
 
     @property
     def is_entry(self) -> bool:
+        """return True is this is an ENTRY or ENTRY_EXIT signal, False otherwise"""
         return SignalType.ENTRY in self.type
 
     @property
     def is_exit(self) -> bool:
+        """return True is this is an EXIT or ENTRY_EXIT signal, False otherwise"""
         return SignalType.EXIT in self.type

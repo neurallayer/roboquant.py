@@ -8,6 +8,7 @@ from roboquant.wallet import Amount
 
 @dataclass(frozen=True, slots=True)
 class Asset(ABC):
+    """Abstract baseclass for all types of assets, ranging from stocks to crypto-currencies"""
 
     symbol: str
     currency: str = "USD"
@@ -18,6 +19,9 @@ class Asset(ABC):
         return float(size) * price
 
     def contract_amount(self, size: Decimal, price: float) -> Amount:
+        """return the total contract amount given the provided size and price
+        The returned amount is denoted in the currency of the asset.
+        """
         value = self.contract_value(size, price)
         return Amount(self.currency, value)
 

@@ -94,6 +94,6 @@ class Order:
     def remaining(self):
         """Return the remaining order size to be filled.
 
-        In case of a sell order, the remaining can be a negative number.
+        In case of a sell order, the remaining will be a negative number.
         """
         return self.size - self.fill

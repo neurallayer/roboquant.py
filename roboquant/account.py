@@ -53,6 +53,7 @@ class Account:
 
     @property
     def base_currency(self):
+        """Return the base currency of this account"""
         return self.buying_power.currency
 
     def mkt_value(self) -> Wallet:
@@ -94,6 +95,7 @@ class Account:
         return self.cash + self.mkt_value()
 
     def equity_value(self) -> float:
+        """Return the equity value denoted in the base currency of the account"""
         return self.convert(self.equity())
 
     def unrealized_pnl(self) -> Wallet:
@@ -107,6 +109,9 @@ class Account:
         return result
 
     def required_buying_power(self, order: Order) -> Amount:
+        """Return the amount of buying power required for a certain order. The underlying logic takes into
+        account that a reduction is position size doesn't require buying power.
+        """
         pos_size = self.get_position_size(order.asset)
 
         # only additional required if remaining order size would increase position size

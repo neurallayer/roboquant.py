@@ -1,7 +1,7 @@
 from abc import abstractmethod
 from array import array
 from dataclasses import dataclass
-from datetime import datetime, timezone
+from datetime import datetime
 from functools import cached_property
 from typing import Any
 
@@ -10,7 +10,7 @@ from roboquant.asset import Asset
 
 @dataclass(slots=True)
 class PriceItem:
-    """Different types of price-items subclass this class"""
+    """Baseclass for the different types of price items, like quotes, bars and trades"""
 
     asset: Asset
     """the asset for this price-item"""
@@ -128,20 +128,18 @@ class Bar(PriceItem):
 class Event:
     """
     An event represents zero of items of information happening at a certain moment in time.
-    An item can contain any type of information, but a common use-case are price-items like quotes, trades or bars.
+    An item can contain any type of information, but the most common use-case are price-items like quotes, trades or bars.
     Time is always a datetime object with the timezone set at UTC.
     """
 
     def __init__(self, time: datetime, items: list[Any]):
         assert time.tzname() == "UTC", "event with non UTC timezone"
         self.time = time
-        self.items = items
+        self.items: list[Any] = items
 
     @staticmethod
-    def empty(time: datetime | None = None):
-        """Return a new empty event"""
-
-        time = time or datetime.now(timezone.utc)
+    def empty(time: datetime):
+        """Return a new empty event at the provided time"""
         return Event(time, [])
 
     def is_empty(self) -> bool:
