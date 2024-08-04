@@ -7,4 +7,4 @@ from roboquant.journals.metricsjournal import MetricsJournal
 from roboquant.journals.pnlmetric import PNLMetric
 from roboquant.journals.pricemetric import PriceItemMetric
 from roboquant.journals.runmetric import RunMetric
-from roboquant.journals.tensorboardjournal import TensorboardJournal
+from roboquant.journals.tensorboard import TensorboardJournal

@@ -10,7 +10,7 @@ class MetricsJournal(Journal):
     A journal that allows for metrics to be added and calculated at each step. It will store
     the results in memory.
 
-    The calculated metric values can be retrieved via the `get_timeseries` method.
+    The calculated metric values can be retrieved via the `get_metric` method.
     """
 
     def __init__(self, *metrics: Metric):
@@ -29,7 +29,7 @@ class MetricsJournal(Journal):
 
         self._history.append((event.time, result))
 
-    def get_timeseries(self, metric_name: str) -> tuple[list[datetime], list[float]]:
+    def get_metric(self, metric_name: str) -> tuple[list[datetime], list[float]]:
         """Return the calculated values of a metric as tuple of date-times and float values"""
         timeline = []
         values = []
@@ -41,7 +41,7 @@ class MetricsJournal(Journal):
 
     def plot(self, plt, metric_name: str, plot_x: bool = True, **kwargs):
         """Plot a metric"""
-        x, y = self.get_timeseries(metric_name)
+        x, y = self.get_metric(metric_name)
         plt = plt.subplot() if hasattr(plt, "subplot") else plt
 
         if plot_x:

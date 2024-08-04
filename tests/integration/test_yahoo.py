@@ -24,7 +24,7 @@ class TestYahoo(unittest.TestCase):
         run_price_item_feed(feed, assets, self)
 
     def test_yahoo_feed_wrong_symbol(self):
-        # expect some error logging due to parsing an invalid symbol
+        # expect some error logging due to providing an invalid symbol
         feed = YahooFeed("INVALID_TICKER_NAME", start_date="2010-01-01", end_date="2020-01-01")
         self.assertEqual(0, len(feed.assets()))
 

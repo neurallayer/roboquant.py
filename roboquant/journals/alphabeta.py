@@ -4,7 +4,7 @@ import numpy as np
 
 from roboquant.asset import Asset
 
-from .metric import Metric
+from roboquant.journals.metric import Metric
 
 
 class AlphaBeta(Metric):
