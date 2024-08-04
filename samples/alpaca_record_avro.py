@@ -1,6 +1,6 @@
 # %%
 from roboquant.alpaca import AlpacaHistoricStockFeed
-from roboquant.feeds.avrofeed import AvroFeed
+from roboquant.feeds.avro import AvroFeed
 
 # %%
 print("The retrieval of historical data will take some time....")

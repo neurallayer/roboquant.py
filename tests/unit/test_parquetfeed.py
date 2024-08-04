@@ -2,7 +2,7 @@ import tempfile
 import unittest
 from pathlib import Path
 
-from roboquant.feeds.parquetfeed import ParquetFeed
+from roboquant.feeds.parquet import ParquetFeed
 from tests.common import get_feed, run_price_item_feed
 
 

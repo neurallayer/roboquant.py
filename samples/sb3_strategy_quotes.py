@@ -5,7 +5,7 @@ from roboquant.alpaca.feed import AlpacaHistoricStockFeed
 from roboquant.asset import Stock
 from roboquant.ml.features import EquityFeature, QuoteFeature
 from roboquant.ml.rl import TradingEnv, SB3PolicyStrategy
-from roboquant.feeds.parquetfeed import ParquetFeed
+from roboquant.feeds.parquet import ParquetFeed
 from roboquant.timeframe import Timeframe
 
 # %%

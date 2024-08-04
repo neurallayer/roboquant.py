@@ -2,7 +2,7 @@ import tempfile
 import unittest
 from pathlib import Path
 
-from roboquant.feeds.avrofeed import AvroFeed
+from roboquant.feeds.avro import AvroFeed
 from tests.common import get_feed, run_price_item_feed
 
 
