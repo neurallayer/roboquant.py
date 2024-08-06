@@ -115,6 +115,16 @@ class Feed(ABC):
             items += len(evt.items)
         return items
 
+    def to_dict(self, *assets: Asset, timeframe: Timeframe | None = None, price_type: str = "DEFAULT"):
+        assert assets, "provide at least 1 asset"
+        result = {asset.symbol: [] for asset in assets}
+        channel = self.play_background(timeframe)
+        while evt := channel.get():
+            for asset in assets:
+                price = evt.get_price(asset, price_type)
+                result[asset.symbol].append(price)
+        return result
+
     def plot(self, plt, asset: Asset, price_type: str = "DEFAULT", timeframe: Timeframe | None = None, **kwargs):
         """
         Plot the prices of a symbol.

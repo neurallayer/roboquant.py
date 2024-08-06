@@ -4,9 +4,9 @@ websocket-client~=1.7.0
 requests>=2.32.0
 
 # Part of optional 
-yfinance~=0.2.38
+yfinance~=0.2.41
 torch>=2.3.0
-tensorboard>=2.15.1
+tensorboard>=2.15.2
 nautilus-ibapi~=10.19.2
 alpaca-py~=0.28.1
 stable-baselines3[extra_no_roms]~=2.3.2

@@ -45,7 +45,7 @@ classifiers = [
     "Programming Language :: Python",
     "Programming Language :: Python :: 3",
     "Programming Language :: Python :: 3 :: Only",
-     "Programming Language :: Python :: 3.10",
+    "Programming Language :: Python :: 3.10",
     "Programming Language :: Python :: 3.11",
     "License :: OSI Approved :: Apache Software License",
     "Operating System :: OS Independent",
@@ -54,17 +54,17 @@ classifiers = [
 ]
 keywords = ["trading", "investment", "finance", "crypto", "stocks", "exchange", "forex"]
 dependencies = [
-  "numpy>=1.25.2",
+  "numpy>=1.26.4",
   "websocket-client~=1.7.0",
-  "requests>=2.31.0",
+  "requests>=2.32.0",
 ]
 
 [tool.setuptools.dynamic]
 version = {attr = "roboquant.__version__"}
 
 [project.optional-dependencies]
-torch = ["torch>=2.1.0", "tensorboard>=2.15.2", "stable-baselines3[extra]>=2.2.1", "sb3-contrib>=2.2.1"]
-yahoo = ["yfinance~=0.2.36"]
+torch = ["torch>=2.3.0", "tensorboard>=2.15.2", "stable-baselines3[extra_no_roms]>=2.3.2", "sb3-contrib>=2.3.0"]
+yahoo = ["yfinance~=0.2.38"]
 ibkr = ["nautilus-ibapi~=10.19.2"]
 alpaca = ["alpaca-py"]
 all = ["roboquant[torch,yahoo,ibkr,alpaca]"]
