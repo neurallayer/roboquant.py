@@ -1,8 +1,14 @@
 from datetime import datetime
+from typing import Any
 
 from roboquant.journals.journal import Journal
 from roboquant.journals.metric import Metric
 from roboquant.journals.pnlmetric import PNLMetric
+
+try:
+    from matplotlib import pyplot
+except ImportError:
+    pyplot = None
 
 
 class MetricsJournal(Journal):
@@ -39,17 +45,23 @@ class MetricsJournal(Journal):
                 values.append(metrics[metric_name])
         return timeline, values
 
-    def plot(self, plt, metric_name: str, plot_x: bool = True, **kwargs):
+    def plot(self, metric_name: str, plot_x: bool = True, plt: Any = pyplot, **kwargs):
         """Plot a metric"""
+        assert plt, "no plt explicitly specified or matplotlib found"
+
         x, y = self.get_metric(metric_name)
-        plt = plt.subplot() if hasattr(plt, "subplot") else plt
 
         if plot_x:
             plt.plot(x, y, **kwargs)
         else:
             plt.plot(y, **kwargs)
 
-        plt.set_title(metric_name)
+        if hasattr(plt, "set_title"):
+            plt.set_title(metric_name)
+        elif hasattr(plt, "title"):
+            plt.title(metric_name)
+
+        return plt
 
     def get_metric_names(self) -> set[str]:
         """return the available metric names in this journal"""

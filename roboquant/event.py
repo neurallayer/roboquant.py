@@ -10,7 +10,8 @@ from roboquant.asset import Asset
 
 @dataclass(slots=True)
 class PriceItem:
-    """Baseclass for the different types of price items, like quotes, bars and trades"""
+    """Baseclass for the different types of price items related to an asset, like stock quotes
+    """
 
     asset: Asset
     """the asset for this price-item"""

@@ -2,11 +2,17 @@ from datetime import datetime
 import logging
 import threading
 from abc import ABC, abstractmethod
+from typing import Any
 
 from roboquant.asset import Asset
 from roboquant.event import Bar
 from roboquant.feeds.eventchannel import EventChannel, ChannelClosed
 from roboquant.timeframe import Timeframe
+
+try:
+    from matplotlib import pyplot
+except ImportError:
+    pyplot = None
 
 
 class Feed(ABC):
@@ -125,27 +131,36 @@ class Feed(ABC):
                 result[asset.symbol].append(price)
         return result
 
-    def plot(self, plt, asset: Asset, price_type: str = "DEFAULT", timeframe: Timeframe | None = None, **kwargs):
+    def plot(
+        self, asset: Asset, price_type: str = "DEFAULT", timeframe: Timeframe | None = None, plt: Any = pyplot, **kwargs
+    ):
         """
         Plot the prices of a symbol.
 
         Parameters
         ----------
-        plt : matplotlib axes
-            The matplotlib.pyplot object where the plot will be drawn.
         symbol : str
             The symbol for which to plot prices.
         price_type : str, optional
             The type of price to plot, e.g. open, close, high, low. (default is "DEFAULT")
         timeframe : Timeframe or None, optional
             The timeframe over which to plot prices. If None, the entire feed timeframe is used. (default is None)
+        plt : matplotlib axes
+            The matplotlib.pyplot object where the plot will be drawn. If none is specified, the default pyplot will be used
         **kwargs
             Additional keyword arguments to pass to the plt.plot() function.
         """
-        plt = plt.subplot() if hasattr(plt, "subplot") else plt
+        assert plt, "no plt explicitly specified or matplotlib found"
+        # plot = plot.subplot() if hasattr(plot, "subplot") else plot
         times, prices = self.get_asset_prices(asset, price_type, timeframe)
         plt.plot(times, prices, **kwargs)
-        plt.set_title(asset.symbol)
+
+        if hasattr(plt, "set_title"):
+            plt.set_title(asset.symbol)
+        elif hasattr(plt, "title"):
+            plt.title(asset.symbol)
+
+        return plt
 
     def get_asset_prices(
         self, asset: Asset, price_type="DEFAULT", timeframe: Timeframe | None = None
