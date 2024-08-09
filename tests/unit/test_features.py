@@ -10,10 +10,11 @@ from roboquant.ml.features import (
     NormalizeFeature,
     PriceFeature,
     SMAFeature,
-    ReturnsFeature,
+    ReturnFeature,
     VolumeFeature,
     FixedValueFeature,
     DayOfWeekFeature,
+    MaxReturnFeature
 )
 from tests.common import get_feed
 
@@ -31,11 +32,13 @@ class TestFeatures(unittest.TestCase):
             PriceFeature(symbol1, price_type="OPEN"),
             SMAFeature(FixedValueFeature(np.ones((3,))), 8),
             SMAFeature(PriceFeature(symbol2, price_type="CLOSE"), 10),
-            ReturnsFeature(PriceFeature(symbol1, price_type="OPEN")),
+            ReturnFeature(PriceFeature(symbol1, price_type="OPEN")),
+            MaxReturnFeature(PriceFeature(symbol1, price_type="CLOSE"), 4),
             VolumeFeature(symbol2),
             DayOfWeekFeature(),
         )
         channel = feed.play_background()
+        result = None
         while evt := channel.get():
             result = feature.calc(evt)
             self.assertTrue(len(result) == feature.size())

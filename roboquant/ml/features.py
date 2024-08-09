@@ -49,7 +49,7 @@ class Feature(Generic[T]):
 
     def returns(self, period=1) -> "Feature[T]":
         if period == 1:
-            return ReturnsFeature(self)  # type: ignore
+            return ReturnFeature(self)  # type: ignore
         return LongReturnsFeature(self, period)  # type: ignore
 
     def normalize(self, min_period=3) -> "Feature[T]":
@@ -359,7 +359,7 @@ class VolumeFeature(Feature[Event]):
         return len(self.assets)
 
 
-class ReturnsFeature(Feature):
+class ReturnFeature(Feature):
 
     def __init__(self, feature: Feature) -> None:
         super().__init__()
@@ -421,13 +421,12 @@ class MaxReturnFeature(Feature):
     def calc(self, value):
         values = self.feature.calc(value)
         h = self.history
+        h.append(values)
 
         if len(h) < h.maxlen:  # type: ignore
-            h.append(values)
             return self._full_nan()
 
         r = max(h) / h[0] - 1.0
-        h.append(values)
         return r
 
     def size(self) -> int:
@@ -435,38 +434,6 @@ class MaxReturnFeature(Feature):
 
     def reset(self):
         self.history.clear()
-        self.feature.reset()
-
-
-class MaxReturnFeature2(Feature):
-    """Calculate the maximum return over a certain period."""
-
-    def __init__(self, feature: Feature, period: int) -> None:
-        super().__init__()
-        self.feature: Feature = feature
-        self.history = np.full((period, self.size()), float("nan"), dtype=np.float32)
-        self.idx = -1
-
-    def calc(self, value):
-        self.idx += 1
-        values = self.feature.calc(value)
-        h = self.history
-        h[self.idx] = values
-
-        hist_len = len(h)
-        if self.idx < hist_len:
-            return self._full_nan()
-
-        root_idx = self.idx % hist_len + 1
-        root_idx = root_idx if root_idx < hist_len else 0
-        r = np.max(h) / h[root_idx] - 1.0
-        return r
-
-    def size(self) -> int:
-        return self.feature.size()
-
-    def reset(self):
-        self.idx = -1
         self.feature.reset()
 
 
@@ -483,13 +450,12 @@ class MinReturnFeature(Feature):
     def calc(self, value):
         values = self.feature.calc(value)
         h = self.history
+        h.append(values)
 
         if len(h) < h.maxlen:  # type: ignore
-            h.append(values)
             return self._full_nan()
 
         r = min(h) / h[0] - 1.0
-        h.append(values)
         return r
 
     def size(self) -> int:
