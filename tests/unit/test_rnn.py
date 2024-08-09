@@ -2,11 +2,12 @@ import unittest
 
 from torch import nn
 import torch.nn.functional as F
+import numpy as np
 
 import roboquant as rq
 from roboquant.asset import Stock
 from roboquant.ml.features import BarFeature, CombinedFeature, PriceFeature, SMAFeature
-from roboquant.ml.strategies import RNNStrategy
+from roboquant.ml.strategies import RNNStrategy, SequenceDataset
 from tests.common import get_feed
 
 
@@ -26,12 +27,23 @@ class _MyModel(nn.Module):
 
 class TestRNN(unittest.TestCase):
 
+    def test_ds(self):
+        x = np.ones((100, 10))
+        y = np.ones((100, 5))
+        ds = SequenceDataset(x, y, 20, 10, 1)
+        size = len(ds)
+        self.assertEqual(70, size)
+        for idx in range(size):
+            a, b = ds[idx]
+            self.assertEqual(20, len(a))
+            self.assertEqual(10, len(b))
+
     def test_lstm_model(self):
         # logging.basicConfig()
         # logging.getLogger("roboquant.strategies").setLevel(level=logging.INFO)
         # Setup
         apple = Stock("AAPL")
-        prediction = 10
+        prediction = 5
         feed = get_feed()
         model = _MyModel()
 
@@ -46,7 +58,7 @@ class TestRNN(unittest.TestCase):
 
         # Train the model with 10 years of data
         tf = rq.Timeframe.fromisoformat("2010-01-01", "2020-01-01")
-        strategy.fit(feed, timeframe=tf, epochs=2, validation_split=0.25, prediction=prediction)
+        strategy.fit(feed, timeframe=tf, epochs=2, validation_split=0.50, prediction=prediction)
 
         # Run the trained model with the last 4 years of data
         tf = rq.Timeframe.fromisoformat("2020-01-01", "2024-01-01")

@@ -19,7 +19,7 @@ logger = logging.getLogger(__name__)
 
 
 class FeatureStrategy(Strategy):
-    """Abstract base class for strategies wanting to use features
+    """Abstract base class for strategies wanting to use event features
     for their input.
     """
 
@@ -45,26 +45,55 @@ class FeatureStrategy(Strategy):
 
 
 class SequenceDataset(Dataset):
-    """Sequence Dataset"""
+    """Dataset that creates an input sequence and an output sequence useful for recurrent networks.
+    The output sequence is always after the input sequence (prediction) and there can be
+    optionally a gap.
 
-    def __init__(self, x_data: NDArray, y_data: NDArray, sequences=20, transform=None, target_transform=None):
-        self.sequences = sequences
-        self.x_data = x_data
-        self.y_data = y_data
+    ```
+    [...input...][...gap...][...target...]
+    ```
+    """
+
+    def __init__(
+        self,
+        input_data: NDArray,
+        target_data: NDArray,
+        input_sequences=20,
+        target_sequences=1,
+        gap=0,
+        transform=None,
+        target_transform=None,
+        target_squeeze=True
+    ):
+        assert len(input_data) == len(target_data), "x_data and y_data need to have the same length"
+        self.input_data = input_data
+        self.target_data = target_data
+        self.input_sequences = input_sequences
+        self.output_sequences = target_sequences
+        self.gap = gap
         self.transform = transform
+        self.target_squeeze = target_squeeze
         self.target_transform = target_transform
 
+        if len(self) == 0:
+            logger.warning("this dataset won't produce any data")
+
     def __len__(self):
-        return len(self.y_data) - self.sequences
+        calc_l = len(self.target_data) - self.input_sequences - self.output_sequences - self.gap + 1
+        return max(0, calc_l)
 
     def __getitem__(self, idx):
-        end = idx + self.sequences
-        features = self.x_data[idx:end]
-        target = self.y_data[end - 1]
+        end = idx + self.input_sequences
+        features = self.input_data[idx:end]
+        start = end + self.gap
+        target = self.target_data[start: start + self.output_sequences]
         if self.transform:
             features = self.transform(features)
         if self.target_transform:
             target = self.target_transform(target)
+
+        if self.output_sequences == 1 and self.target_squeeze:
+            target = np.squeeze(target, 0)
         return features, target
 
 
@@ -111,17 +140,17 @@ class RNNStrategy(FeatureStrategy):
         # what is the border between train- and validation-data
         border = round(len(y) * (1.0 - validation_split))
 
-        x_train = x[: border - prediction]
-        y_train = y[prediction:border]
+        x_train = x[:border]
+        y_train = y[:border]
 
-        train_dataset = SequenceDataset(x_train, y_train, self.history)
+        train_dataset = SequenceDataset(x_train, y_train, self.history, gap=prediction)
         train_dataloader = DataLoader(train_dataset, batch_size=batch_size, shuffle=True)
 
         valid_dataloader = None
         if validation_split > 0.0:
-            x_valid = x[border - prediction: -prediction]
+            x_valid = x[border:]
             y_valid = y[border:]
-            valid_dataset = SequenceDataset(x_valid, y_valid, self.history)
+            valid_dataset = SequenceDataset(x_valid, y_valid, self.history, gap=prediction)
             valid_dataloader = DataLoader(valid_dataset, batch_size=batch_size, shuffle=False)
 
         return train_dataloader, valid_dataloader
