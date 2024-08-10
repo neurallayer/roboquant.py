@@ -36,12 +36,11 @@ class FeatureStrategy(Strategy):
         h.append(row)
         if len(h) == h.maxlen:
             x = np.asarray(h, dtype=self._dtype)
-            if signal := self.predict(x, event.time):
-                return [signal]
+            return self.predict(x, event.time)
         return []
 
     @abstractmethod
-    def predict(self, x: NDArray, time: datetime) -> Signal | None: ...
+    def predict(self, x: NDArray, time: datetime) -> list[Signal]: ...
 
 
 class SequenceDataset(Dataset):
@@ -116,7 +115,7 @@ class RNNStrategy(FeatureStrategy):
         self.sell_pct = sell_pct
         self.asset = asset
 
-    def predict(self, x, time) -> Signal | None:
+    def predict(self, x, time) -> list[Signal]:
         x = torch.asarray(x)
         x = torch.unsqueeze(x, dim=0)  # add the batch dimension
 
@@ -131,10 +130,10 @@ class RNNStrategy(FeatureStrategy):
 
             logger.info("prediction p=%s time=%s", p, time)
             if p >= self.buy_pct:
-                return Signal.buy(self.asset)
+                return [Signal.buy(self.asset)]
             if p <= self.sell_pct:
-                return Signal.sell(self.asset)
-        return None
+                return [Signal.sell(self.asset)]
+        return []
 
     def _get_dataloaders(self, x, y, prediction: int, validation_split: float, batch_size: int):
         # what is the border between train- and validation-data
