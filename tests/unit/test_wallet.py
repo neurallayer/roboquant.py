@@ -1,6 +1,6 @@
 import unittest
 
-from roboquant.wallet import Wallet, Amount
+from roboquant.wallet import NoConversion, One2OneConversion, Wallet, Amount
 
 
 class TestWallet(unittest.TestCase):
@@ -26,6 +26,15 @@ class TestWallet(unittest.TestCase):
         self.assertDictEqual(z, v)
 
         self.assertRaises(Exception, self._update)
+
+    def test_conversion(self):
+
+        Amount.converter = One2OneConversion()
+        one_dollar = Amount("USD", 1.0)
+        self.assertEqual(1.0, one_dollar.convert("EUR"))
+
+        Amount.converter = NoConversion()
+        self.assertRaises(NotImplementedError, lambda: one_dollar.convert("EUR"))
 
 
 if __name__ == "__main__":

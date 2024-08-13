@@ -26,6 +26,7 @@ class One2OneConversion(CurrencyConverter):
 
 @dataclass(frozen=True, slots=True)
 class Amount:
+    """A monetary amount in a single currency"""
 
     currency: str
     value: float
@@ -51,6 +52,7 @@ class Amount:
 
 
 class Wallet(defaultdict[str, float]):
+    """A wallet holds amounts of different currencies"""
 
     def __init__(self, *amounts: Amount):
         super().__init__(float)
@@ -58,6 +60,7 @@ class Wallet(defaultdict[str, float]):
             self[amount.currency] += amount.value
 
     def amounts(self):
+        """Return the amounts contained in this wallet"""
         return [Amount(k, v) for k, v in self.items()]
 
     def __iadd__(self, other: "Amount | Wallet"):
@@ -71,18 +74,18 @@ class Wallet(defaultdict[str, float]):
         return self
 
     def __add__(self, other: "Amount | Wallet"):
-        result = self.copy()
+        result = self.deepcopy()
         for k, v in other.items():
             result[k] += v
         return result
 
     def __sub__(self, other: "Amount | Wallet"):
-        result = self.copy()
+        result = self.deepcopy()
         for k, v in other.items():
             result[k] -= v
         return result
 
-    def copy(self) -> "Wallet":
+    def deepcopy(self) -> "Wallet":
         result = Wallet()
         result.update(self)
         return result

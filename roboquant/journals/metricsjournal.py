@@ -16,15 +16,17 @@ class MetricsJournal(Journal):
     A journal that allows for metrics to be added and calculated at each step. It will store
     the results in memory.
 
-    The calculated metric values can be retrieved via the `get_metric` method.
+    The calculated metric values can be retrieved via the `get_metric` method. There is also
+    functionality to plot a metric.
     """
 
     def __init__(self, *metrics: Metric):
         self.metrics = metrics
-        self._history: list[tuple[datetime, dict]] = []
+        self._history: list[tuple[datetime, dict[str, float]]] = []
 
     @classmethod
     def pnl(cls):
+        """Return a metrics journal configured with the PNL metric"""
         return cls(PNLMetric())
 
     def track(self, event, account, signals, orders):
@@ -64,7 +66,7 @@ class MetricsJournal(Journal):
         return plt
 
     def get_metric_names(self) -> set[str]:
-        """return the available metric names in this journal"""
+        """return the recorded metric names"""
         result = set()
         for _, m in self._history:
             result.update(m.keys())

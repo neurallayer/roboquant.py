@@ -1,3 +1,8 @@
+"""
+The `roboquant` package contains the `run` method and the shared classes between components like
+`Account`, `Asset` and `Event`.
+"""
+
 __version__ = "0.8.2"
 
 import logging
