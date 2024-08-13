@@ -16,7 +16,7 @@ class TestWallet(unittest.TestCase):
         self.assertEqual(200, w["USD"])
         self.assertEqual(50, w["EUR"])
 
-        v = w.copy()
+        v = w.deepcopy()
         self.assertDictEqual(w, v)
 
         v += Amount("EUR", 100)
