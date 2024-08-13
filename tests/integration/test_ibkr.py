@@ -6,7 +6,7 @@ from decimal import Decimal
 from roboquant import Order
 from roboquant.asset import Stock
 from roboquant.brokers.ibkr import IBKRBroker
-from roboquant.wallet import Amount, One2OneConversion
+from roboquant.monetary import Amount, One2OneConversion
 
 
 class TestIBKR(unittest.TestCase):

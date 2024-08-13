@@ -3,7 +3,7 @@ The `roboquant` package contains the `run` method and the shared classes between
 `Account`, `Asset` and `Event`.
 """
 
-__version__ = "0.8.2"
+__version__ = "0.8.3"
 
 import logging
 
@@ -16,7 +16,7 @@ from .account import Account, Position
 from .config import Config
 from .event import Event, PriceItem, Bar, Trade, Quote
 from .order import Order
-from .wallet import Amount, Wallet
+from .monetary import Amount, Wallet
 from .asset import Asset, Stock, Crypto, Option
 from .run import run
 from .timeframe import Timeframe, EMPTY_TIMEFRAME

@@ -3,7 +3,7 @@ from dataclasses import dataclass
 from decimal import Decimal
 from typing import ClassVar, Type
 
-from roboquant.wallet import Amount
+from roboquant.monetary import Amount
 
 
 @dataclass(frozen=True, slots=True)

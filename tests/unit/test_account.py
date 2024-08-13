@@ -3,7 +3,7 @@ from decimal import Decimal
 
 from roboquant import Account, Position
 from roboquant.asset import Stock
-from roboquant.wallet import Wallet, Amount
+from roboquant.monetary import Wallet, Amount
 
 
 class TestAccount(unittest.TestCase):

@@ -5,7 +5,7 @@ from decimal import Decimal
 from typing import Any
 
 from roboquant.asset import Asset
-from roboquant.wallet import Amount
+from roboquant.monetary import Amount
 
 
 @dataclass(slots=True)

@@ -7,7 +7,7 @@ from roboquant.asset import Asset
 from roboquant.brokers.broker import Broker, _update_positions
 from roboquant.event import Event, Quote, PriceItem
 from roboquant.order import Order
-from roboquant.wallet import Amount, Wallet
+from roboquant.monetary import Amount, Wallet
 
 logger = logging.getLogger(__name__)
 

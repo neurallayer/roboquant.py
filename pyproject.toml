@@ -36,7 +36,7 @@ exclude = ["docs*", "tests*", "samples*", "scratch*"]
 name = "roboquant"
 dynamic = ["version"]
 authors = [ { name="roboquant team", email="info@roboquant.org" },]
-description = "A fast algo-trading platform"
+description = "A fast algo-trading platform with support for machine learning based strategies"
 readme = "README.md"
 requires-python = ">=3.10, <3.12"
 classifiers = [
@@ -52,7 +52,7 @@ classifiers = [
     "Topic :: Office/Business :: Financial",
     "Topic :: Office/Business :: Financial :: Investment"
 ]
-keywords = ["trading", "investment", "finance", "crypto", "stocks", "exchange", "forex"]
+keywords = ["trading", "machine learning", "AI", "investment", "finance", "crypto", "stocks", "exchange", "forex"]
 dependencies = [
   "numpy>=1.26.4",
   "websocket-client~=1.7.0",

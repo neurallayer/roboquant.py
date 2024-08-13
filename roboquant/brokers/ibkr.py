@@ -17,7 +17,7 @@ from roboquant.asset import Asset, Stock
 from roboquant.event import Event
 from roboquant.order import Order
 from roboquant.brokers.broker import LiveBroker, _update_positions
-from roboquant.wallet import Amount, Wallet
+from roboquant.monetary import Amount, Wallet
 
 assert VERSION["major"] == 10 and VERSION["minor"] == 19, "Wrong version of the IBAPI found"
 

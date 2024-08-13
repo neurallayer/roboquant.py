@@ -14,7 +14,7 @@ from roboquant.config import Config
 from roboquant.event import Event
 from roboquant.brokers.broker import LiveBroker
 from roboquant.order import Order
-from roboquant.wallet import Wallet, Amount
+from roboquant.monetary import Wallet, Amount
 
 logger = logging.getLogger(__name__)
 

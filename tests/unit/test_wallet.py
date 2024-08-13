@@ -1,6 +1,6 @@
 import unittest
 
-from roboquant.wallet import NoConversion, One2OneConversion, Wallet, Amount
+from roboquant.monetary import NoConversion, One2OneConversion, Wallet, Amount
 
 
 class TestWallet(unittest.TestCase):
