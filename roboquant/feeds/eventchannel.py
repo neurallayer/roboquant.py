@@ -50,7 +50,7 @@ class EventChannel:
     def get(self, timeout=None) -> Event | None:
         """Returns the next event or None if this channel is just closed
 
-        - timeout: the timeout in seconds to send a heartbeat in case no other events were available, default is None.
+        - timeout: the timeout in seconds to send a heartbeat in case no event was received, default is None.
         A heartbeat is an empty event.
         """
         try:
