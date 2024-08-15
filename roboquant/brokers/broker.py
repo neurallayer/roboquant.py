@@ -7,7 +7,7 @@ from roboquant.order import Order
 
 
 class Broker(ABC):
-    """A broker accepts orders and communicates its state through the account object"""
+    """A broker accepts orders and communicates its latest state through the account object"""
 
     @abstractmethod
     def place_orders(self, orders: list[Order]):

@@ -1,3 +1,4 @@
+from datetime import datetime
 import unittest
 from decimal import Decimal
 
@@ -11,15 +12,17 @@ class TestAccount(unittest.TestCase):
     def test_account_init(self):
         acc = Account("USD")
         acc.cash = Wallet(Amount("USD", 1_000.0))
+        now = datetime.now()
         self.assertEqual(acc.buying_power.value, 0.0)
         self.assertEqual(acc.buying_power.currency, "USD")
         self.assertEqual(acc.base_currency, "USD")
-        self.assertEqual(acc.unrealized_pnl().convert("USD"), 0.0)
-        self.assertEqual(acc.mkt_value().convert("USD"), 0.0)
+        self.assertEqual(acc.unrealized_pnl().convert("USD", now), 0.0)
+        self.assertEqual(acc.mkt_value().convert("USD", now), 0.0)
         self.assertEqual(acc.equity_value(), 1_000.0)
 
     def test_account_positions(self):
         acc = Account()
+        now = datetime.now()
         acc.cash = Wallet(Amount("USD", 1_000.0))
         prices = {}
         for i in range(10):
@@ -28,9 +31,9 @@ class TestAccount(unittest.TestCase):
             acc.positions[symbol] = Position(Decimal(10), price, price)
             prices[symbol] = price
 
-        self.assertAlmostEqual(acc.mkt_value().convert("USD"), 1450.0)
+        self.assertAlmostEqual(acc.mkt_value().convert("USD", now), 1450.0)
         self.assertAlmostEqual(acc.equity_value(), 2450.0)
-        self.assertAlmostEqual(acc.unrealized_pnl().convert("USD"), 0.0)
+        self.assertAlmostEqual(acc.unrealized_pnl().convert("USD", now), 0.0)
 
 
 if __name__ == "__main__":

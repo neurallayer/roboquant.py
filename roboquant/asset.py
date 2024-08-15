@@ -8,7 +8,7 @@ from roboquant.monetary import Amount
 
 @dataclass(frozen=True, slots=True)
 class Asset(ABC):
-    """Abstract baseclass for all types of assets, ranging from stocks to crypto-currencies"""
+    """Abstract baseclass for all types of assets, ranging from stocks to cryptocurrencies"""
 
     symbol: str
     currency: str = "USD"

@@ -108,7 +108,7 @@ class AlpacaLiveFeed(LiveFeed):
         if not isinstance(self.stream, OptionDataStream):
             self.stream.subscribe_bars(self.__handle_bars, *symbols)
         else:
-            logger.warning("cannot subscribe to bars to options")
+            logger.warning("cannot subscribe to bars for options")
 
 
 class _AlpacaHistoricFeed(HistoricFeed):
@@ -180,7 +180,7 @@ class AlpacaHistoricStockFeed(_AlpacaHistoricFeed):
 
 
 class AlpacaHistoricCryptoFeed(_AlpacaHistoricFeed):
-    """Get historic crypto-currency prices from Alpaca.
+    """Get historic cryptocurrency prices from Alpaca.
     Support for bars and trades.
     """
 

@@ -12,7 +12,7 @@ class TestDelay(unittest.TestCase):
     Measure the delay of receiving live prices from IEX using Alpaca.
 
     It requires that the system clock of your computer is set correctly.
-    You can navigate to https://time.is/ to get a rought idea about its accuracy.
+    You can navigate to https://time.is/ to get a rough idea about its accuracy.
 
     This route includes the following paths if you run this script from home:
 

@@ -34,12 +34,12 @@ class Account:
     """Represents a trading account with all monetary amounts denoted in a single currency.
     The account maintains the following state during a run:
 
-    - Available buying power for orders in the base currency of the account
-    - Cash available in the base currency of the account
-    - The open positions
-    - The open orders
-    - Calculated derived equity value of the account in the base currency of the account
-    - The last time the account was updated
+    - Available buying power for orders in the base currency of the account.
+    - Cash available in the base currency of the account.
+    - The open positions.
+    - The open orders.
+    - Calculated derived equity value of the account in the base currency of the account.
+    - The last time the account was updated.
 
     Only the broker updates the account and does this only during its `sync` method.
     """
@@ -149,7 +149,7 @@ class Account:
         return result
 
     def _update(self, event: Event, price_type: str = "DEFAULT"):
-        """This is normally invoked by the broker during the sync.
+        """The broker normally invokes this method during the sync.
 
         This method will take care of:
         - update the positions with the latest market prices as found in the event

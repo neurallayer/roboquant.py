@@ -90,7 +90,7 @@ class AlpacaBroker(LiveBroker):
         for order in orders:
 
             if order.gtd:
-                logger.warning("no support for GTD type of orders, ingoring gtd=%s", order.gtd)
+                logger.warning("no support for GTD type of orders, ignoring gtd=%s", order.gtd)
 
             if order.size.is_zero():
                 assert order.id is not None, "can only cancel orders with an id"

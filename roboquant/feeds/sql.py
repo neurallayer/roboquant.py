@@ -16,7 +16,7 @@ logger = logging.getLogger(__name__)
 
 
 class SQLFeed(Feed):
-    """SQLFeed supports recording bars or quotes from other feeds and play them back at a later moment in time.
+    """SQLFeed supports recording bars or quotes from other feeds and plays them back at a later moment in time.
     It is also possible to append values to an existing database.
     """
 

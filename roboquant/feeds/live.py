@@ -12,7 +12,7 @@ class LiveFeed(Feed):
     events that are published are monotonic in time (so always increasing).
 
     If a new event has a timestamp that is before or equal to the previous event, the
-    timstamp will be corrected so the event occurs after the previous event.
+    timestamp will be corrected so the event occurs after the previous event.
 
     The default is to increment it by 1 microsecond over the previous event, but this is configurable.
     """

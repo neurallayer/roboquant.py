@@ -4,8 +4,8 @@ from configparser import ConfigParser
 
 
 class Config:
-    """Access to the roboquant configuration file.
-    This allows to share the same property file for both the Python and Kotlin
+    """Access to a roboquant configuration file.
+    This allows sharing the same property file between both the Python and Kotlin
     version of roboquant.
     """
 

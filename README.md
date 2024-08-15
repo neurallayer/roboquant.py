@@ -13,7 +13,7 @@ Roboquant is an open-source algorithmic trading platform. It is flexible, user-f
 So whether you are a beginning retail trader or an established trading firm, roboquant can help you to develop robust and fully automated trading strategies. You can find out more at [roboquant.org](https://roboquant.org).
 
 ## Usage
-The following code snippet shows all the steps to run a full back-test on a number of stocks.
+The following code snippet shows the steps required to run a full back-test on a number of stocks.
 
 ```python
 import roboquant as rq
@@ -31,9 +31,10 @@ Make sure you have Python version 3.11 or higher installed.
 ```shell
 python3 -m pip install --upgrade roboquant
 ```
-
-You can also try roboquant in an online Jupyter Notebook [![Binder](https://mybinder.org/badge_logo.svg)](https://mybinder.org/v2/gh/neurallayer/roboquant-notebooks/HEAD?labpath=%2Fintro_roboquant.ipynb)
-
+If you don't want to install anything locally, you can try out roboquant in an online Jupyter environment like
+[![Open In Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/neurallayer/roboquant-notebooks/blob/main/intro_roboquant.ipynb)
+or
+[![Binder](https://mybinder.org/badge_logo.svg)](https://mybinder.org/v2/gh/neurallayer/roboquant-notebooks/HEAD?labpath=%2Fintro_roboquant.ipynb).
 
 The core of roboquant limits the number of dependencies. 
 But you can install roboquant including one or more of the optional dependencies if you require certain functionality:
@@ -83,7 +84,10 @@ flake8 roboquant tests
 Roboquant is made available under the Apache 2.0 license. You can read more about the Apache 2.0 license on this page: https://www.apache.org/licenses/LICENSE-2.0.html
 
 ## Disclaimer
-Absolutely no warranty is implied with this product. Use at your own risk. I provide no guarantee that it will be profitable, or that it won't lose all your money very quickly or doesn't contain bugs. All financial trading offers the possibility of loss. Leveraged trading, may result in you losing all your money, and still owing more. Backtested results are no guarantee of future performance. I can take no responsibility for any losses caused by live trading using roboquant. Use at your own risk. I am not registered or authorised by any financial regulator.
+Absolutely no warranty is implied with this product. Use at your own risk. I provide no guarantee that it will be profitable, or that it won't lose all your money very quickly or does not contain bugs.
+
+All financial trading offers the possibility of loss. Leveraged trading, may result in you losing all your money, and still owing more. Back tested results are no guarantee of future performance. I can take no responsibility for any losses caused by live trading using roboquant. Use at your own risk. I am not registered or authorised by any financial regulator.
 
 ## Kotlin version
-Next to this Python version of `roboquant`, there is also a Kotlin version available. Both (will) share a similar API, just the used computer language is different. Which one to use depends very much on personal preferences, skills and usage.
+Next to this Python version of `roboquant`, there is also a Kotlin version available. Both share a similar API, just the used computer language is different.
+Which one to use depends very much on personal preferences, skills and usage.
