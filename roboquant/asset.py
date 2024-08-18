@@ -3,7 +3,7 @@ from dataclasses import dataclass
 from decimal import Decimal
 from typing import ClassVar, Type
 
-from roboquant.monetary import Amount
+from roboquant.monetary import Amount, Currency, USD
 
 
 @dataclass(frozen=True, slots=True)
@@ -11,7 +11,7 @@ class Asset(ABC):
     """Abstract baseclass for all types of assets, ranging from stocks to cryptocurrencies"""
 
     symbol: str
-    currency: str = "USD"
+    currency: Currency = USD
 
     __cache: ClassVar[dict[str, "Asset"]] = {}
 
@@ -65,12 +65,12 @@ class Stock(Asset):
 class Crypto(Asset):
 
     symbol: str  # type: ignore
-    currency: str  # type: ignore
+    currency: Currency  # type: ignore
 
     @staticmethod
     def from_symbol(symbol: str, sep="/"):
         currency = symbol.split(sep)[-1]
-        return Crypto(symbol, currency)
+        return Crypto(symbol, Currency(currency))
 
 
 @dataclass(frozen=True, slots=True)
@@ -89,7 +89,7 @@ def __default_deserializer(clazz: Type[Asset]):
         asset = __cache.get(value)
         if not asset:
             symbol, currency = value.split(":")
-            asset = clazz(symbol, currency)
+            asset = clazz(symbol, Currency(currency))
             __cache[value] = asset
         return asset
 

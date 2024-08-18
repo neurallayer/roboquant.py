@@ -78,7 +78,7 @@ class CSVFeed(HistoricFeed):
     def _get_asset(self, filename: str) -> Asset:
         """Return the symbol based on the filename"""
         symbol = pathlib.Path(filename).stem.upper()
-        return Stock(symbol, "USD")
+        return Stock(symbol)
 
     def _parse_csvfiles(self, filenames: list[str]):
         # pylint: disable=too-many-locals
@@ -138,7 +138,7 @@ class CSVFeed(HistoricFeed):
 
             def _get_asset(self, filename: str):
                 base = pathlib.Path(filename).stem
-                return Stock(base.split(".")[0].upper(), "USD")
+                return Stock(base.split(".")[0].upper())
 
         return StooqDailyFeed()
 
@@ -164,7 +164,7 @@ class CSVFeed(HistoricFeed):
 
             def _get_asset(self, filename: str):
                 base = pathlib.Path(filename).stem
-                return Stock(base.split(".")[0].upper(), "USD")
+                return Stock(base.split(".")[0].upper())
 
         return StooqIntradayFeed()
 

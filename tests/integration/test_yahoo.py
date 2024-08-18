@@ -13,7 +13,7 @@ class TestYahoo(unittest.TestCase):
         feed = YahooFeed(*symbols, start_date="2018-01-01", end_date="2020-01-01")
         self.assertEqual(2, len(feed.assets()))
 
-        assets = {Stock(symbol, "USD") for symbol in symbols}
+        assets = {Stock(symbol) for symbol in symbols}
         self.assertEqual(assets, set(feed.assets()))
 
         tf = feed.timeframe()

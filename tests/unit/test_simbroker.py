@@ -10,7 +10,7 @@ from roboquant.brokers import SimBroker
 
 class TestSimbroker(unittest.TestCase):
 
-    apple = Stock("AAPL", "USD")
+    apple = Stock("AAPL")
 
     @staticmethod
     def _create_event(price=100.0):

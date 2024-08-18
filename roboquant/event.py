@@ -31,6 +31,8 @@ class PriceItem:
 
 @dataclass(slots=True)
 class Quote(PriceItem):
+    """Quote price of an asset""" 
+
     data: array  # [ask-price, ask-volume, bid-price, bid-volume]
 
     def price(self, price_type: str = "DEFAULT") -> float:

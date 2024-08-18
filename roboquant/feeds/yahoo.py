@@ -38,7 +38,7 @@ class YahooFeed(HistoricFeed):
             for t in df.itertuples(index=True):
                 dt = t[0].to_pydatetime().astimezone(timezone.utc)
                 prices = t[1:6]
-                b = Bar(Stock(symbol, "USD"), array("f", prices), interval)
+                b = Bar(Stock(symbol), array("f", prices), interval)
                 self._add_item(dt, b)
 
             logger.info("retrieved symbol=%s items=%s", symbol, len(df))

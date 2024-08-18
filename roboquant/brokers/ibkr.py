@@ -17,7 +17,7 @@ from roboquant.asset import Asset, Stock
 from roboquant.event import Event
 from roboquant.order import Order
 from roboquant.brokers.broker import LiveBroker, _update_positions
-from roboquant.monetary import Amount, Wallet
+from roboquant.monetary import Amount, Wallet, Currency, USD
 
 assert VERSION["major"] == 10 and VERSION["minor"] == 19, "Wrong version of the IBAPI found"
 
@@ -33,8 +33,8 @@ class _IBApi(EWrapper, EClient):
         self.orders: list[Order] = []
         self.positions: dict[Asset, Position] = {}
         self.__account = {
-            AccountSummaryTags.TotalCashValue: Amount("USD", 0.0),
-            AccountSummaryTags.BuyingPower: Amount("USD", 0.0),
+            AccountSummaryTags.TotalCashValue: Amount(USD, 0.0),
+            AccountSummaryTags.BuyingPower: Amount(USD, 0.0),
         }
         self.__account_end = threading.Condition()
         self.__order_id = 0
@@ -59,7 +59,7 @@ class _IBApi(EWrapper, EClient):
     def accountSummary(self, reqId: int, account: str, tag: str, value: str, currency: str):
         logger.debug("account %s=%s", tag, value)
         if tag in self.__account:
-            self.__account[tag] = Amount(currency, float(value))
+            self.__account[tag] = Amount(Currency(currency), float(value))
 
     def accountSummaryEnd(self, reqId: int):
         with self.__account_end:
@@ -95,10 +95,10 @@ class _IBApi(EWrapper, EClient):
             self.__account_end.wait()
 
     def get_buying_power(self):
-        return self.__account[AccountSummaryTags.BuyingPower] or Amount("USD", 0.0)
+        return self.__account[AccountSummaryTags.BuyingPower] or Amount(USD, 0.0)
 
     def get_cash(self):
-        return self.__account[AccountSummaryTags.TotalCashValue] or Amount("USD", 0.0)
+        return self.__account[AccountSummaryTags.TotalCashValue] or Amount(USD, 0.0)
 
 
 class IBKRBroker(LiveBroker):

@@ -6,7 +6,7 @@ from roboquant.journals import TensorboardJournal, PNLMetric, RunMetric, FeedMet
 
 # %%
 # Compare runs with different parameters using tensorboard
-feed = rq.feeds.YahooFeed("JPM", "IBM", "F", "MSFT", "V", "GE","CSCO", "WMT", "XOM", "INTC", start_date="2010-01-01")
+feed = rq.feeds.YahooFeed("JPM", "IBM", "F", "MSFT", "V", "GE", "CSCO", "WMT", "XOM", "INTC", start_date="2010-01-01")
 
 hyper_params = [(3, 5), (13, 26), (12, 50)]
 

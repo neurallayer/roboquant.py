@@ -5,7 +5,7 @@ from decimal import Decimal
 from roboquant.asset import Asset
 from roboquant.event import Event
 from roboquant.order import Order
-from roboquant.monetary import Amount, Wallet
+from roboquant.monetary import Amount, Wallet, USD, Currency
 
 
 @dataclass(slots=True)
@@ -44,7 +44,7 @@ class Account:
     Only the broker updates the account and does this only during its `sync` method.
     """
 
-    def __init__(self, base_currency: str = "USD"):
+    def __init__(self, base_currency: Currency = USD):
         self.buying_power: Amount = Amount(base_currency, 0.0)
         self.positions: dict[Asset, Position] = {}
         self.orders: list[Order] = []

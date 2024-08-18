@@ -81,7 +81,7 @@ class RandomWalk(HistoricFeed):
         alphabet = np.array(list(string.ascii_uppercase))
         while len(assets) < n_symbols:
             symbol = "".join(rnd.choice(alphabet, size=symbol_len))
-            asset = Stock(symbol, "USD")
+            asset = Stock(symbol)
             assets.add(asset)
         return list(assets)
 

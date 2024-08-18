@@ -7,7 +7,7 @@ from roboquant.asset import Asset
 from roboquant.brokers.broker import Broker, _update_positions
 from roboquant.event import Event, Quote, PriceItem
 from roboquant.order import Order
-from roboquant.monetary import Amount, Wallet
+from roboquant.monetary import Amount, Wallet, USD
 
 logger = logging.getLogger(__name__)
 
@@ -27,7 +27,7 @@ class SimBroker(Broker):
     This class can be extended to support different types of use-cases, like margin trading.
     """
 
-    def __init__(self, initial_deposit=Amount("USD", 1_000_000.0), price_type="OPEN", slippage=0.001):
+    def __init__(self, initial_deposit=Amount(USD, 1_000_000.0), price_type="OPEN", slippage=0.001):
         super().__init__()
         self._account = Account(initial_deposit.currency)
         self._modify_orders: list[Order] = []

@@ -31,4 +31,3 @@ feed = rq.feeds.YahooFeed("IBM", "AAPL")
 strategy = MyStrategy(14)
 account = rq.run(feed, strategy)
 print(account)
-# %%

@@ -1,14 +1,15 @@
 import unittest
 
 from roboquant.asset import Asset, Crypto, Stock
+from roboquant.monetary import USD, Currency
 
 
 class TestAsset(unittest.TestCase):
 
     def test_stock(self):
-        tesla = Stock("TSLA", "USD")
+        tesla = Stock("TSLA")
         self.assertEqual("TSLA", tesla.symbol)
-        self.assertEqual("USD", tesla.currency)
+        self.assertEqual(USD, tesla.currency)
         self.assertEqual("Stock", tesla.type())
 
         v = tesla.serialize()
@@ -18,7 +19,7 @@ class TestAsset(unittest.TestCase):
     def test_crypto(self):
         btc = Crypto.from_symbol("BTC/USDT")
         self.assertEqual("BTC/USDT", btc.symbol)
-        self.assertEqual("USDT", btc.currency)
+        self.assertEqual(Currency("USDT"), btc.currency)
         self.assertEqual("Crypto", btc.type())
 
         v = btc.serialize()

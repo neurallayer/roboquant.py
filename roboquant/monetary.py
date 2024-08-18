@@ -5,71 +5,13 @@ from datetime import datetime
 from typing import ClassVar
 
 
-class CurrencyConverter(ABC):
-    """Abstract base class for currency converters"""
-
-    @abstractmethod
-    def convert(self, from_currency: str, to_currency: str, value: float, time: datetime) -> float:
-        """Convert the monetary vale from one currency into another currency at the provided time.
-        """
-        ...
-
-
-class NoConversion(CurrencyConverter):
-    """The default currency converter that doesn't convert between currencies"""
-
-    def convert(self, from_currency: str, to_currency: str, value: float, time: datetime) -> float:
-        raise NotImplementedError("The default NoConversion doesn't support any conversions")
-
-
-class StaticConversion(CurrencyConverter):
-    """Currency converter that uses static rates to convert between different currencies.
-    This converter doesn't take time into consideration.
-    """
-
-    def __init__(self, base_currency: str, rates: dict[str, float]):
-        super().__init__()
-        self.base_currency = base_currency
-        self.rates = rates
-        self.rates[base_currency] = 1.0
-
-    def convert(self, from_currency: str, to_currency: str, value: float, time: datetime) -> float:
-        return value * self.rates[from_currency] / self.rates[to_currency]
-
-
-class One2OneConversion(CurrencyConverter):
-    """Currency converter that always converts 1 to 1 between currencies.
-    So for example, 1 USD equals 1 EUR equals 1 GPB"""
-
-    def convert(self, from_currency: str, to_currency: str, value: float, time: datetime) -> float:
-        return value
-
-
-
 class Currency(str):
-    """Small utility class that allows to create instances of `Amount` as follows:
-
-            amount1 = 12.5@EUR
-            amount2 = 100@JPY
-            wallet = amount1 + 13@USD + amount2
-    """
-
-    converter: CurrencyConverter = NoConversion()
-
-    def convert(self, value: float, currency: "Currency", time: datetime) -> float:
-        """Convert a value from this currency to another currency and return that value.
-        If a conversion is required, it will invoke the registered `Amount.converter`.
-        """
-        if currency == self:
-            return value
-        if value == 0.0:
-            return 0.0
-
-        return Currency.converter.convert(self, currency, value, time)
+    """Currency class represents a monetary currency and is s subclass of `str`"""
 
     def __rmatmul__(self, other: float | int):
         assert isinstance(other, (float, int))
         return Amount(self, other)
+
 
 # Commonly used currencies
 USD = Currency("USD")
@@ -87,15 +29,57 @@ BTC = Currency("BTC")
 ETH = Currency("ETH")
 
 
+class CurrencyConverter(ABC):
+    """Abstract base class for currency converters"""
+
+    @abstractmethod
+    def convert(self, amount: "Amount", to_currency: Currency, time: datetime) -> float:
+        """Convert the monetary amount into another currency at the provided time."""
+        ...
+
+
+class NoConversion(CurrencyConverter):
+    """The default currency converter that doesn't convert between currencies"""
+
+    def convert(self, amount: "Amount", to_currency: Currency, time: datetime) -> float:
+        raise NotImplementedError("The default NoConversion doesn't support any conversions")
+
+
+class StaticConversion(CurrencyConverter):
+    """Currency converter that uses static rates to convert between different currencies.
+    This converter doesn't take time into consideration.
+    """
+
+    def __init__(self, base_currency: Currency, rates: dict[Currency, float]):
+        super().__init__()
+        self.base_currency = base_currency
+        self.rates = rates
+        self.rates[base_currency] = 1.0
+
+    def convert(self, amount: "Amount", to_currency: Currency, time: datetime) -> float:
+        return amount.value * self.rates[amount.currency] / self.rates[to_currency]
+
+
+class One2OneConversion(CurrencyConverter):
+    """Currency converter that always converts 1 to 1 between currencies.
+    So for example, 1 USD equals 1 EUR equals 1 GPB"""
+
+    def convert(self, amount: "Amount", to_currency: str, time: datetime) -> float:
+        return amount.value
 
 
 @dataclass(frozen=True, slots=True)
 class Amount:
-    """A monetary amount denoted in a single currency"""
+    """A monetary value denoted in a single currency. Amounts are immutable"""
 
-    currency: str
+    currency: Currency
     value: float
-    converter: ClassVar[CurrencyConverter] = NoConversion()
+    __converter: ClassVar[CurrencyConverter] = NoConversion()
+
+    @staticmethod
+    def register_converter(converter: CurrencyConverter):
+        """Register a new currency converter to handle conversions between different currencies"""
+        Amount.__converter = converter
 
     def items(self):
         return [(self.currency, self.value)]
@@ -109,7 +93,7 @@ class Amount:
         """
         return Wallet(self, other)
 
-    def convert(self, currency: str, time: datetime) -> float:
+    def convert(self, currency: Currency, time: datetime) -> float:
         """Convert this amount to another currency and return that value.
         If a conversion is required, it will invoke the registered `Amount.converter`.
         """
@@ -118,13 +102,13 @@ class Amount:
         if self.value == 0.0:
             return 0.0
 
-        return Amount.converter.convert(self.currency, currency, self.value, time)
+        return Amount.__converter.convert(self, currency, time)
 
     def __repr__(self) -> str:
         return f"{self.value:,.2f}@{self.currency}"
 
 
-class Wallet(defaultdict[str, float]):
+class Wallet(defaultdict[Currency, float]):
     """A wallet holds monetary values of different currencies"""
 
     def __init__(self, *amounts: Amount):
@@ -163,10 +147,9 @@ class Wallet(defaultdict[str, float]):
         result.update(self)
         return result
 
-    def convert(self, currency: str, time: datetime) -> float:
+    def convert(self, currency: Currency, time: datetime) -> float:
         """convert all the amounts hold in this wallet to a single currency and return the value"""
         return sum(amount.convert(currency, time) for amount in self.amounts())
 
     def __repr__(self) -> str:
         return " + ".join([f"{a}" for a in self.amounts()])
-

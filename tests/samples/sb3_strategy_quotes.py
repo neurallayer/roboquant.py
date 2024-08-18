@@ -9,7 +9,7 @@ from roboquant.feeds.parquet import ParquetFeed
 from roboquant.timeframe import Timeframe
 
 # %%
-asset = Stock("JPM", "USD")
+asset = Stock("JPM")
 start = "2024-05-01T00:00:00Z"
 border = "2024-05-01T20:00:00Z"
 end = "2024-05-02T00:00:00Z"

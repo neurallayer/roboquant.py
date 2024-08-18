@@ -17,18 +17,18 @@ class TestCSVFeed(unittest.TestCase):
         root = self._get_root_dir("yahoo")
         feed = CSVFeed.yahoo(root)
         symbols = ["META", "AAPL", "AMZN", "TSLA"]
-        assets = [Stock(symbol, "USD") for symbol in symbols]
+        assets = [Stock(symbol) for symbol in symbols]
         run_price_item_feed(feed, assets, self)
 
     def test_csv_feed_stooq_daily(self):
         root = self._get_root_dir("stooq", "daily")
         feed = CSVFeed.stooq_us_daily(root)
-        run_price_item_feed(feed, [Stock("IBM", "USD")], self)
+        run_price_item_feed(feed, [Stock("IBM")], self)
 
     def test_csv_feed_stooq_intraday(self):
         root = self._get_root_dir("stooq", "5_min")
         feed = CSVFeed.stooq_us_intraday(root)
-        run_price_item_feed(feed, [Stock("IBM", "USD")], self)
+        run_price_item_feed(feed, [Stock("IBM")], self)
 
 
 if __name__ == "__main__":

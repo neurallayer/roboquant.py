@@ -10,7 +10,7 @@ testpaths = [
 
 [tool.pyright]
 reportOptionalOperand = "none"
-exclude = ["samples/*.py", "scratch/*.py"]
+# exclude = ["samples/*.py", "scratch/*.py"]
 
 [tool.pylint.MASTER]
 ignore-paths = 'samples'

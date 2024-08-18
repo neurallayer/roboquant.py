@@ -1,7 +1,6 @@
 # %%
-import roboquant as rq
 from roboquant.alpaca import AlpacaHistoricStockFeed
-from roboquant.feeds.sqllitefeed import SQLFeed
+from roboquant.feeds.sql import SQLFeed
 
 # %%
 feed = SQLFeed("/tmp/apple_quotes.db", "quote")

@@ -14,7 +14,7 @@ from roboquant.config import Config
 from roboquant.event import Event
 from roboquant.brokers.broker import LiveBroker
 from roboquant.order import Order
-from roboquant.monetary import Wallet, Amount
+from roboquant.monetary import Wallet, Amount, USD
 
 logger = logging.getLogger(__name__)
 
@@ -23,7 +23,7 @@ class AlpacaBroker(LiveBroker):
 
     def __init__(self, api_key=None, secret_key=None) -> None:
         super().__init__()
-        self.__account: Account = Account("USD")
+        self.__account: Account = Account()
         config = Config()
         api_key = api_key or config.get("alpaca.public.key")
         secret_key = secret_key or config.get("alpaca.secret.key")
@@ -34,9 +34,9 @@ class AlpacaBroker(LiveBroker):
     def get_asset(self, symbol: str, asset_class: AssetClass) -> Asset:
         match asset_class:
             case AssetClass.US_EQUITY:
-                return Stock(symbol, "USD")
+                return Stock(symbol)
             case AssetClass.US_OPTION:
-                return Option(symbol, "USD")
+                return Option(symbol)
             case AssetClass.CRYPTO:
                 return Crypto.from_symbol(symbol)
 
@@ -75,9 +75,9 @@ class AlpacaBroker(LiveBroker):
         client = self.__client
         acc: TradeAccount = client.get_account()  # type: ignore
         if acc.buying_power:
-            self.__account.buying_power = Amount("USD", float(acc.buying_power))
+            self.__account.buying_power = Amount(USD, float(acc.buying_power))
         if acc.cash:
-            self.__account.cash = Wallet(Amount("USD", float(acc.cash)))
+            self.__account.cash = Wallet(Amount(USD, float(acc.cash)))
 
         self.__account.last_update = now
 

@@ -8,6 +8,7 @@ from roboquant.journals.basicjournal import BasicJournal
 from roboquant.ml.features import BarFeature, CombinedFeature, MaxReturnFeature, PriceFeature, SMAFeature
 from roboquant.ml.strategies import RNNStrategy
 
+
 # %%
 # Torch LSTM Model
 class MyModel(nn.Module):
@@ -24,9 +25,10 @@ class MyModel(nn.Module):
         output = self.linear(output)
         return output
 
+
 # %%
 # Config
-apple = Stock("AAPL", "USD")
+apple = Stock("AAPL")
 prediction = 10
 start_date = "2010-01-01"
 feed = rq.feeds.YahooFeed(apple.symbol, start_date=start_date)

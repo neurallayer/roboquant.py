@@ -38,15 +38,15 @@ logger = logging.getLogger(__name__)
 def _get_asset(symbol: str, asset_class: AssetClass) -> Asset:
     match asset_class:
         case AssetClass.US_EQUITY:
-            return Stock(symbol, "USD")
+            return Stock(symbol)
         case AssetClass.CRYPTO:
             return Crypto.from_symbol(symbol)
         case AssetClass.US_OPTION:
-            return Option(symbol, "USD")
+            return Option(symbol)
 
 
 class AlpacaLiveFeed(LiveFeed):
-    """Subscribe to live market data for stocks, crypto currencies or options"""
+    """Subscribe to live market data for stocks, cryptocurrencies or options"""
 
     __one_minute = str(timedelta(minutes=1))
 
