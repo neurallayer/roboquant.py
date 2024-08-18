@@ -11,12 +11,13 @@ from roboquant.event import Event
 from roboquant.feeds.eventchannel import EventChannel
 from roboquant.feeds.feed import Feed
 from roboquant.asset import Asset
-from roboquant.timeframe import EMPTY_TIMEFRAME, Timeframe
+from roboquant.timeframe import Timeframe
 
 logger = logging.getLogger(__name__)
 
 
 class ParquetFeed(Feed):
+    """PriceItems stored in Parquet Files"""
 
     __schema = pa.schema(
         [
@@ -97,7 +98,7 @@ class ParquetFeed(Feed):
             end = d["row_groups"][-1]["columns"][0]["statistics"]["max"]
             tf = Timeframe(start, end, True)
             return tf
-        return EMPTY_TIMEFRAME
+        return Timeframe.EMPTY
 
     def assets(self) -> list[Asset]:
         if not self.exists():

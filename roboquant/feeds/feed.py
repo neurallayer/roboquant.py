@@ -33,9 +33,9 @@ class Feed(ABC):
         """
         ...
 
-    def timeframe(self) -> Timeframe | None:
-        """Return the timeframe of this feed it has one and is known, otherwise return None."""
-        return None
+    def timeframe(self) -> Timeframe:
+        """Return the timeframe of this feed, default is Timeframe.INFINITE"""
+        return Timeframe.INFINITE
 
     def play_background(self, timeframe: Timeframe | None = None, channel_capacity: int = 10) -> EventChannel:
         """
@@ -139,7 +139,7 @@ class Feed(ABC):
 
         Parameters
         ----------
-        symbol : str
+        asset : Asset
             The symbol for which to plot prices.
         price_type : str, optional
             The type of price to plot, e.g. open, close, high, low. (default is "DEFAULT")

@@ -4,7 +4,7 @@ from itertools import chain
 
 from roboquant.asset import Asset
 from roboquant.event import Event, PriceItem
-from roboquant.timeframe import EMPTY_TIMEFRAME, Timeframe
+from roboquant.timeframe import Timeframe
 from .eventchannel import EventChannel
 from .feed import Feed
 
@@ -52,7 +52,7 @@ class HistoricFeed(Feed, ABC):
         if tl:
             return Timeframe(tl[0], tl[-1], inclusive=True)
 
-        return EMPTY_TIMEFRAME
+        return Timeframe.EMPTY
 
     def __update(self):
         if self.__modified:

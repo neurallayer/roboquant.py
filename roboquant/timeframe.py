@@ -11,6 +11,12 @@ class Timeframe:
 
     __slots__ = "start", "end", "inclusive"
 
+    EMPTY: "Timeframe"
+    """represents an empty timeframe"""
+
+    INFINITE: "Timeframe"
+    """represents an infinite timeframe"""
+
     def __init__(self, start: datetime, end: datetime, inclusive=False):
         """
         Create a new timeframe
@@ -68,7 +74,7 @@ class Timeframe:
         return self.start <= time < self.end
 
     def __repr__(self):
-        if self == EMPTY_TIMEFRAME:
+        if self.is_empty():
             return "EMPTY_TIMEFRAME"
 
         last_char = "]" if self.inclusive else ">"
@@ -131,5 +137,5 @@ class Timeframe:
         return False
 
 
-EMPTY_TIMEFRAME = Timeframe.fromisoformat("1900-01-01T00:00:00+00:00", "1900-01-01T00:00:00+00:00", False)
-"""Represents an empty timeframe, one that cannot contain events"""
+Timeframe.EMPTY = Timeframe.fromisoformat("1900-01-01T00:00:00+00:00", "1900-01-01T00:00:00+00:00", False)
+Timeframe.INFINITE = Timeframe.fromisoformat("1900-01-01T00:00:00+00:00", "2200-01-01T00:00:00+00:00", True)

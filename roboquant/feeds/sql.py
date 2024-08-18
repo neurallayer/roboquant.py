@@ -8,7 +8,7 @@ from typing import Literal
 from roboquant.asset import Asset
 from roboquant.event import Bar, PriceItem, Quote
 from roboquant.event import Event
-from roboquant.timeframe import EMPTY_TIMEFRAME, Timeframe
+from roboquant.timeframe import Timeframe
 from roboquant.feeds.eventchannel import EventChannel
 from roboquant.feeds.feed import Feed
 
@@ -61,7 +61,7 @@ class SQLFeed(Feed):
         row = result[0]
         if row[0]:
             return Timeframe.fromisoformat(row[0], row[1], True)
-        return EMPTY_TIMEFRAME
+        return Timeframe.EMPTY
 
     def assets(self):
         con = sqlite3.connect(self.db_file)

@@ -31,7 +31,7 @@ class PriceItem:
 
 @dataclass(slots=True)
 class Quote(PriceItem):
-    """Quote price of an asset""" 
+    """Quote price of an asset, containing ASK and BID prices"""
 
     data: array  # [ask-price, ask-volume, bid-price, bid-volume]
 
