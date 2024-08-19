@@ -1,8 +1,19 @@
+import io
+import logging
+import zipfile
 from abc import ABC, abstractmethod
+from bisect import bisect_left
 from collections import defaultdict
+from csv import reader
 from dataclasses import dataclass
 from datetime import datetime
-from typing import ClassVar
+from pathlib import Path
+from typing import ClassVar, Any, Dict, List
+
+import requests
+
+
+logger = logging.getLogger(__name__)
 
 
 class Currency(str):
@@ -45,6 +56,60 @@ class NoConversion(CurrencyConverter):
         raise NotImplementedError("The default NoConversion doesn't support any conversions")
 
 
+class ECBConversion(CurrencyConverter):
+    """Currency that gets it exchange rates from the European Central Bank"""
+
+    __file_name = Path.home() / ".roboquant" / "eurofxref-hist.csv"
+
+    def __init__(self):
+        self.rates: Dict[Currency, List[Any]] = {EUR: [(datetime.fromisoformat("2000-01-01T15:00:00Z"), 1.0)]}
+        if not self.exists():
+            self.download()
+        self.parse()
+
+    def download(self):
+        if self.exists():
+            logging.info("overwriting existing file")
+
+        r = requests.get("https://www.ecb.europa.eu/stats/eurofxref/eurofxref-hist.zip", timeout=5)
+        with zipfile.ZipFile(io.BytesIO(r.content)) as z:
+            p = Path.home() / ".roboquant"
+            z.extractall(p)
+
+    def exists(self):
+        self.__file_name.exists()
+
+    def parse(self):
+        with open(self.__file_name, "r", encoding="utf8") as csv_file:
+            csv_reader = reader(csv_file)
+            header = next(csv_reader)[1:]
+            currencies = [Currency(e) for e in header if e]
+            for e in header:
+                c = Currency(e)
+                self.rates[c] = []
+
+            header_len = len(currencies)
+            for row in csv_reader:
+                d = datetime.fromisoformat(row[0] + "T15:00:00Z")
+                for idx in range(header_len):
+                    v = row[idx + 1]
+                    if v and v != "N/A":
+                        value = (d, float(v))
+                        self.rates[currencies[idx]].append(value)
+
+        for v in self.rates.values():
+            v.reverse()
+
+    def get_rate(self, currency: Currency, time: datetime) -> float:
+        rates = self.rates[currency]
+        idx = bisect_left(rates, time, key=lambda r: r[0])
+        idx = min(idx, len(rates) - 1)
+        return rates[idx][1]
+
+    def convert(self, amount: "Amount", to_currency: Currency, time: datetime) -> float:
+        return amount.value * self.get_rate(to_currency, time) / self.get_rate(amount.currency, time)
+
+
 class StaticConversion(CurrencyConverter):
     """Currency converter that uses static rates to convert between different currencies.
     This converter doesn't take time into consideration.
@@ -57,7 +122,7 @@ class StaticConversion(CurrencyConverter):
         self.rates[base_currency] = 1.0
 
     def convert(self, amount: "Amount", to_currency: Currency, time: datetime) -> float:
-        return amount.value * self.rates[amount.currency] / self.rates[to_currency]
+        return amount.value * self.rates[to_currency] / self.rates[amount.currency]
 
 
 class One2OneConversion(CurrencyConverter):
@@ -153,3 +218,11 @@ class Wallet(defaultdict[Currency, float]):
 
     def __repr__(self) -> str:
         return " + ".join([f"{a}" for a in self.amounts()])
+
+
+if __name__ == "__main__":
+    ECBConversion().download()
+    Amount.register_converter(ECBConversion())
+    amt = 100 @ EUR + 10_000 @ JPY
+    dt = datetime.fromisoformat("2024-01-01T00:00:00Z")
+    print(amt.convert(USD, dt))

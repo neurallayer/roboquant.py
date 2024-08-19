@@ -1,7 +1,8 @@
 from datetime import datetime
 import unittest
 
-from roboquant.monetary import NoConversion, One2OneConversion, Wallet, Amount, USD, EUR, StaticConversion, GBP, JPY
+from roboquant.monetary import NoConversion, One2OneConversion, Wallet, Amount, USD, EUR, StaticConversion, GBP, JPY, \
+    ECBConversion
 
 
 class TestMonetary(unittest.TestCase):
@@ -46,10 +47,19 @@ class TestMonetary(unittest.TestCase):
 
     def test_static_conversion(self):
         now = datetime.now()
-        converter = StaticConversion(USD, {EUR: 1.1, GBP: 1.3})
+        converter = StaticConversion(USD, {EUR: 0.9, GBP: 0.8, JPY: 150})
         Amount.register_converter(converter)
         amt1 = Amount(GBP, 100.0)
-        self.assertAlmostEqual(118.18181818181817, amt1.convert(EUR, now))
+        self.assertAlmostEqual(112.5, amt1.convert(EUR, now))
+
+        Amount.register_converter(NoConversion())
+
+    def test_ecb_conversion(self):
+        now = datetime.fromisoformat("2020-01-01T00:00:00Z")
+        converter = ECBConversion()
+        Amount.register_converter(converter)
+        amt1 = Amount(GBP, 100.0)
+        self.assertAlmostEqual(117.8856, amt1.convert(EUR, now), 4)
 
         Amount.register_converter(NoConversion())
 
