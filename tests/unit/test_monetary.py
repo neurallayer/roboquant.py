@@ -61,6 +61,9 @@ class TestMonetary(unittest.TestCase):
         amt1 = Amount(GBP, 100.0)
         self.assertAlmostEqual(117.8856, amt1.convert(EUR, now), 4)
 
+        # convert an amount to its own currency
+        self.assertEqual(amt1.value, amt1@amt1.currency)
+
         Amount.register_converter(NoConversion())
 
 

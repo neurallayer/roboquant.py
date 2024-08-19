@@ -6,7 +6,7 @@ from bisect import bisect_left
 from collections import defaultdict
 from csv import reader
 from dataclasses import dataclass
-from datetime import datetime
+from datetime import datetime, timezone
 from pathlib import Path
 from typing import ClassVar, Any, Dict, List
 
@@ -158,6 +158,9 @@ class Amount:
         """
         return Wallet(self, other)
 
+    def __matmul__(self, other: Currency) -> float:
+        return self.convert(other, datetime.now(tz=timezone.utc))
+
     def convert(self, currency: Currency, time: datetime) -> float:
         """Convert this amount to another currency and return that value.
         If a conversion is required, it will invoke the registered `Amount.converter`.
@@ -207,6 +210,9 @@ class Wallet(defaultdict[Currency, float]):
             result[k] -= v
         return result
 
+    def __matmul__(self, other: Currency) -> float:
+        return self.convert(other, datetime.now(tz=timezone.utc))
+
     def deepcopy(self) -> "Wallet":
         result = Wallet()
         result.update(self)
@@ -218,11 +224,3 @@ class Wallet(defaultdict[Currency, float]):
 
     def __repr__(self) -> str:
         return " + ".join([f"{a}" for a in self.amounts()])
-
-
-if __name__ == "__main__":
-    ECBConversion().download()
-    Amount.register_converter(ECBConversion())
-    amt = 100 @ EUR + 10_000 @ JPY
-    dt = datetime.fromisoformat("2024-01-01T00:00:00Z")
-    print(amt.convert(USD, dt))

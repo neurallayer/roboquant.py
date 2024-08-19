@@ -3,7 +3,6 @@ from datetime import datetime
 from decimal import Decimal
 
 from roboquant.asset import Asset
-from roboquant.event import Event
 from roboquant.order import Order
 from roboquant.monetary import Amount, Wallet, USD, Currency
 
@@ -147,15 +146,3 @@ class Account:
             f"last update  : {self.last_update}"
         )
         return result
-
-    def _update(self, event: Event, price_type: str = "DEFAULT"):
-        """The broker normally invokes this method during the sync.
-
-        This method will take care of:
-        - update the positions with the latest market prices as found in the event
-        """
-        self.last_update = event.time
-
-        for asset, position in self.positions.items():
-            if price := event.get_price(asset, price_type):
-                position.mkt_price = price

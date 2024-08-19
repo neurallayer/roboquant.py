@@ -24,15 +24,13 @@ class SignalType(Flag):
 class Signal:
     """Signal that a strategy can create. It contains both a rating and the type of signal.
 
-    A rating is a float normally between -1.0 and 1.0, where -1.0 is a strong sell and 1.0 is a strong buy.
-    But this range isn't enfoced. It is up to the used trader to handle these values.
+    A rating is a float normally between -1.0 and 1.0, where -1.0 is a strong sell, and 1.0 is a strong buy.
+    But this range isn't enforced. It is up to the used trader to handle these values.
 
     Examples:
-    ```
-    Signal.buy("XYZ")
-    Signal.sell("XYZ", SignalType.EXIT)
-    Signal("XYZ", 0.5, SignalType.ENTRY)
-    ```
+        Signal.buy("XYZ")
+        Signal.sell("XYZ", SignalType.EXIT)
+        Signal("XYZ", 0.5, SignalType.ENTRY)
     """
 
     asset: Asset
