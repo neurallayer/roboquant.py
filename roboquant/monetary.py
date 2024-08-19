@@ -62,7 +62,7 @@ class ECBConversion(CurrencyConverter):
     __file_name = Path.home() / ".roboquant" / "eurofxref-hist.csv"
 
     def __init__(self):
-        self.rates: Dict[Currency, List[Any]] = {EUR: [(datetime.fromisoformat("2000-01-01T15:00:00Z"), 1.0)]}
+        self.rates: Dict[Currency, List[Any]] = {EUR: [(datetime.fromisoformat("2000-01-01T15:00:00+00:00"), 1.0)]}
         if not self.exists():
             self.download()
         self.parse()
@@ -90,7 +90,7 @@ class ECBConversion(CurrencyConverter):
 
             header_len = len(currencies)
             for row in csv_reader:
-                d = datetime.fromisoformat(row[0] + "T15:00:00Z")
+                d = datetime.fromisoformat(row[0] + "T15:00:00+00:00")
                 for idx in range(header_len):
                     v = row[idx + 1]
                     if v and v != "N/A":

@@ -55,7 +55,7 @@ class TestMonetary(unittest.TestCase):
         Amount.register_converter(NoConversion())
 
     def test_ecb_conversion(self):
-        now = datetime.fromisoformat("2020-01-01T00:00:00Z")
+        now = datetime.fromisoformat("2020-01-01T00:00:00+00:00")
         converter = ECBConversion()
         Amount.register_converter(converter)
         amt1 = Amount(GBP, 100.0)
