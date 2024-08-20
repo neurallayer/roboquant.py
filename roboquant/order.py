@@ -1,4 +1,4 @@
-from copy import copy
+from copy import deepcopy
 from dataclasses import dataclass
 from datetime import datetime
 from decimal import Decimal
@@ -11,7 +11,7 @@ from roboquant.monetary import Amount
 @dataclass(slots=True)
 class Order:
     """
-    A trading order.
+    A trading order for an asset.
     The `id` is automatically assigned by the broker and should not be set manually.
     Also, the `fill` are managed by the broker and should not be manually set.
     """
@@ -31,17 +31,17 @@ class Order:
         assert not self.size.is_zero(), "Cannot create a new order with size is zero"
 
         self.limit = limit
-        self.id: str | None = None
+        self.id = None
         self.fill = Decimal(0)
         self.info = kwargs
         self.gtd = gtd
 
     def cancel(self) -> "Order":
-        """Create a cancellation order. You can only cancel orders that are still open and have an id.
-        The returned order looks like a regular order, but with its size set to zero.
+        """Create a cancellation order. You can only cancel orders that have an id.
+        The returned order looks like a regular order, but with its `size` set to zero.
         """
         assert self.id is not None, "Can only cancel orders with an already assigned id"
-        result = copy(self)
+        result = deepcopy(self)
         result.size = Decimal(0)
         return result
 
@@ -58,12 +58,12 @@ class Order:
         if size is not None:
             assert not size.is_zero(), "size cannot be set to zero, use order.cancel() to cancel an order"
 
-        result = copy(self)
+        result = deepcopy(self)
         result.size = size or result.size
         result.limit = limit or result.limit
         return result
 
-    def __copy__(self):
+    def __deepcopy__(self, memo):
         result = Order(self.asset, self.size, self.limit, self.gtd, **self.info)
         result.id = self.id
         result.fill = self.fill

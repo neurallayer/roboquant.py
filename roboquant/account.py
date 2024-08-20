@@ -9,16 +9,16 @@ from roboquant.monetary import Amount, Wallet, USD, Currency
 
 @dataclass(slots=True)
 class Position:
-    """Position of a symbol"""
+    """Position of an asset"""
 
     size: Decimal
     """Position size"""
 
     avg_price: float
-    """Average price paid denoted in the currency of the symbol"""
+    """Average price paid denoted in the currency of the asset"""
 
     mkt_price: float
-    """latest market price denoted in the currency of the symbol"""
+    """latest market price denoted in the currency of the asset"""
 
     @property
     def is_short(self):
@@ -57,8 +57,6 @@ class Account:
 
     def mkt_value(self) -> Wallet:
         """Return the sum of the market values of the open positions in the account.
-
-        The returned value is denoted in the base currency of the account.
         """
         result = Wallet()
         for asset, position in self.positions.items():
@@ -79,10 +77,11 @@ class Account:
         return {symbol: position for (symbol, position) in self.positions.items() if position.is_short}
 
     def long_positions(self) -> dict[Asset, Position]:
-        """Return al the short positions in the account"""
+        """Return al the long positions in the account"""
         return {symbol: position for (symbol, position) in self.positions.items() if position.is_long}
 
-    def contract_value(self, asset, size, price):
+    def contract_value(self, asset: Asset, size: Decimal, price: float) -> float:
+        """Contract value denoted in the base currency of hte account"""
         return asset.contract_amount(size, price).convert(self.base_currency, self.last_update)
 
     def equity(self) -> Wallet:

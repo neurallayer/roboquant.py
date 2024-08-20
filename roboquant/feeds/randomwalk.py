@@ -13,7 +13,7 @@ from .historic import HistoricFeed
 
 class RandomWalk(HistoricFeed):
     """This feed simulates the random-walk of stock prices.
-    It can generate trade or bar prices."""
+    It can generate trade, quote, or bar prices."""
 
     def __init__(
         self,

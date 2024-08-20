@@ -34,6 +34,7 @@ class Timeframe:
 
     @classmethod
     def fromisoformat(cls, start: str, end: str, inclusive=False):
+        """Create an instance of Timeframe based on a start and end data in isoformat"""
         s = datetime.fromisoformat(start)
         e = datetime.fromisoformat(end)
         return cls(s, e, inclusive)

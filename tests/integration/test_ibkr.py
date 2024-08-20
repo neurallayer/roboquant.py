@@ -12,7 +12,7 @@ from roboquant.monetary import Amount, One2OneConversion
 class TestIBKR(unittest.TestCase):
 
     def test_ibkr_order(self):
-        Amount.converter = One2OneConversion()
+        Amount.register_converter(One2OneConversion())
         logging.basicConfig(level=logging.DEBUG)
         logging.getLogger("ibapi").setLevel(logging.WARNING)
         asset = Stock("JPM")

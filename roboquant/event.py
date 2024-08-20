@@ -10,18 +10,18 @@ from roboquant.asset import Asset
 
 @dataclass(slots=True)
 class PriceItem:
-    """Baseclass for the different types of price items related to an asset, like stock quotes
+    """Baseclass for the different types of prices related to an asset, like quotes
     """
 
     asset: Asset
-    """the asset for this price-item"""
+    """the underlying asset for this price-item"""
 
     @abstractmethod
     def price(self, price_type: str = "DEFAULT") -> float:
         """Returns the price for the provided price_type.
         A price_type, for example, is `OPEN` or `CLOSE`.
 
-        All price-items are expected to return a DEFAULT price if the type is unknown.
+        All price-items are expected to return the `DEFAULT` price if the type is unknown.
         """
 
     @abstractmethod

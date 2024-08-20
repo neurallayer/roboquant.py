@@ -62,12 +62,12 @@ class ECBConversion(CurrencyConverter):
     __file_name = Path.home() / ".roboquant" / "eurofxref-hist.csv"
 
     def __init__(self):
-        self.rates: Dict[Currency, List[Any]] = {EUR: [(datetime.fromisoformat("2000-01-01T15:00:00+00:00"), 1.0)]}
+        self._rates: Dict[Currency, List[Any]] = {EUR: [(datetime.fromisoformat("2000-01-01T15:00:00+00:00"), 1.0)]}
         if not self.exists():
-            self.download()
-        self.parse()
+            self._download()
+        self._parse()
 
-    def download(self):
+    def _download(self):
         if self.exists():
             logging.info("overwriting existing file")
 
@@ -79,14 +79,14 @@ class ECBConversion(CurrencyConverter):
     def exists(self):
         self.__file_name.exists()
 
-    def parse(self):
+    def _parse(self):
         with open(self.__file_name, "r", encoding="utf8") as csv_file:
             csv_reader = reader(csv_file)
             header = next(csv_reader)[1:]
             currencies = [Currency(e) for e in header if e]
             for e in header:
                 c = Currency(e)
-                self.rates[c] = []
+                self._rates[c] = []
 
             header_len = len(currencies)
             for row in csv_reader:
@@ -95,19 +95,19 @@ class ECBConversion(CurrencyConverter):
                     v = row[idx + 1]
                     if v and v != "N/A":
                         value = (d, float(v))
-                        self.rates[currencies[idx]].append(value)
+                        self._rates[currencies[idx]].append(value)
 
-        for v in self.rates.values():
+        for v in self._rates.values():
             v.reverse()
 
-    def get_rate(self, currency: Currency, time: datetime) -> float:
-        rates = self.rates[currency]
+    def _get_rate(self, currency: Currency, time: datetime) -> float:
+        rates = self._rates[currency]
         idx = bisect_left(rates, time, key=lambda r: r[0])
         idx = min(idx, len(rates) - 1)
         return rates[idx][1]
 
     def convert(self, amount: "Amount", to_currency: Currency, time: datetime) -> float:
-        return amount.value * self.get_rate(to_currency, time) / self.get_rate(amount.currency, time)
+        return amount.value * self._get_rate(to_currency, time) / self._get_rate(amount.currency, time)
 
 
 class StaticConversion(CurrencyConverter):
