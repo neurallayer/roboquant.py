@@ -91,6 +91,11 @@ class Order:
         return self.size < 0
 
     @property
+    def completed(self):
+        """Return True if the order is completed (completely filled)"""
+        return not self.remaining
+
+    @property
     def remaining(self):
         """Return the remaining order size to be filled.
 

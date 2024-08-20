@@ -18,11 +18,11 @@ class _Trx:
 
     asset: Asset
     size: Decimal
-    price: float  # denoted in the currency of the symbol
+    price: float  # denoted in the currency of the asset
 
 
 class SimBroker(Broker):
-    """Implementation of a Broker that simulates order handling and trade execution.
+    """Implementation of a Broker that simulates order execution.
 
     This class can be extended to support different types of use-cases, like margin trading.
     """
@@ -117,12 +117,12 @@ class SimBroker(Broker):
         return Decimal(0)
 
     def place_orders(self, orders: list[Order]):
-        """Place new orders at this broker. The order gets assigned a unique order-id if it hasn't one already.
+        """Place new orders at this broker. The orders get assigned a unique order-id if there isn't one already.
 
         Orders that are placed that have already an order-id are either update- or cancellation-orders.
 
-        There is no trading simulation yet performed or account updated. Orders placed at time `t`, will be
-        processed during time `t+1`. This protects against future bias.
+        There is no trading simulation yet performed or account updated. This is done during the `sync` method.
+        Orders placed at time `t`, will be processed during time `t+1`. This protects against future bias. 
         """
         for order in orders:
             if order.id is None:
@@ -141,6 +141,7 @@ class SimBroker(Broker):
                 logger.info("couldn't find order with id %s", order.id)
                 continue
             if order.is_cancellation:
+                logger.info("cancelled order %s", orig_order)
                 self.remove_order(orig_order)
             else:
                 orig_order.size = order.size or orig_order.size
@@ -153,9 +154,10 @@ class SimBroker(Broker):
         if not event or not self._account.orders:
             return
         prices = event.price_items
-        for order in self._account.orders:
 
+        for order in self._account.orders.copy():
             if order.is_expired(event.time):
+                logger.info("expired order %s", order)
                 self.remove_order(order)
             elif item := prices.get(order.asset):
                 trx = self._execute(order, item)
@@ -163,7 +165,8 @@ class SimBroker(Broker):
                     logger.info("executed order=%s trx=%s", order, trx)
                     self._update_account(trx)
                     order.fill += trx.size
-                    if order.fill == order.size:
+                    if order.completed:
+                        logger.info("completed order %s", order)
                         self.remove_order(order)
 
     def _calculate_open_orders(self):

@@ -34,7 +34,7 @@ class Timeframe:
 
     @classmethod
     def fromisoformat(cls, start: str, end: str, inclusive=False):
-        """Create an instance of Timeframe based on a start and end data in isoformat"""
+        """Create an instance of Timeframe based on a start- and end-time in isoformat"""
         s = datetime.fromisoformat(start)
         e = datetime.fromisoformat(end)
         return cls(s, e, inclusive)
@@ -124,6 +124,7 @@ class Timeframe:
         end = self.end - duration
         if end < self.start:
             raise ValueError("sample duration is too large for this timeframe")
+
         while len(result) < n:
             start = random.uniform(self.start.timestamp(), end.timestamp())
             start_dt = datetime.fromtimestamp(start, timezone.utc)
