@@ -40,7 +40,8 @@ class FeatureStrategy(Strategy):
         return []
 
     @abstractmethod
-    def predict(self, x: NDArray, time: datetime) -> list[Signal]: ...
+    def predict(self, x: NDArray, time: datetime) -> list[Signal]:
+        ...
 
 
 class SequenceDataset(Dataset):

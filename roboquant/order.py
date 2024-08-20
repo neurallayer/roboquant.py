@@ -69,10 +69,10 @@ class Order:
         result.fill = self.fill
         return result
 
-    def value(self):
+    def value(self) -> float:
         return self.asset.contract_value(self.size, self.limit)
 
-    def amount(self):
+    def amount(self) -> Amount:
         return Amount(self.asset.currency, self.value())
 
     @property
@@ -81,22 +81,22 @@ class Order:
         return self.size.is_zero()
 
     @property
-    def is_buy(self):
+    def is_buy(self) -> bool:
         """Return True if this is a BUY order, False otherwise"""
         return self.size > 0
 
     @property
-    def is_sell(self):
+    def is_sell(self) -> bool:
         """Return True if this is a SELL order, False otherwise"""
         return self.size < 0
 
     @property
-    def completed(self):
+    def completed(self) -> bool:
         """Return True if the order is completed (completely filled)"""
         return not self.remaining
 
     @property
-    def remaining(self):
+    def remaining(self) -> Decimal:
         """Return the remaining order size to be filled.
 
         In case of a sell order, the remaining will be a negative number.

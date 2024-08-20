@@ -78,7 +78,7 @@ class TradingEnv(gym.Env):
         logger.debug("time=%s action=%s", self.event.time, action)
 
         signals = [Signal(asset, float(rating)) for asset, rating in zip(self.assets, action)]
-        orders = self.trader.create_orders(signals,  self.event, self.account)
+        orders = self.trader.create_orders(signals, self.event, self.account)
         self.broker.place_orders(orders)
 
         if self.journal:

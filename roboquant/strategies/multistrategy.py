@@ -1,3 +1,5 @@
+from itertools import groupby
+from statistics import mean
 from typing import Literal
 
 from roboquant.event import Event
@@ -11,14 +13,14 @@ class MultiStrategy(Strategy):
 
     - first: in case of multiple signals for the same symbol, the first one wins
     - last:  in case of multiple signals for the same symbol, the last one wins.
-    - avg: return the avgerage of the signals. All signals will be ENTRY and EXIT.
+    - mean: return the mean of the signal ratings. All signals will be ENTRY and EXIT.
     - none: return all signals. This is also the default.
     """
 
     def __init__(
         self,
         *strategies: Strategy,
-        order_filter: Literal["last", "first", "none"] = "none"
+        order_filter: Literal["last", "first", "none", "mean"] = "none"
     ):
         super().__init__()
         self.strategies = list(strategies)
@@ -38,5 +40,12 @@ class MultiStrategy(Strategy):
             case "first":
                 s = {s.asset: s for s in reversed(signals)}
                 return list(s.values())
+            case "mean":
+                result = []
+                for key, group in groupby(signals, lambda signal: signal.asset):
+                    rating = mean(signal.rating for signal in group)
+                    if rating:
+                        result.append(Signal(key, rating))
+                return result
 
         raise ValueError("unsupported signal filter")

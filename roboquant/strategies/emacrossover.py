@@ -49,11 +49,11 @@ class EMACrossover(Strategy):
             self.price2 = price
             self.step = 0
 
-        def is_above(self):
+        def is_above(self) -> bool:
             """Return True is the first momentum is above the second momentum, False otherwise"""
             return self.price1 > self.price2
 
-        def add_price(self, price: float):
+        def add_price(self, price: float) -> int:
             m1, m2 = self.momentum1, self.momentum2
             self.price1 = m1 * self.price1 + (1.0 - m1) * price
             self.price2 = m2 * self.price2 + (1.0 - m2) * price

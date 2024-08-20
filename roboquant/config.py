@@ -16,7 +16,7 @@ class Config:
         self.config = ConfigParser()
         self.config.read_string(config_string)
 
-    def get(self, key):
+    def get(self, key: str) -> str:
         for key2, value in os.environ.items():
             final_key = key2.lower().replace("_", ".")
             if final_key == key:

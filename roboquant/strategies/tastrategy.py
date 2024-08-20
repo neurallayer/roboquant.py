@@ -20,8 +20,8 @@ class TaStrategy(Strategy):
         self._data: dict[Asset, OHLCVBuffer] = {}
         self.size = size
 
-    def create_signals(self, event):
-        result = []
+    def create_signals(self, event) -> list[Signal]:
+        result: list[Signal] = []
         for item in event.items:
             if isinstance(item, Bar):
                 asset = item.asset

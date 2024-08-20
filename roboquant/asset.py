@@ -9,7 +9,7 @@ from roboquant.monetary import Amount, Currency, USD
 @dataclass(frozen=True, slots=True)
 class Asset(ABC):
     """Abstract baseclass for all types of assets, ranging from stocks to cryptocurrencies.
-    Every asset has always at least a `symbol` and `currency` defined.
+    Every asset has always at least a `symbol` and `currency` defined. Assets are immutable.
     """
 
     symbol: str

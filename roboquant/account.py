@@ -43,6 +43,8 @@ class Account:
     Only the broker updates the account and does this only during its `sync` method.
     """
 
+    __slots__ = "buying_power", "positions", "orders", "last_update", "cash"
+
     def __init__(self, base_currency: Currency = USD):
         self.buying_power: Amount = Amount(base_currency, 0.0)
         self.positions: dict[Asset, Position] = {}
@@ -51,7 +53,7 @@ class Account:
         self.cash: Wallet = Wallet()
 
     @property
-    def base_currency(self):
+    def base_currency(self) -> Currency:
         """Return the base currency of this account"""
         return self.buying_power.currency
 

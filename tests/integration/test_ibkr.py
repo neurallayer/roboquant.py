@@ -37,14 +37,14 @@ class TestIBKR(unittest.TestCase):
         self.assertEqual(asset, account.orders[0].asset)
 
         # Update an order
-        update_order = order.modify(size=5, limit=limit-1)
+        update_order = order.modify(size=5, limit=limit - 1)
         broker.place_orders([update_order])
         time.sleep(5)
         account = broker.sync()
         print(account)
         self.assertEqual(len(account.orders), 1)
         self.assertEqual(account.orders[0].size, Decimal(5))
-        self.assertEqual(account.orders[0].limit, limit-1)
+        self.assertEqual(account.orders[0].limit, limit - 1)
 
         # Cancel an order
         cancel_order = update_order.cancel()
