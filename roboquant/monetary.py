@@ -23,6 +23,9 @@ class Currency(str):
         assert isinstance(other, (float, int))
         return Amount(self, other)
 
+    def __call__(self, other: float | int):
+        return Amount(self, other)
+
 
 # Commonly used currencies
 USD = Currency("USD")
@@ -47,6 +50,10 @@ class CurrencyConverter(ABC):
     def convert(self, amount: "Amount", to_currency: Currency, time: datetime) -> float:
         """Convert the monetary amount into another currency at the provided time."""
         ...
+
+    def register(self):
+        """Register this converter to be used for conversions between amounts"""
+        Amount.register_converter(self)
 
 
 class NoConversion(CurrencyConverter):

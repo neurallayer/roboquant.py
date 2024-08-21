@@ -182,7 +182,7 @@ class SimBroker(Broker):
             reserved += short_value
         return reserved
 
-    def _calculate_buyingpower(self):
+    def _calculate_buyingpower(self) -> Amount:
         """Calculate buying power, based on:
 
         buying_power = cash - open_orders - short_positions
