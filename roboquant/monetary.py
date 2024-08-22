@@ -165,12 +165,13 @@ class Amount:
         """
         return Wallet(self, other)
 
-    def __matmul__(self, other: Currency) -> float:
-        return self.convert(other, datetime.now(tz=timezone.utc))
+    def __matmul__(self, other: Currency) -> "Amount":
+        time = datetime.now(tz=timezone.utc)
+        return Amount(other, self.convert_to(other, time))
 
-    def convert(self, currency: Currency, time: datetime) -> float:
-        """Convert this amount to another currency and return that value.
-        If a conversion is required, it will invoke the registered `Amount.converter`.
+    def convert_to(self, currency: Currency, time: datetime) -> float:
+        """Convert this amount to another currency and return the monetary value.
+        If an exchange rate is required, it will invoke the registered `Amount.converter` under the hood.
         """
         if currency == self.currency:
             return self.value
@@ -217,17 +218,18 @@ class Wallet(defaultdict[Currency, float]):
             result[k] -= v
         return result
 
-    def __matmul__(self, other: Currency) -> float:
-        return self.convert(other, datetime.now(tz=timezone.utc))
+    def __matmul__(self, other: Currency) -> Amount:
+        time = datetime.now(tz=timezone.utc)
+        return Amount(other, self.convert_to(other, time))
 
     def deepcopy(self) -> "Wallet":
         result = Wallet()
         result.update(self)
         return result
 
-    def convert(self, currency: Currency, time: datetime) -> float:
+    def convert_to(self, currency: Currency, time: datetime) -> float:
         """convert all the amounts hold in this wallet to a single currency and return the value"""
-        return sum(amount.convert(currency, time) for amount in self.amounts())
+        return sum(amount.convert_to(currency, time) for amount in self.amounts())
 
     def __repr__(self) -> str:
         return " + ".join([f"{a}" for a in self.amounts()])

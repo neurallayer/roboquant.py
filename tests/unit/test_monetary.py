@@ -40,17 +40,20 @@ class TestMonetary(unittest.TestCase):
         now = datetime.now()
         Amount.register_converter(One2OneConversion())
         one_dollar = Amount(USD, 1.0)
-        self.assertEqual(1.0, one_dollar.convert(EUR, now))
+        self.assertEqual(1.0, one_dollar.convert_to(EUR, now))
 
         Amount.register_converter(NoConversion())
-        self.assertRaises(NotImplementedError, lambda: one_dollar.convert(EUR, now))
+        self.assertRaises(NotImplementedError, lambda: one_dollar.convert_to(EUR, now))
 
     def test_static_conversion(self):
         now = datetime.now()
         converter = StaticConversion(USD, {EUR: 0.9, GBP: 0.8, JPY: 150})
         Amount.register_converter(converter)
         amt1 = Amount(GBP, 100.0)
-        self.assertAlmostEqual(112.5, amt1.convert(EUR, now))
+        self.assertAlmostEqual(112.5, amt1.convert_to(EUR, now))
+
+        start = 100@EUR
+        self.assertAlmostEqual(start, 100@EUR@USD@EUR)
 
         Amount.register_converter(NoConversion())
 
@@ -59,10 +62,10 @@ class TestMonetary(unittest.TestCase):
         converter = ECBConversion()
         Amount.register_converter(converter)
         amt1 = Amount(GBP, 100.0)
-        self.assertAlmostEqual(117.8856, amt1.convert(EUR, now), 4)
+        self.assertAlmostEqual(117.8856, amt1.convert_to(EUR, now), 4)
 
         # convert an amount to its own currency
-        self.assertEqual(amt1.value, amt1@amt1.currency)
+        self.assertEqual(amt1.value, (amt1@amt1.currency).value)
 
         Amount.register_converter(NoConversion())
 

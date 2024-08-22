@@ -67,7 +67,7 @@ class Account:
 
     def convert(self, x: Wallet | Amount) -> float:
         """convert a wallet or amount into the base currency of the account"""
-        return x.convert(self.base_currency, self.last_update)
+        return x.convert_to(self.base_currency, self.last_update)
 
     def position_value(self, asset: Asset) -> float:
         """Return position value denoted in the base currency of the account."""
@@ -84,7 +84,7 @@ class Account:
 
     def contract_value(self, asset: Asset, size: Decimal, price: float) -> float:
         """Contract value denoted in the base currency of hte account"""
-        return asset.contract_amount(size, price).convert(self.base_currency, self.last_update)
+        return asset.contract_amount(size, price).convert_to(self.base_currency, self.last_update)
 
     def equity(self) -> Wallet:
         """Return the equity of the account.
