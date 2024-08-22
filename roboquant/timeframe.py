@@ -3,6 +3,11 @@ from datetime import datetime, timedelta, timezone
 from typing import Any
 
 
+def utcnow() -> datetime:
+    """return the current datetime in the UTC timezone"""
+    return datetime.now(timezone.utc)
+
+
 class Timeframe:
     """A timeframe represents a period in time with a specific start- and end-datetime. Timeframes should not be mutated.
 

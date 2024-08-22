@@ -84,7 +84,13 @@ class ECBConversion(CurrencyConverter):
             z.extractall(p)
 
     def exists(self):
+        """True if there is already a downloaded file"""
         self.__file_name.exists()
+
+    @property
+    def currencies(self) -> set[Currency]:
+        """return the set of supported currencies"""
+        return set(self._rates.keys())
 
     def _parse(self):
         with open(self.__file_name, "r", encoding="utf8") as csv_file:
