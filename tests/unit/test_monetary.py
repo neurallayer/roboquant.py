@@ -53,21 +53,19 @@ class TestMonetary(unittest.TestCase):
         self.assertAlmostEqual(112.5, amt1.convert_to(EUR, now))
 
         start = 100@EUR
-        self.assertAlmostEqual(start, 100@EUR@USD@EUR)
+        self.assertAlmostEqual(start.value, (100@EUR@USD@EUR).value)
 
         Amount.register_converter(NoConversion())
 
     def test_ecb_conversion(self):
         now = datetime.fromisoformat("2020-01-01T00:00:00+00:00")
-        converter = ECBConversion()
-        Amount.register_converter(converter)
+        ECBConversion().register()
         amt1 = Amount(GBP, 100.0)
         self.assertAlmostEqual(117.8856, amt1.convert_to(EUR, now), 4)
 
         # convert an amount to its own currency
         self.assertEqual(amt1.value, (amt1@amt1.currency).value)
-
-        Amount.register_converter(NoConversion())
+        NoConversion().register()
 
 
 if __name__ == "__main__":

@@ -200,6 +200,7 @@ class RNNStrategy(FeatureStrategy):
             epochs: The total number of epochs to train the model, default is 10.
             batch_size: The batch size to use, default is 32.
             validation_split: the percentage to use for validation, default is 0.20 (20%).
+            warmup: nuber of warmup steps
             writer: the tensorboard writer to use to log losses, default is None.
         """
         optimizer = optimizer or torch.optim.Adam(self.model.parameters(), lr=0.001)

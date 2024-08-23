@@ -1,5 +1,7 @@
 import io
 import logging
+import os
+from time import time as systemtime
 import zipfile
 from abc import ABC, abstractmethod
 from bisect import bisect_left
@@ -75,17 +77,20 @@ class ECBConversion(CurrencyConverter):
         self._parse()
 
     def _download(self):
-        if self.exists():
-            logging.info("overwriting existing file")
-
+        # logging.info("downloading new ECB exchange rates")
+        print("downloading the latest ECB exchange rates")
         r = requests.get("https://www.ecb.europa.eu/stats/eurofxref/eurofxref-hist.zip", timeout=5)
         with zipfile.ZipFile(io.BytesIO(r.content)) as z:
             p = Path.home() / ".roboquant"
             z.extractall(p)
 
     def exists(self):
-        """True if there is already a downloaded file"""
-        self.__file_name.exists()
+        """True if there is already a recently downloaded file"""
+        if not self.__file_name.exists():
+            return False
+        file_time = os.path.getctime(self.__file_name)
+        local_time = systemtime()
+        return file_time > local_time - 24.0*3600.0
 
     @property
     def currencies(self) -> set[Currency]:

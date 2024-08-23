@@ -39,7 +39,7 @@ class Timeframe:
 
     @classmethod
     def fromisoformat(cls, start: str, end: str, inclusive=False):
-        """Create an instance of Timeframe based on a start- and end-time in isoformat"""
+        """Create an instance of Timeframe based on a start- and end-time in iso-format"""
         s = datetime.fromisoformat(start)
         e = datetime.fromisoformat(end)
         return cls(s, e, inclusive)
@@ -103,9 +103,11 @@ class Timeframe:
         return (1.0 + rate) ** years - 1.0
 
     def split(self, n: int | timedelta | Any) -> list["Timeframe"]:
-        """Split the timeframe in sequential parts and return the resulting list of timeframes.
-        The parameter `n` can be a number, a timedelta instance or other types like relativedelta that support
+        """Split the timeframe in sequential equal parts and return the resulting list of timeframes.
+        The parameter `n` can be a number, a timedelta instance or other types like `relativedelta` that support
         datetime calculations.
+
+        The last returned timeframe can be shorted than the provided timedelta.
         """
 
         period = self.duration / n if isinstance(n, int) else n
