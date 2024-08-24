@@ -131,8 +131,9 @@ class Bar(PriceItem):
 class Event:
     """
     An event represents zero of items of information happening at a certain moment in time.
-    An item can contain any type of information, but the most common use-case are price-items like quotes, trades or bars.
-    Time is always a datetime object with the timezone set at UTC.
+
+    - `Event.time` is a datetime object with the timezone set at UTC.
+    - An item can be any type of object. But the most common use-case are price-items like quotes, trades or bars.
     """
 
     def __init__(self, dt: datetime, items: list[Any]):

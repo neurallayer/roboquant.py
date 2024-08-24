@@ -114,8 +114,8 @@ class IBKRBroker(LiveBroker):
 
     port
        By default, TWS uses socket port 7496 for live sessions and 7497 for paper sessions.
-       IB Gateway by contrast uses 4001 for live sessions and 4002 for paper sessions.
-       However these are just defaults, and can be modified as desired.
+       IB Gateway, by contrast, uses 4001 for live sessions and 4002 for paper sessions.
+       However, these are just defaults, and can be modified as desired.
 
     client_id
         The client id to use to connect to TWS or IB Gateway.
@@ -143,7 +143,7 @@ class IBKRBroker(LiveBroker):
         return cls("127.0.0.1", 7497, client_id)
 
     @classmethod
-    def use_ibgateway(cls, client_id=123):
+    def use_gateway(cls, client_id=123):
         """Return a broker connected to a IB Gateway papertrade instance with its default port (4002) settings"""
         return cls("127.0.0.1", 4002, client_id)
 
@@ -212,7 +212,7 @@ class IBKRBroker(LiveBroker):
                 logger.warning("unknown field name=%s value=%s", name, value)
 
     def _get_contract(self, order: Order) -> Contract:
-        """Map an order to a IBKR contract."""
+        """Map an order to an IBKR contract."""
 
         c = self.contract_mapping.get(order.asset)
 
@@ -229,7 +229,7 @@ class IBKRBroker(LiveBroker):
         return c
 
     def _get_order(self, order: Order) -> IBKROrder:
-        """Map an order to a IBKR order."""
+        """Map an order to an IBKR order."""
         o = IBKROrder()
         o.action = "BUY" if order.is_buy else "SELL"
         o.totalQuantity = abs(order.size)

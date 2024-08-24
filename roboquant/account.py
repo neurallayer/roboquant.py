@@ -83,7 +83,7 @@ class Account:
         return {symbol: position for (symbol, position) in self.positions.items() if position.is_long}
 
     def contract_value(self, asset: Asset, size: Decimal, price: float) -> float:
-        """Contract value denoted in the base currency of hte account"""
+        """Contract value denoted in the base currency of the account"""
         return asset.contract_amount(size, price).convert_to(self.base_currency, self.last_update)
 
     def equity(self) -> Wallet:
@@ -110,11 +110,11 @@ class Account:
 
     def required_buying_power(self, order: Order) -> Amount:
         """Return the amount of buying power required for a certain order. The underlying logic takes into
-        account that a reduction is position size doesn't require buying power.
+        account that a reduction in position size doesn't require buying power.
         """
         pos_size = self.get_position_size(order.asset)
 
-        # only additional required if remaining order size would increase position size
+        # only buying power required if the remaining order size increases the position size
         if abs(pos_size + order.remaining) > abs(pos_size):
             return order.asset.contract_amount(abs(order.remaining), order.limit)
 
