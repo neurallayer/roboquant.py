@@ -1,16 +1,23 @@
 # %%
-from roboquant.monetary import EUR, USD, JPY, ECBConversion
+from roboquant.monetary import EUR, USD, JPY, ECBConversion, Amount
 from datetime import datetime
 
 # %%
+# Different ways to create Amounts and add them to a wallet
 wallet = 20@EUR + 10@USD + 1000@JPY + 10@USD
+wallet += EUR(10.0)
+wallet += Amount(EUR, 10)
 print("The wallet contains", wallet)
 
 # %%
+# Install a currency converter
 ECBConversion().register()
-print("The wallet is", wallet@EUR)
-print("The wallet is", wallet@USD)
 
+# Convert a wallet to a single currency
+print("The total value of the wallet today is", wallet@EUR)
+print("The total value of the wallet today is", wallet@USD)
+
+# Convert amounts
 print("100@USD =", 100@USD@JPY)
 # %%
 dt1 = datetime.fromisoformat("2010-01-01-00:00:00+00:00")

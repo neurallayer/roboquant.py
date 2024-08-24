@@ -1,7 +1,7 @@
 import io
 import logging
 import os
-from time import time as systemtime
+from time import time as stime
 import zipfile
 from abc import ABC, abstractmethod
 from bisect import bisect_left
@@ -66,31 +66,29 @@ class NoConversion(CurrencyConverter):
 
 
 class ECBConversion(CurrencyConverter):
-    """Currency that gets it exchange rates from the European Central Bank"""
+    """Currency that gets it exchange rates from the ECB (European Central Bank)."""
 
     __file_name = Path.home() / ".roboquant" / "eurofxref-hist.csv"
 
     def __init__(self):
-        self._rates: Dict[Currency, List[Any]] = {EUR: [(datetime.fromisoformat("2000-01-01T15:00:00+00:00"), 1.0)]}
+        self._rates: Dict[Currency, List[Any]] = {}
         if not self.exists():
             self._download()
         self._parse()
 
     def _download(self):
-        # logging.info("downloading new ECB exchange rates")
-        print("downloading the latest ECB exchange rates")
-        r = requests.get("https://www.ecb.europa.eu/stats/eurofxref/eurofxref-hist.zip", timeout=5)
+        logging.info("downloading the latest ECB exchange rates")
+        r = requests.get("https://www.ecb.europa.eu/stats/eurofxref/eurofxref-hist.zip", timeout=10)
         with zipfile.ZipFile(io.BytesIO(r.content)) as z:
             p = Path.home() / ".roboquant"
             z.extractall(p)
 
     def exists(self):
-        """True if there is already a recently downloaded file"""
+        """True if there is already a recently (< 12 hours) downloaded file"""
         if not self.__file_name.exists():
             return False
-        file_time = os.path.getctime(self.__file_name)
-        local_time = systemtime()
-        return file_time > local_time - 24.0*3600.0
+        diff = stime() - os.path.getctime(self.__file_name)
+        return diff < 12.0 * 3600.0
 
     @property
     def currencies(self) -> set[Currency]:
@@ -98,6 +96,7 @@ class ECBConversion(CurrencyConverter):
         return set(self._rates.keys())
 
     def _parse(self):
+        self._rates = {EUR: [(datetime.fromisoformat("2000-01-01T15:00:00+00:00"), 1.0)]}
         with open(self.__file_name, "r", encoding="utf8") as csv_file:
             csv_reader = reader(csv_file)
             header = next(csv_reader)[1:]
