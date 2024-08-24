@@ -219,10 +219,10 @@ class FlexTrader(Trader):
 
         return orders
 
-    def _get_orders(self, asset: Asset, size: Decimal, item: PriceItem, signal: Signal, time: datetime) -> list[Order]:
+    def _get_orders(self, asset: Asset, size: Decimal, item: PriceItem, signal: Signal, dt: datetime) -> list[Order]:
         # pylint: disable=unused-argument
         """Return zero or more orders for the provided symbol and size."""
-        gtd = None if not self.valid_for else time + self.valid_for
+        gtd = None if not self.valid_for else dt + self.valid_for
         return [Order(asset, size, item.price(), gtd)]
 
     def __str__(self) -> str:

@@ -45,8 +45,8 @@ class Order:
         result.size = Decimal(0)
         return result
 
-    def is_expired(self, time: datetime) -> bool:
-        return time > self.gtd if self.gtd else False
+    def is_expired(self, dt: datetime) -> bool:
+        return dt > self.gtd if self.gtd else False
 
     def modify(self, size: Decimal | str | int | float | None = None, limit: float | None = None) -> "Order":
         """Create an update-order. You can update the size and/or limit of an order. The returned order has the same id

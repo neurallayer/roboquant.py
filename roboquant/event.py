@@ -135,15 +135,15 @@ class Event:
     Time is always a datetime object with the timezone set at UTC.
     """
 
-    def __init__(self, time: datetime, items: list[Any]):
-        assert time.tzname() == "UTC", "event with non UTC timezone"
-        self.time = time
+    def __init__(self, dt: datetime, items: list[Any]):
+        assert dt.tzname() == "UTC", "event with non UTC timezone"
+        self.time: datetime = dt
         self.items: list[Any] = items
 
     @staticmethod
-    def empty(time: datetime):
+    def empty(dt: datetime):
         """Return a new empty event at the provided time"""
-        return Event(time, [])
+        return Event(dt, [])
 
     def is_empty(self) -> bool:
         """return True if this is an empty event without any items, False otherwise"""

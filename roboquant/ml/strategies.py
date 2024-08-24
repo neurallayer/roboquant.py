@@ -40,7 +40,7 @@ class FeatureStrategy(Strategy):
         return []
 
     @abstractmethod
-    def predict(self, x: NDArray, time: datetime) -> list[Signal]:
+    def predict(self, x: NDArray, dt: datetime) -> list[Signal]:
         ...
 
 
@@ -116,7 +116,7 @@ class RNNStrategy(FeatureStrategy):
         self.sell_pct = sell_pct
         self.asset = asset
 
-    def predict(self, x, time) -> list[Signal]:
+    def predict(self, x, dt) -> list[Signal]:
         x = torch.asarray(x)
         x = torch.unsqueeze(x, dim=0)  # add the batch dimension
 
@@ -129,7 +129,7 @@ class RNNStrategy(FeatureStrategy):
             else:
                 p = output.item()
 
-            logger.info("prediction p=%s time=%s", p, time)
+            logger.info("prediction p=%s time=%s", p, dt)
             if p >= self.buy_pct:
                 return [Signal.buy(self.asset)]
             if p <= self.sell_pct:

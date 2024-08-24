@@ -1,7 +1,7 @@
 import io
 import logging
 import os
-from time import time as stime
+from time import time
 import zipfile
 from abc import ABC, abstractmethod
 from bisect import bisect_left
@@ -49,7 +49,7 @@ class CurrencyConverter(ABC):
     """Abstract base class for currency converters"""
 
     @abstractmethod
-    def convert(self, amount: "Amount", to_currency: Currency, time: datetime) -> float:
+    def convert(self, amount: "Amount", to_currency: Currency, dt: datetime) -> float:
         """Convert the monetary amount into another currency at the provided time."""
         ...
 
@@ -61,7 +61,7 @@ class CurrencyConverter(ABC):
 class NoConversion(CurrencyConverter):
     """The default currency converter that doesn't convert between currencies"""
 
-    def convert(self, amount: "Amount", to_currency: Currency, time: datetime) -> float:
+    def convert(self, amount: "Amount", to_currency: Currency, dt: datetime) -> float:
         raise NotImplementedError("The default NoConversion doesn't support any conversions")
 
 
@@ -87,7 +87,7 @@ class ECBConversion(CurrencyConverter):
         """True if there is already a recently (< 12 hours) downloaded file"""
         if not self.__file_name.exists():
             return False
-        diff = stime() - os.path.getctime(self.__file_name)
+        diff = time() - os.path.getctime(self.__file_name)
         return diff < 12.0 * 3600.0
 
     @property
@@ -117,14 +117,14 @@ class ECBConversion(CurrencyConverter):
         for v in self._rates.values():
             v.reverse()
 
-    def _get_rate(self, currency: Currency, time: datetime) -> float:
+    def _get_rate(self, currency: Currency, dt: datetime) -> float:
         rates = self._rates[currency]
-        idx = bisect_left(rates, time, key=lambda r: r[0])
+        idx = bisect_left(rates, dt, key=lambda r: r[0])
         idx = min(idx, len(rates) - 1)
         return rates[idx][1]
 
-    def convert(self, amount: "Amount", to_currency: Currency, time: datetime) -> float:
-        return amount.value * self._get_rate(to_currency, time) / self._get_rate(amount.currency, time)
+    def convert(self, amount: "Amount", to_currency: Currency, dt: datetime) -> float:
+        return amount.value * self._get_rate(to_currency, dt) / self._get_rate(amount.currency, dt)
 
 
 class StaticConversion(CurrencyConverter):
@@ -138,7 +138,7 @@ class StaticConversion(CurrencyConverter):
         self.rates = rates
         self.rates[base_currency] = 1.0
 
-    def convert(self, amount: "Amount", to_currency: Currency, time: datetime) -> float:
+    def convert(self, amount: "Amount", to_currency: Currency, dt: datetime) -> float:
         return amount.value * self.rates[to_currency] / self.rates[amount.currency]
 
 
@@ -146,7 +146,7 @@ class One2OneConversion(CurrencyConverter):
     """Currency converter that always converts 1 to 1 between currencies.
     So for example, 1 USD equals 1 EUR equals 1 GPB"""
 
-    def convert(self, amount: "Amount", to_currency: str, time: datetime) -> float:
+    def convert(self, amount: "Amount", to_currency: str, dt: datetime) -> float:
         return amount.value
 
 
@@ -176,10 +176,10 @@ class Amount:
         return Wallet(self, other)
 
     def __matmul__(self, other: Currency) -> "Amount":
-        time = datetime.now(tz=timezone.utc)
-        return Amount(other, self.convert_to(other, time))
+        dt = datetime.now(tz=timezone.utc)
+        return Amount(other, self.convert_to(other, dt))
 
-    def convert_to(self, currency: Currency, time: datetime) -> float:
+    def convert_to(self, currency: Currency, dt: datetime) -> float:
         """Convert this amount to another currency and return the monetary value.
         If an exchange rate is required, it will invoke the registered `Amount.converter` under the hood.
         """
@@ -188,7 +188,7 @@ class Amount:
         if self.value == 0.0:
             return 0.0
 
-        return Amount.__converter.convert(self, currency, time)
+        return Amount.__converter.convert(self, currency, dt)
 
     def __repr__(self) -> str:
         return f"{self.value:,.2f}@{self.currency}"
@@ -229,17 +229,17 @@ class Wallet(defaultdict[Currency, float]):
         return result
 
     def __matmul__(self, other: Currency) -> Amount:
-        time = datetime.now(tz=timezone.utc)
-        return Amount(other, self.convert_to(other, time))
+        dt = datetime.now(tz=timezone.utc)
+        return Amount(other, self.convert_to(other, dt))
 
     def deepcopy(self) -> "Wallet":
         result = Wallet()
         result.update(self)
         return result
 
-    def convert_to(self, currency: Currency, time: datetime) -> float:
+    def convert_to(self, currency: Currency, dt: datetime) -> float:
         """convert all the amounts hold in this wallet to a single currency and return the value"""
-        return sum(amount.convert_to(currency, time) for amount in self.amounts())
+        return sum(amount.convert_to(currency, dt) for amount in self.amounts())
 
     def __repr__(self) -> str:
         return " + ".join([f"{a}" for a in self.amounts()])

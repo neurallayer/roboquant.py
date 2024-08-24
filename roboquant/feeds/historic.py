@@ -20,7 +20,7 @@ class HistoricFeed(Feed, ABC):
         self.__modified = False
         self.__assets: set[Asset] = set()
 
-    def _add_item(self, time: datetime, item: PriceItem):
+    def _add_item(self, dt: datetime, item: PriceItem):
         """Add a price-item at a moment in time to this feed.
         Subclasses should invoke this method to populate the historic-feed.
 
@@ -30,10 +30,10 @@ class HistoricFeed(Feed, ABC):
 
         self.__modified = True
 
-        if time not in self.__data:
-            self.__data[time] = [item]
+        if dt not in self.__data:
+            self.__data[dt] = [item]
         else:
-            items = self.__data[time]
+            items = self.__data[dt]
             items.append(item)
 
     def assets(self) -> list[Asset]:
