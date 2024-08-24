@@ -1,9 +1,8 @@
 """
-The `roboquant` package contains the `run` method and the shared classes between components like
-`Account`, `Asset` and `Event`.
+The `roboquant` package contains the `run` method and shared classes like `Account`, `Asset` and `Event`.
 """
 
-__version__ = "0.9.2"
+__version__ = "0.9.3"
 
 import logging
 
