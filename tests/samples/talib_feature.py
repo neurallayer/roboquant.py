@@ -5,6 +5,8 @@ from roboquant.asset import Asset
 from roboquant.ml.features import TaFeature
 from roboquant.strategies.buffer import OHLCVBuffer
 
+# pylint: disable=no-member
+
 
 # %%
 class RSIFeature(TaFeature):

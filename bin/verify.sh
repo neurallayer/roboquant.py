@@ -5,7 +5,7 @@ source .venv/bin/activate
 
 # QA
 flake8 || exit 1
-pylint roboquant tests samples || exit 1
+pylint roboquant tests || exit 1
 python -m unittest discover -s tests/unit || exit 1
 
 echo "All tests passed"

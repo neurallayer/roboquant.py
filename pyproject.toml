@@ -10,14 +10,10 @@ testpaths = [
 
 [tool.pyright]
 reportOptionalOperand = "none"
-# exclude = ["samples/*.py", "scratch/*.py"]
-
-[tool.pylint.MASTER]
-ignore-paths = 'samples'
 
 [tool.pylint.'MESSAGES CONTROL']
 max-line-length = 127
-disable = "too-few-public-methods,missing-module-docstring,missing-class-docstring,missing-function-docstring,unnecessary-ellipsis"
+disable = "too-few-public-methods,missing-module-docstring,missing-class-docstring,missing-function-docstring,unnecessary-ellipsis,invalid-name"
 max-args = 15
 max-locals = 20
 max-attributes = 10

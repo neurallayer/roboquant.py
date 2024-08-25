@@ -1,6 +1,6 @@
 # %%
-from roboquant.monetary import EUR, USD, JPY, ECBConversion, Amount
 from datetime import datetime
+from roboquant.monetary import EUR, USD, JPY, ECBConversion, Amount
 
 # %%
 # Different ways to create Amounts and add them to a wallet

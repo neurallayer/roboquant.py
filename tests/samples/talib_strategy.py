@@ -4,12 +4,15 @@ import roboquant as rq
 from roboquant.signal import Signal
 from roboquant.strategies import OHLCVBuffer, TaStrategy
 
+# pylint: disable=no-member
+
 
 # %%
 class MyStrategy(TaStrategy):
     """Example using talib to create a combined RSI/BollingerBand strategy"""
 
     def process_asset(self, asset: rq.Asset, ohlcv: OHLCVBuffer):
+
         close = ohlcv.close()
 
         rsi = ta.RSI(close, timeperiod=self.size - 1)  # type: ignore
