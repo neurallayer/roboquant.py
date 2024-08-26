@@ -76,11 +76,11 @@ class Account:
 
     def short_positions(self) -> dict[Asset, Position]:
         """Return al the short positions in the account"""
-        return {symbol: position for (symbol, position) in self.positions.items() if position.is_short}
+        return {asset: position for (asset, position) in self.positions.items() if position.is_short}
 
     def long_positions(self) -> dict[Asset, Position]:
         """Return al the long positions in the account"""
-        return {symbol: position for (symbol, position) in self.positions.items() if position.is_long}
+        return {asset: position for (asset, position) in self.positions.items() if position.is_long}
 
     def contract_value(self, asset: Asset, size: Decimal, price: float) -> float:
         """Contract value denoted in the base currency of the account"""

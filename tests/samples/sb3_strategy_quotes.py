@@ -5,7 +5,6 @@ from roboquant.alpaca.feed import AlpacaHistoricStockFeed
 from roboquant.asset import Stock
 from roboquant.ml.features import EquityFeature, QuoteFeature
 from roboquant.ml.rl import TradingEnv, SB3PolicyStrategy
-from roboquant.feeds.parquet import ParquetFeed
 from roboquant.timeframe import Timeframe
 
 # %%
@@ -17,12 +16,8 @@ end = "2024-05-02T00:00:00Z"
 assert start < border < end
 
 # %%
-feed = ParquetFeed("/tmp/jpm.parquet")
-if not feed.exists():
-    inputFeed = AlpacaHistoricStockFeed()
-    inputFeed.retrieve_quotes(asset.symbol, start=start, end=end)
-    feed.record(inputFeed)
-
+feed = AlpacaHistoricStockFeed()
+feed.retrieve_quotes(asset.symbol, start=start, end=end)
 print("feed timeframe=", feed.timeframe())
 
 obs_feature = QuoteFeature(asset).returns().normalize(20)

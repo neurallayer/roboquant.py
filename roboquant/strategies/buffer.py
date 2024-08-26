@@ -87,8 +87,8 @@ class OHLCVBuffers(UserDict[Asset, OHLCVBuffer]):
         self.size = size
 
     def add_event(self, event: Event) -> set[Asset]:
-        """Add a new event and return all the symbols that have been added and are ready to be processed"""
-        symbols: set[Asset] = set()
+        """Add a new event and return all the assets that have been added and are ready to be processed"""
+        assets: set[Asset] = set()
         for item in event.items:
             if isinstance(item, Bar):
                 asset = item.asset
@@ -97,8 +97,8 @@ class OHLCVBuffers(UserDict[Asset, OHLCVBuffer]):
                 ohlcv = self[asset]
                 ohlcv.append(item.ohlcv)
                 if ohlcv.is_full():
-                    symbols.add(asset)
-        return symbols
+                    assets.add(asset)
+        return assets
 
     def ready(self):
-        return {symbol for symbol, ohlcv in self.items() if ohlcv.is_full()}
+        return {asset for asset, ohlcv in self.items() if ohlcv.is_full()}

@@ -55,7 +55,7 @@ class _Context:
         if logger.isEnabledFor(logging.INFO):
             extra = " ".join(f"{k}={v}" for k, v in kwargs.items())
             logger.info(
-                "Discarded signal because %s [symbol=%s rating=%s type=%s position=%s %s]",
+                "Discarded signal because %s [asset=%s rating=%s type=%s position=%s %s]",
                 rule,
                 self.signal.asset,
                 self.signal.rating,
@@ -67,11 +67,11 @@ class _Context:
 
 class FlexTrader(Trader):
     """Implementation of a Trader that has configurable rules to modify which signals are converted into orders.
-    This implementation will not generate orders if there is not a price in the event for the underlying symbol.
+    This implementation will not generate orders if there is not a price in the event for the underlying asset.
 
     The configurable parameters include:
 
-    - one_order_only: don't create new orders for a symbol if there is already an open orders for that same symbol
+    - one_order_only: don't create new orders for a asset if there is already an open orders for that same asset
     - size_fractions: enable fractional order sizes (if size_fractions is larger than 0), default is 0
     - safety_margin_perc: the safety margin as percentage of equity that should remain available (to avoid margin calls),
     default is 0.05 (5%)
@@ -221,7 +221,7 @@ class FlexTrader(Trader):
 
     def _get_orders(self, asset: Asset, size: Decimal, item: PriceItem, signal: Signal, dt: datetime) -> list[Order]:
         # pylint: disable=unused-argument
-        """Return zero or more orders for the provided symbol and size."""
+        """Return zero or more orders for the provided asset and size."""
         gtd = None if not self.valid_for else dt + self.valid_for
         return [Order(asset, size, item.price(), gtd)]
 

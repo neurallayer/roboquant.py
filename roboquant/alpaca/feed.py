@@ -45,6 +45,11 @@ def _get_asset(symbol: str, asset_class: AssetClass) -> Asset:
             return Option(symbol)
 
 
+def _assert_keys(api_key, secret_key):
+    assert api_key, "no api key provided or found"
+    assert secret_key, "no secret key provided or found"
+
+
 class AlpacaLiveFeed(LiveFeed):
     """Subscribe to live market data for stocks, cryptocurrencies or options"""
 
@@ -55,6 +60,7 @@ class AlpacaLiveFeed(LiveFeed):
         config = Config()
         api_key = api_key or config.get("alpaca.public.key")
         secret_key = secret_key or config.get("alpaca.secret.key")
+        _assert_keys(api_key, secret_key)
         self.market = market
 
         match market:
@@ -153,6 +159,7 @@ class AlpacaHistoricStockFeed(_AlpacaHistoricFeed):
         config = Config()
         api_key = api_key or config.get("alpaca.public.key")
         secret_key = secret_key or config.get("alpaca.secret.key")
+        _assert_keys(api_key, secret_key)
         self.client = StockHistoricalDataClient(api_key, secret_key, url_override=data_api_url)
         self.feed = feed
 
@@ -189,6 +196,7 @@ class AlpacaHistoricCryptoFeed(_AlpacaHistoricFeed):
         config = Config()
         api_key = api_key or config.get("alpaca.public.key")
         secret_key = secret_key or config.get("alpaca.secret.key")
+        _assert_keys(api_key, secret_key)
         self.client = CryptoHistoricalDataClient(api_key, secret_key, url_override=data_api_url)
 
     def retrieve_bars(self, *symbols, start=None, end=None, resolution: TimeFrame | None = None):

@@ -1,11 +1,10 @@
 # %%
+# pylint: disable=no-member
 import talib.stream as ta
 import roboquant as rq
 from roboquant.asset import Asset
 from roboquant.ml.features import TaFeature
 from roboquant.strategies.buffer import OHLCVBuffer
-
-# pylint: disable=no-member
 
 
 # %%

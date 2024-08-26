@@ -31,10 +31,10 @@ class AlphaBeta(Metric):
     def __get_market_value(self, prices: dict[Asset, float]):
         cnt = 0
         result = 0.0
-        for symbol in prices.keys():
-            if symbol in self.__last_prices:
+        for asset in prices.keys():
+            if asset in self.__last_prices:
                 cnt += 1
-                result += prices[symbol] / self.__last_prices[symbol]
+                result += prices[asset] / self.__last_prices[asset]
         return 1.0 if cnt == 0 else result / cnt
 
     def __update(self, equity, prices):

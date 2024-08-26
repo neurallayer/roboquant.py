@@ -72,7 +72,7 @@ class Feed(ABC):
         thread.start()
         return channel
 
-    def get_ohlcv(self, asset: Asset, timeframe: Timeframe | None = None) -> dict[str, list]:
+    def get_ohlcv(self, asset: Asset, timeframe: Timeframe | None = None) -> dict[str, list[float | datetime]]:
         """Get the OHLCV values for an asset in this feed.
         The returned value is a dict with the keys being "Date", "Open", "High", "Low", "Close", "Volume"
         and the values a list.
@@ -91,7 +91,7 @@ class Feed(ABC):
                 result["Volume"].append(item.ohlcv[4])
         return result
 
-    def print_items(self, timeframe: Timeframe | None = None, timeout: float | None = None):
+    def print_items(self, timeframe: Timeframe | None = None, timeout: float | None = None) -> None:
         """Print the items in a feed to the console.
         This is mostly useful for debugging purposes to see what items a feed generates.
         """
@@ -102,7 +102,7 @@ class Feed(ABC):
             for item in event.items:
                 print("======> ", item)
 
-    def count_events(self, timeframe: Timeframe | None = None, timeout: float | None = None, include_empty=False):
+    def count_events(self, timeframe: Timeframe | None = None, timeout: float | None = None, include_empty=False) -> int:
         """Count the number of events in a feed"""
 
         channel = self.play_background(timeframe)
@@ -112,7 +112,7 @@ class Feed(ABC):
                 events += 1
         return events
 
-    def count_items(self, timeframe: Timeframe | None = None, timeout: float | None = None):
+    def count_items(self, timeframe: Timeframe | None = None, timeout: float | None = None) -> int:
         """Count the number of events in a feed"""
 
         channel = self.play_background(timeframe)
@@ -121,7 +121,11 @@ class Feed(ABC):
             items += len(evt.items)
         return items
 
-    def to_dict(self, *assets: Asset, timeframe: Timeframe | None = None, price_type: str = "DEFAULT"):
+    def to_dict(
+        self, *assets: Asset, timeframe: Timeframe | None = None, price_type: str = "DEFAULT"
+    ) -> dict[str, list[float | None]]:
+        """Return the prices of one or more assets as a dict with the key being the synbol name."""
+
         assert assets, "provide at least 1 asset"
         result = {asset.symbol: [] for asset in assets}
         channel = self.play_background(timeframe)
@@ -131,16 +135,14 @@ class Feed(ABC):
                 result[asset.symbol].append(price)
         return result
 
-    def plot(
-        self, asset: Asset, price_type: str = "DEFAULT", timeframe: Timeframe | None = None, plt: Any = pyplot, **kwargs
-    ):
+    def plot(self, asset: Asset, price_type: str = "DEFAULT", timeframe: Timeframe | None = None, plt: Any = pyplot, **kwargs):
         """
-        Plot the prices of a symbol.
+        Plot the prices of a single asset.
 
         Parameters
         ----------
         asset : Asset
-            The symbol for which to plot prices.
+            The asset for which to plot prices.
         price_type : str, optional
             The type of price to plot, e.g. open, close, high, low. (default is "DEFAULT")
         timeframe : Timeframe or None, optional

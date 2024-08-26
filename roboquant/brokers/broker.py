@@ -46,8 +46,8 @@ def _update_account(account: Account, event: Event | None, price_type: str = "DE
 
     account.last_update = event.time
 
-    for symbol, position in account.positions.items():
-        if price := event.get_price(symbol, price_type):
+    for asset, position in account.positions.items():
+        if price := event.get_price(asset, price_type):
             position.mkt_price = price
 
 
@@ -58,8 +58,8 @@ def _update_positions(account: Account, event: Event | None, price_type: str = "
 
     account.last_update = event.time
 
-    for symbol, position in account.positions.items():
-        if price := event.get_price(symbol, price_type):
+    for asset, position in account.positions.items():
+        if price := event.get_price(asset, price_type):
             position.mkt_price = price
 
 

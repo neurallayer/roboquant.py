@@ -2,10 +2,10 @@
 import roboquant as rq
 
 # %%
-feed = rq.feeds.YahooFeed("JPM", "IBM", "F", start_date="2000-01-01")
+feed = rq.feeds.YahooFeed("JPM", "IBM", "F", start_date="2000-01-01", end_date="2020-01-01")
 
 # %%
-# split the feed timeframe in 4 equal parts
+# split the feed timeframe into 4 parts
 timeframes = feed.timeframe().split(4)
 
 # %%

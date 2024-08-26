@@ -36,6 +36,6 @@ class TaStrategy(Strategy):
     @abstractmethod
     def process_asset(self, asset: Asset, ohlcv: OHLCVBuffer) -> Signal | None:
         """
-        Create zero or more orders for the provided symbol
+        Create zero or more orders for the provided asset
         """
         ...
