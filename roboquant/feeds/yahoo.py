@@ -15,7 +15,7 @@ logger = logging.getLogger(__name__)
 class YahooFeed(HistoricFeed):
     """A feed using the Yahoo Finance API to retrieve historic price data"""
 
-    def __init__(self, *symbols: str, start_date="2010-01-01", end_date: str | None = None, interval="1d"):
+    def __init__(self, *symbols: str, start_date: str = "2010-01-01", end_date: str | None = None, interval="1d"):
         super().__init__()
         warnings.simplefilter(action="ignore", category=FutureWarning)
         warnings.simplefilter(action="ignore", category=DeprecationWarning)
@@ -42,6 +42,8 @@ class YahooFeed(HistoricFeed):
                 self._add_item(dt, b)
 
             logger.info("retrieved symbol=%s items=%s", symbol, len(df))
+
+        self.__update()
 
     @staticmethod
     def __auto_adjust(df):
