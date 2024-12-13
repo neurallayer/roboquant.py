@@ -10,7 +10,7 @@ wallet += Amount(EUR, 10)
 print("The wallet contains", wallet)
 
 # %%
-# Install a currency converter
+# Install the ECB currency converter
 ECBConversion().register()
 
 # Convert a wallet to a single currency

@@ -9,10 +9,10 @@ from roboquant.monetary import Amount, Wallet, USD, Currency
 
 @dataclass(slots=True)
 class Position:
-    """Position of an asset"""
+    """Position of an asset in the account"""
 
     size: Decimal
-    """Position size"""
+    """Position size as a Decimal"""
 
     avg_price: float
     """Average price paid denoted in the currency of the asset"""
@@ -22,10 +22,12 @@ class Position:
 
     @property
     def is_short(self):
+        """Return True is this is a short position, False otherwise"""
         return self.size < 0
 
     @property
     def is_long(self):
+        """Return True is this is a long position, False otherwise"""
         return self.size > 0
 
 

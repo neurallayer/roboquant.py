@@ -12,13 +12,13 @@ from roboquant.monetary import Amount
 class Order:
     """
     A trading order for an asset. Each order has a `size` and a `limit` price.
+    Order with a positive `size` are buy orders and with a negative `size` are sell orders. 
+
     The `gtd` (good till date) is optional and if not set implies the order is valid
-    for ever.
-    
-    The `info` will hold any abritrary properties set on the order.
+    for ever. The `info` will hold any abritrary properties (kwargs) set on the order.
 
     The `id` is automatically assigned by the `Broker` and should not be set manually.
-    Also, the `fill` is managed by the broker and should not be manually set.
+    The same applies to the `fill` property.
     """
 
     asset: Asset

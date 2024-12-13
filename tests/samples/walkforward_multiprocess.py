@@ -1,4 +1,6 @@
 """This example shows how to perform a walk-forward using a multi-process approach.
+This allows you to utlize all the CPU's available on the machine (at the cost of higher memory usage)
+
 Each run is over a certain timeframe and set of parameters for the EMA Crossover strategy.
 """
 
@@ -13,7 +15,7 @@ print(FEED)
 
 
 def _walkforward(params):
-    """Perform a run over the provided timeframe"""
+    """Perform a run over the provided timeframe and EMA parameters"""
     timeframe, (fast, slow) = params 
     strategy = rq.strategies.EMACrossover(fast, slow)
     acc = rq.run(FEED, strategy, timeframe=timeframe)
@@ -22,9 +24,10 @@ def _walkforward(params):
 
 if __name__ == "__main__":
 
-    # Using "fork" ensures that the FEED object is not being created for each process
-    # The pool is created with default number of processes (equals CPU cores available) 
+    # Using "fork" ensures that the FEED object is not being recreated for each process
+    # The pool is created with default number of processes (equal to the number of CPU cores) 
     with get_context("fork").Pool() as p:
+
         # Split overal timeframe into 5 equal non-overlapping timeframes
         timeframes = FEED.timeframe().split(5)
 

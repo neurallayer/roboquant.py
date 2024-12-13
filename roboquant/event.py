@@ -133,7 +133,8 @@ class Event:
     An event represents zero of items of information happening at a certain moment in time.
 
     - `Event.time` is a datetime object with the timezone set at UTC.
-    - An item can be any type of object. But the most common use-case are price-items like quotes, trades or bars.
+    - An item can be any type of object. But the most common use-case are of the type `PriceItem`,
+      like `Quote`, `Trade` or `Bar`.
     """
 
     def __init__(self, dt: datetime, items: list[Any]):
@@ -149,9 +150,6 @@ class Event:
     def is_empty(self) -> bool:
         """return True if this is an empty event without any items, False otherwise"""
         return len(self.items) == 0
-
-    # def __len__(self) -> int:
-    #    return len(self.items)
 
     @cached_property
     def price_items(self) -> dict[Asset, PriceItem]:

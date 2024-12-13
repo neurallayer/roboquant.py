@@ -72,13 +72,13 @@ class NoConversion(CurrencyConverter):
 
 
 class ECBConversion(CurrencyConverter):
-    """Currency that gets it exchange rates from the ECB (European Central Bank)."""
+    """CurrencyConverter that gets it exchange rates from the ECB (European Central Bank)."""
 
     __file_name = Path.home() / ".roboquant" / "eurofxref-hist.csv"
 
-    def __init__(self):
+    def __init__(self, force_download=False):
         self._rates: Dict[Currency, List[Any]] = {}
-        if not self.exists():
+        if force_download or not self.up_to_date():
             self._download()
         self._parse()
 
@@ -89,7 +89,7 @@ class ECBConversion(CurrencyConverter):
             p = Path.home() / ".roboquant"
             z.extractall(p)
 
-    def exists(self):
+    def up_to_date(self):
         """True if there is already a recently (< 12 hours) downloaded file"""
         if not self.__file_name.exists():
             return False
@@ -158,7 +158,7 @@ class One2OneConversion(CurrencyConverter):
 
 @dataclass(frozen=True, slots=True)
 class Amount:
-    """A monetary value denoted in a single currency. Amounts are immutable"""
+    """A monetary value denoted in a single `Currency`. Amounts are immutable"""
 
     currency: Currency
     value: float
@@ -177,7 +177,7 @@ class Amount:
 
     def __add__(self, other: "Amount") -> "Wallet":
         """Add another amount to this amount.
-        This will always return a wallet, even if both amounts have the same currency.
+        This will always return a wallet, even if both amounts are denoted in the same currency.
         """
         return Wallet(self, other)
 
