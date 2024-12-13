@@ -16,16 +16,17 @@ print(FEED)
 
 def _walkforward(params):
     """Perform a run over the provided timeframe and EMA parameters"""
-    timeframe, (fast, slow) = params 
+    timeframe, (fast, slow) = params
     strategy = rq.strategies.EMACrossover(fast, slow)
     acc = rq.run(FEED, strategy, timeframe=timeframe)
     print(f"{timeframe} EMA({fast:2},{slow:2}) ==> {acc.equity()}")
     return acc.equity_value()
 
+
 if __name__ == "__main__":
 
     # Using "fork" ensures that the FEED object is not being recreated for each process
-    # The pool is created with default number of processes (equal to the number of CPU cores) 
+    # The pool is created with default number of processes (equal to the number of CPU cores)
     with get_context("fork").Pool() as p:
 
         # Split overal timeframe into 5 equal non-overlapping timeframes
@@ -33,12 +34,11 @@ if __name__ == "__main__":
 
         # Test the following combinations of parameters for EMACrossover strategy
         ema_params = [(3, 5), (5, 7), (10, 15), (15, 21)]
-        params = product(timeframes, ema_params)
+        all_params = product(timeframes, ema_params)
 
         # run the back tests in parallel
-        equities = p.map(_walkforward, params)
+        equities = p.map(_walkforward, all_params)
 
         # print some result
         print("max equity =>", max(equities))
         print("min equity =>", min(equities))
-
