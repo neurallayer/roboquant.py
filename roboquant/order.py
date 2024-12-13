@@ -12,7 +12,7 @@ from roboquant.monetary import Amount
 class Order:
     """
     A trading order for an asset. Each order has a `size` and a `limit` price.
-    Order with a positive `size` are buy orders and with a negative `size` are sell orders. 
+    Order with a positive `size` are buy orders and with a negative `size` are sell orders.
 
     The `gtd` (good till date) is optional and if not set implies the order is valid
     for ever. The `info` will hold any abritrary properties (kwargs) set on the order.
