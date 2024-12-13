@@ -64,6 +64,7 @@ class CSVFeed(HistoricFeed):
         files = self._get_files(path)
         logger.info("located %s files in path %s", len(files), path)
         self._parse_csvfiles(files)  # type: ignore
+        self._update()
 
     def _get_files(self, path):
         if pathlib.Path(path).is_file():

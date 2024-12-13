@@ -38,12 +38,12 @@ class HistoricFeed(Feed, ABC):
 
     def assets(self) -> list[Asset]:
         """Return the list of unique symbols available in this feed"""
-        self.__update()
+        self._update()
         return list(self.__assets)
 
     def timeline(self) -> list[datetime]:
         """Return the timeline of this feed as a list of datatime objects"""
-        self.__update()
+        self._update()
         return list(self.__data.keys())
 
     def timeframe(self):
@@ -54,7 +54,7 @@ class HistoricFeed(Feed, ABC):
 
         return Timeframe.EMPTY
 
-    def __update(self):
+    def _update(self):
         if self.__modified:
             self.__data = dict(sorted(self.__data.items()))
             price_items = chain.from_iterable(self.__data.values())
@@ -62,7 +62,7 @@ class HistoricFeed(Feed, ABC):
             self.__modified = False
 
     def play(self, channel: EventChannel):
-        self.__update()
+        self._update()
         for k, v in self.__data.items():
             evt = Event(k, v)
             channel.put(evt)

@@ -43,7 +43,7 @@ class YahooFeed(HistoricFeed):
 
             logger.info("retrieved symbol=%s items=%s", symbol, len(df))
 
-        self.__update()
+        self._update()
 
     @staticmethod
     def __auto_adjust(df):

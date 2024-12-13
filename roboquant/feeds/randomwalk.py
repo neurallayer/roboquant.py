@@ -51,6 +51,7 @@ class RandomWalk(HistoricFeed):
             for i in range(n_prices):
                 item = item_gen(asset, prices[i], volume, spread_dev)
                 self._add_item(timeline[i], item)
+        self._update()
 
     @staticmethod
     def __get_trade(symbol, price, volume, _):
