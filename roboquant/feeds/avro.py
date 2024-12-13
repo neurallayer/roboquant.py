@@ -16,6 +16,9 @@ logger = logging.getLogger(__name__)
 
 
 class AvroFeed(Feed):
+    """Feed that uses Avro files to store historic prices. Supports Quotes, Trades and Bars.
+    Besides play back, there is also recording functionality to transfer another feed into an AvroFeed.
+    """
 
     _schema = {
         "namespace": "org.roboquant.avro.schema",

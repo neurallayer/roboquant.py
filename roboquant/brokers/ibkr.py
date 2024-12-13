@@ -51,7 +51,8 @@ class _IBApi(EWrapper, EClient):
     def position(self, account: str, contract: Contract, position: Decimal, avgCost: float):
         logger.debug("position=%s symbol=%s  avgCost=%s", position, contract.localSymbol, avgCost)
         symbol = contract.localSymbol or contract.symbol
-        asset = Stock(symbol, contract.currency)
+        currency = Currency(contract.currency)
+        asset = Stock(symbol, currency)
         old_position = self.positions.get(asset)
         mkt_price = old_position.mkt_price if old_position else avgCost
         self.positions[asset] = Position(position, avgCost, mkt_price)
@@ -75,7 +76,8 @@ class _IBApi(EWrapper, EClient):
         )
         size = order.totalQuantity if order.action == "BUY" else -order.totalQuantity
         symbol = contract.localSymbol
-        asset = Stock(symbol, contract.currency)
+        currency = Currency(contract.currency)
+        asset = Stock(symbol, currency)
         rq_order = Order(asset, size, order.lmtPrice)
         rq_order.id = str(orderId)
         # rq_order.created_at = datetime.fromisoformat(order.activeStartTime)

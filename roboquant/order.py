@@ -11,9 +11,14 @@ from roboquant.monetary import Amount
 @dataclass(slots=True)
 class Order:
     """
-    A trading order for an asset.
-    The `id` is automatically assigned by the broker and should not be set manually.
-    Also, the `fill` are managed by the broker and should not be manually set.
+    A trading order for an asset. Each order has a `size` and a `limit` price.
+    The `gtd` (good till date) is optional and if not set implies the order is valid
+    for ever.
+    
+    The `info` will hold any abritrary properties set on the order.
+
+    The `id` is automatically assigned by the `Broker` and should not be set manually.
+    Also, the `fill` is managed by the broker and should not be manually set.
     """
 
     asset: Asset
@@ -46,6 +51,7 @@ class Order:
         return result
 
     def is_expired(self, dt: datetime) -> bool:
+        """Return True of this order has expired, False otherwise"""
         return dt > self.gtd if self.gtd else False
 
     def modify(self, size: Decimal | str | int | float | None = None, limit: float | None = None) -> "Order":
@@ -70,9 +76,11 @@ class Order:
         return result
 
     def value(self) -> float:
+        """Return the total value of this order"""
         return self.asset.contract_value(self.size, self.limit)
 
     def amount(self) -> Amount:
+        """Return the total vlaue of this order as an Amount"""
         return Amount(self.asset.currency, self.value())
 
     @property

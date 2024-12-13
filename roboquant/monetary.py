@@ -19,7 +19,13 @@ logger = logging.getLogger(__name__)
 
 
 class Currency(str):
-    """Currency class represents a monetary currency and is s subclass of `str`"""
+    """Currency class represents a monetary currency and is a subclass of `str`.
+
+    It is possible to create an `Amount` using a combination of `number` and `Currency`:
+
+        amount1 = 100@USD
+        amount2 = 200.50@EUR
+    """
 
     def __rmatmul__(self, other: float | int):
         assert isinstance(other, (float, int))

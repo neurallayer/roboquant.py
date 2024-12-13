@@ -8,7 +8,7 @@ from roboquant.strategies.strategy import Strategy
 
 
 class MultiStrategy(Strategy):
-    """Combine one or more signal strategies. The MultiStrategy provides additional control on how to handle conflicting
+    """Combine one or more strategies. The MultiStrategy provides additional control on how to handle conflicting
     signals for the same asset via the signal_filter:
 
     - first: in case of multiple signals for the same asset, the first one wins
@@ -20,11 +20,11 @@ class MultiStrategy(Strategy):
     def __init__(
         self,
         *strategies: Strategy,
-        order_filter: Literal["last", "first", "none", "mean"] = "none"
+        signal_filter: Literal["last", "first", "none", "mean"] = "none"
     ):
         super().__init__()
         self.strategies = list(strategies)
-        self.filter = order_filter
+        self.filter = signal_filter
 
     def create_signals(self, event: Event) -> list[Signal]:
         signals: list[Signal] = []
