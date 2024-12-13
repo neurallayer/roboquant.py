@@ -1,16 +1,16 @@
 # Core 
 numpy~=1.26.4
-websocket-client~=1.7.0
+websocket-client~=1.8.0
 requests>=2.32.0
 
 # Part of optional 
-yfinance~=0.2.41
-torch>=2.3.0
+yfinance~=0.2.50
+torch>=2.5.0
 tensorboard>=2.15.2
 nautilus-ibapi~=10.19.2
 alpaca-py~=0.28.1
-stable-baselines3[extra_no_roms]~=2.3.2
-sb3-contrib~=2.3.0
+stable-baselines3[extra_no_roms]~=2.4.0
+sb3-contrib~=2.4.0
 gymnasium~=0.29.1
 fastavro~=1.9.4
 pyarrow~=16.1.0

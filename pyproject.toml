@@ -51,7 +51,7 @@ classifiers = [
 keywords = ["trading", "machine learning", "AI", "investment", "finance", "crypto", "stocks", "exchange", "forex"]
 dependencies = [
   "numpy>=1.26.4",
-  "websocket-client~=1.7.0",
+  "websocket-client~=1.8.0",
   "requests>=2.32.0",
 ]
 
@@ -59,8 +59,8 @@ dependencies = [
 version = {attr = "roboquant.__version__"}
 
 [project.optional-dependencies]
-torch = ["torch>=2.3.0", "tensorboard>=2.15.2", "stable-baselines3[extra_no_roms]>=2.3.2", "sb3-contrib>=2.3.0"]
-yahoo = ["yfinance~=0.2.38"]
+torch = ["torch>=2.5.0", "tensorboard>=2.15.2", "stable-baselines3[extra_no_roms]>=2.3.2", "sb3-contrib>=2.3.0"]
+yahoo = ["yfinance~=0.2.50"]
 ibkr = ["nautilus-ibapi~=10.19.2"]
 alpaca = ["alpaca-py"]
 all = ["roboquant[torch,yahoo,ibkr,alpaca]"]
