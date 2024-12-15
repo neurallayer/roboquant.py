@@ -1,13 +1,6 @@
 [tool.ruff]
 line-length = 127
 
-[tool.pytest.ini_options]
-minversion = "8.0"
-addopts = "-ra -q"
-testpaths = [
-    "tests/unit"
-]
-
 [build-system]
 requires = ["hatchling"]
 build-backend = "hatchling.build"
