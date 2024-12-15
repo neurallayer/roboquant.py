@@ -58,6 +58,7 @@ class Asset(ABC):
 
 @dataclass(frozen=True, slots=True)
 class Stock(Asset):
+    """Stock (or equity) asset"""
 
     def serialize(self):
         return "Stock" + ":" + self.symbol + ":" + self.currency
@@ -65,6 +66,7 @@ class Stock(Asset):
 
 @dataclass(frozen=True, slots=True)
 class Crypto(Asset):
+    """Crypto-currency asset"""
 
     symbol: str  # type: ignore
     currency: Currency  # type: ignore
@@ -77,6 +79,8 @@ class Crypto(Asset):
 
 @dataclass(frozen=True, slots=True)
 class Option(Asset):
+    """Option Contract asset"""
+
     multiplier = 100
 
     def contract_value(self, size: Decimal, price: float) -> float:
@@ -84,7 +88,6 @@ class Option(Asset):
 
 
 def __default_deserializer(clazz: Type[Asset]):
-
     __cache: dict[str, Asset] = {}
 
     def _deserialize(value: str) -> Asset:

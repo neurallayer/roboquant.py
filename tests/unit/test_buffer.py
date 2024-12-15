@@ -6,7 +6,6 @@ from roboquant.strategies.buffer import NumpyBuffer
 
 
 class TestBuffer(unittest.TestCase):
-
     def test_buffer(self):
         b = NumpyBuffer(10, 5)
         x = np.arange(100).reshape(20, 5)

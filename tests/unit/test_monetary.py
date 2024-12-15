@@ -1,8 +1,18 @@
 from datetime import datetime
 import unittest
 
-from roboquant.monetary import NoConversion, One2OneConversion, Wallet, Amount, USD, EUR, StaticConversion, GBP, JPY, \
-    ECBConversion
+from roboquant.monetary import (
+    NoConversion,
+    One2OneConversion,
+    Wallet,
+    Amount,
+    USD,
+    EUR,
+    StaticConversion,
+    GBP,
+    JPY,
+    ECBConversion,
+)
 
 
 class TestMonetary(unittest.TestCase):
@@ -12,7 +22,7 @@ class TestMonetary(unittest.TestCase):
         a.value = 100  # type: ignore
 
     def test_currency(self):
-        w = 12@USD + 20@EUR
+        w = 12 @ USD + 20 @ EUR
         self.assertIn(USD, w)
         self.assertIn(USD, w)
         self.assertIn(EUR, w)
@@ -52,19 +62,19 @@ class TestMonetary(unittest.TestCase):
         amt1 = Amount(GBP, 100.0)
         self.assertAlmostEqual(112.5, amt1.convert_to(EUR, now))
 
-        start = 100@EUR
-        self.assertAlmostEqual(start.value, (100@EUR@USD@EUR).value)
+        start = 100 @ EUR
+        self.assertAlmostEqual(start.value, (100 @ EUR @ USD @ EUR).value)
 
         Amount.register_converter(NoConversion())
 
     def test_ecb_conversion(self):
         now = datetime.fromisoformat("2020-01-01T00:00:00+00:00")
-        ECBConversion().register()
+        ECBConversion(force_download=False).register()
         amt1 = Amount(GBP, 100.0)
         self.assertAlmostEqual(117.8856, amt1.convert_to(EUR, now), 4)
 
         # convert an amount to its own currency
-        self.assertEqual(amt1.value, (amt1@amt1.currency).value)
+        self.assertEqual(amt1.value, (amt1 @ amt1.currency).value)
         NoConversion().register()
 
 

@@ -32,7 +32,7 @@
     "python.testing.pytestEnabled": false,
     "python.testing.unittestEnabled": true,
     "[python]": {
-        "editor.defaultFormatter": "ms-python.black-formatter"
+        "editor.defaultFormatter": "charliermarsh.ruff"
     },
     "pylint.ignorePatterns": [
         "*samples/*.py"

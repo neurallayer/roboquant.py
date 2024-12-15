@@ -12,7 +12,7 @@ class TaStrategy(Strategy):
     based on technical indicators using a history of bars/candlesticks.
 
     Subclasses should implement the `process_asset` method. This method is only invoked once
-    there is at least `size` history for an individual asset.
+    there is at least `size` history for an individual asset available.
     """
 
     def __init__(self, size: int) -> None:

@@ -41,10 +41,14 @@ class RandomWalk(HistoricFeed):
         timeline = [start_date + frequency * i for i in range(n_prices)]
 
         match price_type:
-            case "bar": item_gen = self.__get_bar
-            case "trade": item_gen = self.__get_trade
-            case "quote": item_gen = self.__get_quote
-            case _: raise ValueError("unsupported item_type", price_type)
+            case "bar":
+                item_gen = self.__get_bar
+            case "trade":
+                item_gen = self.__get_trade
+            case "quote":
+                item_gen = self.__get_quote
+            case _:
+                raise ValueError("unsupported item_type", price_type)
 
         for asset in assets:
             prices = self.__price_path(rnd, n_prices, price_dev, start_price_min, start_price_max)

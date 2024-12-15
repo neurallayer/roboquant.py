@@ -40,44 +40,45 @@ The core of roboquant limits the number of dependencies.
 But you can install roboquant including one or more of the optional dependencies if you require certain functionality:
 
 ```shell
-# market data from Yahoo Finance using the YahooFeed
-python3 -m pip install --upgrade "roboquant[yahoo]"
-
 # PyTorch based strategies using RNNStrategy
 python3 -m pip install --upgrade "roboquant[torch]"
 
 # Integration with Interactive Brokers using IBKRBroker
 python3 -m pip install --upgrade "roboquant[ibkr]"
 
+# Integration with Alpaca
+python3 -m pip install --upgrade "roboquant[alpaca]"
+
 # Install all dependencies
 python3 -m pip install --upgrade "roboquant[all]"
 ```
 
 ## Building from source
-Although this first step isn't required, it is recommended to create a virtual environment.
-Go to the directory where you have downloaded the source code and run the following commands:
+Roboquant.py uses `uv` as the main tool for handling package dependencies.
+
 
 ```shell
-python3 -m venv .venv
-source .venv/bin/activate
+uv sync
 ```
 
-You should now be in the virtual environment and ready to install the required packages and build/install roboquant:
+You should now be in the virtual environment and ready to build/install roboquant:
 
 ```shell
-pip install -r requirements.txt
-python -m build
-pip install .
+uv build
+uv pip install
 ```
 
 Some other useful commands:
 
 ```shell
 # run the unit tests
-python -m unittest discover -s tests/unit 
+uv run python -m unittest discover -s tests/unit 
 
 # validate the code
-flake8 roboquant tests
+uvx ruff check
+
+# publish, only works if UV_PUBLISH_TOKEN is set
+uv publish 
 ```
 
 ## License

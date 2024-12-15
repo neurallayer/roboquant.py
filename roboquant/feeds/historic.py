@@ -40,6 +40,13 @@ class HistoricFeed(Feed, ABC):
         """Return the list of unique symbols available in this feed"""
         self._update()
         return list(self.__assets)
+    
+    def get_asset(self, symbol: str) -> Asset | None:
+        """Return the first asset that matches the provided symbol name, or None if not found"""
+        try:
+            return next(asset for asset in self.assets() if asset.symbol == symbol)
+        except StopIteration:
+            return None
 
     def timeline(self) -> list[datetime]:
         """Return the timeline of this feed as a list of datatime objects"""
