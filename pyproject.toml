@@ -20,6 +20,7 @@ ignore = ["F401"]
 
 [tool.pyright]
 reportOptionalOperand = "none"
+typeCheckingMode = "standard"
 
 [project]
 name = "roboquant"

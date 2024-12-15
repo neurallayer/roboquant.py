@@ -33,15 +33,5 @@
     "python.testing.unittestEnabled": true,
     "[python]": {
         "editor.defaultFormatter": "charliermarsh.ruff"
-    },
-    "pylint.ignorePatterns": [
-        "*samples/*.py"
-    ],
-    "flake8.ignorePatterns": [
-        "*samples/*.py"
-    ],
-    "python.analysis.exclude": [
-        "**/samples", "**/Interactive*.py"
-    ],
-    "python.analysis.typeCheckingMode": "standard"
+    }
 }
