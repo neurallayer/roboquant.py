@@ -28,7 +28,7 @@ jobs:
       run: uv python install
 
     - name: Install the project
-      run: uv sync --all-extras
+      run: uv sync --all-extras --no-dev
 
     - name: Run ruff checking
       run: uvx ruff check
