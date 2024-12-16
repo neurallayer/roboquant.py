@@ -77,25 +77,15 @@ class Account:
 
     def short_positions(self) -> dict[Asset, Position]:
         """Return al the short positions in the account"""
-        return {
-            asset: position
-            for (asset, position) in self.positions.items()
-            if position.is_short
-        }
+        return {asset: position for (asset, position) in self.positions.items() if position.is_short}
 
     def long_positions(self) -> dict[Asset, Position]:
         """Return al the long positions in the account"""
-        return {
-            asset: position
-            for (asset, position) in self.positions.items()
-            if position.is_long
-        }
+        return {asset: position for (asset, position) in self.positions.items() if position.is_long}
 
     def contract_value(self, asset: Asset, size: Decimal, price: float) -> float:
         """Contract value denoted in the base currency of the account"""
-        return asset.contract_amount(size, price).convert_to(
-            self.base_currency, self.last_update
-        )
+        return asset.contract_amount(size, price).convert_to(self.base_currency, self.last_update)
 
     def equity(self) -> Wallet:
         """Return the equity of the account.
@@ -116,9 +106,7 @@ class Account:
         """
         result = Wallet()
         for asset, position in self.positions.items():
-            result += asset.contract_amount(
-                position.size, position.mkt_price - position.avg_price
-            )
+            result += asset.contract_amount(position.size, position.mkt_price - position.avg_price)
         return result
 
     def required_buying_power(self, order: Order) -> Amount:

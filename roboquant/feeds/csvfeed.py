@@ -15,12 +15,11 @@ logger = logging.getLogger(__name__)
 
 
 class CSVColumn(str, Enum):
-
-    DATE = 'Date'
-    OPEN = 'Open'
-    HIGH = 'High'
-    LOW = 'Low'
-    CLOSE = 'Close'
+    DATE = "Date"
+    OPEN = "Open"
+    HIGH = "High"
+    LOW = "Low"
+    CLOSE = "Close"
     VOLUME = "Volume"
     ADJ_CLOSE = "Adj CLose"
     TIME = "Time"
@@ -46,7 +45,7 @@ class CSVFeed(HistoricFeed):
         date_fmt: str | None = None,
         time_fmt: str | None = None,
         endswith=".csv",
-        frequency=""
+        frequency="",
     ):
         super().__init__()
         columns = columns or ["Date", "Open", "High", "Low", "Close", "Volume", "Adj Close", "Time"]
@@ -155,12 +154,7 @@ class CSVFeed(HistoricFeed):
                     super().__init__(path, columns=columns, has_time_column=True, endswith=".txt")
                 else:
                     super().__init__(
-                        path,
-                        columns=columns,
-                        has_time_column=True,
-                        date_fmt="%Y%m%d",
-                        time_fmt="%H%M%S",
-                        endswith=".txt"
+                        path, columns=columns, has_time_column=True, date_fmt="%Y%m%d", time_fmt="%H%M%S", endswith=".txt"
                     )
 
             def _get_asset(self, filename: str):

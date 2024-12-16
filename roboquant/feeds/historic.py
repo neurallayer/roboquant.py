@@ -27,7 +27,6 @@ class HistoricFeed(Feed, ABC):
         Items added at the same time, will be part of the same event.
         So each unique time will only produce a single event.
         """
-
         self.__modified = True
 
         if dt not in self.__data:
@@ -40,7 +39,7 @@ class HistoricFeed(Feed, ABC):
         """Return the list of unique symbols available in this feed"""
         self._update()
         return list(self.__assets)
-    
+
     def get_asset(self, symbol: str) -> Asset | None:
         """Return the first asset that matches the provided symbol name, or None if not found"""
         try:

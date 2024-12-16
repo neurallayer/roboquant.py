@@ -31,9 +31,7 @@ class AggregatorFeed(Feed):
         self.price_type = price_type
 
     def __aggr_trade2bar(self, evt: Event, bars: dict[Asset, Bar], freq: str):
-
         for item in evt.items:
-
             if self.price_type == "trade" and isinstance(item, Trade):
                 price = item.trade_price
                 volume = item.trade_volume

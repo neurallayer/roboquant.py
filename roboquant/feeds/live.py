@@ -26,6 +26,7 @@ class LiveFeed(Feed):
     def play(self, channel: EventChannel):
         self._channel = channel
         while not channel.is_closed:
+            # change in future for wait/notify
             time.sleep(1)
         self._channel = None
 

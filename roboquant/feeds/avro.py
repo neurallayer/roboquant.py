@@ -72,7 +72,7 @@ class AvroFeed(Feed):
 
                 price_type = str(row["type"])  # type: ignore
                 asset = Asset.deserialize(str(row["asset"]))  # type: ignore
-                match (price_type):
+                match price_type:
                     case "QUOTE":
                         item = Quote(asset, array("f", row["values"]))  # type: ignore
                         items.append(item)

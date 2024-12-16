@@ -50,7 +50,6 @@ class ParquetFeed(Feed):
             prices = batch.column("prices")
             types = batch.column("type")
             for n, a, p, t in zip(times, assets, prices, types):
-
                 if n != last_time:
                     if items:
                         now = last_time.as_py()
