@@ -34,6 +34,6 @@ jobs:
       run: uvx ruff check
 
     - name: Run unit tests
-      run: uv run python -m unittest discover -s tests/unit
+      run: uv run --no-dev python -m unittest discover -s tests/unit
 
   
