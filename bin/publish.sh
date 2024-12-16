@@ -3,7 +3,7 @@
 
 rm -rf ./runs
 
-uv sync --all-extras
+uv sync --all-extras --dev
 
 # QA
 uvx ruff check

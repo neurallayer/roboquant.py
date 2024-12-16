@@ -39,6 +39,7 @@ class EMACrossover(Strategy):
         return result
 
     class _Calculator:
+        """Calculates the EMA crossover"""
 
         __slots__ = "momentum1", "momentum2", "price1", "price2", "step"
 

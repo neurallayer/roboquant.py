@@ -9,7 +9,7 @@ class SignalType(Flag):
 
     - ENTRY: enter/increase a position size
     - EXIT: close/reduce a position size
-    - ENTRY_EXIT: can be used both to increase or decrease position sizes
+    - ENTRY_EXIT: can be used both to increase or reduce position sizes
     """
 
     ENTRY = auto()
@@ -27,12 +27,14 @@ class Signal:
     A rating is a float normally between -1.0 and 1.0, where -1.0 is a strong sell, and 1.0 is a strong buy.
     But this range isn't enforced. It is up to the used trader to handle these values.
 
-    The type indicates if it is an ENTRY, EXIT or ENTRY_EXIT signal.
+    The type indicates if it is an `ENTRY`, `EXIT` or `ENTRY_EXIT` signal. The default is `ENTRY_EXIT`.
 
     Examples:
+    ```
         Signal.buy("XYZ")
         Signal.sell("XYZ", SignalType.EXIT)
         Signal("XYZ", 0.5, SignalType.ENTRY)
+    ```
     """
 
     asset: Asset

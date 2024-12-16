@@ -1,6 +1,6 @@
 [[ ! -f "LICENSE" ]] && echo "run the script from the project root directory like this: ./bin/verify.sh" && exit 1
 
-uv sync --all-extras
+uv sync --all-extras --dev
 
 # QA
 echo "Running ruff" 

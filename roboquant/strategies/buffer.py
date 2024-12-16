@@ -24,6 +24,7 @@ class NumpyBuffer:
         self.rows = rows
 
     def append(self, data: array | NDArray | list | tuple) -> bool:
+        """Append data to this buffer. Return True if the buffer is full, False otherwise"""
         if self._idx >= len(self._data):
             self._data[0: self.rows] = self._data[-self.rows:]
             self._idx = self.rows
@@ -53,7 +54,9 @@ class NumpyBuffer:
 
 
 class OHLCVBuffer(NumpyBuffer):
-    """A OHLCV buffer (first-in-first-out) of a fixed capacity."""
+    """A OHLCV buffer (first-in-first-out) of a fixed capacity.
+    It stores the data in a `NumpyBuffer`.
+    """
 
     def __init__(self, capacity: int, dtype="float64") -> None:
         """Create a new OHLCV buffer"""
@@ -81,6 +84,7 @@ class OHLCVBuffer(NumpyBuffer):
 
 
 class OHLCVBuffers(UserDict[Asset, OHLCVBuffer]):
+    """A OHLCV buffer for multiple assets"""
 
     def __init__(self, size: int):
         super().__init__()
@@ -100,5 +104,6 @@ class OHLCVBuffers(UserDict[Asset, OHLCVBuffer]):
                     assets.add(asset)
         return assets
 
-    def ready(self):
+    def ready(self) -> set[Asset]:
+        """Return a set of assets for which the buffer is already full"""
         return {asset for asset, ohlcv in self.items() if ohlcv.is_full()}

@@ -927,32 +927,28 @@ wheels = [
 
 [[package]]
 name = "roboquant"
-version = "0.9.6"
+version = "0.9.7"
 source = { editable = "." }
 dependencies = [
-    { name = "fastavro" },
     { name = "matplotlib" },
     { name = "numpy" },
-    { name = "pyarrow" },
     { name = "requests" },
     { name = "websocket-client" },
     { name = "yfinance" },
 ]
 
 [package.optional-dependencies]
-all = [
-    { name = "alpaca-py" },
-    { name = "nautilus-ibapi" },
-    { name = "sb3-contrib" },
-    { name = "stable-baselines3" },
-    { name = "tensorboard" },
-    { name = "torch" },
-]
 alpaca = [
     { name = "alpaca-py" },
 ]
+avro = [
+    { name = "fastavro" },
+]
 ibkr = [
     { name = "nautilus-ibapi" },
+]
+parquet = [
+    { name = "pyarrow" },
 ]
 torch = [
     { name = "sb3-contrib" },
@@ -961,28 +957,30 @@ torch = [
     { name = "torch" },
 ]
 
+[package.dev-dependencies]
+dev = [
+    { name = "ta-lib" },
+]
+
 [package.metadata]
 requires-dist = [
-    { name = "alpaca-py", marker = "extra == 'all'" },
     { name = "alpaca-py", marker = "extra == 'alpaca'" },
-    { name = "fastavro", specifier = ">=1.9.7" },
+    { name = "fastavro", marker = "extra == 'avro'", specifier = ">=1.9.7" },
     { name = "matplotlib", specifier = ">=3.10.0" },
-    { name = "nautilus-ibapi", marker = "extra == 'all'", specifier = "~=10.19.2" },
     { name = "nautilus-ibapi", marker = "extra == 'ibkr'", specifier = "~=10.19.2" },
     { name = "numpy", specifier = ">=1.26.4" },
-    { name = "pyarrow", specifier = ">=16.1.0" },
+    { name = "pyarrow", marker = "extra == 'parquet'", specifier = ">=16.1.0" },
     { name = "requests", specifier = ">=2.32.0" },
-    { name = "sb3-contrib", marker = "extra == 'all'", specifier = ">=2.4.0" },
     { name = "sb3-contrib", marker = "extra == 'torch'", specifier = ">=2.4.0" },
-    { name = "stable-baselines3", marker = "extra == 'all'", specifier = ">=2.4.0" },
     { name = "stable-baselines3", marker = "extra == 'torch'", specifier = ">=2.4.0" },
-    { name = "tensorboard", marker = "extra == 'all'", specifier = ">=2.15.2" },
     { name = "tensorboard", marker = "extra == 'torch'", specifier = ">=2.15.2" },
-    { name = "torch", marker = "extra == 'all'", specifier = ">=2.5.0" },
     { name = "torch", marker = "extra == 'torch'", specifier = ">=2.5.0" },
     { name = "websocket-client", specifier = "~=1.8.0" },
     { name = "yfinance", specifier = "~=0.2.50" },
 ]
+
+[package.metadata.requires-dev]
+dev = [{ name = "ta-lib", specifier = ">=0.5.1" }]
 
 [[package]]
 name = "sb3-contrib"
@@ -1060,6 +1058,15 @@ sdist = { url = "https://files.pythonhosted.org/packages/ca/99/5a5b6f19ff9f08367
 wheels = [
     { url = "https://files.pythonhosted.org/packages/b2/fe/81695a1aa331a842b582453b605175f419fe8540355886031328089d840a/sympy-1.13.1-py3-none-any.whl", hash = "sha256:db36cdc64bf61b9b24578b6f7bab1ecdd2452cf008f34faa33776680c26d66f8", size = 6189177 },
 ]
+
+[[package]]
+name = "ta-lib"
+version = "0.5.1"
+source = { registry = "https://pypi.org/simple" }
+dependencies = [
+    { name = "numpy" },
+]
+sdist = { url = "https://files.pythonhosted.org/packages/5a/a0/9272a65a64acae4457b8e6c8eea681766dea77243b001564a247f3c90b5b/TA-Lib-0.5.1.tar.gz", hash = "sha256:2beeacb7f54212d7c5a7a56bcdd65094d8d6d02f0a732246764c0a96172c9d2a", size = 369560 }
 
 [[package]]
 name = "tensorboard"
