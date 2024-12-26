@@ -24,17 +24,17 @@ def _walkforward(params):
 
 
 if __name__ == "__main__":
-
     # Using "fork" ensures that the FEED object is not being recreated for each process
     # The pool is created with default number of processes (equal to the number of CPU cores)
     with get_context("fork").Pool() as p:
-
         # Split overal timeframe into 5 equal non-overlapping timeframes
-        timeframes = FEED.timeframe().split(5)
+        timeframe_params = FEED.timeframe().split(5)
 
-        # Test the following combinations of parameters for EMACrossover strategy
+        # EMACrossover params, the fast and slow periods
         ema_params = [(3, 5), (5, 7), (10, 15), (15, 21)]
-        all_params = product(timeframes, ema_params)
+
+        # All combinations of params (Cartesian product)
+        all_params = product(timeframe_params, ema_params)
 
         # run the back tests in parallel
         equities = p.map(_walkforward, all_params)

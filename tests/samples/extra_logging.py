@@ -1,5 +1,5 @@
 # %%
-# Increase roboquant logging level to get better insights into the run
+# Increase roboquant logging level to get better insights into a run
 import logging
 import roboquant as rq
 
