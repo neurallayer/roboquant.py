@@ -114,7 +114,6 @@ class SQLFeed(Feed):
             event = Event(dt, items)
             channel.put(event)
 
-        con.commit()
 
     def record(self, feed: Feed, timeframe=None, append=False, batch_size=10_000):
         """Record another feed into this SQLite database.

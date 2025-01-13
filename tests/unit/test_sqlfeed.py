@@ -24,9 +24,7 @@ class TestSQLFeed(unittest.TestCase):
         feed.create_index()
 
         self.assertEqual(set(origin_feed.assets()), set(feed.assets()))
-
         run_price_item_feed(feed, origin_feed.assets(), self)
-        db_file.unlink(missing_ok=True)
 
 
 if __name__ == "__main__":
