@@ -9,7 +9,7 @@ build-backend = "hatchling.build"
 path = "roboquant/__init__.py"
 
 [tool.ruff.lint]
-ignore = ["F401"]
+# ignore = ["F401"]
 
 [tool.pyright]
 reportOptionalOperand = "none"

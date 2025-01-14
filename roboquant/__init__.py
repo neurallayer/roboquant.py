@@ -2,7 +2,7 @@
 The `roboquant` package contains the `run` method and shared classes like `Account`, `Asset` and `Event`.
 """
 
-__version__ = "0.9.7"
+__version__ = "0.9.8"
 
 import logging
 
@@ -22,3 +22,29 @@ from .timeframe import Timeframe, utcnow
 
 logger = logging.getLogger(__name__)
 logger.info("roboquant version=%s", __version__)
+
+__all__ = [
+    "brokers",
+    "feeds",
+    "journals",
+    "strategies",
+    "ml",
+    "Account",
+    "Position",
+    "Config",
+    "Event",
+    "PriceItem",
+    "Bar",
+    "Trade",
+    "Quote",
+    "Order",
+    "Amount",
+    "Wallet",
+    "Asset",
+    "Stock",
+    "Crypto",
+    "Option",
+    "run",
+    "Timeframe",
+    "utcnow",
+]

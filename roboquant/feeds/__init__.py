@@ -13,3 +13,15 @@ try:
     from .yahoo import YahooFeed
 except ImportError:
     pass
+
+__all__ = [
+    "Feed",
+    "EventChannel",
+    "CSVFeed",
+    "HistoricFeed",
+    "RandomWalk",
+    "SQLFeed",
+    "AggregatorFeed",
+    "CollectorFeed",
+    "YahooFeed",
+]
