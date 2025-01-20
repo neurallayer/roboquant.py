@@ -49,8 +49,11 @@ python3 -m pip install --upgrade "roboquant[ibkr]"
 # Integration with Alpaca
 python3 -m pip install --upgrade "roboquant[alpaca]"
 
-# Install all dependencies
-python3 -m pip install --upgrade "roboquant[all]"
+# Install Avro feed dependencies
+python3 -m pip install --upgrade "roboquant[avro]"
+
+# Install Avro feed dependencies
+python3 -m pip install --upgrade "roboquant[parquet]"
 ```
 
 ## Building from source
