@@ -2,7 +2,7 @@
 The `roboquant` package contains the `run` method and shared classes like `Account`, `Asset` and `Event`.
 """
 
-__version__ = "0.9.9"
+__version__ = "1.0.0"
 
 import logging
 
