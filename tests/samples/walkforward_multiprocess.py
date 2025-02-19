@@ -24,9 +24,11 @@ def _walkforward(params):
 
 
 if __name__ == "__main__":
+
     # Using "fork" ensures that the FEED object is not being recreated for each process
     # The pool is created with default number of processes (equal to the number of CPU cores)
     with get_context("fork").Pool() as p:
+
         # Split overal timeframe into 5 equal non-overlapping timeframes
         timeframe_params = FEED.timeframe().split(5)
 

@@ -42,7 +42,7 @@ class Order:
         self.gtd = gtd
 
     def cancel(self) -> "Order":
-        """Create a cancellation order. You can only cancel orders that have an id.
+        """Create a cancellation order. You can only cancel an order that has an id assigned to it.
         The returned order looks like a regular order, but with its `size` set to zero.
         """
         assert self.id is not None, "Can only cancel orders with an already assigned id"
@@ -80,7 +80,7 @@ class Order:
         return self.asset.contract_value(self.size, self.limit)
 
     def amount(self) -> Amount:
-        """Return the total vlaue of this order as an Amount"""
+        """Return the total value of this order as a single Amount denoted in the currency of the asset"""
         return Amount(self.asset.currency, self.value())
 
     @property

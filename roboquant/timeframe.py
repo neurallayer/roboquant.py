@@ -39,7 +39,12 @@ class Timeframe:
 
     @classmethod
     def fromisoformat(cls, start: str, end: str, inclusive=False):
-        """Create an instance of Timeframe based on a start- and end-datetime in iso-format"""
+        """Create an instance of Timeframe based on a start- and end-datetime in ISO 8601 format.
+        
+        Usage:
+            tf1 = Timeframe.fromisoformat("2021-01-01T00:12:00+00:00", "2021-01-02T00:13:00+00:00", True)
+            tf2 = Timeframe.fromisoformat("2021-01-01", "2022-01-01", False)
+        """
         s = datetime.fromisoformat(start)
         e = datetime.fromisoformat(end)
         return cls(s, e, inclusive)
@@ -107,7 +112,7 @@ class Timeframe:
         The parameter `n` can be a number, a timedelta instance or other types like `relativedelta` that support
         datetime calculations.
 
-        The last returned timeframe can be shorted than the provided timedelta.
+        The last returned timeframe can be shorter than the provided timedelta.
         """
 
         period = self.duration / n if isinstance(n, int) else n
@@ -125,7 +130,9 @@ class Timeframe:
         return result
 
     def sample(self, duration: timedelta | Any, n: int = 1) -> list["Timeframe"]:
-        """Sample one or more periods of `duration` from this timeframe."""
+        """Sample one or more periods of `duration` from this timeframe.
+        It can contain duplicates and the resulting timeframes can overlap.
+        """
 
         result = []
         end = self.end - duration

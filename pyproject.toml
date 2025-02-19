@@ -42,11 +42,11 @@ dependencies = [
   "websocket-client~=1.8.0",
   "requests>=2.32.0",
   "matplotlib>=3.10.0",
-  "yfinance~=0.2.51"
+  "yfinance~=0.2.54"
 ]
 
 [project.optional-dependencies]
-torch = ["torch>=2.5.1", "tensorboard>=2.15.2", "stable-baselines3>=2.4.1", "sb3-contrib>=2.4.0"]
+torch = ["torch>=2.6.0", "tensorboard>=2.19.0", "stable-baselines3>=2.5.0", "sb3-contrib>=2.5.0"]
 ibkr = ["nautilus-ibapi~=10.19.2"]
 alpaca = ["alpaca-py"]
 avro = ["fastavro>=1.9.7"]
