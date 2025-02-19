@@ -9,7 +9,7 @@ class SignalType(Flag):
 
     - ENTRY: enter/increase a position size
     - EXIT: close/reduce a position size
-    - ENTRY_EXIT: can be used both to increase or reduce position sizes
+    - ENTRY_EXIT: can be used both to increase or reduce position sizes.
     """
 
     ENTRY = auto()
@@ -27,7 +27,8 @@ class Signal:
     A rating is a float normally between -1.0 and 1.0, where -1.0 is a strong sell, and 1.0 is a strong buy.
     But this range isn't enforced. It is up to the used trader to handle these values.
 
-    The type indicates if it is an `ENTRY`, `EXIT` or `ENTRY_EXIT` signal. The default is `ENTRY_EXIT`.
+    The type indicates if it is an `ENTRY`, `EXIT` or `ENTRY_EXIT` signal. The default is `ENTRY_EXIT`. Please note that
+    it is up to the trader to handle these types correctly.
 
     Examples:
     ```
@@ -38,8 +39,13 @@ class Signal:
     """
 
     asset: Asset
+    """The asset this signal is for"""
+
     rating: float
+    """The rating of this signal, normally between -1.0 and 1.0"""
+
     type: SignalType = SignalType.ENTRY_EXIT
+    """The type of signal, either ENTRY, EXIT or ENTRY_EXIT"""
 
     @staticmethod
     def buy(symbol, signal_type=SignalType.ENTRY_EXIT) -> "Signal":
@@ -53,20 +59,20 @@ class Signal:
 
     @property
     def is_buy(self) -> bool:
-        """return True if this is a BUY signal, False otherwise"""
+        """Return True if this is a BUY signal, False otherwise"""
         return self.rating > 0.0
 
     @property
     def is_sell(self) -> bool:
-        """return True if this is a SELL signal, False otherwise"""
+        """Return True if this is a SELL signal, False otherwise"""
         return self.rating < 0.0
 
     @property
     def is_entry(self) -> bool:
-        """return True if this is an ENTRY or ENTRY_EXIT signal, False otherwise"""
+        """Return True if this is an ENTRY or ENTRY_EXIT signal, False otherwise"""
         return SignalType.ENTRY in self.type
 
     @property
     def is_exit(self) -> bool:
-        """return True if this is an EXIT or ENTRY_EXIT signal, False otherwise"""
+        """Return True if this is an EXIT or ENTRY_EXIT signal, False otherwise"""
         return SignalType.EXIT in self.type

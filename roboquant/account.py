@@ -32,17 +32,16 @@ class Position:
 
 
 class Account:
-    """Represents a trading account with all monetary amounts denoted in a single currency.
-    The account maintains the following state during a run:
+    """Represents a trading account. The account maintains the following state during a run:
 
     - Available buying power for orders in the base currency of the account.
     - Cash available in the base currency of the account.
-    - The open positions.
-    - The open orders.
+    - The open positions denoted in the currency of the asset.
+    - The open orders denoted in the currency of the asset.
     - Calculated derived equity value of the account in the base currency of the account.
     - The last time the account was updated.
 
-    Only the broker updates the account and does this only during its `sync` method.
+    Only the `broker` updates the account and does this only during its `sync` method.
     """
 
     __slots__ = "buying_power", "positions", "orders", "last_update", "cash"
@@ -122,10 +121,11 @@ class Account:
         return Amount(order.asset.currency, 0.0)
 
     def unrealized_pnl_value(self) -> float:
+        """Return the unrealized profit and loss value denoted in the base currency of the account"""
         return self.convert(self.unrealized_pnl())
 
     def get_position_size(self, asset: Asset) -> Decimal:
-        """Return the position size for a symbol"""
+        """Return the position size for a symbol, or zero if not found."""
         pos = self.positions.get(asset)
         return pos.size if pos else Decimal()
 
