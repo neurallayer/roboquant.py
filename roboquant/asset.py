@@ -18,6 +18,9 @@ class Asset(ABC):
     __cache: ClassVar[dict[str, "Asset"]] = {}
 
     def contract_value(self, size: Decimal, price: float) -> float:
+        """return the total contract value given the provided size and price.
+        The default implementation assumes the contract value is the size times the price.
+        """
         return float(size) * price
 
     def contract_amount(self, size: Decimal, price: float) -> Amount:
@@ -27,7 +30,8 @@ class Asset(ABC):
         value = self.contract_value(size, price)
         return Amount(self.currency, value)
 
-    def type(self):
+    def type(self) -> str:
+        """Return the type of this asset, for example Stock or Crypto."""
         return type(self).__name__
 
     def __eq__(self, value: object) -> bool:
@@ -50,8 +54,8 @@ class Asset(ABC):
         asset = Asset.__cache.get(value)
         if not asset:
             asset_type, other = value.split(":", maxsplit=1)
-            d = _asset_deserializer_registry[asset_type]
-            asset = d(other)
+            deserializer = _asset_deserializer_registry[asset_type]
+            asset = deserializer(other)
             Asset.__cache[value] = asset
         return asset
 
@@ -60,16 +64,10 @@ class Asset(ABC):
 class Stock(Asset):
     """Stock (or equity) asset"""
 
-    def serialize(self):
-        return "Stock" + ":" + self.symbol + ":" + self.currency
-
 
 @dataclass(frozen=True, slots=True)
 class Crypto(Asset):
     """Crypto-currency asset"""
-
-    symbol: str  # type: ignore
-    currency: Currency  # type: ignore
 
     @staticmethod
     def from_symbol(symbol: str, sep="/"):
@@ -82,8 +80,10 @@ class Option(Asset):
     """Option Contract asset"""
 
     multiplier = 100
+    """The multiplier for an option contracct, default is 100"""
 
     def contract_value(self, size: Decimal, price: float) -> float:
+        """Contract value for an option is the size times the price times the multiplier"""
         return float(size) * price * self.multiplier
 
 

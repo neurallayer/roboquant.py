@@ -11,7 +11,7 @@ from roboquant.monetary import Amount
 @dataclass(slots=True)
 class Order:
     """
-    A trading order for an asset. Each order has a `size` and a `limit` price.
+    A trading order for an asset. Each order has a mandatory `size` and a `limit` price.
     Order with a positive `size` are buy orders and with a negative `size` are sell orders.
 
     The `gtd` (good till date) is optional and if not set implies the order is valid

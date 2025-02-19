@@ -19,7 +19,10 @@ def run(
     capacity: int = 10,
     heartbeat_timeout: float | None = None
 ) -> Account:
-    """Start a new run.
+    """Start a new run. A run can be seen as a simulation of a trading strategy. It will use the provided feed to
+    generate events and the strategy to create signals. The trader will convert these signals into orders that will be sent
+    to the broker. The broker will execute these orders and update the account accordingly. The journal can be used to log
+    and/or store progress and metrics.
 
     Args:
         feed: The feed to use for this run

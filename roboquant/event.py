@@ -3,14 +3,14 @@ from array import array
 from dataclasses import dataclass
 from datetime import datetime
 from functools import cached_property
-from typing import Any
+from typing import Any, Sequence
 
 from roboquant.asset import Asset
 
 
 @dataclass(slots=True)
 class PriceItem:
-    """Baseclass for the different types of prices related to an asset, like quotes
+    """Baseclass for the different types of prices related to an asset, like trades or quotes
     """
 
     asset: Asset
@@ -33,7 +33,7 @@ class PriceItem:
 class Quote(PriceItem):
     """Quote price of an asset, containing ASK and BID prices"""
 
-    data: array  # [ask-price, ask-volume, bid-price, bid-volume]
+    data: Sequence[float]  # [ask-price, ask-volume, bid-price, bid-volume]
 
     def price(self, price_type: str = "DEFAULT") -> float:
         """Return the price, the default being the mid-point price"""
@@ -102,7 +102,7 @@ class Bar(PriceItem):
     """Represents a bar (a.k.a. candlestick) with open-, high-, low-, close-price and volume data.
     """
 
-    ohlcv: array
+    ohlcv: Sequence[float]  # [open, high, low, close, volume]
     frequency: str = ""  # f.e 1s , 15m, 4h, 1d
 
     @classmethod

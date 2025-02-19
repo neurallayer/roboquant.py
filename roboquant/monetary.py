@@ -21,7 +21,7 @@ logger = logging.getLogger(__name__)
 class Currency(str):
     """Currency class represents a monetary currency and is a subclass of `str`.
 
-    It is possible to create an `Amount` using a combination of `number` and `Currency`:
+    It is possible to create an `Amount` using a combination of a `number` and a `Currency`:
 
         amount1 = 100@USD
         amount2 = 200.50@EUR
@@ -72,7 +72,7 @@ class NoConversion(CurrencyConverter):
 
 
 class ECBConversion(CurrencyConverter):
-    """CurrencyConverter that gets it exchange rates from the ECB (European Central Bank)."""
+    """CurrencyConverter that retrieves it exchange rates from the ECB (European Central Bank)."""
 
     __file_name = Path.home() / ".roboquant" / "eurofxref-hist.csv"
 
@@ -166,7 +166,9 @@ class Amount:
 
     @staticmethod
     def register_converter(converter: CurrencyConverter):
-        """Register a new currency converter to handle conversions between different currencies"""
+        """Register a new currency converter to handle conversions between different currencies.
+        It will replace the current registered converter.
+        """
         Amount.__converter = converter
 
     def items(self):
@@ -201,7 +203,9 @@ class Amount:
 
 
 class Wallet(defaultdict[Currency, float]):
-    """A wallet holds monetary values of different currencies"""
+    """A wallet holds monetary values of different currencies.
+    You can add wallets together, subtract them, or convert them to a single currency.
+    """
 
     def __init__(self, *amounts: Amount):
         super().__init__(float)
