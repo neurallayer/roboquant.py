@@ -24,6 +24,8 @@ def run(
     to the broker. The broker will execute these orders and update the account accordingly. The journal can be used to log
     and/or store progress and metrics.
 
+    At the end of the run, the latest version of the account will be returned.
+
     Args:
         feed: The feed to use for this run
         strategy: Your strategy that you want to use

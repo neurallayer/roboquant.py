@@ -17,19 +17,19 @@ class Timeframe:
     __slots__ = "start", "end", "inclusive"
 
     EMPTY: "Timeframe"
-    """represents an empty timeframe"""
+    """represents an empty timeframe, with a start and end time set to the same value"""
 
     INFINITE: "Timeframe"
-    """represents an infinite timeframe"""
+    """represents an infinite timeframe, with a start time set to the year 1900 and an end time set to the year 2200"""
 
     def __init__(self, start: datetime, end: datetime, inclusive=False):
         """
-        Create a new timeframe
+        Create a new timeframe. All datetimes will be stored in the UTC timezone.
 
         Args:
-        - start: start time
-        - end: end time
-        - inclusive: should the end time be inclusive, default is False
+        - start: start datetime
+        - end: end datetime
+        - inclusive: should the end datetime be inclusive, default is False
         """
         self.start: datetime = start.astimezone(timezone.utc)
         self.end: datetime = end.astimezone(timezone.utc)
@@ -39,7 +39,7 @@ class Timeframe:
 
     @classmethod
     def fromisoformat(cls, start: str, end: str, inclusive=False):
-        """Create an instance of Timeframe based on a start- and end-time in iso-format"""
+        """Create an instance of Timeframe based on a start- and end-datetime in iso-format"""
         s = datetime.fromisoformat(start)
         e = datetime.fromisoformat(end)
         return cls(s, e, inclusive)
