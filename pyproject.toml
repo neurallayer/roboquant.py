@@ -38,7 +38,6 @@ classifiers = [
 keywords = ["trading", "machine learning", "AI", "investment", "finance", "crypto", "stocks", "exchange", "forex"]
 dependencies = [
   "numpy>=1.26.4",
-  # "numpy>=2.2.1",
   "websocket-client~=1.8.0",
   "requests>=2.32.0",
   "matplotlib>=3.10.0",
@@ -48,9 +47,9 @@ dependencies = [
 [project.optional-dependencies]
 torch = ["torch>=2.6.0", "tensorboard>=2.19.0", "stable-baselines3>=2.5.0", "sb3-contrib>=2.5.0"]
 ibkr = ["nautilus-ibapi~=10.19.2"]
-alpaca = ["alpaca-py"]
+alpaca = ["alpaca-py>=0.38.0"]
 avro = ["fastavro>=1.9.7"]
-parquet = ["pyarrow>=16.1.0"]
+parquet = ["pyarrow>=19.0.0"]
 
 [project.urls]
 Homepage = "https://roboquant.org"
@@ -59,5 +58,5 @@ Issues = "https://github.com/neurallayer/roboquant.py/issues"
 
 [dependency-groups]
 dev = [
-    "ta-lib~=0.5.3",
+    "ta-lib==0.5.3",
 ]
