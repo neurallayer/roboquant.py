@@ -41,18 +41,6 @@ class Broker(ABC):
         ...
 
 
-def _update_account(account: Account, event: Event | None, price_type: str = "DEFAULT"):
-
-    if not event:
-        return
-
-    account.last_update = event.time
-
-    for asset, position in account.positions.items():
-        if price := event.get_price(asset, price_type):
-            position.mkt_price = price
-
-
 def _update_positions(account: Account, event: Event | None, price_type: str = "DEFAULT"):
     """update the open positions in the account with the latest market prices"""
     if not event:
@@ -66,6 +54,9 @@ def _update_positions(account: Account, event: Event | None, price_type: str = "
 
 
 class LiveBroker(Broker):
+    """Base class for brokers that are used in live trading. It contains some common functionality
+    that is useful for live brokers.
+    """
 
     def __init__(self) -> None:
         super().__init__()

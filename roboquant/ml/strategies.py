@@ -98,6 +98,8 @@ class SequenceDataset(Dataset):
 
 
 class RNNStrategy(FeatureStrategy):
+    """A strategy that uses a recurrent neural network to predict the future of a time series.
+    The input and label features are both features that can be calculated from an event."""
 
     def __init__(
         self,

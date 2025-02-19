@@ -15,6 +15,7 @@ T = TypeVar("T")
 
 
 class Feature(Generic[T]):
+    """Base class for all types of features"""
 
     @abstractmethod
     def calc(self, value: T) -> NDArray:
@@ -60,7 +61,7 @@ class Feature(Generic[T]):
 
 
 class EquityFeature(Feature[Account]):
-    """Returns the total equity value of the account"""
+    """Calcukates the total equity value of the account"""
 
     def calc(self, value):
         return np.array(value.equity_value(), dtype=np.float32)
@@ -90,7 +91,7 @@ class SlicedFeature(Feature):
 
 
 class TrueRangeFeature(Feature[Event]):
-    """Calculates the true range value for a asset"""
+    """Calculates the true range value for a single asset that has a Bar price item (candlestick) in the event"""
 
     def __init__(self, asset: Asset) -> None:
         super().__init__()
@@ -135,7 +136,7 @@ class FixedValueFeature(Feature):
 
 
 class PriceFeature(Feature[Event]):
-    """Extract a single price for one or more assets"""
+    """Extract a single price for one or more assets in the event"""
 
     def __init__(self, *assets: Asset, price_type: str = "DEFAULT") -> None:
         super().__init__()
@@ -259,7 +260,7 @@ class NormalizeFeature(Feature):
 
 
 class FillFeature(Feature):
-    """If a feature contains a nan value, use the last known value instead"""
+    """If a feature contains a NaN value, use the last known value instead"""
 
     def __init__(self, feature: Feature) -> None:
         super().__init__()
@@ -282,7 +283,7 @@ class FillFeature(Feature):
 
 
 class FillWithConstantFeature(Feature):
-    """If a feature contains a nan value, fill with a constant value"""
+    """If a feature contains a NaN value, fill with a constant value"""
 
     def __init__(self, feature: Feature, constant: float = 0.0) -> None:
         super().__init__()
@@ -304,10 +305,11 @@ class FillWithConstantFeature(Feature):
 
 
 class CacheFeature(Feature):
-    """Cache the results of a feature. This requires the feed to have an always increasing time value
-    and the feature to produce the same output at a given time.
-
-    Typically, this doesn't work for features that depend on account values.
+    """Cache the results of a feature. This requires: 
+    
+    - the feed to have an always increasing time value
+    - the feature to produce the same output at a given time. Typically, this doesn't hold true for features that
+    are based on account values.
     """
 
     def __init__(self, feature: Feature, validate=False) -> None:
@@ -344,7 +346,7 @@ class CacheFeature(Feature):
 
 
 class VolumeFeature(Feature[Event]):
-    """Extract the volume for one or more assets"""
+    """Extract the volume for one or more assets in the event"""
 
     def __init__(self, *assets: Asset, volume_type: str = "DEFAULT") -> None:
         super().__init__()
@@ -360,6 +362,7 @@ class VolumeFeature(Feature[Event]):
 
 
 class ReturnFeature(Feature):
+    """Calculate the return of another feature"""
 
     def __init__(self, feature: Feature) -> None:
         super().__init__()
@@ -439,7 +442,7 @@ class MaxReturnFeature(Feature):
 
 class MinReturnFeature(Feature):
     """Calculate the minimum return over a certain period.
-    This will only work on features that return a single value.
+    This will only work for features that return a single value.
     """
 
     def __init__(self, feature: Feature, period: int) -> None:
@@ -467,6 +470,7 @@ class MinReturnFeature(Feature):
 
 
 class SMAFeature(Feature):
+    """Calculate the simple moving average of another feature"""
 
     def __init__(self, feature: Feature, period: int) -> None:
         super().__init__()

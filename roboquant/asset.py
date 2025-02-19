@@ -13,7 +13,10 @@ class Asset(ABC):
     """
 
     symbol: str
+    """The symbol of the asset, for example, AAPL"""
+
     currency: Currency = USD
+    """The currency of the asset, default is USD"""
 
     __cache: ClassVar[dict[str, "Asset"]] = {}
 

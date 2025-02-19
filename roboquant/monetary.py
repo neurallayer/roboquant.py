@@ -37,18 +37,43 @@ class Currency(str):
 
 # Commonly used currencies
 USD = Currency("USD")
+"""US Dollar"""
+
 EUR = Currency("EUR")
+"""Euro"""
+
 JPY = Currency("JPY")
+"""Japanese Yen"""
+
 GBP = Currency("GBP")
+"""British Pound"""
+
 CHF = Currency("CHF")
+"""Swiss Franc"""
+
 INR = Currency("INR")
+"""Indian Rupee"""
+
 AUD = Currency("AUD")
+"""Australian Dollar"""
+
 CAD = Currency("CAD")
+"""Canadian Dollar"""
+
 NZD = Currency("NZD")
+"""New Zealand Dollar"""
+
 CMY = Currency("CMY")
+"""Chinese Yuan"""
+
 HKD = Currency("HKD")
+"""Hong Kong Dollar"""
+
 BTC = Currency("BTC")
+"""Bitcoin"""
+
 ETH = Currency("ETH")
+"""Ethereum"""
 
 
 class CurrencyConverter(ABC):

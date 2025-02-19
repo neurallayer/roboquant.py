@@ -66,7 +66,7 @@ class _Context:
 
 
 class FlexTrader(Trader):
-    """Implementation of a Trader that has configurable rules to modify which signals are converted into orders.
+    """Implementation of a Trader that has configurable rules to determine which signals are converted into orders.
     This implementation will not generate orders if there is not a price in the event for the underlying asset.
 
     The configurable parameters include:
@@ -81,7 +81,7 @@ class FlexTrader(Trader):
     - shorting: allow orders that could result in a short position, default is false
     - price_type: the price type to use when determining order value, for example "CLOSE". Default is "DEFAULT"
 
-    It might be sometimes challenging to understand wby a signal isn't converted into an order. The flex-trader logs
+    It might be sometimes challenging to understand why a signal isn't converted into an order. The flex-trader logs
     at INFO level when certain rules have been fired.
 
     Setting higher logging:

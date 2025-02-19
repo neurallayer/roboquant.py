@@ -29,6 +29,7 @@ logger = logging.getLogger(__name__)
 
 
 class TradingEnv(gym.Env):
+    """A Gym environment for trading strategies"""
     # pylint: disable=too-many-instance-attributes,unused-argument
 
     metadata = {"render_modes": ["human", "rgb_array"], "render_fps": 4}
@@ -134,6 +135,7 @@ class TradingEnv(gym.Env):
 
 
 class SB3PolicyStrategy(Strategy):
+    """A strategy that uses a Stable Baselines 3 policy to generate signals"""
 
     def __init__(self, obs_feature: Feature[Event], assets: list[Asset], policy: BasePolicy):
         super().__init__()
