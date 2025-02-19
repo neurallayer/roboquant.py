@@ -4,7 +4,7 @@ import logging
 
 from roboquant.account import Account, Position
 from roboquant.asset import Asset
-from roboquant.brokers.broker import Broker, _update_positions
+from roboquant.brokers.broker import Broker
 from roboquant.event import Event, Quote, PriceItem
 from roboquant.order import Order
 from roboquant.monetary import Amount, Wallet, USD
@@ -206,7 +206,7 @@ class SimBroker(Broker):
 
         self._process_modify_orders()
         self._process_open_orders(event)
-        _update_positions(acc, event, self.price_type)
+        self._update_positions(acc, event, self.price_type)
         acc.buying_power = self._calculate_buyingpower()
         return acc
 

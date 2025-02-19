@@ -40,17 +40,17 @@ class Broker(ABC):
         """
         ...
 
+    @staticmethod
+    def _update_positions(account: Account, event: Event | None, price_type: str = "DEFAULT"):
+        """utility methid to update the open positions in the account with the latest market prices found in the event"""
+        if not event:
+            return
 
-def _update_positions(account: Account, event: Event | None, price_type: str = "DEFAULT"):
-    """update the open positions in the account with the latest market prices"""
-    if not event:
-        return
+        account.last_update = event.time
 
-    account.last_update = event.time
-
-    for asset, position in account.positions.items():
-        if price := event.get_price(asset, price_type):
-            position.mkt_price = price
+        for asset, position in account.positions.items():
+            if price := event.get_price(asset, price_type):
+                position.mkt_price = price
 
 
 class LiveBroker(Broker):
