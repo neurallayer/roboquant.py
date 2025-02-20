@@ -5,11 +5,6 @@ from roboquant.journals.journal import Journal
 from roboquant.journals.metric import Metric
 from roboquant.journals.pnlmetric import PNLMetric
 
-try:
-    from matplotlib import pyplot
-except ImportError:
-    pyplot = None
-
 
 class MetricsJournal(Journal):
     """
@@ -47,10 +42,11 @@ class MetricsJournal(Journal):
                 values.append(metrics[metric_name])
         return timeline, values
 
-    def plot(self, metric_name: str, plot_x: bool = True, plt: Any = pyplot, **kwargs):
-        """Plot a metric"""
-        assert plt, "no plt explicitly specified or matplotlib found"
-
+    def plot(self, metric_name: str, plot_x: bool = True, plt: Any = None, **kwargs):
+        """Plot a metric. This requires matplotlib to be installed."""
+        if not plt:
+            from matplotlib import pyplot as plt
+        
         x, y = self.get_metric(metric_name)
 
         if plot_x:

@@ -40,14 +40,17 @@ class SQLFeed(Feed):
         self.is_bar = price_type == "bar"
 
     def exists(self):
+        """Check if the database file exists"""
         return os.path.exists(self.db_file)
 
     def create_index(self):
+        """Create an index on the date column"""
         with sqlite3.connect(self.db_file) as con:
             con.execute(SQLFeed._sql_create_index)
             con.commit()
 
     def number_items(self):
+        """Return the number of items in the database"""
         with sqlite3.connect(self.db_file) as con:
             result = con.execute(SQLFeed._sql_count_items).fetchall()
             con.commit()
@@ -55,6 +58,7 @@ class SQLFeed(Feed):
             return row[0]
 
     def timeframe(self):
+        """Return the timeframe of the data in the database"""
         with sqlite3.connect(self.db_file) as con:
             result = con.execute(SQLFeed._sql_select_timeframe).fetchall()
             con.commit()
@@ -64,13 +68,15 @@ class SQLFeed(Feed):
             return Timeframe.EMPTY
 
     def assets(self):
+        """Return the assets in the database"""
         with sqlite3.connect(self.db_file) as con:
             result = con.execute(SQLFeed._sql_select_assets).fetchall()
             con.commit()
             assets = {Asset.deserialize(columns[0]) for columns in result}
             return assets
 
-    def get_item(self, row) -> PriceItem:
+    def _get_item(self, row) -> PriceItem:
+        """Get a PriceItem from a row in the database"""
         if self.is_bar:
             asset_str = row[1]
             asset = Asset.deserialize(asset_str)
@@ -83,6 +89,7 @@ class SQLFeed(Feed):
         return Quote(asset, array("f", data))
 
     def play(self, channel: EventChannel):
+        """Play back the data in the database to the channel"""
         with sqlite3.connect(self.db_file) as con:
             cur = con.cursor()
             t_old = ""
@@ -105,7 +112,7 @@ class SQLFeed(Feed):
                         items = []
                     t_old = t
 
-                item = self.get_item(row)
+                item = self._get_item(row)
                 items.append(item)
 
         # are there leftovers

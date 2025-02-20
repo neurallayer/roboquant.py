@@ -28,6 +28,7 @@ class EventChannel:
 
     @property
     def maxsize(self):
+        """The maximum size of the queue"""
         return self._queue.maxsize
 
     def put(self, event: Event):
@@ -70,6 +71,7 @@ class EventChannel:
             self._queue.put(None)
 
     def copy(self):
+        """Create a copy of this channel. Items on the original channel will not be copied to the new channel."""
         return EventChannel(self.timeframe, self._queue.maxsize)
 
     @property

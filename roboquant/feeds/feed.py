@@ -9,11 +9,6 @@ from roboquant.event import Bar
 from roboquant.feeds.eventchannel import EventChannel, ChannelClosed
 from roboquant.timeframe import Timeframe
 
-try:
-    from matplotlib import pyplot
-except ImportError:
-    pyplot = None
-
 
 class Feed(ABC):
     """
@@ -64,7 +59,7 @@ class Feed(ABC):
                 # this exception we can expect
                 pass
             except Exception as e:
-                logging.error("Error at playback", exc_info=e)
+                logging.error("Error during playback", exc_info=e)
             finally:
                 channel.close()
 
@@ -135,9 +130,9 @@ class Feed(ABC):
                 result[asset.symbol].append(price)
         return result
 
-    def plot(self, asset: Asset, price_type: str = "DEFAULT", timeframe: Timeframe | None = None, plt: Any = pyplot, **kwargs):
+    def plot(self, asset: Asset, price_type: str = "DEFAULT", timeframe: Timeframe | None = None, plt: Any = None, **kwargs):
         """
-        Plot the prices of a single asset.
+        Plot the prices of a single asset. This requires matplotlib to be installed.
 
         Parameters
         ----------
@@ -152,8 +147,9 @@ class Feed(ABC):
         **kwargs
             Additional keyword arguments to pass to the plt.plot() function.
         """
-        assert plt, "no plt explicitly specified or matplotlib found"
-        # plot = plot.subplot() if hasattr(plot, "subplot") else plot
+        if not plt:
+            from matplotlib import pyplot as plt
+
         times, prices = self.get_asset_prices(asset, price_type, timeframe)
         plt.plot(times, prices, **kwargs)
 

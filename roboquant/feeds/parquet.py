@@ -34,6 +34,7 @@ class ParquetFeed(Feed):
         logger.info("parquet feed path=%s", parquet_path)
 
     def exists(self):
+        """Check if the parquet file exists"""
         return os.path.exists(self.parquet_path)
 
     def play(self, channel: EventChannel):

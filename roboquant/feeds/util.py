@@ -86,8 +86,8 @@ class AggregatorFeed(Feed):
             channel.put(evt)
 
 
-class CollectorFeed(Feed):
-    """Collect events that occur close after ech other into a single new event.
+class GroupingFeed(Feed):
+    """Group events that occur close after ech other into a single new event.
 
     Close to eachother is defined by the timeout in seconds. If there is no new
     event in the specified timeout, all the previously collected event items will

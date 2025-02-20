@@ -33,7 +33,7 @@ class CSVColumn(str, Enum):
 
 
 class CSVFeed(HistoricFeed):
-    """Use CSV files with historic data as a feed."""
+    """Use CSV files with historic market data as a feed."""
 
     def __init__(
         self,

@@ -13,7 +13,8 @@ logger = logging.getLogger(__name__)
 
 
 class YahooFeed(HistoricFeed):
-    """A feed using the Yahoo Finance API to retrieve historic price data"""
+    """A feed using the Yahoo Finance API to retrieve historic market data. By default it will retrieve daily data, but
+    you can also specify a different intervals."""
 
     def __init__(self, *symbols: str, start_date: str = "2010-01-01", end_date: str | None = None, interval="1d"):
         super().__init__()
@@ -38,12 +39,17 @@ class YahooFeed(HistoricFeed):
             for t in df.itertuples(index=True):
                 dt = t[0].to_pydatetime().astimezone(timezone.utc)
                 prices = t[1:6]
-                b = Bar(Stock(symbol), array("f", prices), interval)
+                asset = self._get_asset(symbol)
+                b = Bar(asset, array("f", prices), interval)
                 self._add_item(dt, b)
 
             logger.info("retrieved symbol=%s items=%s", symbol, len(df))
 
         self._update()
+
+    def _get_asset(self, symbol: str):
+        """Get the asset for the given symbol. Sub classes can override this method to provide a different asset type."""
+        return Stock(symbol)
 
     @staticmethod
     def __auto_adjust(df):

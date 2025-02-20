@@ -39,9 +39,11 @@ class AvroFeed(Feed):
         logger.info("avro feed file=%s", avro_file)
 
     def exists(self):
+        """Check if the avro file exists"""
         return os.path.exists(self.avro_file)
 
     def index(self):
+        """Create an index on the date column and return it"""
         result = []
         if self.exists():
             with open(self.avro_file, "rb") as fo:
@@ -87,6 +89,10 @@ class AvroFeed(Feed):
                         raise ValueError(f"Unsupported priceItem type={price_type}")
 
     def record(self, feed: Feed, timeframe=None, append=False, batch_size=10_000):
+        """Record another feed into an Avro file. It supports Quotes, Trades, and Bars.
+        Later you can then use this Avro file as a feed to play back the data.
+        """
+
         schema = parse_schema(AvroFeed._schema)
         channel = feed.play_background(timeframe)
 

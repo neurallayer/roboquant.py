@@ -1,4 +1,4 @@
-from .util import AggregatorFeed, CollectorFeed
+from .util import AggregatorFeed, GroupingFeed
 from .csvfeed import CSVFeed
 from .eventchannel import EventChannel
 from .feed import Feed
@@ -22,6 +22,6 @@ __all__ = [
     "RandomWalk",
     "SQLFeed",
     "AggregatorFeed",
-    "CollectorFeed",
+    "GroupingFeed",
     "YahooFeed",
 ]
