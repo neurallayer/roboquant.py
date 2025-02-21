@@ -46,7 +46,7 @@ class MetricsJournal(Journal):
         """Plot a metric. This requires matplotlib to be installed."""
         if not plt:
             from matplotlib import pyplot as plt
-        
+
         x, y = self.get_metric(metric_name)
 
         if plot_x:
