@@ -12,23 +12,34 @@ from roboquant.monetary import Amount
 class Order:
     """
     A trading order for an asset. Each order has a mandatory `size` and a `limit` price.
-    Order with a positive `size` are buy orders and with a negative `size` are sell orders.
+    Orders with a positive `size` are buy orders and with a negative `size` are sell orders.
 
     The `gtd` (good till date) is optional and if not set implies the order is valid
-    for ever. The `info` will hold any abritrary properties (kwargs) set on the order.
+    forever. The `info` can hold any abritrary properties (kwargs) set on the order.
 
-    The `id` is automatically assigned by the `Broker` and should not be set manually.
-    The same applies to the `fill` property.
+    The `id` and `fill` are automatically set by the `Broker` and should not be set manually.
     """
 
     asset: Asset
+    """The asset this order is for"""
+
     size: Decimal
+    """The size of the order. Positive for buy orders, negative for sell orders."""
+
     limit: float
+    """The limit price of the order"""
+
     gtd: datetime | None
+    """The good till date of the order"""
+
     info: dict[str, Any]
+    """Any additional information about the order"""
 
     id: str | None
+    """The unique id of the order, set by the broker only"""
+
     fill: Decimal
+    """The filled size of the order, set by the broker only"""
 
     def __init__(self, asset: Asset, size: Decimal | str | int | float, limit: float, gtd: datetime | None = None, **kwargs):
         self.asset = asset

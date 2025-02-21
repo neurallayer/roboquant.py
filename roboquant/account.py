@@ -36,8 +36,8 @@ class Account:
 
     - Available buying power for orders in the base currency of the account.
     - Cash available in the base currency of the account.
-    - The open positions denoted in the currency of the asset.
-    - The open orders denoted in the currency of the asset.
+    - The open positions, each denoted in the currency of the asset.
+    - The open orders, each denoted in the currency of the asset.
     - Calculated derived equity value of the account in the base currency of the account.
     - The last time the account was updated.
 

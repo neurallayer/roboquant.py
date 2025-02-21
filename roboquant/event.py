@@ -49,26 +49,32 @@ class Quote(PriceItem):
 
     @property
     def ask_price(self) -> float:
+        """Return the ask price"""
         return self.data[0]
 
     @property
     def bid_price(self) -> float:
+        """Return the bid price"""
         return self.data[2]
 
     @property
     def ask_volume(self) -> float:
+        """Return the ask volume"""
         return self.data[1]
 
     @property
     def bid_volume(self) -> float:
+        """Return the bid volume"""
         return self.data[3]
 
     @property
     def spread(self) -> float:
+        """Return the spread between the ask and bid price"""
         return self.data[0] - self.data[2]
 
     @property
     def midpoint_price(self) -> float:
+        """Return the mid-point price"""
         return (self.data[0] + self.data[2]) / 2.0
 
     def volume(self, volume_type: str = "DEFAULT") -> float:
@@ -88,7 +94,10 @@ class Trade(PriceItem):
     Often this reflects an actual trade, but it can also be used in different scenarios.
     """
     trade_price: float
+    """The price of the trade"""
+
     trade_volume: float
+    """The volume of the trade"""
 
     def price(self, price_type: str = "DEFAULT") -> float:
         return self.trade_price
@@ -103,7 +112,10 @@ class Bar(PriceItem):
     """
 
     ohlcv: array  # [open, high, low, close, volume]
+    """The open, high, low, close and volume data of the bar stored in an array of floats"""
+
     frequency: str = ""  # f.e 1s , 15m, 4h, 1d
+    """The frequency of the bar, for example, 1s, 15m, 4h, 1d"""
 
     @classmethod
     def from_adj_close(cls, asset: Asset, ohlcv: array, adj_close: float, frequency=""):
@@ -130,7 +142,7 @@ class Bar(PriceItem):
 
 class Event:
     """
-    An event represents zero of items of information happening at a certain moment in time.
+    An event contains zero or more items of information happening at the same moment in time.
 
     - `Event.time` is a datetime object with the timezone set at UTC.
     - An item can be any type of object. But the most common use-case are of the type `PriceItem`,

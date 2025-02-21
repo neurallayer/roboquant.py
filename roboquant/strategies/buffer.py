@@ -18,7 +18,7 @@ class NumpyBuffer:
 
     def __init__(self, rows: int, columns: int, dtype: Any = "float32", order="C") -> None:
         """Create a new Numpy buffer"""
-        size = int(rows * 1.25 + 3)
+        size = int(rows * 1.25 + 3)  # slight overallocation to minimize copying when buffer is full
         self._data: NDArray = np.full((size, columns), np.nan, dtype=dtype, order=order)  # type: ignore
         self._idx = 0
         self.rows = rows

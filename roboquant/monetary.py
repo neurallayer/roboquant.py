@@ -77,7 +77,7 @@ ETH = Currency("ETH")
 
 
 class CurrencyConverter(ABC):
-    """Abstract base class for currency converters"""
+    """Abstract base class for currency converters. They are used to convert monetary amounts from one currency to another."""
 
     @abstractmethod
     def convert(self, amount: "Amount", to_currency: Currency, dt: datetime) -> float:
@@ -90,7 +90,7 @@ class CurrencyConverter(ABC):
 
 
 class NoConversion(CurrencyConverter):
-    """The default currency converter that doesn't convert between currencies"""
+    """The default currency converter that doesn't convert between currencies."""
 
     def convert(self, amount: "Amount", to_currency: Currency, dt: datetime) -> float:
         raise NotImplementedError("The default NoConversion doesn't support any conversions")
@@ -229,7 +229,7 @@ class Amount:
 
 class Wallet(defaultdict[Currency, float]):
     """A wallet holds monetary values of different currencies.
-    You can add wallets together, subtract them, or convert them to a single currency.
+    Wallets are mutable and you can add wallets together, subtract them, or convert them to a single currency.
     """
 
     def __init__(self, *amounts: Amount):

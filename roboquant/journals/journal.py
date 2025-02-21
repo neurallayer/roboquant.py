@@ -16,6 +16,6 @@ class Journal(ABC):
 
     @abstractmethod
     def track(self, event: Event, account: Account, signals: list[Signal], orders: list[Order]):
-        """invoked at each step of a run that provides the journal with the opportunity to
+        """Invoked at each step of a run that provides the journal with the opportunity to
         track and log various metrics."""
         ...

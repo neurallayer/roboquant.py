@@ -11,5 +11,6 @@ class Metric(ABC):
 
     @abstractmethod
     def calc(self, event: Event, account: Account, signals: list[Signal], orders: list[Order]) -> dict[str, float]:
-        """Calculate zero or more metrics and return the result as a dictionary"""
+        """Calculate zero or more metrics and return the result as a dictionary. The dictionary should not be modified
+        after it is returned. The keys in the dictionary should be unique and not conflict with other metrics."""
         ...

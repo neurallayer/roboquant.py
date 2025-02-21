@@ -24,6 +24,7 @@ class Config:
         self.config.read_string(config_string)
 
     def get(self, key: str) -> str:
+        """Get the value for the given key. It will first look in the environment variables and then in the config file"""
         for key2, value in os.environ.items():
             final_key = key2.lower().replace("_", ".")
             if final_key == key:

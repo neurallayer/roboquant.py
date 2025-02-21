@@ -7,7 +7,7 @@ from roboquant.strategies.strategy import Strategy
 
 
 class EMACrossover(Strategy):
-    """EMA Crossover Strategy that serves as an example strategy."""
+    """EMA Crossover Strategy implementation, that also serves as an example."""
 
     def __init__(self, fast_period=13, slow_period=26, smoothing=2.0, price_type="DEFAULT"):
         super().__init__()

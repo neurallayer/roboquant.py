@@ -16,8 +16,8 @@ logger = logging.getLogger(__name__)
 
 
 class SQLFeed(Feed):
-    """SQLFeed supports recording bars or quotes from other feeds and plays them back at a later moment in time.
-    It is also possible to append values to an existing database.
+    """SQLFeed supports recording bars or quotes from other feeds and then play them back during a run.
+    There is support for either Bars or Quotes. It is also possible to append values to an existing database.
     """
 
     # Used SQL statements in this class
@@ -124,7 +124,7 @@ class SQLFeed(Feed):
 
     def record(self, feed: Feed, timeframe=None, append=False, batch_size=10_000):
         """Record another feed into this SQLite database.
-        It only supports Bars and Quotes"""
+        It supports Bars and Quotes, other types of price-items are ignored."""
         with sqlite3.connect(self.db_file) as con:
             cur = con.cursor()
 

@@ -48,7 +48,7 @@ class EventChannel:
             # the event is past the provided timeframe.
             self.close()
 
-    def get(self, timeout=None) -> Event | None:
+    def get(self, timeout: float|None=None) -> Event | None:
         """Returns the next event or None if this channel is just closed
 
         - timeout: the timeout in seconds to send a heartbeat in case no other event was received, default is None.

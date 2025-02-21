@@ -13,8 +13,13 @@ class SignalType(Flag):
     """
 
     ENTRY = auto()
+    """Indicates that this signal can be used to enter or increase a position size"""
+
     EXIT = auto()
+    """Indicates that this signal can be used to exit or reduce a position size"""
+
     ENTRY_EXIT = ENTRY | EXIT
+    """Indicates that this signal can be used for both entering and exiting a position size"""
 
     def __str__(self):
         return self.name or str(self)
