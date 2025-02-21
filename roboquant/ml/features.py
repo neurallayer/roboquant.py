@@ -305,8 +305,8 @@ class FillWithConstantFeature(Feature):
 
 
 class CacheFeature(Feature):
-    """Cache the results of a feature. This requires: 
-    
+    """Cache the results of a feature. This requires:
+
     - the feed to have an always increasing time value
     - the feature to produce the same output at a given time. Typically, this doesn't hold true for features that
     are based on account values.

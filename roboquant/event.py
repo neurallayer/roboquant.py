@@ -26,7 +26,7 @@ class PriceItem:
 
     @abstractmethod
     def volume(self, volume_type: str = "DEFAULT") -> float:
-        """Return the volume of the price-item. 
+        """Return the volume of the price-item.
         Some price-items have multiple volumes, like the BID and ASK volume.
         """
 

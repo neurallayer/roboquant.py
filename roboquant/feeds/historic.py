@@ -11,7 +11,7 @@ from .feed import Feed
 
 class HistoricFeed(Feed, ABC):
     """
-    Abstract base class for feeds that produce historic price-items. 
+    Abstract base class for feeds that produce historic price-items.
     Internally it uses a dictionary to store the data.
     """
 

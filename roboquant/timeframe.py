@@ -40,7 +40,7 @@ class Timeframe:
     @classmethod
     def fromisoformat(cls, start: str, end: str, inclusive=False):
         """Create an instance of Timeframe based on a start- and end-datetime in ISO 8601 format.
-        
+
         Usage:
             tf1 = Timeframe.fromisoformat("2021-01-01T00:12:00+00:00", "2021-01-02T00:13:00+00:00", True)
             tf2 = Timeframe.fromisoformat("2021-01-01", "2022-01-01", False)

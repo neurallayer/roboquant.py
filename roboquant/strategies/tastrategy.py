@@ -36,7 +36,7 @@ class TaStrategy(Strategy):
     @abstractmethod
     def process_asset(self, asset: Asset, ohlcv: OHLCVBuffer) -> Signal | None:
         """
-        Create an signal for the provided asset, or return None if no signal should be created. 
+        Create an signal for the provided asset, or return None if no signal should be created.
         Subclasses should implement this method.
         """
         ...
