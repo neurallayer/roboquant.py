@@ -63,23 +63,23 @@ class OHLCVBuffer(NumpyBuffer):
         super().__init__(capacity, 5, dtype)
 
     def open(self) -> NDArray:
-        """Return the open prices"""
+        """Return the open prices as a Numpy array"""
         return self._get(0)
 
     def high(self) -> NDArray:
-        """Return the high prices"""
+        """Return the high prices as a Numpy array"""
         return self._get(1)
 
     def low(self) -> NDArray:
-        """Return the low prices"""
+        """Return the low prices as a Numpy array"""
         return self._get(2)
 
     def close(self) -> NDArray:
-        """Return the close prices"""
+        """Return the close prices as a Numpy array"""
         return self._get(3)
 
     def volume(self) -> NDArray:
-        """Return the volumes"""
+        """Return the volumes as a Numpy array"""
         return self._get(4)
 
 
@@ -91,7 +91,9 @@ class OHLCVBuffers(UserDict[Asset, OHLCVBuffer]):
         self.size = size
 
     def add_event(self, event: Event) -> set[Asset]:
-        """Add a new event and return all the assets that have been added and are ready to be processed"""
+        """Add a new event and return all the assets that have been added and are ready to be processed.
+        PriceItems that are not Bars are ignored.
+        """
         assets: set[Asset] = set()
         for item in event.items:
             if isinstance(item, Bar):
@@ -105,5 +107,5 @@ class OHLCVBuffers(UserDict[Asset, OHLCVBuffer]):
         return assets
 
     def ready(self) -> set[Asset]:
-        """Return a set of assets for which the buffer is already full"""
+        """Return the set of assets for which the buffer is already full"""
         return {asset for asset, ohlcv in self.items() if ohlcv.is_full()}

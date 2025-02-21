@@ -38,5 +38,12 @@ class TaStrategy(Strategy):
         """
         Create an signal for the provided asset, or return None if no signal should be created.
         Subclasses should implement this method.
+
+        Sample:
+        ```
+        prices = ohlcv.close()
+        if prices[-10:].mean() > prices[:10].mean():
+            return Signal.buy(asset)
+        ```
         """
         ...
