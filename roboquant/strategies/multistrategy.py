@@ -8,13 +8,13 @@ from roboquant.strategies.strategy import Strategy
 
 
 class MultiStrategy(Strategy):
-    """Combine one or more strategies. The MultiStrategy provides additional control on how to handle conflicting
+    """Combine multiple strategies. The MultiStrategy provides additional control on how to handle conflicting
     signals for the same asset via the signal_filter:
 
-    - first: in case of multiple signals for the same asset, the first one wins
-    - last:  in case of multiple signals for the same asset, the last one wins.
-    - mean: return the mean of the signal ratings. All signals will be ENTRY and EXIT.
-    - none: return all signals. This is also the default.
+    - first: in case of multiple signals for the same asset, the first one prevails.
+    - last:  in case of multiple signals for the same asset, the last one prevails.
+    - mean: return the mean of the signal ratings. All signals will be `ENTRY_EXIT`. If the mean is 0, no signal will be returned.
+    - none: return all signals and don't handle coflicts. This is also the default.
     """
 
     def __init__(

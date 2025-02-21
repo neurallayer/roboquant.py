@@ -8,8 +8,8 @@ from roboquant.strategies.strategy import Strategy
 
 
 class TaStrategy(Strategy):
-    """Abstract base class for other strategies that helps to implement trading solutions
-    based on technical indicators using a history of bars/candlesticks.
+    """Abstract base class for other strategies that assists to implement trading solutions
+    based on technical indicators using a history of bars (aka candlesticks).
 
     Subclasses should implement the `process_asset` method. This method is only invoked once
     there is at least `size` history for an individual asset available.
@@ -36,6 +36,7 @@ class TaStrategy(Strategy):
     @abstractmethod
     def process_asset(self, asset: Asset, ohlcv: OHLCVBuffer) -> Signal | None:
         """
-        Create zero or more orders for the provided asset
+        Create an signal for the provided asset, or return None if no signal should be created. 
+        Subclasses should implement this method.
         """
         ...

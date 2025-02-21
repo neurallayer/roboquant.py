@@ -238,7 +238,7 @@ class Wallet(defaultdict[Currency, float]):
             self[amount.currency] += amount.value
 
     def amounts(self):
-        """Return the amounts contained in this wallet"""
+        """Return a list with amounts contained in this wallet"""
         return [Amount(k, v) for k, v in self.items()]
 
     def __iadd__(self, other: "Amount | Wallet"):
@@ -268,6 +268,7 @@ class Wallet(defaultdict[Currency, float]):
         return Amount(other, self.convert_to(other, dt))
 
     def deepcopy(self) -> "Wallet":
+        """Return a deep copy of this wallet"""
         result = Wallet()
         result.update(self)
         return result

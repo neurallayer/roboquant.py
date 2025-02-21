@@ -26,7 +26,9 @@ class PriceItem:
 
     @abstractmethod
     def volume(self, volume_type: str = "DEFAULT") -> float:
-        """Return the volume of the price-item"""
+        """Return the volume of the price-item. 
+        Some price-items have multiple volumes, like the BID and ASK volume.
+        """
 
 
 @dataclass(slots=True)
@@ -35,8 +37,10 @@ class Quote(PriceItem):
 
     data: array  # [ask-price, ask-volume, bid-price, bid-volume]
 
-    def price(self, price_type: str = "DEFAULT") -> float:
-        """Return the price, the default being the mid-point price"""
+    def price(self, price_type: str = "MID") -> float:
+        """Return the price, the default being the mid-point price.
+        Alternatively, you can request the ASK or BID price.
+        """
 
         match price_type:
             case "ASK":
@@ -77,7 +81,10 @@ class Quote(PriceItem):
         """Return the mid-point price"""
         return (self.data[0] + self.data[2]) / 2.0
 
-    def volume(self, volume_type: str = "DEFAULT") -> float:
+    def volume(self, volume_type: str = "MID") -> float:
+        """Return the volume, the default being the MID volume (average of BID and ASK volume).
+        Alternatively, you can request the ASK or BID volume."""
+
         match volume_type:
             case "ASK":
                 return self.data[1]
@@ -100,9 +107,11 @@ class Trade(PriceItem):
     """The volume of the trade"""
 
     def price(self, price_type: str = "DEFAULT") -> float:
+        """Return the price of the trade"""
         return self.trade_price
 
     def volume(self, volume_type: str = "DEFAULT") -> float:
+        """Return the volume of the trade"""
         return self.trade_volume
 
 
@@ -123,7 +132,10 @@ class Bar(PriceItem):
         ohlcv = array("f", [ohlcv[0] * adj, ohlcv[1] * adj, ohlcv[2] * adj, adj_close, ohlcv[4] / adj])
         return cls(asset, ohlcv, frequency)
 
-    def price(self, price_type: str = "DEFAULT") -> float:
+    def price(self, price_type: str = "CLOSE") -> float:
+        """Return the price for the bar, default being the CLOSE price.
+        Alternatively, you can request the OPEN, HIGH or LOW price.
+        """
         match price_type:
             case "DEFAULT":
                 return self.ohlcv[3]
