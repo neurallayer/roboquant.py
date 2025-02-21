@@ -21,7 +21,7 @@ class MetricsJournal(Journal):
 
     @classmethod
     def pnl(cls):
-        """Return a metrics journal configured with the PNL metric"""
+        """Return a metrics journal pre-configured with the PNL metric"""
         return cls(PNLMetric())
 
     def track(self, event, account, signals, orders):
@@ -62,7 +62,7 @@ class MetricsJournal(Journal):
         return plt
 
     def get_metric_names(self) -> set[str]:
-        """return the recorded metric names"""
+        """return all the recorded metric names"""
         result = set()
         for _, m in self._history:
             result.update(m.keys())

@@ -92,6 +92,7 @@ class ParquetFeed(Feed):
         return [] if start is None else range(start, md.num_row_groups)
 
     def timeframe(self) -> Timeframe:
+        """Return the timeframe of this feed, if the feed is empty it will return an empty timeframe"""
         d = pq.read_metadata(self.parquet_path).to_dict()
         if d["row_groups"]:
             start = d["row_groups"][0]["columns"][0]["statistics"]["min"]
@@ -101,6 +102,7 @@ class ParquetFeed(Feed):
         return Timeframe.EMPTY
 
     def assets(self) -> list[Asset]:
+        """return the list of unique assets available in this feed"""
         if not self.exists():
             return []
 
@@ -110,12 +112,15 @@ class ParquetFeed(Feed):
         return list({Asset.deserialize(s) for s in assets_set})
 
     def meta(self):
+        """Return the metadata of the parquet file"""
         return pq.read_metadata(self.parquet_path)
 
     def __repr__(self) -> str:
         return f"ParquetFeed(path={self.parquet_path})"
 
     def record(self, feed: Feed, timeframe: Timeframe | None = None, row_group_size=10_000):
+        """Record a feed to a parquet file so it can be replayed later on"""
+
         with pq.ParquetWriter(self.parquet_path, schema=ParquetFeed.__schema, use_dictionary=True) as writer:
             channel = feed.play_background(timeframe)
             items = []
