@@ -1,8 +1,11 @@
 from roboquant.journals.metric import Metric
 
 
-class FeedMetric(Metric):
-    """Tracks the performance of the market, aka the price-items found in the event"""
+class MarketReturnMetric(Metric):
+    """Tracks the performance of the market, aka the price-items found in the event.
+    It will calculate the latest return of the market based on the price-items found
+    in the event and tracks the total return of the market.
+    """
 
     def __init__(self, price_type="DEFAULT"):
         self._prev_prices = {}
@@ -21,7 +24,6 @@ class FeedMetric(Metric):
 
         result = 0.0 if n == 0 else mkt_return / n
 
-        new_total = self._last_total * (1.0 + result)
-        self._last_total = new_total
+        self._last_total *= 1.0 + result
 
-        return {"feed/pnl": result, "feed/total_pnl": new_total - 1.0}
+        return {"feed/pnl": result, "feed/total_pnl": self._last_total - 1.0}

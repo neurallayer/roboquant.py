@@ -155,6 +155,7 @@ class ECBConversion(CurrencyConverter):
         return rates[idx][1]
 
     def convert(self, amount: "Amount", to_currency: Currency, dt: datetime) -> float:
+        dt = dt.astimezone(timezone.utc)
         return amount.value * self._get_rate(to_currency, dt) / self._get_rate(amount.currency, dt)
 
 
