@@ -10,7 +10,6 @@ path = "roboquant/__init__.py"
 
 [tool.ruff.lint]
 select = ["E", "F", "W"]
-# ignore = ["F401"]
 
 [tool.pyright]
 reportOptionalOperand = "none"
@@ -22,7 +21,7 @@ dynamic = ["version"]
 authors = [ { name="roboquant team", email="info@roboquant.org" },]
 description = "A fast algo-trading platform with support for AI based strategies"
 readme = "README.md"
-requires-python = ">=3.11, <3.14"
+requires-python = ">=3.11, <3.13"
 classifiers = [
     "Development Status :: 4 - Beta",
     "Intended Audience :: Developers",
@@ -31,7 +30,6 @@ classifiers = [
     "Programming Language :: Python :: 3 :: Only",
     "Programming Language :: Python :: 3.11",
     "Programming Language :: Python :: 3.12",
-    "Programming Language :: Python :: 3.13",
     "License :: OSI Approved :: Apache Software License",
     "Operating System :: OS Independent",
     "Topic :: Office/Business :: Financial",
@@ -39,7 +37,7 @@ classifiers = [
 ]
 keywords = ["trading", "machine learning", "AI", "investment", "finance", "crypto", "stocks", "exchange", "forex"]
 dependencies = [
-  "numpy>=2.2.3",
+  "numpy>=1.26.4",
   "websocket-client~=1.8.0",
   "requests>=2.32.0",
   "yfinance~=0.2.54"
