@@ -9,7 +9,7 @@ from itertools import product
 
 import roboquant as rq
 
-# Feed with over 20 years of data
+# Feed with over 25 years of data
 FEED = rq.feeds.YahooFeed("GOOG", "MSFT", "NVDA", start_date="2000-01-01")
 print(FEED)
 
@@ -32,10 +32,10 @@ if __name__ == "__main__":
         # Split overal timeframe into 5 equal non-overlapping timeframes
         timeframe_params = FEED.timeframe().split(5)
 
-        # EMACrossover params, the fast and slow periods
+        # EMACrossover parameters, the fast and slow periods
         ema_params = [(3, 5), (5, 7), (10, 15), (15, 21)]
 
-        # All combinations of params (Cartesian product)
+        # All the combinations of parameters (Cartesian product)
         all_params = product(timeframe_params, ema_params)
 
         # run the back tests in parallel
