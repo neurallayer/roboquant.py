@@ -10,7 +10,7 @@ from roboquant.event import Quote, Bar, Trade
 from roboquant.event import Event
 from roboquant.feeds.eventchannel import EventChannel
 from roboquant.feeds.feed import Feed
-from roboquant.asset import Asset
+from roboquant.asset import deserialize_to_asset
 
 logger = logging.getLogger(__name__)
 
@@ -73,7 +73,7 @@ class AvroFeed(Feed):
                     t_old = t
 
                 price_type = str(row["type"])  # type: ignore
-                asset = Asset.deserialize(str(row["asset"]))  # type: ignore
+                asset = deserialize_to_asset(str(row["asset"]))  # type: ignore
                 match price_type:
                     case "QUOTE":
                         item = Quote(asset, array("f", row["values"]))  # type: ignore

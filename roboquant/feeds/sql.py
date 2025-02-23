@@ -5,7 +5,7 @@ from array import array
 from datetime import datetime
 from typing import Literal
 
-from roboquant.asset import Asset
+from roboquant.asset import deserialize_to_asset
 from roboquant.event import Bar, PriceItem, Quote
 from roboquant.event import Event
 from roboquant.timeframe import Timeframe
@@ -72,14 +72,14 @@ class SQLFeed(Feed):
         with sqlite3.connect(self.db_file) as con:
             result = con.execute(SQLFeed._sql_select_assets).fetchall()
             con.commit()
-            assets = {Asset.deserialize(columns[0]) for columns in result}
+            assets = {deserialize_to_asset(columns[0]) for columns in result}
             return assets
 
     def _get_item(self, row) -> PriceItem:
         """Get a PriceItem from a row in the database"""
         if self.is_bar:
             asset_str = row[1]
-            asset = Asset.deserialize(asset_str)
+            asset = deserialize_to_asset(asset_str)
             prices = row[2:7]
             freq = row[7]
             return Bar(asset, array("f", prices), freq)

@@ -10,7 +10,7 @@ from roboquant.event import Quote, Bar, Trade
 from roboquant.event import Event
 from roboquant.feeds.eventchannel import EventChannel
 from roboquant.feeds.feed import Feed
-from roboquant.asset import Asset
+from roboquant.asset import deserialize_to_asset, Asset
 from roboquant.timeframe import Timeframe
 
 logger = logging.getLogger(__name__)
@@ -59,7 +59,7 @@ class ParquetFeed(Feed):
                     last_time = n
                     items = []
 
-                asset = Asset.deserialize(a.as_py())
+                asset = deserialize_to_asset(a.as_py())
                 if t.as_py() == 1:
                     item = Quote(asset, array("f", p.as_py()))
                     items.append(item)
@@ -109,7 +109,7 @@ class ParquetFeed(Feed):
         result_table = pq.read_table(self.parquet_path, columns=["asset"], schema=ParquetFeed.__schema)
         assets_list = result_table["asset"].to_pylist()
         assets_set = set(assets_list)
-        return list({Asset.deserialize(s) for s in assets_set})
+        return list({deserialize_to_asset(s) for s in assets_set})
 
     def meta(self):
         """Return the metadata of the parquet file"""

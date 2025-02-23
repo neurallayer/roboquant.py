@@ -22,16 +22,28 @@ class Currency(str):
     """Currency class represents a monetary currency and is a subclass of `str`.
 
     It is possible to create an `Amount` using a combination of a `number` and a `Currency`:
-
-        amount1 = 100@USD
-        amount2 = 200.50@EUR
+    ```
+    amount1 = 100@USD
+    amount2 = 200.50@EUR
+    amount3 = USD(100)
+    ```
     """
 
     def __rmatmul__(self, other: float | int):
+        """Create a new `Amount` using this currency and the provided value
+        ```
+        amount1 = 100@USD
+        ```
+        """
         assert isinstance(other, (float, int))
         return Amount(self, other)
 
     def __call__(self, other: float | int):
+        """Create a new `Amount` using this currency and the provided value
+        ```
+        amount = USD(100)
+        ```
+        """
         return Amount(self, other)
 
 
