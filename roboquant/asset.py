@@ -83,7 +83,7 @@ class Crypto(Asset):
     """Crypto-currency asset"""
 
     @staticmethod
-    def from_symbol(symbol: str, sep="/"):
+    def from_symbol(symbol: str, sep: str="/"):
         currency = symbol.split(sep)[-1]
         return Crypto(symbol, Currency(currency))
 
@@ -115,7 +115,7 @@ class Option(Asset):
         return f"Option:{self.symbol}:{self.currency}"
 
 # Keep the registered asset classes in a dictionary so they can be deserialized later on
-__asset_classes = {}
+__asset_classes: dict[str, Type[Asset]] = {}
 __cache: dict[str, Asset] = {}
 
 def register_asset_class(clazz: Type[Asset]):

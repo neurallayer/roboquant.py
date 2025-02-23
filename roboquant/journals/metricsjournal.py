@@ -34,8 +34,8 @@ class MetricsJournal(Journal):
 
     def get_metric(self, metric_name: str) -> tuple[list[datetime], list[float]]:
         """Return the calculated values of a metric as tuple of date-times and float values"""
-        timeline = []
-        values = []
+        timeline: list[datetime] = []
+        values: list[float] = []
         for time, metrics in self._history:
             if metric_name in metrics:
                 timeline.append(time)
@@ -63,7 +63,7 @@ class MetricsJournal(Journal):
 
     def get_metric_names(self) -> set[str]:
         """return all the recorded metric names"""
-        result = set()
+        result: set[str] = set()
         for _, m in self._history:
             result.update(m.keys())
         return result

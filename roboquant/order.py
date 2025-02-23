@@ -39,7 +39,8 @@ class Order:
     """The unique id of the order, set by the broker only"""
 
     fill: Decimal
-    """The filled size of the order, set by the broker only"""
+    """The filled size of the order, set by the broker only. Just like the size, positive for buy orders,
+    negative for sell orders. So the remanining size is `size - fill`"""
 
     def __init__(self, asset: Asset, size: Decimal | str | int | float, limit: float, gtd: datetime | None = None, **kwargs):
         self.asset = asset
@@ -80,15 +81,19 @@ class Order:
         result.limit = limit or result.limit
         return result
 
-    def __deepcopy__(self, memo):
+    def __deepcopy__(self, _):
         result = Order(self.asset, self.size, self.limit, self.gtd, **self.info)
         result.id = self.id
         result.fill = self.fill
         return result
 
     def value(self) -> float:
-        """Return the total value of this order"""
+        """Return the total contract value of this order, it ignores the already filled part of the order"""
         return self.asset.contract_value(self.size, self.limit)
+
+    def remaining_value(self) -> float:
+        """Return the remaining contract value of this order"""
+        return self.asset.contract_value(self.remaining, self.limit)
 
     def amount(self) -> Amount:
         """Return the total value of this order as a single Amount denoted in the currency of the asset"""

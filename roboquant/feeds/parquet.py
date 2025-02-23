@@ -118,7 +118,7 @@ class ParquetFeed(Feed):
     def __repr__(self) -> str:
         return f"ParquetFeed(path={self.parquet_path})"
 
-    def record(self, feed: Feed, timeframe: Timeframe | None = None, row_group_size=10_000):
+    def record(self, feed: Feed, timeframe: Timeframe | None = None, row_group_size: int=10_000):
         """Record a feed to a parquet file so it can be replayed later on"""
 
         with pq.ParquetWriter(self.parquet_path, schema=ParquetFeed.__schema, use_dictionary=True) as writer:

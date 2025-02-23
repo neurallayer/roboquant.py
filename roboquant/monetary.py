@@ -113,7 +113,7 @@ class ECBConversion(CurrencyConverter):
 
     __file_name = Path.home() / ".roboquant" / "eurofxref-hist.csv"
 
-    def __init__(self, force_download=False):
+    def __init__(self, force_download: bool=False):
         self._rates: Dict[Currency, List[Any]] = {}
         if force_download or not self.up_to_date():
             self._download()
@@ -209,19 +209,25 @@ class Amount:
         """
         Amount.__converter = converter
 
-    def items(self):
+    def items(self) -> list[tuple[Currency, float]]:
+        """Return a list with only this amount an an item, this brings the `Amount` class in line with the `Wallet` class"""
         return [(self.currency, self.value)]
 
-    def amounts(self):
+    def amounts(self) -> list["Amount"]:
+        """Return a list with only this amount, this brings the `Amount` class in line with the `Wallet` class"""
         return [self]
 
-    def __add__(self, other: "Amount") -> "Wallet":
+    def __add__(self, other: "Amount") -> "Wallet | Amount":
         """Add another amount to this amount.
-        This will always return a wallet, even if both amounts are denoted in the same currency.
+        If the other amount is in the same currency, it will return a new `Amount` otherwise it will return a `Wallet`.
+        So no currency conversion will be done.
         """
+        if other.currency == self.currency:
+            return Amount(self.currency, self.value + other.value)
         return Wallet(self, other)
 
     def __matmul__(self, other: Currency) -> "Amount":
+        """Convert this amount to another currency and return a new `Amount`"""
         dt = datetime.now(tz=timezone.utc)
         return Amount(other, self.convert_to(other, dt))
 

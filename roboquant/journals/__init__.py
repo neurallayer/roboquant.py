@@ -1,6 +1,6 @@
 from roboquant.journals.alphabeta import AlphaBeta
 from roboquant.journals.basicjournal import BasicJournal
-from roboquant.journals.feedmetric import MarketReturnMetric
+from roboquant.journals.marketreturnmetric import MarketReturnMetric
 from roboquant.journals.journal import Journal
 from roboquant.journals.metric import Metric
 from roboquant.journals.metricsjournal import MetricsJournal

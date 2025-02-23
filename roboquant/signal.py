@@ -30,16 +30,17 @@ class Signal:
     """Signal that a strategy can create. It contains both a rating and the type of signal.
 
     A rating is a float normally between -1.0 and 1.0, where -1.0 is a strong sell, and 1.0 is a strong buy.
-    But this range isn't enforced. It is up to the used trader to handle these values.
+    But this range isn't enforced. It is up to the used `trader` to handle these values.
 
     The type indicates if it is an `ENTRY`, `EXIT` or `ENTRY_EXIT` signal. The default is `ENTRY_EXIT`. Please note that
-    it is up to the trader to handle these types correctly.
+    it is again up to the `trader` to handle these types correctly.
 
     Examples:
     ```
-        Signal.buy("XYZ")
-        Signal.sell("XYZ", SignalType.EXIT)
-        Signal("XYZ", 0.5, SignalType.ENTRY)
+    apple = Stock("AAPL")
+    Signal.buy(apple)
+    Signal.sell(apple, SignalType.EXIT)
+    Signal(apple, 0.5, SignalType.ENTRY)
     ```
     """
 
@@ -50,17 +51,17 @@ class Signal:
     """The rating of this signal, normally between -1.0 and 1.0"""
 
     type: SignalType = SignalType.ENTRY_EXIT
-    """The type of signal, either ENTRY, EXIT or ENTRY_EXIT"""
+    """The type of signal, either ENTRY, EXIT or ENTRY_EXIT. Default is ENTRY_EXIT"""
 
     @staticmethod
-    def buy(symbol, signal_type=SignalType.ENTRY_EXIT) -> "Signal":
+    def buy(asset: Asset, signal_type: SignalType=SignalType.ENTRY_EXIT) -> "Signal":
         """Create a BUY signal with a rating of 1.0"""
-        return Signal(symbol, 1.0, signal_type)
+        return Signal(asset, 1.0, signal_type)
 
     @staticmethod
-    def sell(symbol, signal_type=SignalType.ENTRY_EXIT) -> "Signal":
+    def sell(asset: Asset, signal_type: SignalType=SignalType.ENTRY_EXIT) -> "Signal":
         """Create a SELL signal with a rating of -1.0"""
-        return Signal(symbol, -1.0, signal_type)
+        return Signal(asset, -1.0, signal_type)
 
     @property
     def is_buy(self) -> bool:

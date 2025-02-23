@@ -11,6 +11,7 @@ from roboquant.event import Event
 from roboquant.feeds.eventchannel import EventChannel
 from roboquant.feeds.feed import Feed
 from roboquant.asset import deserialize_to_asset
+from roboquant.timeframe import Timeframe
 
 logger = logging.getLogger(__name__)
 
@@ -88,7 +89,7 @@ class AvroFeed(Feed):
                     case _:
                         raise ValueError(f"Unsupported priceItem type={price_type}")
 
-    def record(self, feed: Feed, timeframe=None, append=False, batch_size=10_000):
+    def record(self, feed: Feed, timeframe: Timeframe | None=None, append: bool=False, batch_size: int=10_000):
         """Record another feed into an Avro file. It supports Quotes, Trades, and Bars.
         Later you can then use this Avro file as a feed to play back the data.
         """

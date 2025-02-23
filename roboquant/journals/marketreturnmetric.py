@@ -1,4 +1,9 @@
+from roboquant.event import Event
+from roboquant.account import Account
+from roboquant.asset import Asset
 from roboquant.journals.metric import Metric
+from roboquant.order import Order
+from roboquant.signal import Signal
 
 
 class MarketReturnMetric(Metric):
@@ -7,12 +12,12 @@ class MarketReturnMetric(Metric):
     in the event and tracks the total return of the market.
     """
 
-    def __init__(self, price_type="DEFAULT"):
-        self._prev_prices = {}
+    def __init__(self, price_type: str="DEFAULT"):
+        self._prev_prices: dict[Asset, float] = {}
         self.price_type = price_type
         self._last_total = 1.0
 
-    def calc(self, event, account, signals, orders):
+    def calc(self, event: Event, account: Account, signals: list[Signal], orders: list[Order]) -> dict[str, float]:
         mkt_return = 0.0
         n = 0
         for asset, price in event.get_prices(self.price_type).items():

@@ -27,7 +27,7 @@ class SimBroker(Broker):
     This class can be extended to support different types of use-cases, like margin trading.
     """
 
-    def __init__(self, initial_deposit=Amount(USD, 1_000_000.0), price_type="OPEN", slippage=0.001):
+    def __init__(self, initial_deposit: Amount=Amount(USD, 1_000_000.0), price_type:str="OPEN", slippage:float=0.001):
         super().__init__()
         self._account = Account(initial_deposit.currency)
         self._modify_orders: list[Order] = []
@@ -85,7 +85,7 @@ class SimBroker(Broker):
         correction = self.slippage if order.is_buy else -self.slippage
         return price * (1.0 + correction)
 
-    def _execute(self, order: Order, item) -> _Trx | None:
+    def _execute(self, order: Order, item: PriceItem) -> _Trx | None:
         """Simulate a market execution for the three order types"""
 
         price = self._get_execution_price(order, item)
@@ -131,7 +131,7 @@ class SimBroker(Broker):
             else:
                 self._modify_orders.append(order)
 
-    def remove_order(self, order):
+    def remove_order(self, order: Order):
         self._account.orders.remove(order)
 
     def _process_modify_orders(self):
