@@ -11,3 +11,4 @@ build/
 *.ipynb
 .ruff_cache/
 .pytest_cache/
+.env

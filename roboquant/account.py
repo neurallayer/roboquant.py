@@ -9,7 +9,7 @@ from roboquant.monetary import Amount, Wallet, USD, Currency
 
 @dataclass(slots=True)
 class Position:
-    """Position of an asset in the account"""
+    """The position of an asset in the account"""
 
     size: Decimal
     """Position size as a Decimal"""

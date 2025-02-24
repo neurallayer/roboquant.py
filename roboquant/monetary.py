@@ -97,7 +97,7 @@ class CurrencyConverter(ABC):
         ...
 
     def register(self):
-        """Register this converter to be used for conversions between amounts"""
+        """Register this converter to be used for all conversions between amounts"""
         Amount.register_converter(self)
 
 
@@ -109,7 +109,10 @@ class NoConversion(CurrencyConverter):
 
 
 class ECBConversion(CurrencyConverter):
-    """CurrencyConverter that retrieves it exchange rates from the ECB (European Central Bank)."""
+    """CurrencyConverter that retrieves it exchange rates from the ECB (European Central Bank).
+    These exchange rates are based on the Euro and are updated daily by the ECB. They don't contain
+    any historical data from before the Euro was introduced in 1999.
+    """
 
     __file_name = Path.home() / ".roboquant" / "eurofxref-hist.csv"
 
@@ -172,8 +175,8 @@ class ECBConversion(CurrencyConverter):
 
 
 class StaticConversion(CurrencyConverter):
-    """Currency converter that uses static rates to convert between different currencies.
-    This converter doesn't take time into consideration.
+    """Currency converter that uses static configured rates to convert between different currencies.
+    This converter doesn't take `time` into consideration.
     """
 
     def __init__(self, base_currency: Currency, rates: dict[Currency, float]):

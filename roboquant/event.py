@@ -157,8 +157,9 @@ class Event:
     An event contains zero or more items of information happening at the same moment in time.
 
     - `Event.time` is a datetime object with the timezone set at UTC.
-    - An item can be any type of object. But the most common use-case are of the type `PriceItem`,
-      like `Quote`, `Trade` or `Bar`.
+    - An item can be any type of object. The most common use-case are of the type `PriceItem`,
+      like `Quote`, `Trade` or `Bar`. But items could also represent other types of information like
+      fundamental data or social-media posts.
     """
 
     def __init__(self, dt: datetime, items: list[Any]):

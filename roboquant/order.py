@@ -17,7 +17,7 @@ class Order:
     The `gtd` (good till date) is optional and if not set implies the order is valid
     forever. The `info` can hold any abritrary properties (kwargs) set on the order.
 
-    The `id` and `fill` are automatically set by the `Broker` and should not be set manually.
+    The `id` and `fill` are automatically set by the `Broker` and should not be updated.
     """
 
     asset: Asset

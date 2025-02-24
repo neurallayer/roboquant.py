@@ -4,6 +4,7 @@ import time
 from datetime import datetime, timedelta
 from decimal import Decimal
 
+from ibapi.order_cancel import OrderCancel
 from ibapi import VERSION
 from ibapi.account_summary_tags import AccountSummaryTags
 from ibapi.client import EClient
@@ -19,14 +20,13 @@ from roboquant.order import Order
 from roboquant.brokers.broker import LiveBroker
 from roboquant.monetary import Amount, Wallet, Currency, USD
 
-assert VERSION["major"] == 10 and VERSION["minor"] == 19, "Wrong version of the IBAPI found"
+assert VERSION["major"] == 10 and VERSION["minor"] == 30, "Wrong version of the IBAPI found, required 10.30.x"
 
 logger = logging.getLogger(__name__)
 
 
 # noinspection PyPep8Naming
 class _IBApi(EWrapper, EClient):
-
     def __init__(self):
         EClient.__init__(self, self)
         self.__tmp_orders: dict[str, Order] = {}
@@ -117,13 +117,14 @@ class IBKRBroker(LiveBroker):
     port
        By default, TWS uses socket port 7496 for live sessions and 7497 for paper sessions.
        IB Gateway, by contrast, uses 4001 for live sessions and 4002 for paper sessions.
-       However, these are just defaults, and can be modified as desired.
+       However, these are just defaults, and can be configured in the API settings of TWS or IB Gateway.
 
     client_id
-        The client id to use to connect to TWS or IB Gateway.
+        The client id to use to connect to TWS or IB Gateway. The default is 123. This will showup as a
+        seperate tab in the IB Gateway GUI.
     """
 
-    def __init__(self, host="127.0.0.1", port=4002, client_id=123) -> None:
+    def __init__(self, host: str = "127.0.0.1", port: int = 4002, client_id: int = 123) -> None:
         super().__init__()
         self.__account = Account()
         self.contract_mapping: dict[Asset, Contract] = {}
@@ -140,12 +141,12 @@ class IBKRBroker(LiveBroker):
         time.sleep(3.0)
 
     @classmethod
-    def use_tws(cls, client_id=123):
+    def use_tws(cls, client_id: int = 123):
         """Return a broker connected to the TWS papertrade instance with its default port (7497) settings"""
         return cls("127.0.0.1", 7497, client_id)
 
     @classmethod
-    def use_gateway(cls, client_id=123):
+    def use_gateway(cls, client_id: int = 123):
         """Return a broker connected to a IB Gateway papertrade instance with its default port (4002) settings"""
         return cls("127.0.0.1", 4002, client_id)
 
@@ -179,7 +180,6 @@ class IBKRBroker(LiveBroker):
         return acc
 
     def place_orders(self, orders):
-
         self.__has_new_orders_since_sync = len(orders) > 0
 
         for idx, order in enumerate(orders, start=1):
@@ -192,7 +192,7 @@ class IBKRBroker(LiveBroker):
                     logger.warning("can only cancel orders with an id")
                     continue
 
-                self.__api.cancelOrder(int(order.id), "")
+                self.__api.cancelOrder(int(order.id), OrderCancel())
                 if self.sleep_after_cancel:
                     time.sleep(self.sleep_after_cancel)
             else:

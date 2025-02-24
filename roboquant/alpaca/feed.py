@@ -26,7 +26,6 @@ from alpaca.data.timeframe import TimeFrame, TimeFrameUnit
 from alpaca.trading.enums import AssetClass
 
 from roboquant.asset import Asset, Crypto, Option, Stock
-from roboquant.config import Config
 from roboquant.event import Bar, Event, Quote, Trade
 from roboquant.feeds.historic import HistoricFeed
 from roboquant.feeds.live import LiveFeed
@@ -55,12 +54,8 @@ class AlpacaLiveFeed(LiveFeed):
 
     __one_minute = str(timedelta(minutes=1))
 
-    def __init__(self, market: Literal["iex", "sip", "crypto", "option"] = "iex", api_key=None, secret_key=None) -> None:
+    def __init__(self, api_key:str, secret_key: str, market: Literal["iex", "sip", "crypto", "option"] = "iex") -> None:
         super().__init__()
-        config = Config()
-        api_key = api_key or config.get("alpaca.public.key")
-        secret_key = secret_key or config.get("alpaca.secret.key")
-        _assert_keys(api_key, secret_key)
         self.market = market
 
         match market:
@@ -154,13 +149,9 @@ class AlpacaHistoricStockFeed(_AlpacaHistoricFeed):
     Support for bars, trades and quotes.
     """
 
-    def __init__(self, api_key=None, secret_key=None, data_api_url=None, feed: DataFeed | None = None):
+    def __init__(self, api_key:str, secret_key:str, feed: DataFeed = DataFeed.IEX, **kwargs):
         super().__init__()
-        config = Config()
-        api_key = api_key or config.get("alpaca.public.key")
-        secret_key = secret_key or config.get("alpaca.secret.key")
-        _assert_keys(api_key, secret_key)
-        self.client = StockHistoricalDataClient(api_key, secret_key, url_override=data_api_url)
+        self.client = StockHistoricalDataClient(api_key, secret_key, **kwargs)
         self.feed = feed
 
     def retrieve_bars(self, *symbols, start=None, end=None, resolution: TimeFrame | None = None, adjustment=Adjustment.ALL):
@@ -191,13 +182,9 @@ class AlpacaHistoricCryptoFeed(_AlpacaHistoricFeed):
     Support for bars and trades.
     """
 
-    def __init__(self, api_key=None, secret_key=None, data_api_url=None):
+    def __init__(self, api_key:str, secret_key:str, **kwargs):
         super().__init__()
-        config = Config()
-        api_key = api_key or config.get("alpaca.public.key")
-        secret_key = secret_key or config.get("alpaca.secret.key")
-        _assert_keys(api_key, secret_key)
-        self.client = CryptoHistoricalDataClient(api_key, secret_key, url_override=data_api_url)
+        self.client = CryptoHistoricalDataClient(api_key, secret_key, **kwargs)
 
     def retrieve_bars(self, *symbols, start=None, end=None, resolution: TimeFrame | None = None):
         resolution = resolution or TimeFrame(amount=1, unit=TimeFrameUnit.Day)

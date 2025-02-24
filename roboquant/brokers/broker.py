@@ -29,7 +29,8 @@ class Broker(ABC):
 
     @abstractmethod
     def sync(self, event: Event | None = None) -> Account:
-        """Sync the state, and return an updated account to reflect the latest state.
+        """Sync the state, and return an updated account to reflect the latest state. So all brokers
+        return the same account object, making it easier to switch from back-testing to live-trading.
 
         Args:
             event: optional the latest event.

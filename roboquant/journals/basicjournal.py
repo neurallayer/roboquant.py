@@ -8,7 +8,7 @@ logger = logging.getLogger(__name__)
 
 @dataclass
 class BasicJournal(Journal):
-    """Journal that tracks the following metrics:
+    """Journal that track the following information:
     - total number of events, and items,
     - the total number of signals and orders
     - the maximum open positions

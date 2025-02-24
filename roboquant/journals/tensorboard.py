@@ -4,9 +4,9 @@ from roboquant.journals.metric import Metric
 
 class TensorboardJournal(Journal):
     """Record metrics to a Tensorboard compatible file. The wall time is set to the event time, so
-    with the right configuration in tensorboard, you can see the metrics evolve over time.
+    with the right configuration in the tensorboard UI, you can see the metrics evolve over time.
 
-    This can be used outside the realm of machine learning, but requires tensorboard to be installed.
+    This can be used outside the realm of machine learning, but requires tensorboard library to be installed.
     """
 
     def __init__(self, writer, *metrics: Metric):

@@ -496,15 +496,6 @@ wheels = [
 ]
 
 [[package]]
-name = "nautilus-ibapi"
-version = "10.19.4"
-source = { registry = "https://pypi.org/simple" }
-sdist = { url = "https://files.pythonhosted.org/packages/09/94/b293e58248ae72b66f3a0fd2ed3a89d75011bc111745f5351aa28d117bd7/nautilus_ibapi-10.19.4.tar.gz", hash = "sha256:fdfae46b9de577d8b7a396c6345c3b60391155f999c80b0c4021968016685aae", size = 62707 }
-wheels = [
-    { url = "https://files.pythonhosted.org/packages/d2/1c/cfbab96ef72ddd22b4668135899ff56b7a87d08780e57a660c16a188f298/nautilus_ibapi-10.19.4-py3-none-any.whl", hash = "sha256:61f40762a0a18ef6fee57212c7092d5f42c22f72cf3a08c052cb2be68af4f413", size = 71867 },
-]
-
-[[package]]
 name = "networkx"
 version = "3.4.2"
 source = { registry = "https://pypi.org/simple" }
@@ -926,6 +917,24 @@ wheels = [
 ]
 
 [[package]]
+name = "python-dotenv"
+version = "1.0.1"
+source = { registry = "https://pypi.org/simple" }
+sdist = { url = "https://files.pythonhosted.org/packages/bc/57/e84d88dfe0aec03b7a2d4327012c1627ab5f03652216c63d49846d7a6c58/python-dotenv-1.0.1.tar.gz", hash = "sha256:e324ee90a023d808f1959c46bcbc04446a10ced277783dc6ee09987c37ec10ca", size = 39115 }
+wheels = [
+    { url = "https://files.pythonhosted.org/packages/6a/3e/b68c118422ec867fa7ab88444e1274aa40681c606d59ac27de5a5588f082/python_dotenv-1.0.1-py3-none-any.whl", hash = "sha256:f7b63ef50f1b690dddf550d03497b66d609393b40b564ed0d674909a68ebf16a", size = 19863 },
+]
+
+[[package]]
+name = "python-ibapi-stable"
+version = "10.30.1"
+source = { registry = "https://pypi.org/simple" }
+sdist = { url = "https://files.pythonhosted.org/packages/f8/55/88234090f91ec20cc7160634d1d62c37b8bf7ead143920e2a3ecdea899b8/python_ibapi_stable-10.30.1.tar.gz", hash = "sha256:c0e25a57a9f0140109a36208f99af452fb63ee8a8b417ca6339e7e8d9af572ab", size = 69525 }
+wheels = [
+    { url = "https://files.pythonhosted.org/packages/02/76/939aae501bf6c3fe945b1f2ca207e3b4faa389e83c8a634f2e696d36798b/python_ibapi_stable-10.30.1-py3-none-any.whl", hash = "sha256:2aabd990edcf902ebd161722d6825d6fd8342528519e1be507ed16005b081fbe", size = 76624 },
+]
+
+[[package]]
 name = "pytz"
 version = "2024.2"
 source = { registry = "https://pypi.org/simple" }
@@ -964,10 +973,11 @@ wheels = [
 
 [[package]]
 name = "roboquant"
-version = "1.0.0"
+version = "1.0.1"
 source = { editable = "." }
 dependencies = [
     { name = "numpy" },
+    { name = "python-ibapi-stable" },
     { name = "requests" },
     { name = "websocket-client" },
     { name = "yfinance" },
@@ -981,7 +991,7 @@ avro = [
     { name = "fastavro" },
 ]
 ibkr = [
-    { name = "nautilus-ibapi" },
+    { name = "python-ibapi-stable" },
 ]
 parquet = [
     { name = "pyarrow" },
@@ -996,6 +1006,7 @@ torch = [
 [package.dev-dependencies]
 dev = [
     { name = "matplotlib" },
+    { name = "python-dotenv" },
     { name = "ta-lib" },
 ]
 
@@ -1003,9 +1014,10 @@ dev = [
 requires-dist = [
     { name = "alpaca-py", marker = "extra == 'alpaca'", specifier = ">=0.38.0" },
     { name = "fastavro", marker = "extra == 'avro'", specifier = ">=1.9.7" },
-    { name = "nautilus-ibapi", marker = "extra == 'ibkr'", specifier = "~=10.19.2" },
     { name = "numpy", specifier = ">=1.26.4" },
     { name = "pyarrow", marker = "extra == 'parquet'", specifier = ">=19.0.0" },
+    { name = "python-ibapi-stable" },
+    { name = "python-ibapi-stable", marker = "extra == 'ibkr'", specifier = "~=10.30.1" },
     { name = "requests", specifier = ">=2.32.0" },
     { name = "sb3-contrib", marker = "extra == 'torch'", specifier = ">=2.5.0" },
     { name = "stable-baselines3", extras = ["extra"], marker = "extra == 'torch'", specifier = ">=2.5.0" },
@@ -1018,6 +1030,7 @@ requires-dist = [
 [package.metadata.requires-dev]
 dev = [
     { name = "matplotlib", specifier = ">=3.10.0" },
+    { name = "python-dotenv", specifier = ">=1.0.1" },
     { name = "ta-lib", specifier = "==0.5.3" },
 ]
 

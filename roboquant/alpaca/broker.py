@@ -10,7 +10,6 @@ from alpaca.trading.models import Order as AOrder
 from alpaca.trading.requests import GetOrdersRequest, LimitOrderRequest, ReplaceOrderRequest
 from roboquant.account import Account, Position
 from roboquant.asset import Asset, Crypto, Option, Stock
-from roboquant.config import Config
 from roboquant.event import Event
 from roboquant.brokers.broker import LiveBroker
 from roboquant.order import Order
@@ -22,12 +21,9 @@ logger = logging.getLogger(__name__)
 class AlpacaBroker(LiveBroker):
     """Alpaca Broker implementation for live trading"""
 
-    def __init__(self, api_key=None, secret_key=None) -> None:
+    def __init__(self, api_key: str, secret_key: str) -> None:
         super().__init__()
         self.__account: Account = Account()
-        config = Config()
-        api_key = api_key or config.get("alpaca.public.key")
-        secret_key = secret_key or config.get("alpaca.secret.key")
         self.__client = TradingClient(api_key, secret_key)
         self.price_type = "DEFAULT"
         self.sleep_after_cancel = 0.0

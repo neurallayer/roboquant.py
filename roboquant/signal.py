@@ -48,7 +48,7 @@ class Signal:
     """The asset this signal is for"""
 
     rating: float
-    """The rating of this signal, normally between -1.0 and 1.0"""
+    """The rating of this signal, normally a float value between -1.0 and 1.0"""
 
     type: SignalType = SignalType.ENTRY_EXIT
     """The type of signal, either ENTRY, EXIT or ENTRY_EXIT. Default is ENTRY_EXIT"""
