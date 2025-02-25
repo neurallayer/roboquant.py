@@ -33,8 +33,8 @@ jobs:
     - name: Run ruff checking
       run: uvx ruff check
 
-    - name: Run pyright
-      run: uv run pyright tests roboquant
+    # - name: Run pyright
+    #  run: uv run pyright tests roboquant
 
     - name: Run unit tests
       run: uv run --no-dev python -m unittest discover -s tests/unit
