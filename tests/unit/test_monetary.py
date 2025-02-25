@@ -23,6 +23,7 @@ class TestMonetary(unittest.TestCase):
 
     def test_currency(self):
         w = 12 @ USD + 20 @ EUR
+        assert isinstance(w, Wallet)
         self.assertIn(USD, w)
         self.assertIn(USD, w)
         self.assertIn(EUR, w)

@@ -1,4 +1,5 @@
 # %%
+import os
 from datetime import timedelta
 import logging
 import roboquant as rq
@@ -9,13 +10,15 @@ logging.basicConfig()
 logging.getLogger("roboquant").setLevel(level=logging.INFO)
 
 # %%
-broker = AlpacaBroker()
+api_key =  os.environ["ALPACA_API_KEY"]
+secret_key = os.environ["ALPACA_SECRET"]
+broker = AlpacaBroker(api_key, secret_key)
 account = broker.sync()
 print(account)
 
 # %%
 # Connect to Alpaca and subscribe to some popular stocks
-alpaca_feed = AlpacaLiveFeed(market="iex")
+alpaca_feed = AlpacaLiveFeed(api_key, secret_key, market="iex")
 symbols = ["TSLA", "MSFT", "NVDA", "AMD", "AAPL", "AMZN", "META", "GOOG", "XOM", "JPM", "NLFX", "BA", "INTC", "V"]
 alpaca_feed.subscribe_trades(*symbols)
 

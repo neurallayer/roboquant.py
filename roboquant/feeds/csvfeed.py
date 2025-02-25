@@ -1,6 +1,5 @@
 import csv
 from enum import Enum
-import sys
 import logging
 import os
 import pathlib
@@ -14,7 +13,7 @@ from roboquant.feeds.historic import HistoricFeed
 logger = logging.getLogger(__name__)
 
 
-class CSVColumn(str, Enum):
+class _CSVColumn(str, Enum):
     DATE = "Date"
     OPEN = "Open"
     HIGH = "High"
@@ -28,8 +27,8 @@ class CSVColumn(str, Enum):
         return self.value
 
     @staticmethod
-    def merge(d: dict["CSVColumn", str]) -> list[str]:
-        return [d.get(e, e.value) for e in CSVColumn]
+    def merge(d: dict["_CSVColumn", str]) -> list[str]:
+        return [d.get(e, e.value) for e in _CSVColumn]
 
 
 class CSVFeed(HistoricFeed):
@@ -123,18 +122,7 @@ class CSVFeed(HistoricFeed):
 
         class StooqDailyFeed(CSVFeed):
             def __init__(self):
-                # from Python 3.11 onwards, we can use the fast standard ISO parsing
-                if sys.version_info >= (3, 11):
-                    super().__init__(path, columns=columns, time_offset="21:00:00+00:00", endswith=".txt", frequency="1d")
-                else:
-                    super().__init__(
-                        path,
-                        columns=columns,
-                        time_offset="21:00:00+00:00",
-                        date_fmt="%Y%m%d",
-                        endswith=".txt",
-                        frequency="1d",
-                    )
+                super().__init__(path, columns=columns, time_offset="21:00:00+00:00", endswith=".txt", frequency="1d")
 
             def _get_asset(self, filename: str):
                 base = pathlib.Path(filename).stem
@@ -149,13 +137,7 @@ class CSVFeed(HistoricFeed):
 
         class StooqIntradayFeed(CSVFeed):
             def __init__(self):
-                # from Python 3.11 onwards, we can use the faster standard ISO parsing
-                if sys.version_info >= (3, 11):
-                    super().__init__(path, columns=columns, has_time_column=True, endswith=".txt")
-                else:
-                    super().__init__(
-                        path, columns=columns, has_time_column=True, date_fmt="%Y%m%d", time_fmt="%H%M%S", endswith=".txt"
-                    )
+                super().__init__(path, columns=columns, has_time_column=True, endswith=".txt")
 
             def _get_asset(self, filename: str):
                 base = pathlib.Path(filename).stem

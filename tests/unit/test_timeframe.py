@@ -17,16 +17,16 @@ class TestTimeframe(unittest.TestCase):
         self.assertEqual("UTC", tf.end.tzname())
 
         now = datetime.now(timezone.utc)
-        self.assertIn(now, tf)
-        self.assertIn(tf.start, tf)
-        self.assertIn(tf.end, tf)
+        self.assertTrue(now in tf)
+        self.assertTrue(tf.start in tf)
+        self.assertTrue(tf.end in tf)
 
     def test_timeframe_exclusive(self):
         tf = Timeframe.next(days=2, inclusive=False)
         now = datetime.now(timezone.utc)
-        self.assertIn(now, tf)
-        self.assertIn(tf.start, tf)
-        self.assertNotIn(tf.end, tf)
+        self.assertTrue(now in tf)
+        self.assertTrue(tf.start in tf)
+        self.assertFalse(tf.end in tf)
 
     def test_timeframe_duration(self):
         duration = timedelta(days=2)

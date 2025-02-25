@@ -19,7 +19,7 @@ class Feed(ABC):
     @abstractmethod
     def play(self, channel: EventChannel):
         """
-        (Re-)plays the events in the feed and puts them on the provided event channel.
+        (Re-)play the events in the feed and put them on the provided event channel.
 
         Parameters
         ----------

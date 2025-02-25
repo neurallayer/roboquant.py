@@ -1,14 +1,20 @@
+import os
 import time
 import unittest
 from statistics import mean, stdev
+from dotenv import load_dotenv
 
 from roboquant import Timeframe
 from roboquant.alpaca import AlpacaLiveFeed
 
+load_dotenv()
+
 
 class TestDelay(unittest.TestCase):
     """
-    Measure the delay of receiving live prices from IEX using Alpaca.
+    Measure the delay of receiving live market data from IEX using Alpaca. It will take a minute to run and will
+    collect the quotes for a number of populair stocks. The delay is the time between the moment the quote was
+    generated and the moment it was received by the system.
 
     It requires that the system clock of your computer is set correctly.
     You can navigate to https://time.is/ to get a rough idea about its accuracy.
@@ -24,7 +30,9 @@ class TestDelay(unittest.TestCase):
     __symbols = ["TSLA", "MSFT", "NVDA", "AMD", "AAPL", "AMZN", "META", "GOOG", "XOM", "JPM", "NLFX", "BA", "INTC", "V"]
 
     def test_alpaca_delay(self):
-        feed = AlpacaLiveFeed(market="iex")
+        api_key = os.environ["ALPACA_API_KEY"]
+        secret_key = os.environ["ALPACA_SECRET"]
+        feed = AlpacaLiveFeed(api_key, secret_key, market="iex")
         feed.subscribe_quotes(*TestDelay.__symbols)
         timeframe = Timeframe.next(minutes=1)
         channel = feed.play_background(timeframe, 1000)

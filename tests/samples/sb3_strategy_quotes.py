@@ -1,4 +1,5 @@
 # %%
+import os
 from sb3_contrib import RecurrentPPO
 from roboquant import run
 from roboquant.alpaca.feed import AlpacaHistoricStockFeed
@@ -16,7 +17,9 @@ end = "2024-05-02T00:00:00Z"
 assert start < border < end
 
 # %%
-feed = AlpacaHistoricStockFeed()
+api_key = os.environ["ALPACA_API_KEY"]
+secret_key = os.environ["ALPACA_SECRET"]
+feed = AlpacaHistoricStockFeed(api_key, secret_key)
 feed.retrieve_quotes(asset.symbol, start=start, end=end)
 print("feed timeframe=", feed.timeframe())
 

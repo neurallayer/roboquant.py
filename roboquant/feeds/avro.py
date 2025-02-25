@@ -17,8 +17,8 @@ logger = logging.getLogger(__name__)
 
 
 class AvroFeed(Feed):
-    """Feed that uses Avro files to store historic prices. Supports Quotes, Trades and Bars.
-    Besides play back, there is also recording functionality to transfer another feed into an AvroFeed.
+    """Feed that uses Avro files to store historic prices. Supports `Quote`, `Trade` and `Bar` prices.
+    Besides play back, there is also functionality to record another feed into an AvroFeed.
     """
 
     _schema = {
@@ -90,7 +90,7 @@ class AvroFeed(Feed):
                         raise ValueError(f"Unsupported priceItem type={price_type}")
 
     def record(self, feed: Feed, timeframe: Timeframe | None=None, append: bool=False, batch_size: int=10_000):
-        """Record another feed into an Avro file. It supports Quotes, Trades, and Bars.
+        """Record another feed into an Avro file. It supports a mix of `Quote`, `Trade`, and `Bar` prices.
         Later you can then use this Avro file as a feed to play back the data.
         """
 

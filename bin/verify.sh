@@ -5,6 +5,7 @@ uv sync --all-extras --dev
 # QA
 echo "Running ruff" 
 uvx ruff check || exit 1
+uv run pyright tests roboquant || exit 1
 echo "Running unittest" 
 uv run python -m unittest discover -s tests/unit || exit 1
 

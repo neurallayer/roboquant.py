@@ -23,7 +23,7 @@ def get_recent_start_date(days=10):
 
 
 def run_price_item_feed(feed: Feed, assets: Iterable[Asset], test_case: TestCase, timeframe=None, min_items=1):
-    """Common test for all feeds that produce price-items"""
+    """Common test for all feeds that produce price-items. It validates the data and the order of the items"""
 
     channel = feed.play_background(timeframe)
 
@@ -62,6 +62,7 @@ def run_price_item_feed(feed: Feed, assets: Iterable[Asset], test_case: TestCase
 
 
 def run_strategy(strategy: Strategy, test_case: TestCase):
+    """Run and test a strategy on a feed"""
     feed = get_feed()
     all_assets = feed.assets()
     channel = feed.play_background()

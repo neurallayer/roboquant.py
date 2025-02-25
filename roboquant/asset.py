@@ -24,7 +24,7 @@ class Asset(ABC):
 
     def contract_value(self, size: Decimal, price: float) -> float:
         """return the total contract value given the provided size and price.
-        The default implementation assumes the contract value is the size times the price.
+        The default implementation for the contract value is the `size` times the `price`.
         """
         return float(size) * price
 
@@ -49,14 +49,17 @@ class Asset(ABC):
 
     @abstractmethod
     def serialize(self) -> str:
-        """Serialize the asset to a string representation that can be used to reconstruct the asset later on"""
+        """Serialize the asset to a string representation that can be used to reconstruct the asset later on.
+        The first part of the string should be the `class.__name__`, followed by a semicolon.
+        For example: `Stock:AAPL:USD`
+        """
         ...
 
     @staticmethod
     @abstractmethod
     def deserialize(value: str) -> "Asset":
-        """Deserialize a string representation to the asset. The string representation should be created using
-        the `serialize` method"""
+        """Deserialize a string value to an asset.
+        This methid should be able to deserialize the string that was created using the `serialize` method"""
         ...
 
 
@@ -102,7 +105,7 @@ class Option(Asset):
     """Option Contract asset that has uses a contract size of 100 to calculate the contract value"""
 
     def contract_value(self, size: Decimal, price: float) -> float:
-        """Contract value for an option is the `size` times the `price` times `100`"""
+        """Contract value for this option type is the `size` times the `price` times `100`"""
         return float(size) * price * 100.0
 
     @staticmethod
@@ -126,9 +129,9 @@ def deserialize_to_asset(value: str) -> Asset:
     """Based on the provided string value, deserialize it to the correct asset. The asset class needs to be registered
     first using the `register_asset_class` method.
     """
-    asset_class, _ = value.split(":", maxsplit=1)
     asset = __cache.get(value)
     if not asset:
+        asset_class, _ = value.split(":", maxsplit=1)
         deserializer = __asset_classes[asset_class].deserialize
         asset = deserializer(value)
         __cache[value] = asset

@@ -7,7 +7,8 @@ import roboquant as rq
 
 
 class TestProfile(unittest.TestCase):
-    """Collect profiling statistics over a simple backtest"""
+    """Collect profiling statistics over a simple backtest. This can be used to detect
+    performance bottlenecks and to optimize the code."""
 
     def test_profile(self):
         path = os.path.expanduser("~/data/nasdaq_stocks/1")
