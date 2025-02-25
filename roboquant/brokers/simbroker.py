@@ -32,6 +32,15 @@ class SimBroker(Broker):
     """
 
     def __init__(self, initial_deposit: Amount=Amount(USD, 1_000_000.0), price_type:str="OPEN", slippage:float=0.001):
+        """Create a new SimBroker instance.
+        params:
+        - initial_deposit: The initial deposit of cash in the account. The currency of the deposit is used as the base currency
+        for the account.
+        - price_type: The price type to use for the execution, like OPEN, CLOSE, HIGH, LOW
+        - slippage: The slippage to use for the execution, a percentage value. Default is 0.1% (0.001)
+        """
+
+
         super().__init__()
         self._account = Account(initial_deposit.currency)
         self._modify_orders: list[Order] = []

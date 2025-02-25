@@ -20,7 +20,7 @@ symbols = ["TSLA", "MSFT", "NVDA", "AMD", "AAPL", "AMZN", "META", "GOOG", "XOM",
 alpaca_feed.subscribe_trades(*symbols)
 
 # Convert the trades into 15-second candles
-feed = rq.feeds.AggregatorFeed(alpaca_feed, timedelta(seconds=15), price_type="trade")
+feed = rq.feeds.BarAggregatorFeed(alpaca_feed, timedelta(seconds=15), price_type="trade")
 
 # %%
 strategy = rq.strategies.EMACrossover(13, 26)

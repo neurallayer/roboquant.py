@@ -8,7 +8,7 @@ from .eventchannel import EventChannel
 from .feed import Feed
 
 
-class AggregatorFeed(Feed):
+class BarAggregatorFeed(Feed):
     """Aggregates Trades or Quotes of another feed into a `Bar` prices.
 
     When trades are selected, the actual trade prices and volumes are used to create the aggregated bars.
@@ -86,18 +86,15 @@ class AggregatorFeed(Feed):
             channel.put(evt)
 
 
-class GroupingFeed(Feed):
-    """Group events that occur close after ech other into a single new event.
-
-    Close to eachother is defined by the timeout in seconds. If there is no new
-    event in the specified timeout, all the previously collected event items will
-    be bundled together and put on the channel as a single event.
+class TimeGroupingFeed(Feed):
+    """Group events that occur close after each other into a single event. It uses the time of the events to
+    determine if they are close to each other.
     """
 
     def __init__(
         self,
         feed: Feed,
-        timeout=5.0,
+        timeout: float=5.0,
     ):
         super().__init__()
         self.feed = feed
@@ -106,10 +103,21 @@ class GroupingFeed(Feed):
     def play(self, channel: EventChannel):
         src_channel = self.feed.play_background(channel.timeframe, channel.maxsize)
         items = []
-        while event := src_channel.get(self.timeout):
-            if event.is_empty() and items:
-                new_event = Event(event.time, items)
+        time = None
+        remaining = self.timeout
+        while event := src_channel.get(remaining):
+            time = time or event.time
+            remaining = self.timeout - (event.time - time).total_seconds()
+
+            if remaining <= 0.0:
+                new_event = Event(time, items)
                 channel.put(new_event)
                 items = []
+                time = event.time
+                remaining = self.timeout
 
             items.extend(event.items)
+
+        if time:
+            new_event = Event(time, items)
+            channel.put(new_event)

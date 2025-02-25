@@ -30,7 +30,10 @@ class LiveFeed(Feed):
             time.sleep(1)
         self._channel = None
 
-    def put(self, event: Event):
+    def _put(self, event: Event):
+        """Put an event on the channel. If the event is not monotonic in time, it will be corrected.
+        Subclasses should call this method to publish new live events.
+        """
         if self._channel:
             try:
                 if event.time <= self._last_time:

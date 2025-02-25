@@ -12,7 +12,7 @@ symbols = ["TSLA", "MSFT", "NVDA", "AMD", "AAPL", "AMZN"]
 alpaca_feed = AlpacaLiveFeed(market="iex")
 alpaca_feed.subscribe_bars(*symbols)
 
-feed = rq.feeds.GroupingFeed(alpaca_feed, 10.0)
+feed = rq.feeds.TimeGroupingFeed(alpaca_feed, 10.0)
 # %%
 # Let run an EMACrossover strategy
 strategy = rq.strategies.EMACrossover(5, 13)

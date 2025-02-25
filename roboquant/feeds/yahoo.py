@@ -17,7 +17,18 @@ class YahooFeed(HistoricFeed):
     you can also specify a different intervals."""
 
     def __init__(self, *symbols: str, start_date: str = "2010-01-01", end_date: str | None = None, interval="1d"):
+        """
+        Create a new YahooFeed instance
+        Parameters:
+        - symbols: list of symbols to retrieve
+        - start_date: the start date of the data to retrieve, default is `2010-01-01`
+        - end_date: the end date of the data to retrieve, default is `None` (today)
+        - interval: the interval of the data to retrieve, default is `1d` (daily)
+        """
+
         super().__init__()
+
+        # Disable some yfinance warnings
         warnings.simplefilter(action="ignore", category=FutureWarning)
         warnings.simplefilter(action="ignore", category=DeprecationWarning)
 
@@ -33,7 +44,7 @@ class YahooFeed(HistoricFeed):
                 logger.warning("no data retrieved for symbol=%s", symbol)
                 continue
 
-            # yFinance one doesn't correct the volume, so we use this one instead
+            # yFinance one doesn't correct the volume, so we use our own auto-adjust
             self.__auto_adjust(df)
 
             for t in df.itertuples(index=True):
@@ -48,12 +59,12 @@ class YahooFeed(HistoricFeed):
         self._update()
 
     def _get_asset(self, symbol: str):
-        """Get the asset for the given symbol. Sub classes can override this method to provide a different asset type."""
+        """Get the asset for the given symbol. The default implementation will return a Stock denoted in USD.
+        Sub classes can override this method to provide a different asset type."""
         return Stock(symbol)
 
     @staticmethod
     def __auto_adjust(df):
-        """small routine to apply adj close"""
         ratio = df["Adj Close"] / df["Close"]
         df["Open"] = df["Open"] * ratio
         df["High"] = df["High"] * ratio

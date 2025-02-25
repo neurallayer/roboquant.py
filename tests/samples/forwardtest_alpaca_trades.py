@@ -14,7 +14,7 @@ alpaca = AlpacaLiveFeed(market="iex")
 alpaca.subscribe_trades(*symbols)
 
 # Convert the trades into 15-second bars
-feed = rq.feeds.AggregatorFeed(alpaca, timedelta(seconds=15), "trade")
+feed = rq.feeds.BarAggregatorFeed(alpaca, timedelta(seconds=15), "trade")
 
 # %%
 # Let run an EMACrossover strategy

@@ -16,8 +16,12 @@ logger = logging.getLogger(__name__)
 
 
 class SQLFeed(Feed):
-    """SQLFeed supports recording bars or quotes from other feeds and then play them back during a run.
+    """SQLFeed supports recording price-items from another feeds and then play them back during a run.
     There is support for either Bars or Quotes. It is also possible to append values to an existing database.
+
+    Under the hood, the data is stored in a SQLite database. The database schema is created automatically when
+    the first item is recorded. The database schema is different for Bars and Quotes, so you can only store
+    one type of price-items in a single database.
     """
 
     # Used SQL statements in this class
@@ -44,7 +48,9 @@ class SQLFeed(Feed):
         return os.path.exists(self.db_file)
 
     def create_index(self):
-        """Create an index on the date column"""
+        """Create an index on the date column. The database will become larger. But the performance will improve
+        when querying data for specific timeframes, for example in case of a walk-forward back test.
+        """
         with sqlite3.connect(self.db_file) as con:
             con.execute(SQLFeed._sql_create_index)
             con.commit()
@@ -77,16 +83,15 @@ class SQLFeed(Feed):
 
     def _get_item(self, row) -> PriceItem:
         """Get a PriceItem from a row in the database"""
+        asset_str = row[1]
+        asset = deserialize_to_asset(asset_str)
         if self.is_bar:
-            asset_str = row[1]
-            asset = deserialize_to_asset(asset_str)
             prices = row[2:7]
             freq = row[7]
             return Bar(asset, array("f", prices), freq)
-
-        asset = row[1]
-        data = row[2:6]
-        return Quote(asset, array("f", data))
+        else:
+            prices = row[2:6]
+            return Quote(asset, array("f", prices))
 
     def play(self, channel: EventChannel):
         """Play back the data in the database to the channel"""
@@ -115,7 +120,7 @@ class SQLFeed(Feed):
                 item = self._get_item(row)
                 items.append(item)
 
-        # are there leftovers
+        # send the remainders
         if items:
             dt = datetime.fromisoformat(t_old)
             event = Event(dt, items)

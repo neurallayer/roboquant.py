@@ -82,7 +82,7 @@ class AlpacaLiveFeed(LiveFeed):
 
     def __put_item(self, time, item):
         event = Event(time, [item])
-        self.put(event)
+        self._put(event)
 
     async def __handle_trades(self, data):
         asset = _get_asset(data.symbol, self.asset_class)

@@ -49,7 +49,7 @@ class EventChannel:
             self.close()
 
     def get(self, timeout: float|None=None) -> Event | None:
-        """Returns the next event or None if this channel is just closed
+        """Returns the next event or None if this channel is just closed.
 
         - timeout: the timeout in seconds to send a heartbeat in case no other event was received, default is None.
         A heartbeat is an empty event.
