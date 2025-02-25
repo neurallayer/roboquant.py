@@ -14,8 +14,8 @@ class MultiStrategy(Strategy):
     - first: in case of multiple signals for the same asset, the first one prevails.
     - last:  in case of multiple signals for the same asset, the last one prevails.
     - mean: return the mean of the signal ratings. All signals will be `ENTRY_EXIT`.
-        If the mean is 0, no signal will be returned.
-    - none: return all signals and don't handle coflicts. This is also the default.
+        If the mean is 0, no signal will be created for that asset.
+    - none: return all signals and don't handle conflicts. This is also the default.
     """
 
     def __init__(

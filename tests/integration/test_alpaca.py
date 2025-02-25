@@ -1,3 +1,4 @@
+import time
 import unittest
 import os
 from alpaca.data.timeframe import TimeFrame
@@ -47,11 +48,21 @@ class TestAlpaca(unittest.TestCase):
     def test_alpaca_broker(self):
         broker = AlpacaBroker(self.api_key, self.secret_key)
         account = broker.sync()
+        print(account)
         self.assertTrue(account.buying_power.value > 0)
         self.assertTrue(account.equity_value() > 0)
         order = Order(self.assets[0], 1, 100.0)
+        print(order)
         broker.place_orders([order])
+        time.sleep(5)
         account = broker.sync()
+        print(account)
+        cancel_orders = [order.cancel() for order in account.orders]
+        for o in cancel_orders:
+            assert o.is_cancellation
+        print(cancel_orders)
+        broker.place_orders(cancel_orders)
+        time.sleep(10)
         print(account)
 
 

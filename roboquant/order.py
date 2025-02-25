@@ -55,7 +55,7 @@ class Order:
 
     def cancel(self) -> "Order":
         """Create a cancellation order. You can only cancel an order that has an id assigned to it.
-        The returned order looks like a regular order, but with its `size` set to zero.
+        The returned order is a regular order, but with its `size` set to zero. All additional properties are kept.
         """
         assert self.id is not None, "Can only cancel orders with an already assigned id"
         result = deepcopy(self)
@@ -66,9 +66,12 @@ class Order:
         """Return True of this order has expired, False otherwise"""
         return dt > self.gtd if self.gtd else False
 
-    def modify(self, size: Decimal | str | int | float | None = None, limit: float | None = None) -> "Order":
-        """Create an update-order. You can update the size and/or limit of an order. The returned order has the same id
+    def modify(
+        self, size: Decimal | str | int | float | None = None, limit: float | None = None) -> "Order":
+        """Create an update-order. You can update the size, limit of an order. The returned order has the same id
         as the original order. You can only update existing orders that have an id.
+
+        If you want to cancel an order, use the `cancel` method instead. The size of an order cannot be modified to zero.
         """
 
         assert self.id, "Can only update an already assigned id"

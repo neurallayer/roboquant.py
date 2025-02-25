@@ -49,7 +49,6 @@ class AlpacaBroker(LiveBroker):
                 float(alpaca_order.limit_price),  # type: ignore
             )
             order.fill = Decimal(alpaca_order.filled_qty)  # type: ignore
-            order.gtd = alpaca_order.created_at
             order.id = str(alpaca_order.id)
             orders.append(order)
 
@@ -89,7 +88,7 @@ class AlpacaBroker(LiveBroker):
             if order.gtd:
                 logger.warning("no support for GTD type of orders, ignoring gtd=%s", order.gtd)
 
-            if order.size.is_zero():
+            if order.is_cancellation:
                 assert order.id is not None, "can only cancel orders with an id"
                 self.__client.cancel_order_by_id(order.id)
                 if self.sleep_after_cancel:

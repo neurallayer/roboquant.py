@@ -1,9 +1,8 @@
 from array import array
 from collections import UserDict
-from typing import Any
 
 import numpy as np
-from numpy.typing import NDArray
+from numpy.typing import NDArray, DTypeLike
 
 from roboquant.asset import Asset
 from roboquant.event import Bar, Event
@@ -14,43 +13,43 @@ class NumpyBuffer:
     It uses a single Numpy array to store its data.
     """
 
-    __slots__ = "_data", "_idx", "rows"
+    __slots__ = "__data", "__idx", "rows"
 
-    def __init__(self, rows: int, columns: int, dtype: Any = "float32", order="C") -> None:
+    def __init__(self, rows: int, columns: int, dtype: DTypeLike = "float32", order="C") -> None:
         """Create a new Numpy buffer"""
         size = int(rows * 1.25 + 3)  # slight overallocation to minimize copying when buffer is full
-        self._data: NDArray = np.full((size, columns), np.nan, dtype=dtype, order=order)  # type: ignore
-        self._idx = 0
+        self.__data: NDArray = np.full((size, columns), np.nan, dtype=dtype, order=order)  # type: ignore
+        self.__idx = 0
         self.rows = rows
 
     def append(self, data: array | NDArray | list | tuple) -> bool:
         """Append data to this buffer. Return True if the buffer is full, False otherwise"""
-        if self._idx >= len(self._data):
-            self._data[0: self.rows] = self._data[-self.rows:]
-            self._idx = self.rows
+        if self.__idx >= len(self.__data):
+            self.__data[0 : self.rows] = self.__data[-self.rows :]
+            self.__idx = self.rows
 
-        self._data[self._idx] = data
-        self._idx += 1
-        return self._idx >= self.rows
+        self.__data[self.__idx] = data
+        self.__idx += 1
+        return self.__idx >= self.rows
 
     def __array__(self):
-        start = max(0, self._idx - self.rows)
-        return self._data[start: self._idx]
+        start = max(0, self.__idx - self.rows)
+        return self.__data[start : self.__idx]
 
     def _get(self, column):
-        start = max(0, self._idx - self.rows)
-        return self._data[start: self._idx, column]
+        start = max(0, self.__idx - self.rows)
+        return self.__data[start : self.__idx, column]
 
     def __len__(self):
-        return min(self._idx, self.rows)
+        return min(self.__idx, self.rows)
 
     def is_full(self) -> bool:
-        return self._idx >= self.rows
+        return self.__idx >= self.rows
 
     def reset(self):
         """reset the buffer"""
-        self._data.fill(np.nan)
-        self._idx = 0
+        self.__data.fill(np.nan)
+        self.__idx = 0
 
 
 class OHLCVBuffer(NumpyBuffer):
@@ -58,7 +57,7 @@ class OHLCVBuffer(NumpyBuffer):
     It stores the data in a `NumpyBuffer`.
     """
 
-    def __init__(self, capacity: int, dtype="float64") -> None:
+    def __init__(self, capacity: int, dtype: DTypeLike = "float64") -> None:
         """Create a new OHLCV buffer"""
         super().__init__(capacity, 5, dtype)
 
@@ -106,6 +105,6 @@ class OHLCVBuffers(UserDict[Asset, OHLCVBuffer]):
                     assets.add(asset)
         return assets
 
-    def ready(self) -> set[Asset]:
+    def ready_assets(self) -> set[Asset]:
         """Return the set of assets for which the buffer is already full"""
         return {asset for asset, ohlcv in self.items() if ohlcv.is_full()}
