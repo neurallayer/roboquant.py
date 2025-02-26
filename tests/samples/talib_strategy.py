@@ -1,9 +1,8 @@
 # %%
 # pylint: disable=no-member
-import talib.stream as ta
+import talib.stream as ta # type: ignore
 import roboquant as rq
 from roboquant.strategies import OHLCVBuffer, TaStrategy
-
 
 # %%
 class MyStrategy(TaStrategy):

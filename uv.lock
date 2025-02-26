@@ -1030,7 +1030,6 @@ dev = [
     { name = "matplotlib" },
     { name = "pyright" },
     { name = "python-dotenv" },
-    { name = "ta-lib" },
 ]
 
 [package.metadata]
@@ -1055,7 +1054,6 @@ dev = [
     { name = "matplotlib", specifier = ">=3.10.0" },
     { name = "pyright", specifier = ">=1.1.394" },
     { name = "python-dotenv", specifier = ">=1.0.1" },
-    { name = "ta-lib", specifier = "==0.5.3" },
 ]
 
 [[package]]
@@ -1146,16 +1144,6 @@ sdist = { url = "https://files.pythonhosted.org/packages/ca/99/5a5b6f19ff9f08367
 wheels = [
     { url = "https://files.pythonhosted.org/packages/b2/fe/81695a1aa331a842b582453b605175f419fe8540355886031328089d840a/sympy-1.13.1-py3-none-any.whl", hash = "sha256:db36cdc64bf61b9b24578b6f7bab1ecdd2452cf008f34faa33776680c26d66f8", size = 6189177 },
 ]
-
-[[package]]
-name = "ta-lib"
-version = "0.5.3"
-source = { registry = "https://pypi.org/simple" }
-dependencies = [
-    { name = "numpy" },
-    { name = "setuptools" },
-]
-sdist = { url = "https://files.pythonhosted.org/packages/4d/f4/5446938ea22178e6a60ec37590c084603688631bdbb97addf29c8bb4488a/ta_lib-0.5.3.tar.gz", hash = "sha256:d187ad05cd949147bbc9b6ae6444f348cf38bf6826757fe93246c2da2af3f593", size = 371949 }
 
 [[package]]
 name = "tensorboard"
