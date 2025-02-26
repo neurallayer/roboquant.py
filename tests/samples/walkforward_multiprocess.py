@@ -1,5 +1,5 @@
 """This example shows how to perform a walk-forward using a multi-process approach.
-This allows you to utlize all the CPU's available on the machine (at the cost of higher memory usage)
+This allows you to utilize all the CPU's available on the machine (at the cost of higher memory usage)
 
 Each run is over a certain timeframe and set of parameters for the EMA Crossover strategy.
 """

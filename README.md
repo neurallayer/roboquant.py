@@ -61,7 +61,7 @@ Roboquant.py uses `uv` as the main tool for handling package dependencies.
 
 
 ```shell
-uv sync --all-extras
+uv sync --all-extras --dev
 ```
 
 You should now be in the virtual environment and ready to build/install roboquant:

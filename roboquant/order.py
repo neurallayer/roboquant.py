@@ -21,16 +21,16 @@ class Order:
     """
 
     asset: Asset
-    """The asset this order is for"""
+    """The asset of this order"""
 
     size: Decimal
-    """The size of the order. Positive for buy orders, negative for sell orders."""
+    """The size of the order. Positive for buy orders, negative for sell orders"""
 
     limit: float
-    """The limit price of the order"""
+    """The limit price of the order, denoted in the currency of the asset"""
 
     gtd: datetime | None
-    """The good till date of the order"""
+    """The good till date of the order, or None if no expiration date"""
 
     info: dict[str, Any]
     """Any additional information about the order"""
@@ -54,7 +54,7 @@ class Order:
         self.gtd = gtd
 
     def cancel(self) -> "Order":
-        """Create a cancellation order. You can only cancel an order that has an id assigned to it.
+        """Create a cancellation order. You can only cancel an order that has an `id` assigned to it.
         The returned order is a regular order, but with its `size` set to zero. All additional properties are kept.
         """
         assert self.id is not None, "Can only cancel orders with an already assigned id"
@@ -125,7 +125,9 @@ class Order:
     @property
     def remaining(self) -> Decimal:
         """Return the remaining order size to be filled.
-
+        ```
+        size = fill + remaining
+        ```
         In case of a sell order, the remaining will be a negative number.
         """
         return self.size - self.fill
