@@ -40,6 +40,8 @@ class YahooFeed(HistoricFeed):
                 start=start_date, end=end_date, auto_adjust=False, actions=False, interval=interval, timeout=30
             )[columns]
 
+            assert df is not None
+
             if len(df) == 0:
                 logger.warning("no data retrieved for symbol=%s", symbol)
                 continue

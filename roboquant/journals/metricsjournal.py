@@ -50,16 +50,16 @@ class MetricsJournal(Journal):
         x, y = self.get_metric(metric_name)
 
         if plot_x:
-            plt.plot(x, y, **kwargs)
+            result = plt.plot(x, y, **kwargs)
         else:
-            plt.plot(y, **kwargs)
+            result = plt.plot(y, **kwargs)
 
         if hasattr(plt, "set_title"):
             plt.set_title(metric_name)
         elif hasattr(plt, "title"):
             plt.title(metric_name)
 
-        return plt
+        return result
 
     def get_metric_names(self) -> set[str]:
         """return all the recorded metric names"""

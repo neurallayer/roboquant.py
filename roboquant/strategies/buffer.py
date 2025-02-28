@@ -15,7 +15,7 @@ class NumpyBuffer:
 
     __slots__ = "__data", "__idx", "rows"
 
-    def __init__(self, rows: int, columns: int, dtype: DTypeLike = "float32", order="C") -> None:
+    def __init__(self, rows: int, columns: int, dtype: DTypeLike = "float32", order: str="C") -> None:
         """Create a new Numpy buffer"""
         size = int(rows * 1.25 + 3)  # slight overallocation to minimize copying when buffer is full
         self.__data: NDArray = np.full((size, columns), np.nan, dtype=dtype, order=order)  # type: ignore
@@ -32,11 +32,11 @@ class NumpyBuffer:
         self.__idx += 1
         return self.__idx >= self.rows
 
-    def __array__(self):
+    def __array__(self)-> NDArray:
         start = max(0, self.__idx - self.rows)
         return self.__data[start : self.__idx]
 
-    def _get(self, column):
+    def _get(self, column: int) -> NDArray:
         start = max(0, self.__idx - self.rows)
         return self.__data[start : self.__idx, column]
 

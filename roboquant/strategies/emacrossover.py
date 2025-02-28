@@ -9,7 +9,7 @@ from roboquant.strategies.strategy import Strategy
 class EMACrossover(Strategy):
     """EMA Crossover Strategy implementation."""
 
-    def __init__(self, fast_period=13, slow_period=26, smoothing=2.0, price_type="DEFAULT"):
+    def __init__(self, fast_period: int = 13, slow_period: int = 26, smoothing: float = 2.0, price_type: str = "DEFAULT"):
         super().__init__()
         self._history: dict[Asset, EMACrossover._Calculator] = {}
         self.fast = 1.0 - (smoothing / (fast_period + 1))
@@ -21,7 +21,6 @@ class EMACrossover(Strategy):
     def create_signals(self, event: Event) -> list[Signal]:
         result = []
         for asset, price in event.get_prices(self.price_type).items():
-
             if asset not in self._history:
                 self._history[asset] = self._Calculator(self.fast, self.slow, price=price)
             else:

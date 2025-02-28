@@ -3,6 +3,7 @@ import logging
 from decimal import Decimal
 from enum import Flag, auto
 import random
+from typing import Any
 
 from roboquant.asset import Asset
 from roboquant.event import Event
@@ -51,7 +52,7 @@ class _Context:
         self.signal = signal
         self.position = position
 
-    def log(self, rule: str, **kwargs):
+    def log(self, rule: str, **kwargs: Any):
         if logger.isEnabledFor(logging.INFO):
             extra = " ".join(f"{k}={v}" for k, v in kwargs.items())
             logger.info(
@@ -91,15 +92,15 @@ class FlexTrader(Trader):
 
     def __init__(
         self,
-        one_order_only=True,
-        size_fractions=0,
-        safety_margin_perc=0.05,
-        shorting=False,
-        max_order_perc=0.05,
-        min_order_perc=0.02,
-        max_position_perc=0.1,
-        price_type="DEFAULT",
-        shuffle_signals=False,
+        one_order_only: bool=True,
+        size_fractions:int=0,
+        safety_margin_perc:float=0.05,
+        shorting:bool=False,
+        max_order_perc:float=0.05,
+        min_order_perc: float=0.02,
+        max_position_perc: float=0.1,
+        price_type: str="DEFAULT",
+        shuffle_signals: bool=False,
     ) -> None:
         super().__init__()
         self.one_order_only = one_order_only

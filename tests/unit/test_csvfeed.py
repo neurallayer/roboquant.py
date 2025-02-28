@@ -20,6 +20,14 @@ class TestCSVFeed(unittest.TestCase):
         assets = [Stock(symbol) for symbol in symbols]
         run_price_item_feed(feed, assets, self)
 
+    def test_basic_feed(self):
+        root = self._get_root_dir("yahoo")
+        feed = CSVFeed.yahoo(root)
+        asset = feed.get_asset("AAPL")
+        assert asset
+        ohlcv = feed.get_ohlcv(asset)
+        self.assertEqual(feed.count_events(), len(ohlcv))
+
     def test_csv_feed_stooq_daily(self):
         root = self._get_root_dir("stooq", "daily")
         feed = CSVFeed.stooq_us_daily(root)

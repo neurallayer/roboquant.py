@@ -2,7 +2,7 @@ from datetime import datetime
 import logging
 import threading
 from abc import ABC, abstractmethod
-from typing import Any
+from typing import Any, Sequence
 
 from roboquant.asset import Asset
 from roboquant.event import Bar
@@ -67,23 +67,19 @@ class Feed(ABC):
         thread.start()
         return channel
 
-    def get_ohlcv(self, asset: Asset, timeframe: Timeframe | None = None) -> dict[str, list[float | datetime]]:
+    def get_ohlcv(self, asset: Asset, timeframe: Timeframe | None = None) -> dict[datetime, Sequence[float]]:
         """Get the OHLCV values for an asset in this feed.
-        The returned value is a dict with the keys being "Date", "Open", "High", "Low", "Close", "Volume"
-        and the values a list.
+        The returned value is a `dict` with the keys being the `datetime` and the value being an `array`
+        of the OHLCV values.
         """
 
-        result = {column: [] for column in ["Date", "Open", "High", "Low", "Close", "Volume"]}
+        result: dict[datetime, Sequence[float]] = {}
         channel = self.play_background(timeframe)
         while event := channel.get():
             item = event.price_items.get(asset)
             if item and isinstance(item, Bar):
-                result["Date"].append(event.time)
-                result["Open"].append(item.ohlcv[0])
-                result["High"].append(item.ohlcv[1])
-                result["Low"].append(item.ohlcv[2])
-                result["Close"].append(item.ohlcv[3])
-                result["Volume"].append(item.ohlcv[4])
+                result[event.time] = item.ohlcv
+
         return result
 
     def print_items(self, timeframe: Timeframe | None = None, timeout: float | None = None) -> None:
@@ -132,7 +128,7 @@ class Feed(ABC):
 
     def plot(self, asset: Asset, price_type: str = "DEFAULT", timeframe: Timeframe | None = None, plt: Any = None, **kwargs):
         """
-        Plot the prices of a single asset. This requires matplotlib to be installed.
+        Plot the prices of a single asset. This requires matplotlib to be installed. It returns the plotted chart.
 
         Parameters
         ----------
@@ -151,14 +147,14 @@ class Feed(ABC):
             from matplotlib import pyplot as plt
 
         times, prices = self.get_asset_prices(asset, price_type, timeframe)
-        plt.plot(times, prices, **kwargs)
+        result = plt.plot(times, prices, **kwargs)
 
         if hasattr(plt, "set_title"):
             plt.set_title(asset.symbol)
         elif hasattr(plt, "title"):
             plt.title(asset.symbol)
 
-        return plt
+        return result
 
     def get_asset_prices(
         self, asset: Asset, price_type="DEFAULT", timeframe: Timeframe | None = None

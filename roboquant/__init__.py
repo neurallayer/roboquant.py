@@ -14,7 +14,7 @@ from roboquant import strategies
 from roboquant import ml
 from .account import Account, Position
 from .event import Event, PriceItem, Bar, Trade, Quote
-from .signal import Signal
+from .signal import Signal, SignalType
 from .order import Order
 from .monetary import Amount, Wallet
 from .asset import Asset, Stock, Crypto, Option
@@ -38,6 +38,7 @@ __all__ = [
     "Trade",
     "Quote",
     "Signal",
+    "SignalType",
     "Order",
     "Amount",
     "Wallet",
