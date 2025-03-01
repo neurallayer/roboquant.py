@@ -71,6 +71,7 @@ class ParquetFeed(Feed):
                     item = Trade(asset, price, volume)
                     items.append(item)
 
+        # any remainders
         if items:
             now = last_time.as_py()
             event = Event(now, items)

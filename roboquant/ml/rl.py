@@ -59,7 +59,10 @@ class TradingEnv(gym.Env):
         self.trader = trader or FlexTrader()
         self.assets = assets
 
+        # The observation space is determined by the final shape of the observation feature
         self.observation_space = spaces.Box(-1.0, 1.0, shape=(obs_feature.size(),), dtype=np.float32)
+
+        # The action space is for very asset to predict a number between a strong sell (-1.0) and strogn buy (1.0)
         self.action_space = spaces.Box(-1.0, 1.0, shape=(len(self.assets),), dtype=np.float32)
 
         logger.info("observation_space=%s action_space=%s", self.observation_space, self.action_space)
@@ -67,12 +70,15 @@ class TradingEnv(gym.Env):
         self.render_mode = None
 
     def get_observation(self, evt: Event) -> NDArray[np.float32]:
+        """Based on an event, calculate the observation features and return them as a Numpy array"""
         return self.obs_feature.calc(evt)
 
-    def get_reward(self, account: Account):
+    def get_reward(self, account: Account) -> NDArray[np.float32]:
+        """Based on the account, calculate the reward features and return them as a Numpy array"""
         return self.reward_feature.calc(account)
 
     def step(self, action):
+        """Take a step"""
         assert self.event is not None
         assert self.account is not None
 
@@ -122,6 +128,7 @@ class TradingEnv(gym.Env):
             logger.info(observation)
 
     def render(self):
+        """No rendering is supported"""
         pass
 
     def __repr__(self):

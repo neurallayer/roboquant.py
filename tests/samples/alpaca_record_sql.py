@@ -19,6 +19,7 @@ if not feed.exists():
     # store it for later use
     feed.record(alpaca_feed)
 
+# %%
 # Info on recorded feed
 print(feed)
 print(feed.count_events())

@@ -5,7 +5,7 @@ from roboquant.feeds.avro import AvroFeed
 from dotenv import load_dotenv
 load_dotenv()
 # %%
-print("The retrieval of historical data will take some time....")
+print("The retrieval of historical data will take some time and will require plenty of free diskspace")
 api_key = os.environ["ALPACA_API_KEY"]
 secret_key = os.environ["ALPACA_SECRET"]
 alpaca_feed = AlpacaHistoricStockFeed(api_key, secret_key)
@@ -23,4 +23,3 @@ feed.record(alpaca_feed)
 # Info on recorded feed
 print(feed.timeframe())
 print(feed.count_events())
-feed.index()

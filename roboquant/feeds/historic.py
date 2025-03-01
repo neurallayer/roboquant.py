@@ -41,12 +41,12 @@ class HistoricFeed(Feed, ABC):
         self._update()
         return list(self.__assets)
 
-    def get_asset(self, symbol: str) -> Asset | None:
+    def get_asset(self, symbol: str) -> Asset:
         """Return the first asset that matches the provided symbol name, or None if not found"""
         try:
             return next(asset for asset in self.assets() if asset.symbol == symbol)
         except StopIteration:
-            return None
+            raise ValueError(f"no asset found with symbol={symbol}")
 
     def timeline(self) -> list[datetime]:
         """Return the timeline of this feed as a list of datatime objects"""

@@ -4,6 +4,8 @@ from datetime import timedelta
 import logging
 import roboquant as rq
 from roboquant.alpaca import AlpacaBroker, AlpacaLiveFeed
+from dotenv import load_dotenv
+load_dotenv()
 
 # %%
 logging.basicConfig()

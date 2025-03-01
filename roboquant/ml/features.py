@@ -305,9 +305,9 @@ class FillWithConstantFeature(Feature):
 
 
 class CacheFeature(Feature):
-    """Cache the results of a feature. This requires:
+    """Cache the results of a feature from a previous run. This can speedup the learning process a lot, but this requires that:
 
-    - the feed to have an always increasing time value
+    - the feed to have an always an increasing time value (monotomic)
     - the feature to produce the same output at a given time. Typically, this doesn't hold true for features that
     are based on account values.
     """
@@ -470,7 +470,7 @@ class MinReturnFeature(Feature):
 
 
 class SMAFeature(Feature):
-    """Calculate the simple moving average of another feature"""
+    """Calculate the simple moving average of another feature."""
 
     def __init__(self, feature: Feature, period: int) -> None:
         super().__init__()
@@ -509,7 +509,7 @@ class DayOfWeekFeature(Feature[Event]):
         super().__init__()
         self.tz = tz
 
-    def calc(self, value):
+    def calc(self, value: Event):
         dt = datetime.astimezone(value.time, self.tz)
         weekday = dt.weekday()
         result = np.zeros(7, dtype=np.float32)
@@ -527,7 +527,7 @@ class TimeDifference(Feature[Event]):
         super().__init__()
         self._last_time: datetime | None = None
 
-    def calc(self, value):
+    def calc(self, value: Event):
         if self._last_time:
             diff = value.time - self._last_time
             self._last_time = value.time

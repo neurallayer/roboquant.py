@@ -43,28 +43,31 @@ class SQLFeed(Feed):
         self.price_type = price_type
         self.is_bar = price_type == "bar"
 
-    def exists(self):
+    def exists(self) -> bool:
         """Check if the database file exists"""
         return os.path.exists(self.db_file)
 
     def create_index(self):
         """Create an index on the date column. The database will become larger. But the performance will improve
         when querying data for specific timeframes, for example in case of a walk-forward back test.
+        If you benefit from this index, best to invoke this method after all the data has been recorded.
         """
         with sqlite3.connect(self.db_file) as con:
             con.execute(SQLFeed._sql_create_index)
             con.commit()
 
-    def number_items(self):
-        """Return the number of items in the database"""
+    def number_items(self) -> int:
+        """Return the number of price-items in the database"""
         with sqlite3.connect(self.db_file) as con:
             result = con.execute(SQLFeed._sql_count_items).fetchall()
             con.commit()
             row = result[0]
             return row[0]
 
-    def timeframe(self):
-        """Return the timeframe of the data in the database"""
+    def timeframe(self) -> Timeframe:
+        """Return the timeframe of the data in the database.
+        If no data found, it will return `Timeframe.EMPTY`.
+        """
         with sqlite3.connect(self.db_file) as con:
             result = con.execute(SQLFeed._sql_select_timeframe).fetchall()
             con.commit()
@@ -74,7 +77,7 @@ class SQLFeed(Feed):
             return Timeframe.EMPTY
 
     def assets(self):
-        """Return the assets in the database"""
+        """Return all the assets in the database"""
         with sqlite3.connect(self.db_file) as con:
             result = con.execute(SQLFeed._sql_select_assets).fetchall()
             con.commit()

@@ -115,7 +115,7 @@ class Feed(ABC):
     def to_dict(
         self, *assets: Asset, timeframe: Timeframe | None = None, price_type: str = "DEFAULT"
     ) -> dict[str, list[float | None]]:
-        """Return the prices of one or more assets as a dict with the key being the synbol name."""
+        """Return the prices of one or more assets as a dict with the key being the symbol name."""
 
         assert assets, "provide at least 1 asset"
         result = {asset.symbol: [] for asset in assets}
@@ -125,6 +125,18 @@ class Feed(ABC):
                 price = evt.get_price(asset, price_type)
                 result[asset.symbol].append(price)
         return result
+
+    def to_dataframe(self, asset: Asset, timeframe: Timeframe | None = None):
+        """Return the bars for the asset as a Pandas dataframe, with the index being the event time
+        and the columns being "Open", "High", "Low", "Close", "Volume".
+
+        This will throw an exception if the pandas library isn't installed.
+        """
+        import pandas as pd
+
+        ohlcv = self.get_ohlcv(asset, timeframe)
+        columns : Any = ["Open", "High", "Low", "Close", "Volume"]
+        return pd.DataFrame.from_dict(ohlcv, orient="index", columns=columns)
 
     def plot(self, asset: Asset, price_type: str = "DEFAULT", timeframe: Timeframe | None = None, plt: Any = None, **kwargs):
         """

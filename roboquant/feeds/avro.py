@@ -43,7 +43,8 @@ class AvroFeed(Feed):
         """Check if the avro file exists"""
         return os.path.exists(self.avro_file)
 
-    def index(self):
+     # typing: ignore
+    def __index(self):
         """Create an index on the date column and return it"""
         result = []
         if self.exists():

@@ -41,6 +41,7 @@ class FeatureStrategy(Strategy):
 
     @abstractmethod
     def predict(self, x: NDArray, dt: datetime) -> list[Signal]:
+        """Subclasses need to implement this method"""
         ...
 
 

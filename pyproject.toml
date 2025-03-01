@@ -78,4 +78,5 @@ dev = [
   "matplotlib>=3.10.0",
   "python-dotenv>=1.0.1",
   "pyright>=1.1.395",
+  "ipykernel>=6.29.5",
 ]
