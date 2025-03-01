@@ -2,7 +2,9 @@ from datetime import datetime
 import logging
 import threading
 from abc import ABC, abstractmethod
-from typing import Any, Sequence
+from typing import Sequence
+from matplotlib import pyplot as plt
+import matplotlib.axes
 
 from roboquant.asset import Asset
 from roboquant.event import Bar
@@ -135,10 +137,17 @@ class Feed(ABC):
         import pandas as pd
 
         ohlcv = self.get_ohlcv(asset, timeframe)
-        columns : Any = ["Open", "High", "Low", "Close", "Volume"]
-        return pd.DataFrame.from_dict(ohlcv, orient="index", columns=columns)
+        columns = ["Open", "High", "Low", "Close", "Volume"]
+        return pd.DataFrame.from_dict(ohlcv, orient="index", columns=columns)  # type: ignore
 
-    def plot(self, asset: Asset, price_type: str = "DEFAULT", timeframe: Timeframe | None = None, plt: Any = None, **kwargs):
+    def plot(
+        self,
+        asset: Asset,
+        price_type: str = "DEFAULT",
+        timeframe: Timeframe | None = None,
+        ax: matplotlib.axes.Axes | None = None,
+        **kwargs,
+    ):
         """
         Plot the prices of a single asset. This requires matplotlib to be installed. It returns the plotted chart.
 
@@ -150,22 +159,17 @@ class Feed(ABC):
             The type of price to plot, e.g. open, close, high, low. (default is "DEFAULT")
         timeframe : Timeframe or None, optional
             The timeframe over which to plot prices. If None, the entire feed timeframe is used. (default is None)
-        plt : matplotlib axes
-            The matplotlib.pyplot object where the plot will be drawn. If none is specified, the default pyplot will be used
+        ax : matplotlib axes
+            The matplotlib.pyplot axis where the plot will be drawn. If none is specified, the default pyplot will be used
         **kwargs
             Additional keyword arguments to pass to the plt.plot() function.
         """
-        if not plt:
-            from matplotlib import pyplot as plt
+        if not ax:
+            _, ax = plt.subplots()
 
         times, prices = self.get_asset_prices(asset, price_type, timeframe)
-        result = plt.plot(times, prices, **kwargs)
-
-        if hasattr(plt, "set_title"):
-            plt.set_title(asset.symbol)
-        elif hasattr(plt, "title"):
-            plt.title(asset.symbol)
-
+        result = ax.plot(times, prices, **kwargs)  # type: ignore
+        ax.set_title(asset.symbol)
         return result
 
     def get_asset_prices(

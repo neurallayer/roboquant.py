@@ -1,9 +1,11 @@
 from datetime import datetime
-from typing import Any
+import matplotlib.axes
+from matplotlib import pyplot as plt
 
 from roboquant.journals.journal import Journal
 from roboquant.journals.metric import Metric
 from roboquant.journals.pnlmetric import PNLMetric
+
 
 
 class MetricsJournal(Journal):
@@ -42,23 +44,20 @@ class MetricsJournal(Journal):
                 values.append(metrics[metric_name])
         return timeline, values
 
-    def plot(self, metric_name: str, plot_x: bool = True, plt: Any = None, **kwargs):
-        """Plot a metric. This requires matplotlib to be installed."""
-        if not plt:
-            from matplotlib import pyplot as plt
+    def plot(self, metric_name: str, plot_x: bool = True, ax: matplotlib.axes.Axes | None  = None, **kwargs):
+        """Plot one of the metrics. Optional a `matplotlib.axes.Axes` can be provided
+        This requires matplotlib to be installed."""
+        if not ax:
+            _, ax = plt.subplots()
 
         x, y = self.get_metric(metric_name)
 
         if plot_x:
-            result = plt.plot(x, y, **kwargs)
+            result = ax.plot(x, y, **kwargs)  # type: ignore
         else:
-            result = plt.plot(y, **kwargs)
+            result = ax.plot(y, **kwargs)
 
-        if hasattr(plt, "set_title"):
-            plt.set_title(metric_name)
-        elif hasattr(plt, "title"):
-            plt.title(metric_name)
-
+        ax.set_title(metric_name)
         return result
 
     def get_metric_names(self) -> set[str]:
