@@ -33,8 +33,6 @@ python3 -m pip install --upgrade roboquant
 ```
 If you don't want to install anything locally, you can try out roboquant in an online Jupyter environment like
 [![Open In Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/neurallayer/roboquant-notebooks/blob/main/intro_roboquant.ipynb)
-or
-[![Binder](https://mybinder.org/badge_logo.svg)](https://mybinder.org/v2/gh/neurallayer/roboquant-notebooks/HEAD?labpath=%2Fintro_roboquant.ipynb).
 
 The core of roboquant limits the number of dependencies. 
 But you can install roboquant including one or more of the optional dependencies if you require certain functionality:
@@ -93,5 +91,4 @@ Absolutely no warranty is implied with this product. Use at your own risk. I pro
 All financial trading offers the possibility of loss. Leveraged trading, may result in you losing all your money, and still owing more. Back tested results are no guarantee of future performance. I can take no responsibility for any losses caused by live trading using roboquant. Use at your own risk. I am not registered or authorised by any financial regulator.
 
 ## Kotlin version
-Next to this Python version of `roboquant`, there is also a Kotlin version available. Both share a similar API, just the used computer language is different.
-Which one to use depends very much on personal preferences, skills and usage.
+Next to this Python version of `roboquant`, there is also a Kotlin version available. Both share a similar API, just the used computer language is different. Which one to use depends very much on personal preferences, skills and usage.
