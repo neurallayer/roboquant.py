@@ -51,7 +51,7 @@ class Asset(ABC):
     def serialize(self) -> str:
         """Serialize the asset to a string representation that can be used to reconstruct the asset later on.
         The first part of the string should be the `class.__name__`, followed by a semicolon.
-        For example: `Stock:AAPL:USD`
+        For example, `Stock:AAPL:USD`
         """
         ...
 
@@ -59,7 +59,7 @@ class Asset(ABC):
     @abstractmethod
     def deserialize(value: str) -> "Asset":
         """Deserialize a string value to an asset.
-        This methid should be able to deserialize the string that was created using the `serialize` method"""
+        This method should be able to deserialize the string that was created using the `serialize` method"""
         ...
 
 

@@ -72,7 +72,7 @@ class FlexTrader(Trader):
 
     The configurable parameters include:
 
-    - one_order_only: don't create new orders for a asset if there is already an open orders for that same asset
+    - one_order_only: don't create new orders for an asset if there is already an open orders for that same asset
     - size_fractions: enable fractional order sizes (if size_fractions is larger than 0), default is 0
     - safety_margin_perc: the safety margin as percentage of equity that should remain available (to avoid margin calls),
     default is 0.05 (5%)

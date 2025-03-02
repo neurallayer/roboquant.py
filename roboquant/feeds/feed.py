@@ -132,7 +132,7 @@ class Feed(ABC):
         """Return the bars for the asset as a Pandas dataframe, with the index being the event time
         and the columns being "Open", "High", "Low", "Close", "Volume".
 
-        This will throw an exception if the pandas library isn't installed.
+        This will throw an exception if the Pandas library isn't installed.
         """
         import pandas as pd
 

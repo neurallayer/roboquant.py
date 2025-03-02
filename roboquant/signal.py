@@ -36,7 +36,7 @@ class Signal:
     it is again up to the `trader` to handle these types correctly.
 
     Examples:
-    ```
+    ```python
     apple = Stock("AAPL")
     Signal.buy(apple)
     Signal.sell(apple, SignalType.EXIT)

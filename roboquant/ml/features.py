@@ -305,9 +305,10 @@ class FillWithConstantFeature(Feature):
 
 
 class CacheFeature(Feature):
-    """Cache the results of a feature from a previous run. This can speedup the learning process a lot, but this requires that:
+    """Cache the results of a feature from a previous run. This can speed up the learning process a lot, but
+    this requires that:
 
-    - the feed to have an always an increasing time value (monotomic)
+    - the feed to have always an increasing time value (monotonic)
     - the feature to produce the same output at a given time. Typically, this doesn't hold true for features that
     are based on account values.
     """

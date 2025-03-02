@@ -22,7 +22,7 @@ class Position:
 
     @property
     def is_short(self):
-        """Return True is this is a short position, False otherwise"""
+        """Return True if this is a short position, False otherwise"""
         return self.size < 0
 
     @property

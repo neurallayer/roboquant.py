@@ -9,7 +9,7 @@ from roboquant.signal import Signal
 class MarketReturnMetric(Metric):
     """Tracks the performance of the market, aka the price-items found in the event.
     It will calculate the latest return of the market based on the price-items found
-    in the event and tracks the total return of the market.
+    in the event and track the total return of the market.
     """
 
     def __init__(self, price_type: str="DEFAULT"):

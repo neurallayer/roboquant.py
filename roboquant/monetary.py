@@ -213,7 +213,7 @@ class Amount:
         Amount.__converter = converter
 
     def items(self) -> list[tuple[Currency, float]]:
-        """Return a list with only this amount an an item, this brings the `Amount` class in line with the `Wallet` class"""
+        """Return a list with only this amount as the item, this brings the `Amount` class in line with the `Wallet` class"""
         return [(self.currency, self.value)]
 
     def amounts(self) -> list["Amount"]:
@@ -251,7 +251,7 @@ class Amount:
 
 class Wallet(defaultdict[Currency, float]):
     """A wallet holds monetary values of different currencies.
-    Wallets are mutable and you can add wallets together, subtract them, or convert them to a single currency.
+    Wallets are mutable, and you can add wallets together, subtract them, or convert them to a single currency.
     """
 
     def __init__(self, *amounts: Amount):

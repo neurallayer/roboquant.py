@@ -64,7 +64,7 @@ class LiveBroker(Broker):
         self.max_delay = timedelta(minutes=30)
 
     def guard(self, event: Event | None = None) -> datetime:
-        """This method will evaluate an event and if it occurs to far in the past,
+        """This method will evaluate an event, and if it occurs to far in the past,
         it will raise a ValueError. Implementations of `LiveBroker` should call this
         method in their `sync` implementation to ensure the `LiveBroker` isn't used
         in a back test.

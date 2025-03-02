@@ -3,8 +3,8 @@ import os.path
 from datetime import datetime
 from array import array
 
-from fastavro import writer, reader, parse_schema
-from fastavro._read_py import block_reader
+from fastavro import writer, reader, parse_schema, block_reader
+# from fastavro._read_py import block_reader
 
 from roboquant.event import Quote, Bar, Trade
 from roboquant.event import Event
@@ -18,7 +18,7 @@ logger = logging.getLogger(__name__)
 
 class AvroFeed(Feed):
     """Feed that uses Avro files to store historic prices. Supports `Quote`, `Trade` and `Bar` prices.
-    Besides play back, there is also functionality to record another feed into an AvroFeed.
+    Besides playback, there is also functionality to record another feed into an `AvroFeed`.
     """
 
     _schema = {

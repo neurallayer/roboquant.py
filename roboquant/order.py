@@ -12,10 +12,10 @@ from roboquant.monetary import Amount
 class Order:
     """
     A trading order for an asset. Each order has a mandatory `size` and a `limit` price.
-    Orders with a positive `size` are buy orders and with a negative `size` are sell orders.
+    Orders with a positive `size` are buy orders, and with a negative `size` are sell orders.
 
-    The `gtd` (good till date) is optional and if not set implies the order is valid
-    forever. The `info` can hold any abritrary properties (kwargs) set on the order.
+    The `gtd` (good till date) is optional, and if not set implies the order is valid
+    forever. The `info` can hold any arbitrary properties (kwargs) set on the order.
 
     The `id` and `fill` are automatically set by the `Broker` and should not be updated.
     """
@@ -68,8 +68,8 @@ class Order:
 
     def modify(
         self, size: Decimal | str | int | float | None = None, limit: float | None = None) -> "Order":
-        """Create an update-order. You can update the size, limit of an order. The returned order has the same id
-        as the original order. You can only update existing orders that have an id.
+        """Create an update-order. You can update the size and limit of an order.
+        The returned order has the same id as the original order. You can only update existing orders that have an id.
 
         If you want to cancel an order, use the `cancel` method instead. The size of an order cannot be modified to zero.
         """

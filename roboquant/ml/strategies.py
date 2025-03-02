@@ -47,7 +47,7 @@ class FeatureStrategy(Strategy):
 
 class SequenceDataset(Dataset):
     """Dataset that creates an input sequence and an output sequence useful for recurrent networks.
-    The output sequence is always after the input sequence (prediction) and there can be
+    The output sequence is always after the input sequence, but there can be
     optionally a gap.
 
     ```

@@ -13,7 +13,7 @@ logger = logging.getLogger(__name__)
 
 
 class YahooFeed(HistoricFeed):
-    """A feed using the Yahoo Finance API to retrieve historic market data. By default it will retrieve daily data, but
+    """A feed using the Yahoo Finance API to retrieve historic market data. By default, it will retrieve daily data, but
     you can also specify a different intervals."""
 
     def __init__(self, *symbols: str, start_date: str = "2010-01-01", end_date: str | None = None, interval="1d"):
@@ -62,7 +62,7 @@ class YahooFeed(HistoricFeed):
 
     def _get_asset(self, symbol: str):
         """Get the asset for the given symbol. The default implementation will return a Stock denoted in USD.
-        Sub classes can override this method to provide a different asset type."""
+        Subclasses can override this method to provide a different asset type."""
         return Stock(symbol)
 
     @staticmethod

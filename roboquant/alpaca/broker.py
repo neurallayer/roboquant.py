@@ -28,7 +28,7 @@ class AlpacaBroker(LiveBroker):
         self.price_type = "DEFAULT"
         self.sleep_after_cancel = 0.0
 
-    def get_asset(self, symbol: str, asset_class: AssetClass) -> Asset:
+    def _get_asset(self, symbol: str, asset_class: AssetClass) -> Asset:
         match asset_class:
             case AssetClass.US_EQUITY:
                 return Stock(symbol)
@@ -42,7 +42,7 @@ class AlpacaBroker(LiveBroker):
         request = GetOrdersRequest(status=QueryOrderStatus.OPEN)
         alpaca_orders: list[AOrder] = self.__client.get_orders(request)  # type: ignore
         for alpaca_order in alpaca_orders:
-            asset = self.get_asset(alpaca_order.symbol, alpaca_order.asset_class)  # type: ignore
+            asset = self._get_asset(alpaca_order.symbol, alpaca_order.asset_class)  # type: ignore
             order = Order(
                 asset,
                 Decimal(alpaca_order.qty),  # type: ignore
@@ -62,7 +62,7 @@ class AlpacaBroker(LiveBroker):
             if p.side == "short":
                 size = -size
             new_pos = Position(size, float(p.avg_entry_price), float(p.current_price or "nan"))
-            asset = self.get_asset(p.symbol, p.asset_class)
+            asset = self._get_asset(p.symbol, p.asset_class)
             self.__account.positions[asset] = new_pos
 
     def sync(self, event: Event | None = None) -> Account:

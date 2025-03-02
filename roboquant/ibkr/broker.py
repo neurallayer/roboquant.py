@@ -121,7 +121,7 @@ class IBKRBroker(LiveBroker):
 
     client_id
         The client id to use to connect to TWS or IB Gateway. The default is 123. This will showup as a
-        seperate tab in the IB Gateway GUI.
+        separate tab in the IB Gateway GUI.
     """
 
     def __init__(self, host: str = "127.0.0.1", port: int = 4002, client_id: int = 123) -> None:
@@ -184,7 +184,7 @@ class IBKRBroker(LiveBroker):
 
         for idx, order in enumerate(orders, start=1):
             if idx % 25 == 0:
-                # avoid to many API calls
+                # avoid too many API calls
                 time.sleep(1)
 
             if order.size.is_zero():

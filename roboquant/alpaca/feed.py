@@ -44,11 +44,6 @@ def _get_asset(symbol: str, asset_class: AssetClass) -> Asset:
             return Option(symbol)
 
 
-def _assert_keys(api_key, secret_key):
-    assert api_key, "no api key provided or found"
-    assert secret_key, "no secret key provided or found"
-
-
 class AlpacaLiveFeed(LiveFeed):
     """Subscribe to live market data for stocks, cryptocurrencies or options"""
 

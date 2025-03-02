@@ -16,10 +16,10 @@ logger = logging.getLogger(__name__)
 
 
 class SQLFeed(Feed):
-    """SQLFeed supports recording price-items from another feeds and then play them back during a run.
+    """SQLFeed supports recording price-items from another feed and then play them back during a run.
     There is support for either Bars or Quotes. It is also possible to append values to an existing database.
 
-    Under the hood, the data is stored in a SQLite database. The database schema is created automatically when
+    Under the hood, the data is stored in an SQLite database. The database schema is created automatically when
     the first item is recorded. The database schema is different for Bars and Quotes, so you can only store
     one type of price-items in a single database.
     """
@@ -49,7 +49,7 @@ class SQLFeed(Feed):
 
     def create_index(self):
         """Create an index on the date column. The database will become larger. But the performance will improve
-        when querying data for specific timeframes, for example in case of a walk-forward back test.
+        when querying data for specific timeframes, for example, in case of a walk-forward back test.
         If you benefit from this index, best to invoke this method after all the data has been recorded.
         """
         with sqlite3.connect(self.db_file) as con:
@@ -66,7 +66,7 @@ class SQLFeed(Feed):
 
     def timeframe(self) -> Timeframe:
         """Return the timeframe of the data in the database.
-        If no data found, it will return `Timeframe.EMPTY`.
+        If no data is found, it will return `Timeframe.EMPTY`.
         """
         with sqlite3.connect(self.db_file) as con:
             result = con.execute(SQLFeed._sql_select_timeframe).fetchall()
