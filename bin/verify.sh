@@ -1,4 +1,5 @@
 [[ ! -f "LICENSE" ]] && echo "run the script from the project root directory like this: ./bin/verify.sh" && exit 1
+export PYRIGHT_PYTHON_FORCE_VERSION="latest"
 
 uv sync --all-extras --dev
 

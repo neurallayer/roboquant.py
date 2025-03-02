@@ -46,4 +46,3 @@ for timeframe in timeframes:
     rq.run(feed, strategy, journal=journal, timeframe=timeframe)
     journal.plot("pnl/equity", plot_x=False, ax=ax, linewidth=0.5, color="grey")
 
-# %%

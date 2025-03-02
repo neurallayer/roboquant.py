@@ -77,6 +77,6 @@ Issues = "https://github.com/neurallayer/roboquant.py/issues"
 dev = [
   "matplotlib>=3.10.0",
   "python-dotenv>=1.0.1",
-  "pyright>=1.1.395",
+  "pyright>=1.1.396",
   "ipykernel>=6.29.5",
 ]

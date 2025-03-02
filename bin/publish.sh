@@ -1,5 +1,6 @@
 
 [[ ! -f "LICENSE" ]] && echo "run the script from the project root directory like this: ./bin/publish.sh" && exit 1
+export PYRIGHT_PYTHON_FORCE_VERSION="latest"
 
 rm -rf ./runs
 
