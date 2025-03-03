@@ -1,13 +1,55 @@
+"""series of technical indicators"""""
+
+
 import numpy as np
-import math
+
 
 EPS = 0.000000001
 
+
+def _get_ema_weights(period, alpha):
+    w = alpha * (1.0 - alpha) ** np.arange(period)
+    w = np.flip(w) / np.sum(w)
+    return w
+
 def sma(data: np.ndarray, period: int):
+    """
+    Calculate the Simple Moving Average (SMA) of the given data over the specified period.
+
+    Parameters:
+    data (np.ndarray): Array of data points.
+    period (int): Number of periods to calculate the SMA.
+
+    Returns:
+    float: The SMA of the data.
+    """
     return float(np.mean(data[-period:]))
 
 
+def median(data: np.ndarray, period: int):
+    """
+    Calculate the median of the last 'period' elements in the given data array.
+    Parameters:
+        data (np.ndarray): The input array containing numerical data.
+        period (int): The number of elements from the end of the array to consider for the median calculation.
+    Returns:
+        float: The median value of the specified period of elements in the data array.
+    """
+    return float(np.median(data[-period:]))
+
+
 def bb(data: np.ndarray, period: int, multiplier: float=2.0):
+    """
+    Calculate the Bollinger Bands of the given data over the specified period.
+
+    Parameters:
+    data (np.ndarray): Array of data points.
+    period (int): Number of periods to calculate the Bollinger Bands.
+    multiplier (float): Multiplier for the standard deviation.
+
+    Returns:
+    tuple: Upper band, basis (SMA), and lower band.
+    """
     data = data[-period:]
     basis = float(np.mean(data))
     band = float(np.std(data)) * multiplier
@@ -15,6 +57,16 @@ def bb(data: np.ndarray, period: int, multiplier: float=2.0):
 
 
 def rsi(data: np.ndarray, period: int):
+    """
+    Calculate the Relative Strength Index (RSI) of the given data over the specified period.
+
+    Parameters:
+    data (np.ndarray): Array of data points.
+    period (int): Number of periods to calculate the RSI.
+
+    Returns:
+    float: The RSI of the data.
+    """
     data = data[-period:]
     returns = np.diff(data)
     gain = np.mean(returns, where=returns > 0.0) or EPS
@@ -22,7 +74,20 @@ def rsi(data: np.ndarray, period: int):
     rs = gain / loss
     return 100.0 - (100.0 / (1 + rs))
 
+
 def atr(high: np.ndarray, low: np.ndarray, close: np.ndarray, period: int = 14):
+    """
+    Calculate the Average True Range (ATR) of the given data over the specified period.
+
+    Parameters:
+    high (np.ndarray): Array of high prices.
+    low (np.ndarray): Array of low prices.
+    close (np.ndarray): Array of close prices.
+    period (int): Number of periods to calculate the ATR.
+
+    Returns:
+    float: The ATR of the data.
+    """
     h = high[-period:]
     l = low[-period:]  # noqa: E741
     c = close[-period-1:-1]
@@ -36,56 +101,81 @@ def atr(high: np.ndarray, low: np.ndarray, close: np.ndarray, period: int = 14):
     return float(np.mean(true_range))
 
 
-class SMA:
-
-    def __init__(self, period: int) -> None:
-        self.period = period
-
-    def __call__(self, data: np.ndarray):
-        return np.mean(data[-self.period:])
-
-
-class WeightedMA:
-    """Use a Weighted Moving Average. The length of the weights is the minimum required period.
-    It is ensured that the weights add up to 1.0.
+def ema(data: np.ndarray, period: int, alpha=0.1) -> float:
     """
+    Calculate the Exponential Moving Average (EMA) of the given data over the specified period.
 
-    def __init__(self, weights: np.ndarray) -> None:
-            # Make sure the weights add up to 1
-            self._w = np.array(weights) / np.sum(weights)
+    Parameters:
+    data (np.ndarray): Array of data points.
+    period (int): Number of periods to calculate the EMA.
+    alpha (float): Smoothing factor.
 
-            # Weights should add up to 1
-            assert math.isclose(np.sum(self._w), 1.0)
-
-    def __call__(self, data: np.ndarray):
-        period = len(self._w)
-        return np.sum(self._w * data[-period:])
-
-
-class EMA(WeightedMA):
-
-    def __init__(self, period: int, alpha=0.1) -> None:
-        # Calculate the weights
-        w = (1.0 - alpha) ** np.arange(period)
-        w = np.flip(w)
-        super().__init__(w)
+    Returns:
+    float: The EMA of the data.
+    """
+    w = alpha * (1.0 - alpha) ** np.arange(period)
+    w = np.flip(w) / np.sum(w)
+    total = np.sum(w * data[-period:])
+    return float(total)
 
 
-def ema2(data: np.ndarray, period: int, alpha=0.1):
-    data = data[-period:]
-    w = np.flip(alpha * (1.0 - alpha) ** np.arange(period))
-    total = np.sum(w * data)
-    return total
+def ema_crossover(data: np.ndarray, period1, period2, alpha=0.1):
+    """
+    Determine if an EMA crossover has occurred between two periods.
+
+    Parameters:
+    data (np.ndarray): Array of data points.
+    period1 (int): First period for EMA calculation.
+    period2 (int): Second period for EMA calculation.
+    alpha (float): Smoothing factor.
+
+    Returns:
+    bool: True if a crossover has occurred, False otherwise.
+    """
+    new = np.sign(ema(data, period1, alpha) - ema(data, period2, alpha))
+    old = np.sign(ema(data[:-1], period1, alpha) - ema(data[:-1], period2, alpha) )
+    return new != old
+
+def macd(data: np.ndarray, ema1 = 26, ema2 = 12, ema3 = 9):
+    w1 = _get_ema_weights(ema1, 0.1)
+    ema_1 = np.convolve(data[:-ema1-ema3], w1)
+
+    w2 = _get_ema_weights(ema2, 0.1)
+    ema_2 = np.convolve(data[:-ema2-ema3], w2)
+
+    macd_line = ema_1 - ema_2
+    macd_ema = ema(macd_line, ema3)
+    return macd_ema > macd_line[-1]
+
+
+def wma(data: np.ndarray, weights: np.ndarray):
+    """
+    Calculate the Weighted Moving Average (WMA) of the given data using the specified weights.
+
+    Parameters:
+    data (np.ndarray): Array of data points.
+    weights (np.ndarray): Array of weights.
+
+    Returns:
+    float: The WMA of the data.
+    """
+    period = len(weights)
+    weights = weights / np.sum(weights)
+    return np.sum(data[-period:] * weights)
 
 
 if __name__ == "__main__":
     data = np.random.rand(5, 1_000)
     close = data[3]
 
-    ema_10 = EMA(10, 0.1)
-    sma_10 = SMA(10)
 
-    print(sma_10(close))
-    print(ema_10(close))
+    print(sma(close, 10))
+    print(ema(close, 14))
+
+    for i in range(1,100):
+        p = close[:-i]
+        print(ema_crossover(p, 10, 14))
+
+
     print(atr(data[1], data[2], data[3]))
 
