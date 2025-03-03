@@ -1323,7 +1323,7 @@ wheels = [
 
 [[package]]
 name = "roboquant"
-version = "1.1.0"
+version = "1.2.0"
 source = { editable = "." }
 dependencies = [
     { name = "numpy" },
@@ -1360,6 +1360,9 @@ dev = [
     { name = "pyright" },
     { name = "python-dotenv" },
 ]
+talib = [
+    { name = "ta-lib" },
+]
 
 [package.metadata]
 requires-dist = [
@@ -1385,6 +1388,7 @@ dev = [
     { name = "pyright", specifier = ">=1.1.396" },
     { name = "python-dotenv", specifier = ">=1.0.1" },
 ]
+talib = [{ name = "ta-lib", specifier = ">=0.6.3" }]
 
 [[package]]
 name = "sb3-contrib"
@@ -1488,6 +1492,16 @@ sdist = { url = "https://files.pythonhosted.org/packages/ca/99/5a5b6f19ff9f08367
 wheels = [
     { url = "https://files.pythonhosted.org/packages/b2/fe/81695a1aa331a842b582453b605175f419fe8540355886031328089d840a/sympy-1.13.1-py3-none-any.whl", hash = "sha256:db36cdc64bf61b9b24578b6f7bab1ecdd2452cf008f34faa33776680c26d66f8", size = 6189177 },
 ]
+
+[[package]]
+name = "ta-lib"
+version = "0.6.3"
+source = { registry = "https://pypi.org/simple" }
+dependencies = [
+    { name = "numpy" },
+    { name = "setuptools" },
+]
+sdist = { url = "https://files.pythonhosted.org/packages/35/dc/e7fab66315fdd2e2eeb2e3dbb9d23ea615bafc1e9174a8965d310e40a3c2/ta_lib-0.6.3.tar.gz", hash = "sha256:0c628db09b3fab6e5c26979e608b674e7aecc10359c82ba8d53f729767a856ac", size = 376798 }
 
 [[package]]
 name = "tensorboard"

@@ -80,3 +80,6 @@ dev = [
   "pyright>=1.1.396",
   "ipykernel>=6.29.5",
 ]
+talib = [
+  "ta-lib>=0.6.3"
+]
