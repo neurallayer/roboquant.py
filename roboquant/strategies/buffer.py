@@ -83,7 +83,7 @@ class OHLCVBuffer(NumpyBuffer):
 
 
 class OHLCVBuffers(UserDict[Asset, OHLCVBuffer]):
-    """A OHLCV buffer for multiple assets"""
+    """A OHLCV buffer that tracks multiple assets"""
 
     def __init__(self, size: int):
         super().__init__()
@@ -91,7 +91,7 @@ class OHLCVBuffers(UserDict[Asset, OHLCVBuffer]):
 
     def add_event(self, event: Event) -> set[Asset]:
         """Add a new event and return all the assets that have been added and are ready to be processed.
-        PriceItems that are not Bars are ignored.
+        PriceItems in the event that are not of the type `Bar` are ignored.
         """
         assets: set[Asset] = set()
         for item in event.items:
@@ -100,8 +100,7 @@ class OHLCVBuffers(UserDict[Asset, OHLCVBuffer]):
                 if asset not in self:
                     self[asset] = OHLCVBuffer(self.size)
                 ohlcv = self[asset]
-                ohlcv.append(item.ohlcv)
-                if ohlcv.is_full():
+                if ohlcv.append(item.ohlcv):
                     assets.add(asset)
         return assets
 
