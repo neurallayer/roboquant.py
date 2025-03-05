@@ -21,7 +21,7 @@ rq.run(feed, strategy, journal=journal)
 journal.plot("pnl/equity", color="green", linewidth=0.5)
 
 # %%
-# Run a walk forward over 4 equal timeframes and plot each run.
+# Perform a walk forward over 4 equal timeframes and plot each run.
 
 timeframes = feed.timeframe().split(4)
 _, ax = plt.subplots()
@@ -45,4 +45,3 @@ for timeframe in timeframes:
     journal = rq.journals.MetricsJournal.pnl()
     rq.run(feed, strategy, journal=journal, timeframe=timeframe)
     journal.plot("pnl/equity", plot_x=False, ax=ax, linewidth=0.5, color="grey")
-

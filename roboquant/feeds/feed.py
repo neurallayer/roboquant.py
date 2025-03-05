@@ -172,11 +172,24 @@ class Feed(ABC):
         ax.set_title(asset.symbol)
         return result
 
-    def get_asset_prices(
-        self, asset: Asset, price_type="DEFAULT", timeframe: Timeframe | None = None
-    ) -> tuple[list[datetime], list[float]]:
-        """Get prices for a single asset from the feed by replaying the feed."""
 
+    def get_asset_prices(self, asset: Asset, price_type="DEFAULT", timeframe: Timeframe | None = None
+    ) -> tuple[list[datetime], list[float]]:
+        """
+        Retrieve the prices of a given asset, optional over a specified timeframe.
+
+        Args:
+            asset (Asset): The asset for which to retrieve prices.
+            price_type (str, optional): The type of price to retrieve (e.g., "DEFAULT", "CLOSE", "OPEN").
+            Defaults to "DEFAULT".
+            timeframe (Timeframe | None, optional): The timeframe over which to retrieve prices.
+            If None, the entire available timeframe is used. Defaults to None.
+
+        Returns:
+            tuple[list[datetime], list[float]]: A tuple containing two lists:
+                - A list of datetime objects representing the times at which prices were recorded.
+                - A list of float values representing the prices of the asset at the corresponding times.
+        """
         x = []
         y = []
         channel = self.play_background(timeframe)
