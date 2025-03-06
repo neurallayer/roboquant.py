@@ -74,6 +74,8 @@ def run_strategy(strategy: Strategy, test_case: TestCase):
             test_case.assertEqual(type(signal), Signal)
             test_case.assertEqual(asset.symbol, asset.symbol.upper())
             test_case.assertIn(asset, all_assets)
+            test_case.assertGreaterEqual(signal.rating, -1)
+            test_case.assertLessEqual(signal.rating, 1)
         total_signals += len(signals)
 
     test_case.assertGreater(total_signals, 0)

@@ -17,6 +17,8 @@ logger = logging.getLogger(__name__)
 
 
 class _PositionChange(Flag):
+    """representing the four types of changes to a portfolio"""
+
     ENTRY_LONG = auto()
     ENTRY_SHORT = auto()
     EXIT_LONG = auto()
@@ -45,23 +47,39 @@ class _PositionChange(Flag):
 
         return _PositionChange.EXIT_SHORT if is_buy else _PositionChange.ENTRY_SHORT
 
+    def __repr__(self) -> str:
+        return self.name.split(".")[-1]  # type: ignore
+
 
 class _Context:
+    def __init__(self, time: datetime) -> None:
+        self.time = time.replace(tzinfo=None)  # Allow for nicer printing
 
-    def __init__(self, signal: Signal, position: Decimal) -> None:
-        self.signal = signal
-        self.position = position
-
-    def log(self, rule: str, **kwargs: Any):
+    def log_received(self, **kwargs):
         if logger.isEnabledFor(logging.INFO):
             extra = " ".join(f"{k}={v}" for k, v in kwargs.items())
             logger.info(
-                "Discarded signal because %s [asset=%s rating=%s type=%s position=%s %s]",
+                "==> %s received %s",
+                self.time,
+                extra
+            )
+
+    def log_orders(self, orders):
+        if logger.isEnabledFor(logging.INFO):
+            logger.info(
+                "<== %s converter signal into order(s) %s",
+                self.time,
+                orders,
+            )
+
+    def log_rule(self, rule: str, **kwargs: Any):
+        """Log an exit due to a rule"""
+        if logger.isEnabledFor(logging.INFO):
+            extra = " ".join(f"{k}={v}" for k, v in kwargs.items())
+            logger.info(
+                "<== %s discarded signal because of '%s' rule %s",
+                self.time,
                 rule,
-                self.signal.asset,
-                self.signal.rating,
-                self.signal.type,
-                self.position,
                 extra,
             )
 
@@ -92,15 +110,15 @@ class FlexTrader(Trader):
 
     def __init__(
         self,
-        one_order_only: bool=True,
-        size_fractions:int=0,
-        safety_margin_perc:float=0.05,
-        shorting:bool=False,
-        max_order_perc:float=0.05,
-        min_order_perc: float=0.02,
-        max_position_perc: float=0.1,
-        price_type: str="DEFAULT",
-        shuffle_signals: bool=False,
+        one_order_only: bool = True,
+        size_fractions: int = 0,
+        safety_margin_perc: float = 0.05,
+        shorting: bool = False,
+        max_order_perc: float = 0.05,
+        min_order_perc: float = 0.02,
+        max_position_perc: float = 0.1,
+        price_type: str = "DEFAULT",
+        shuffle_signals: bool = False,
     ) -> None:
         super().__init__()
         self.one_order_only = one_order_only
@@ -135,78 +153,79 @@ class FlexTrader(Trader):
         max_pos_value = equity * self.max_position_perc
         available = account.buying_power.value - self.safety_margin_perc * equity
         order_assets = {order.asset for order in account.orders}
+        ctx = _Context(event.time)
 
         for signal in signals:
             asset = signal.asset
             pos_size = account.get_position_size(asset)
-            ctx = _Context(signal, pos_size)
-
             change = _PositionChange.get_change(signal.is_buy, pos_size)
 
-            logger.info("available=%s signal=%s pos=%s change=%s", available, signal, pos_size, change)
+            ctx.log_received(signal=signal, position=pos_size, available=available)
+
+            # logger.info("==> received signal available=%s signal=%s pos=%s change=%s", available, signal, pos_size, change)
 
             if self.one_order_only and asset in order_assets:
-                ctx.log("one order only")
+                ctx.log_rule("one order only")
                 continue
 
             item = event.price_items.get(asset)
             if item is None:
-                ctx.log("no price is available")
+                ctx.log_rule("no known price")
                 continue
 
             price = item.price(self.price_type)
 
             if not self.shorting and change == _PositionChange.ENTRY_SHORT:
-                ctx.log("no shorting")
+                ctx.log_rule("no shorting")
                 continue
 
             if change.is_exit:
                 # Closing orders don't require or use buying power
                 if not signal.is_exit:
-                    ctx.log("no exit signal")
+                    ctx.log_rule("no exit signal")
                     continue
 
                 rounded_size = round(-pos_size * abs(Decimal(signal.rating)), self.size_digits)
                 if rounded_size.is_zero():
-                    ctx.log("cannot exit with order size zero")
+                    ctx.log_rule("cannot exit with order size zero")
                     continue
                 new_orders = self._get_orders(asset, rounded_size, item, signal, event.time)
                 orders += new_orders
             else:
                 if available < 0:
-                    ctx.log("no more available buying power")
+                    ctx.log_rule("no more available buying power")
                     continue
 
                 if not signal.is_entry:
-                    ctx.log("no entry signal")
+                    ctx.log_rule("no entry signal")
                     continue
 
                 if available < min_order_value:
-                    ctx.log("available buying power below minimum order value")
+                    ctx.log_rule("available buying power below minimum order value")
                     continue
 
                 available_order_value = min(available, max_order_value, max_pos_value - abs(account.position_value(asset)))
                 if available_order_value < min_order_value:
-                    ctx.log("calculated available order value below minimum order value")
+                    ctx.log_rule("calculated available order value below minimum order value")
                     continue
 
                 contract_price = account.contract_value(asset, Decimal(1), price)
                 order_size = self._get_order_size(signal.rating, contract_price, available_order_value)
 
                 if order_size.is_zero():
-                    ctx.log("calculated order size is zero")
+                    ctx.log_rule("calculated order size is zero")
                     continue
 
                 order_value = abs(account.contract_value(asset, order_size, price))
                 if abs(order_value) > available:
-                    ctx.log(
+                    ctx.log_rule(
                         "order value above available buying power",
                         order_value=order_value,
                         available=available,
                     )
                     continue
                 if abs(order_value) < min_order_value:
-                    ctx.log(
+                    ctx.log_rule(
                         "order value below minimum order value",
                         order_value=order_value,
                         min_order_value=min_order_value,
@@ -220,11 +239,20 @@ class FlexTrader(Trader):
 
         return orders
 
-    def _get_orders(self, asset: Asset, size: Decimal, item: PriceItem, signal: Signal, dt: datetime) -> list[Order]:
+    def _get_orders(self, asset: Asset, size: Decimal, item: PriceItem, signal: Signal, time: datetime) -> list[Order]:
         # pylint: disable=unused-argument
-        """Return zero or more orders for the provided asset and size."""
-        gtd = None if not self.valid_for else dt + self.valid_for
-        return [Order(asset, size, item.price(), gtd)]
+        """Return zero or more orders for the provided asset and size.
+        The default implementation:
+        - creates a single order
+        - with the limit price being exactly the `self.price_type`
+        - the gtd set to the time of the event + `self.valid_for`
+
+        Overwrite this method if you want to implement different logic.
+        """
+        gtd = None if not self.valid_for else time + self.valid_for
+        result = [Order(asset, size, item.price(self.price_type), gtd)]
+        logger.info("<== %s converted signal into new order(s) %s", time.replace(tzinfo=None), result)
+        return result
 
     def __str__(self) -> str:
         attrs = " ".join([f"{k}={v}" for k, v in self.__dict__.items() if not k.startswith("_")])

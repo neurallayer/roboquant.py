@@ -6,7 +6,7 @@ from tests.common import run_strategy
 
 
 class _MyStrategy(TaStrategy):
-    """Example using CandleStrategy to create a custom strategy"""
+    """Example using TaStrategy as a baseclass to create a custom strategy"""
 
     def process_asset(self, asset, ohlcv: OHLCVBuffer):
         close = ohlcv.close()
@@ -19,9 +19,9 @@ class _MyStrategy(TaStrategy):
         return None
 
 
-class TestCandleStrategy(unittest.TestCase):
+class TestTaStrategy(unittest.TestCase):
 
-    def test_candle_strategy(self):
+    def test_my_tastrategy(self):
         # ensure there is enough history available
         strategy = _MyStrategy(27)
         run_strategy(strategy, self)

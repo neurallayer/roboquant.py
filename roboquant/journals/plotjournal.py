@@ -67,7 +67,10 @@ class PlotJournal(Journal):
         """
         ratios = [5,] + [1 for _ in self._metrics]
         fig, axes = plt.subplots(1 + len(self._metrics), sharex=True, gridspec_kw={'height_ratios': ratios})
-        fig.subplots_adjust(hspace=0)
+        # fig.subplots_adjust(hspace=0)
+        # fig.set_size_inches(15, 5 + (2 * len(ratios)))
+        fig.set_size_inches(8.27, 11.69) # A4
+        fig.tight_layout()
 
         plot_nr = 0
         ax = axes[plot_nr]
@@ -87,7 +90,6 @@ class PlotJournal(Journal):
             plot_nr+=1
             ax = axes[plot_nr]
             ax.tick_params(axis='y', which='major', labelsize="small")
-            # ax.xtick(size="small")
             ax.plot(value.x, value.y)
             ax.set_title(name, y=1.0, pad=-14, size="small")
 

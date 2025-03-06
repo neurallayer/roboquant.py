@@ -4,8 +4,11 @@ import numpy as np
 from enum import Enum
 from typing import Tuple
 from numpy.typing import NDArray
-import talib._ta_lib as _ta_lib  # type: ignore
 
+try:
+    import talib._ta_lib as _ta_lib  # type: ignore
+except ImportError:
+    pass
 
 class MA_Type(Enum):
     SMA = 0
@@ -751,7 +754,7 @@ def SUM(real: NDArray[np.float64], timeperiod: int = 30) -> float: ...
 
 
 # ################
-# extra ones
+# missed ones
 # ###############
 
 
@@ -770,8 +773,8 @@ def IMI(open: NDArray[np.float64], close: NDArray[np.float64], timeperiod: int =
 #    if fn not in __TA_FUNCTION_NAMES__:
 #       if not fn.startswith("__") and fn == fn.upper():
 #            print("not found ", fn)
-
-for func_name in _ta_lib.__TA_FUNCTION_NAMES__:  # type: ignore
-    #    if func_name not in globals():
-    #        print("new function", func_name)
-    globals()[func_name] = getattr(_ta_lib, "stream_%s" % func_name)
+if "_ta_lib" in globals():
+    for func_name in _ta_lib.__TA_FUNCTION_NAMES__:  # type: ignore
+        #    if func_name not in globals():
+        #        print("new function", func_name)
+        globals()[func_name] = getattr(_ta_lib, "stream_%s" % func_name)  # type: ignore

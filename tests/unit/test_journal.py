@@ -1,13 +1,11 @@
 import pathlib
 import unittest
-# from matplotlib import pyplot as plt
 
 from roboquant.feeds import CSVFeed
 from roboquant.journals import RunMetric
 from roboquant.strategies.emacrossover import EMACrossover
 from roboquant import run
 from roboquant.journals.plotjournal import PlotJournal
-
 
 
 class TestJournal(unittest.TestCase):
@@ -26,7 +24,6 @@ class TestJournal(unittest.TestCase):
 
         run(feed, strategy, journal=journal)
         journal.plot()
-        # plt.show()
 
 
 if __name__ == "__main__":
