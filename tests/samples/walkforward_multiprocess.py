@@ -14,7 +14,7 @@ FEED = rq.feeds.YahooFeed("GOOG", "MSFT", "NVDA", start_date="2000-01-01")
 print(FEED)
 
 
-def _walkforward(params):
+def walk_forward(params):
     """Perform a run over the provided timeframe and EMA parameters"""
     timeframe, (fast, slow) = params
     strategy = rq.strategies.EMACrossover(fast, slow)
@@ -38,8 +38,8 @@ if __name__ == "__main__":
         # All the combinations of parameters (Cartesian product)
         all_params = product(timeframe_params, ema_params)
 
-        # run the back tests in parallel
-        equities = p.map(_walkforward, all_params)
+        # run the walk-forward in parallel
+        equities = p.map(walk_forward, all_params)
 
         # print some result
         print("max equity =>", max(equities))

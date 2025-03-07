@@ -1,3 +1,4 @@
+from decimal import Decimal
 import unittest
 
 from roboquant.asset import Crypto, Stock, Option
@@ -14,6 +15,9 @@ class TestAsset(unittest.TestCase):
         testla2 = Stock.deserialize(v)
         self.assertEqual(tesla, testla2)
         self.assertRaises(AssertionError, Stock.deserialize, "Stock2:GOOG:USD")
+
+        cv = tesla.contract_value(Decimal(100), 150.0)
+        self.assertEqual(cv, 100*150.0)
 
     def test_crypto(self):
         btc = Crypto.from_symbol("BTC/USDT")
@@ -32,6 +36,9 @@ class TestAsset(unittest.TestCase):
         testla2 = Option.deserialize(v)
         self.assertEqual(tesla, testla2)
         self.assertRaises(AssertionError, Option.deserialize, "Option2:TSLA250228C00100000:USD")
+
+        cv = tesla.contract_value(Decimal(100), 150.0)
+        self.assertEqual(cv, 100*150.0*100)
 
 
 if __name__ == "__main__":

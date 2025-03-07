@@ -4,15 +4,17 @@ from roboquant.strategies.strategy import Strategy
 
 
 class IBSStrategy(Strategy):
-    """IBS Strategy implementation.
-   - If IBS is below buy threshhold, create a BUY Signal with rating `1.0 - IBS`
-   - If IBS is abive sell threshhold, create a SELL Signal with rating `- IBS`
+    """Internal Bar Strength indicator based strategy, that follows the following rules:
+   - If IBS indicator is below buy-threshhold, create a BUY Signal with rating `1.0 - IBS`
+   - If IBS indicator is above sell-threshhold, create a SELL Signal with rating `- IBS`
+
+   So it is a mean-reversion strategy that uses IBS to identify oversold or overbought opprtunities.
     """
 
-    def __init__(self, buy=0.2, sell=0.8):
+    def __init__(self, buy_threshold=0.2, sell_threshold=0.8):
         super().__init__()
-        self.buy = buy
-        self.sell = sell
+        self.__buy = buy_threshold
+        self.__sell = sell_threshold
 
     def create_signals(self, event: Event) -> list[Signal]:
         result = []
@@ -21,9 +23,9 @@ class IBSStrategy(Strategy):
                 _, h, l, c, _ = item.ohlcv # noqa: E741
                 if h != l:
                     ibs = (c - l) / (h - l)
-                    if ibs < self.buy:
+                    if ibs < self.__buy:
                         result.append(Signal(asset, 1.0 - ibs))
-                    elif ibs > self.sell:
+                    elif ibs > self.__sell:
                         result.append(Signal(asset, -ibs))
         return result
 

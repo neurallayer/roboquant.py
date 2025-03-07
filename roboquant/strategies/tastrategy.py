@@ -38,7 +38,7 @@ class TaStrategy(Strategy):
         Sample:
         ```
         prices = ohlcv.close()
-        if prices[-10:].mean() > prices[:10].mean():
+        if prices[-10:].mean() > prices[-20:].mean():
             return Signal.buy(asset)
         ```
         """

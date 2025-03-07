@@ -12,6 +12,8 @@ from tests.common import get_feed
 
 
 class _MyModel(nn.Module):
+    """Sample LSTM based model for testign purposes"""
+
     def __init__(self) -> None:
         super().__init__()
         self.lstm = nn.LSTM(6, 8, batch_first=True, num_layers=2, dropout=0.5)
@@ -27,7 +29,7 @@ class _MyModel(nn.Module):
 
 class TestRNN(unittest.TestCase):
 
-    def test_ds(self):
+    def test_dataset(self):
         x = np.ones((100, 10))
         y = np.ones((100, 5))
         ds = SequenceDataset(x, y, 20, 10, 1)
@@ -63,7 +65,10 @@ class TestRNN(unittest.TestCase):
         # Run the trained model with the last 4 years of data
         tf = rq.Timeframe.fromisoformat("2020-01-01", "2024-01-01")
         account = None
-        account = rq.run(feed, strategy, timeframe=tf)
+        try:
+            account = rq.run(feed, strategy, timeframe=tf)
+        except:  # noqa: E722
+            pass
         self.assertTrue(account)
 
 
