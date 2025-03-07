@@ -220,13 +220,10 @@ class Amount:
         """Return a list with only this amount, this brings the `Amount` class in line with the `Wallet` class"""
         return [self]
 
-    def __add__(self, other: "Amount") -> "Wallet | Amount":
-        """Add another amount to this amount.
-        If the other amount is in the same currency, it will return a new `Amount` otherwise it will return a `Wallet`.
+    def __add__(self, other: "Amount") -> "Wallet":
+        """Add another amount to this amount. It will return a `Wallet`.
         So no currency conversion will be done.
         """
-        if other.currency == self.currency:
-            return Amount(self.currency, self.value + other.value)
         return Wallet(self, other)
 
     def __matmul__(self, other: Currency) -> "Amount":
