@@ -37,14 +37,17 @@ feed = rq.feeds.YahooFeed(apple.symbol, start_date=start_date)
 # Define the strategy
 model = MyModel()
 
+# What are the input features
 input_feature = CombinedFeature(
     BarFeature(apple).returns(),
     SMAFeature(BarFeature(apple), 10).returns(),
     SMAFeature(BarFeature(apple), 20).returns(),
 ).normalize()
 
+# What should it predict
 label_feature = MaxReturnFeature(PriceFeature(apple, price_type="HIGH"), 10)
 
+# Create the strategy
 strategy = RNNStrategy(input_feature, label_feature, model, apple, sequences=20, buy_pct=0.04, sell_pct=0.01)
 
 # %%

@@ -28,8 +28,8 @@ def run(
 
     Args:
         feed: The feed to use for this run
-        strategy: Your strategy that you want to use
-        trader: The trader to use, default is FlexTrader
+        strategy: The strategy that you want to use, use None if you have all the logic in the Trader
+        trader: The trader to use, default is the `FlexTrader` if None is provided
         journal: Journal to use to log and/or store progress and metrics, default is None
         broker: The broker you want to use. If None is specified, the `SimBroker` will be used with its default settings
         timeframe: Optionally limit the run to events within this timeframe. The default is None
