@@ -19,9 +19,7 @@ logger = logging.getLogger(__name__)
 
 
 class FeatureStrategy(Strategy):
-    """Abstract base class for strategies wanting to use event features
-    for their input.
-    """
+    """Abstract base class for strategies that use event features as input."""
 
     def __init__(self, input_feature: Feature[Event], history: int, dtype="float32"):
         super().__init__()
@@ -31,6 +29,7 @@ class FeatureStrategy(Strategy):
         self._dtype = dtype
 
     def create_signals(self, event: Event) -> list[Signal]:
+        """Create signals based on the event features."""
         h = self._hist
         row = self.input_feature.calc(event)
         h.append(row)
@@ -41,32 +40,31 @@ class FeatureStrategy(Strategy):
 
     @abstractmethod
     def predict(self, x: NDArray, dt: datetime) -> list[Signal]:
-        """Subclasses need to implement this method"""
+        """Subclasses need to implement this method to predict signals based on input features."""
         ...
 
 
 class SequenceDataset(Dataset):
-    """Dataset that creates an input sequence and an output sequence useful for recurrent networks.
-    The output sequence is always after the input sequence, but there can be
-    optionally a gap.
+    """Dataset for creating input and output sequences for recurrent networks.
 
-    ```
+    The output sequence follows the input sequence, with an optional gap in between.
+
+    Example:
     [...input...][...gap...][...target...]
-    ```
     """
 
     def __init__(
         self,
         input_data: NDArray,
         target_data: NDArray,
-        input_sequences:int = 20,
+        input_sequences: int = 20,
         target_sequences: int = 1,
         gap=0,
         transform=None,
         target_transform=None,
         target_squeeze=True
     ):
-        assert len(input_data) == len(target_data), "x_data and y_data need to have the same length"
+        assert len(input_data) == len(target_data), "input_data and target_data must have the same length"
         self.input_data = input_data
         self.target_data = target_data
         self.input_sequences = input_sequences
@@ -77,13 +75,15 @@ class SequenceDataset(Dataset):
         self.target_transform = target_transform
 
         if len(self) == 0:
-            logger.warning("this dataset won't produce any data")
+            logger.warning("This dataset won't produce any data")
 
     def __len__(self):
+        """Return the number of samples in the dataset."""
         calc_l = len(self.target_data) - self.input_sequences - self.output_sequences - self.gap + 1
         return max(0, calc_l)
 
     def __getitem__(self, idx):
+        """Get a sample from the dataset."""
         end = idx + self.input_sequences
         features = self.input_data[idx:end]
         start = end + self.gap
@@ -99,8 +99,10 @@ class SequenceDataset(Dataset):
 
 
 class RNNStrategy(FeatureStrategy):
-    """A strategy that uses a recurrent neural network to predict the future of a time series.
-    The input and label features are both features that can be calculated from an event."""
+    """Strategy using a recurrent neural network to predict future time series values.
+
+    The input and label features are calculated from events.
+    """
 
     def __init__(
         self,
@@ -120,8 +122,9 @@ class RNNStrategy(FeatureStrategy):
         self.asset = asset
 
     def predict(self, x, dt) -> list[Signal]:
+        """Predict signals based on the input features using the RNN model."""
         x = torch.asarray(x)
-        x = torch.unsqueeze(x, dim=0)  # add the batch dimension
+        x = torch.unsqueeze(x, dim=0)  # Add the batch dimension
 
         self.model.eval()
         with torch.no_grad():
@@ -132,7 +135,7 @@ class RNNStrategy(FeatureStrategy):
             else:
                 p = output.item()
 
-            logger.info("prediction p=%s time=%s", p, dt)
+            logger.info("Prediction p=%s time=%s", p, dt)
             if p >= self.buy_pct:
                 return [Signal.buy(self.asset)]
             if p <= self.sell_pct:
@@ -140,7 +143,8 @@ class RNNStrategy(FeatureStrategy):
         return []
 
     def _get_dataloaders(self, x, y, prediction: int, validation_split: float, batch_size: int):
-        # what is the border between train- and validation-data
+        """Create dataloaders for training and validation datasets."""
+        # Determine the border between training and validation data
         border = round(len(y) * (1.0 - validation_split))
 
         x_train = x[:border]
@@ -159,6 +163,7 @@ class RNNStrategy(FeatureStrategy):
         return train_dataloader, valid_dataloader
 
     def __get_xy(self, feed, timeframe=None, warmup=0) -> tuple[NDArray, NDArray]:
+        """Extract input and label features from the feed."""
         channel = feed.play_background(timeframe)
         x = []
         y = []
@@ -175,6 +180,7 @@ class RNNStrategy(FeatureStrategy):
 
     @staticmethod
     def describe(x):
+        """Print the shape, min, max, and mean of the input array."""
         print("shape=", x.shape, "min=", np.min(x, axis=0), "max=", np.max(x, axis=0), "mean=", np.mean(x, axis=0))
 
     def fit(
@@ -191,20 +197,19 @@ class RNNStrategy(FeatureStrategy):
         writer=None,
     ):
         """
-        Train the model for a fixed number of epochs (dataset iterations).
+        Train the model for a fixed number of epochs.
 
         Args:
             feed: The data feed to use.
-            optimizer: The torch optimizer to use.
-            If None is specified, Adam will be used.
-            criterion: The torch loss function to use. If None is specified, MESLoss will be used.
+            optimizer: The torch optimizer to use. If None is specified, Adam will be used.
+            criterion: The torch loss function to use. If None is specified, MSELoss will be used.
             prediction: The steps in the future to predict, default is 1.
             timeframe: The timeframe to limit the training and validation to.
             epochs: The total number of epochs to train the model, default is 10.
             batch_size: The batch size to use, default is 32.
-            validation_split: the percentage to use for validation, default is 0.20 (20%).
-            warmup: number of warmup steps
-            writer: the tensorboard writer to use to log losses, default is None.
+            validation_split: The percentage to use for validation, default is 0.20 (20%).
+            warmup: Number of warmup steps.
+            writer: The tensorboard writer to use to log losses, default is None.
         """
         optimizer = optimizer or torch.optim.Adam(self.model.parameters(), lr=0.001)
         criterion = criterion or torch.nn.MSELoss()
@@ -231,6 +236,7 @@ class RNNStrategy(FeatureStrategy):
             writer.flush()
 
     def _train_epoch(self, data_loader, opt, crit):
+        """Train the model for one epoch."""
         model = self.model
         model.train()
         b, total_loss = 0, torch.tensor([0.0])
@@ -246,6 +252,7 @@ class RNNStrategy(FeatureStrategy):
         return (total_loss / b).item()
 
     def _valid_epoch(self, data_loader, crit):
+        """Validate the model for one epoch."""
         model = self.model
         model.eval()
         b, total_loss = 0, torch.tensor([0.0])

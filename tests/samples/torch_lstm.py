@@ -1,4 +1,5 @@
 # %%
+import logging
 from torch import nn
 import torch.nn.functional as F
 
@@ -6,7 +7,7 @@ import roboquant as rq
 from roboquant.asset import Stock
 from roboquant.journals.basicjournal import BasicJournal
 from roboquant.ml.features import BarFeature, CombinedFeature, MaxReturnFeature, PriceFeature, SMAFeature
-from roboquant.ml.strategies import RNNStrategy
+from roboquant.ml.strategies import RNNStrategy, logger
 
 
 # %%
@@ -29,7 +30,7 @@ class MyModel(nn.Module):
 # %%
 # Config
 apple = Stock("AAPL")
-prediction = 10
+prediction = 5 # predict 5 steps in the future
 start_date = "2010-01-01"
 feed = rq.feeds.YahooFeed(apple.symbol, start_date=start_date)
 
@@ -42,21 +43,25 @@ input_feature = CombinedFeature(
     BarFeature(apple).returns(),
     SMAFeature(BarFeature(apple), 10).returns(),
     SMAFeature(BarFeature(apple), 20).returns(),
-).normalize()
+).normalize(20)
 
 # What should it predict
-label_feature = MaxReturnFeature(PriceFeature(apple, price_type="HIGH"), 10)
+# In this case the max return over the prediction period
+label_feature = MaxReturnFeature(PriceFeature(apple, price_type="HIGH"), prediction)
 
 # Create the strategy
-strategy = RNNStrategy(input_feature, label_feature, model, apple, sequences=20, buy_pct=0.04, sell_pct=0.01)
+logging.basicConfig()
+logger.setLevel("INFO")
+strategy = RNNStrategy(input_feature, label_feature, model, apple, sequences=20, buy_pct=0.02, sell_pct=0.02)
 
 # %%
-# Train the model
+# Train the model from 2010 to 20202
 tf = rq.Timeframe.fromisoformat(start_date, "2020-01-01")
 strategy.fit(feed, timeframe=tf, epochs=20, validation_split=0.25, prediction=prediction)
 
 # %%
 # Run the trained model with the last years of data
+logger.setLevel("WARNING")
 tf = rq.Timeframe.fromisoformat("2020-01-01", "2025-01-01")
 journal = BasicJournal()
 account = rq.run(feed, strategy, timeframe=tf, journal=journal)

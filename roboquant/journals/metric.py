@@ -7,7 +7,9 @@ from roboquant.signal import Signal
 
 
 class Metric(ABC):
-    """Metric calculates zero or more values during each step of a run"""
+    """Metric calculates zero or more values during each step of a run.
+    They can be used for example in the MetricsJournal.
+    """
 
     @abstractmethod
     def calc(self, event: Event, account: Account, signals: list[Signal], orders: list[Order]) -> dict[str, float]:

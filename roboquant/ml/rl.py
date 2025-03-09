@@ -62,7 +62,7 @@ class TradingEnv(gym.Env):
         # The observation space is determined by the final shape of the observation feature
         self.observation_space = spaces.Box(-1.0, 1.0, shape=(obs_feature.size(),), dtype=np.float32)
 
-        # The action space is for very asset to predict a number between a strong sell (-1.0) and strogn buy (1.0)
+        # The action space is for very asset to predict a number between a strong sell (-1.0) and strong buy (1.0)
         self.action_space = spaces.Box(-1.0, 1.0, shape=(len(self.assets),), dtype=np.float32)
 
         logger.info("observation_space=%s action_space=%s", self.observation_space, self.action_space)
@@ -96,6 +96,7 @@ class TradingEnv(gym.Env):
         if self.event:
             self.account = self.broker.sync(self.event)
 
+            # Early stop if lost everything and no more equity
             if self.account.equity_value() < 0.0:
                 logger.info("Account equity < 0, done=True")
                 return None, 0.0, True, False, {}

@@ -20,9 +20,9 @@ class Feature(Generic[T]):
     @abstractmethod
     def calc(self, value: T) -> NDArray:
         """
-        Return the result as a 1-dimensional NDArray.
+        Perform the calculation and return the result as a 1-dimensional NDArray.
         The result should always be the same size. If a value cannot be calculated at a certain
-        item, it should return a float NaN.
+        time, it should use a float NaN in the NDArray.
         """
 
     @abstractmethod

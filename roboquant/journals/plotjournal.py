@@ -58,11 +58,11 @@ class PlotJournal(Journal):
                 self._metrics[name].add(time, value)
 
     def plot(self, **kwargs):
-        """Plot a chart with:
-        - prices
+        """Plot a chart with the following charts:
+        - prices of the configured asset.
         - signals als horizontal lines, greeen and red.
         - orders als small green up and red down triangles.
-        - metrics plotted.
+        - metrics that have been configured.
 
         """
         ratios = [5,] + [1 for _ in self._metrics]

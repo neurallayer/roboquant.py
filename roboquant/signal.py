@@ -38,9 +38,9 @@ class Signal:
     Examples:
     ```python
     apple = Stock("AAPL")
-    Signal.buy(apple)
-    Signal.sell(apple, SignalType.EXIT)
-    Signal(apple, 0.5, SignalType.ENTRY)
+    signal1 = Signal.buy(apple)
+    signal2 = Signal.sell(apple, SignalType.EXIT)
+    signal3 = Signal(apple, 0.5, SignalType.ENTRY)
     ```
     """
 
