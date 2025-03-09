@@ -40,7 +40,7 @@ class Order:
 
     fill: Decimal
     """The filled size of the order, set by the broker only. Just like the size, positive for buy orders,
-    negative for sell orders. So the remanining size is `size - fill`"""
+    negative for sell orders. So the remaining size is `size - fill`"""
 
     def __init__(self, asset: Asset, size: Decimal | str | int | float, limit: float, gtd: datetime | None = None, **kwargs):
         self.asset = asset
@@ -124,7 +124,7 @@ class Order:
 
     @property
     def remaining(self) -> Decimal:
-        """Return the remaining order size to be filled.
+        """Return the remaining order size that still needs to be filled.
         ```
         size = fill + remaining
         ```

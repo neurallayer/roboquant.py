@@ -15,7 +15,7 @@ class TestJournal(unittest.TestCase):
         root = pathlib.Path(__file__).parent.resolve().joinpath("..", "data", *paths)
         return str(root)
 
-    def test_plotjournal(self):
+    def test_plot_journal(self):
         root = self._get_root_dir("yahoo")
         feed = CSVFeed.yahoo(root)
         apple = feed.get_asset("AAPL")

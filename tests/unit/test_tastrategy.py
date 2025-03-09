@@ -21,7 +21,7 @@ class _MyStrategy(TaStrategy):
 
 class TestTaStrategy(unittest.TestCase):
 
-    def test_my_tastrategy(self):
+    def test_my_ta_strategy(self):
         # ensure there is enough history available
         strategy = _MyStrategy(27)
         run_strategy(strategy, self)

@@ -9,7 +9,7 @@ from roboquant.journals.metric import Metric
 
 class AlphaBeta(Metric):
     """
-    Calculate the alpha and beta over a given window size.
+    Calculate the alpha and beta metric over a given window size.
     """
 
     def __init__(self, window_size: int, price_type: str = "DEFAULT", risk_free_return: float = 0.0):

@@ -102,7 +102,7 @@ class Crypto(Asset):
 
 @dataclass(frozen=True, slots=True)
 class Option(Asset):
-    """Option Contract asset that has uses a contract size of 100 to calculate the contract value"""
+    """Option contract asset that has uses a contract size of 100 to calculate the contract value"""
 
     def contract_value(self, size: Decimal, price: float) -> float:
         """Contract value for this option type is the `size` times the `price` times `100`"""
@@ -138,7 +138,7 @@ def deserialize_to_asset(value: str) -> Asset:
     return asset
 
 
-# Register the default inlcuded asset classes
+# Register the default included asset classes
 register_asset_class(Stock)
 register_asset_class(Option)
 register_asset_class(Crypto)

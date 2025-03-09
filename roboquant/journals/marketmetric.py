@@ -7,6 +7,7 @@ from roboquant.journals.metric import Metric
 
 class MarketMetric(Metric):
     """Calculates the market PNL by acquiring the same amount of all assets and sum their individual PNL performance.
+    So this is a long only performance of the market.
     """
 
     def __init__(self, initial_amount: Amount = USD(1_000.0), price_type: str = "DEFAULT") -> None:

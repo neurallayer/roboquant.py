@@ -61,7 +61,7 @@ class Feature(Generic[T]):
 
 
 class EquityFeature(Feature[Account]):
-    """Calcukates the total equity value of the account"""
+    """Calculates the total equity value of the account"""
 
     def calc(self, value):
         return np.array(value.equity_value(), dtype=np.float32)

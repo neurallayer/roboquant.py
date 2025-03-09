@@ -6,11 +6,11 @@ from tests.common import run_strategy
 
 class TestMultiStrategy(unittest.TestCase):
 
-    def test_ibsstrategy(self):
+    def test_ibs_strategy(self):
         strategy = IBSStrategy()
         run_strategy(strategy, self)
 
-    def test_emastrategy(self):
+    def test_ema_strategy(self):
         strategy = EMACrossover()
         run_strategy(strategy, self)
 

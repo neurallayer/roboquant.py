@@ -12,8 +12,8 @@ class TestAsset(unittest.TestCase):
         self.assertEqual("TSLA", tesla.symbol)
         self.assertEqual(USD, tesla.currency)
         v = tesla.serialize()
-        testla2 = Stock.deserialize(v)
-        self.assertEqual(tesla, testla2)
+        tesla2 = Stock.deserialize(v)
+        self.assertEqual(tesla, tesla2)
         self.assertRaises(AssertionError, Stock.deserialize, "Stock2:GOOG:USD")
 
         cv = tesla.contract_value(Decimal(100), 150.0)
@@ -24,8 +24,8 @@ class TestAsset(unittest.TestCase):
         self.assertEqual("BTC/USDT", btc.symbol)
         self.assertEqual(Currency("USDT"), btc.currency)
         v = btc.serialize()
-        testla2 = Crypto.deserialize(v)
-        self.assertEqual(btc, testla2)
+        tesla2 = Crypto.deserialize(v)
+        self.assertEqual(btc, tesla2)
         self.assertRaises(AssertionError, Crypto.deserialize, "Crypto2:BTC/USDT:USDT")
 
     def test_option(self):
@@ -33,8 +33,8 @@ class TestAsset(unittest.TestCase):
         self.assertEqual("TSLA250228C00100000", tesla.symbol)
         self.assertEqual(USD, tesla.currency)
         v = tesla.serialize()
-        testla2 = Option.deserialize(v)
-        self.assertEqual(tesla, testla2)
+        tesla2 = Option.deserialize(v)
+        self.assertEqual(tesla, tesla2)
         self.assertRaises(AssertionError, Option.deserialize, "Option2:TSLA250228C00100000:USD")
 
         cv = tesla.contract_value(Decimal(100), 150.0)

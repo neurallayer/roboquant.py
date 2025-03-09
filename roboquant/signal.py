@@ -9,7 +9,7 @@ class SignalType(Flag):
 
     - ENTRY: enter/increase a position size
     - EXIT: close/reduce a position size
-    - ENTRY_EXIT: can be used both to increase or reduce position sizes.
+    - ENTRY_EXIT: can be used both to enter/increase or close/reduce position sizes.
     """
 
     ENTRY = auto()
