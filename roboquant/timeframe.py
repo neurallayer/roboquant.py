@@ -4,7 +4,7 @@ from typing import Any
 
 
 def utcnow() -> datetime:
-    """return the current datetime in the UTC timezone"""
+    """Return the current datetime in the UTC timezone."""
     return datetime.now(timezone.utc)
 
 
@@ -17,19 +17,19 @@ class Timeframe:
     __slots__ = "start", "end", "inclusive"
 
     EMPTY: "Timeframe"
-    """represents an empty timeframe, with a start and end time set to the same value"""
+    """Represents an empty timeframe, with a start and end time set to the same value."""
 
     INFINITE: "Timeframe"
-    """represents an infinite timeframe, with a start time set to the year 1900 and an end time set to the year 2200"""
+    """Represents an infinite timeframe, with a start time set to the year 1900 and an end time set to the year 2200."""
 
     def __init__(self, start: datetime, end: datetime, inclusive=False):
         """
         Create a new timeframe. All datetimes will be stored in the UTC timezone.
 
         Args:
-        - start: start datetime
-        - end: end datetime
-        - inclusive: should the end datetime be inclusive, default is False
+            start (datetime): Start datetime.
+            end (datetime): End datetime.
+            inclusive (bool): Should the end datetime be inclusive, default is False.
         """
         self.start: datetime = start.astimezone(timezone.utc)
         self.end: datetime = end.astimezone(timezone.utc)
@@ -39,7 +39,16 @@ class Timeframe:
 
     @classmethod
     def fromisoformat(cls, start: str, end: str, inclusive=False):
-        """Create an instance of Timeframe based on a start- and end-datetime in ISO 8601 format.
+        """
+        Create an instance of Timeframe based on a start- and end-datetime in ISO 8601 format.
+
+        Args:
+            start (str): Start datetime in ISO 8601 format.
+            end (str): End datetime in ISO 8601 format.
+            inclusive (bool): Should the end datetime be inclusive, default is False.
+
+        Returns:
+            Timeframe: A new Timeframe instance.
 
         Usage:
             tf1 = Timeframe.fromisoformat("2021-01-01T00:12:00+00:00", "2021-01-02T00:13:00+00:00", True)
@@ -49,13 +58,26 @@ class Timeframe:
         e = datetime.fromisoformat(end)
         return cls(s, e, inclusive)
 
-    def is_empty(self):
-        """Return true if this is an empty timeframe"""
+    def is_empty(self) -> bool:
+        """
+        Return true if this is an empty timeframe.
+
+        Returns:
+            bool: True if the timeframe is empty, False otherwise.
+        """
         return self.start == self.end and not self.inclusive
 
     @staticmethod
-    def previous(inclusive=False, **kwargs):
-        """Convenient method to create a historic timeframe, the kwargs arguments will be passed to the timedelta
+    def previous(inclusive=False, **kwargs) -> "Timeframe":
+        """
+        Convenient method to create a historic timeframe, the kwargs arguments will be passed to the timedelta.
+
+        Args:
+            inclusive (bool): Should the end datetime be inclusive, default is False.
+            **kwargs: Arguments to be passed to timedelta.
+
+        Returns:
+            Timeframe: A new Timeframe instance.
 
         Usage:
             tf = Timeframe.previous(days=365)
@@ -67,8 +89,16 @@ class Timeframe:
         return Timeframe(start, end, inclusive)
 
     @staticmethod
-    def next(inclusive=False, **kwargs):
-        """Convenient method to create a future timeframe, the kwargs arguments will be passed to the timedelta
+    def next(inclusive=False, **kwargs) -> "Timeframe":
+        """
+        Convenient method to create a future timeframe, the kwargs arguments will be passed to the timedelta.
+
+        Args:
+            inclusive (bool): Should the end datetime be inclusive, default is False.
+            **kwargs: Arguments to be passed to timedelta.
+
+        Returns:
+            Timeframe: A new Timeframe instance.
 
         Usage:
             tf = Timeframe.next(minutes=30)
@@ -79,12 +109,27 @@ class Timeframe:
         end = start + td
         return Timeframe(start, end, inclusive)
 
-    def __contains__(self, dt: datetime):
+    def __contains__(self, dt: datetime) -> bool:
+        """
+        Check if a datetime is within the timeframe.
+
+        Args:
+            dt (datetime): The datetime to check.
+
+        Returns:
+            bool: True if the datetime is within the timeframe, False otherwise.
+        """
         if self.inclusive:
             return self.start <= dt <= self.end
         return self.start <= dt < self.end
 
-    def __repr__(self):
+    def __repr__(self) -> str:
+        """
+        Return a string representation of the timeframe.
+
+        Returns:
+            str: String representation of the timeframe.
+        """
         if self.is_empty():
             return "EMPTY_TIMEFRAME"
 
@@ -94,13 +139,28 @@ class Timeframe:
 
     @property
     def duration(self) -> timedelta:
-        """return the duration of this timeframe expressed as timedelta"""
+        """
+        Return the duration of this timeframe expressed as timedelta.
+
+        Returns:
+            timedelta: Duration of the timeframe.
+        """
         return self.end - self.start
 
     def annualize(self, rate: float) -> float:
-        """annualize the rate for this timeframe"""
+        """
+        Annualize the rate for this timeframe.
 
-        # at least 1 week is required to calculate annualized return
+        Args:
+            rate (float): The rate to annualize.
+
+        Returns:
+            float: The annualized rate.
+
+        Note:
+            At least 1 week is required to calculate annualized return.
+        """
+
         if self.duration < timedelta(weeks=1):
             return float("NaN")
 
@@ -108,11 +168,18 @@ class Timeframe:
         return (1.0 + rate) ** years - 1.0
 
     def split(self, n: int | timedelta | Any) -> list["Timeframe"]:
-        """Split the timeframe in sequential equal parts and return the resulting list of timeframes.
-        The parameter `n` can be a number, a timedelta instance or other types like `relativedelta` that support
-        datetime calculations.
+        """
+        Split the timeframe in sequential equal parts and return the resulting list of timeframes.
 
-        The last returned timeframe can be shorter than the provided timedelta.
+        Args:
+            n (int | timedelta | Any): The number of parts or the duration of each part.
+
+        Returns:
+            list[Timeframe]: List of resulting timeframes.
+
+        Note:
+            The parameter `n` can be a number, a timedelta instance or other types like `relativedelta` that support
+            datetime calculations. The last returned timeframe can be shorter than the provided timedelta.
         """
 
         period = self.duration / n if isinstance(n, int) else n
@@ -130,8 +197,21 @@ class Timeframe:
         return result
 
     def sample(self, duration: timedelta | Any, n: int = 1) -> list["Timeframe"]:
-        """Sample one or more periods of `duration` from this timeframe.
-        It can contain duplicates and the resulting timeframes can overlap.
+        """
+        Sample one or more periods of `duration` with replacements from this timeframe.
+
+        Args:
+            duration (timedelta | Any): The duration of each sample.
+            n (int): The number of samples to generate, default is 1.
+
+        Returns:
+            list[Timeframe]: List of sampled timeframes.
+
+        Raises:
+            ValueError: If the sample duration is too large for this timeframe.
+
+        Note:
+            It can contain duplicates and the resulting timeframes can overlap.
         """
 
         result = []
@@ -146,7 +226,16 @@ class Timeframe:
             result.append(tf)
         return result
 
-    def __eq__(self, other):
+    def __eq__(self, other: Any) -> bool:
+        """
+        Check if two timeframes are equal.
+
+        Args:
+            other (Any): The other timeframe to compare.
+
+        Returns:
+            bool: True if the timeframes are equal, False otherwise.
+        """
         if isinstance(other, Timeframe):
             return self.start == other.start and self.end == other.end and self.inclusive == other.inclusive
 

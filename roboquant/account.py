@@ -18,7 +18,7 @@ class Position:
     """Average price paid denoted in the currency of the asset"""
 
     mkt_price: float
-    """latest market price denoted in the currency of the asset"""
+    """Latest market price denoted in the currency of the asset"""
 
     @property
     def is_short(self):
@@ -27,7 +27,7 @@ class Position:
 
     @property
     def is_long(self):
-        """Return True is this is a long position, False otherwise"""
+        """Return True if this is a long position, False otherwise"""
         return self.size > 0
 
 
@@ -47,6 +47,12 @@ class Account:
     __slots__ = "buying_power", "positions", "orders", "last_update", "cash"
 
     def __init__(self, base_currency: Currency = USD):
+        """
+        Initialize a new Account instance.
+
+        Args:
+            base_currency (Currency): The base currency of the account, defaults to USD.
+        """
         self.buying_power: Amount = Amount(base_currency, 0.0)
         self.positions: dict[Asset, Position] = {}
         self.orders: list[Order] = []
@@ -59,49 +65,103 @@ class Account:
         return self.buying_power.currency
 
     def mkt_value(self) -> Wallet:
-        """Return the sum of the market values of the open positions in the account."""
+        """
+        Return the sum of the market values of the open positions in the account.
+
+        Returns:
+            Wallet: The total market value of all open positions.
+        """
         result = Wallet()
         for asset, position in self.positions.items():
             result += asset.contract_amount(position.size, position.mkt_price)
         return result
 
     def convert(self, x: Wallet | Amount) -> float:
-        """convert a wallet or amount into the base currency of the account"""
+        """
+        Convert a wallet or amount into the base currency of the account.
+
+        Args:
+            x (Wallet | Amount): The wallet or amount to convert.
+
+        Returns:
+            float: The converted value in the base currency.
+        """
         return x.convert_to(self.base_currency, self.last_update)
 
     def position_value(self, asset: Asset) -> float:
-        """Return position value denoted in the base currency of the account."""
+        """
+        Return position value denoted in the base currency of the account.
+
+        Args:
+            asset (Asset): The asset for which to get the position value.
+
+        Returns:
+            float: The position value in the base currency.
+        """
         pos = self.positions.get(asset)
         return asset.contract_value(pos.size, pos.mkt_price) if pos else 0.0
 
     def short_positions(self) -> dict[Asset, Position]:
-        """Return al the short positions in the account"""
+        """
+        Return all the short positions in the account.
+
+        Returns:
+            dict[Asset, Position]: A dictionary of assets and their corresponding short positions.
+        """
         return {asset: position for (asset, position) in self.positions.items() if position.is_short}
 
     def long_positions(self) -> dict[Asset, Position]:
-        """Return al the long positions in the account"""
+        """
+        Return all the long positions in the account.
+
+        Returns:
+            dict[Asset, Position]: A dictionary of assets and their corresponding long positions.
+        """
         return {asset: position for (asset, position) in self.positions.items() if position.is_long}
 
     def contract_value(self, asset: Asset, size: Decimal, price: float) -> float:
-        """Contract value denoted in the base currency of the account"""
+        """
+        Contract value denoted in the base currency of the account.
+
+        Args:
+            asset (Asset): The asset for which to calculate the contract value.
+            size (Decimal): The size of the position.
+            price (float): The price of the asset.
+
+        Returns:
+            float: The contract value in the base currency.
+        """
         return asset.contract_amount(size, price).convert_to(self.base_currency, self.last_update)
 
     def equity(self) -> Wallet:
-        """Return the equity of the account.
-        It calculates the sum mkt values of each open position and adds the available cash.
+        """
+        Return the equity of the account.
+        It calculates the sum of market values of each open position and adds the available cash.
 
         The returned value is denoted in the base currency of the account.
+
+        Returns:
+            Wallet: The equity of the account.
         """
         return self.cash + self.mkt_value()
 
     def equity_value(self) -> float:
-        """Return the equity value denoted in the base currency of the account"""
+        """
+        Return the equity value denoted in the base currency of the account.
+
+        Returns:
+            float: The equity value in the base currency.
+        """
         return self.convert(self.equity())
 
     def unrealized_pnl(self) -> Wallet:
-        """Return the sum of the unrealized profit and loss for the open position.
+        """
+        Return the sum of the unrealized profit and loss for the open positions.
 
         The returned value is denoted in the base currency of the account.
+
+        Returns:
+            Wallet: The unrealized profit and loss.
         """
         result = Wallet()
         for asset, position in self.positions.items():
@@ -109,23 +169,43 @@ class Account:
         return result
 
     def required_buying_power(self, order: Order) -> Amount:
-        """Return the amount of buying power required for a certain order. The underlying logic takes into
+        """
+        Return the amount of buying power required for a certain order. The underlying logic takes into
         account that a reduction in position size doesn't require buying power.
+
+        Args:
+            order (Order): The order for which to calculate the required buying power.
+
+        Returns:
+            Amount: The required buying power as an Amount.
         """
         pos_size = self.get_position_size(order.asset)
 
-        # only buying power required if the remaining order size increases the position size
+        # Only buying power required if the remaining order size increases the position size
         if abs(pos_size + order.remaining) > abs(pos_size):
             return order.asset.contract_amount(abs(order.remaining), order.limit)
 
         return Amount(order.asset.currency, 0.0)
 
     def unrealized_pnl_value(self) -> float:
-        """Return the unrealized profit and loss value denoted in the base currency of the account"""
+        """
+        Return the unrealized profit and loss value denoted in the base currency of the account.
+
+        Returns:
+            float: The unrealized profit and loss value in the base currency.
+        """
         return self.convert(self.unrealized_pnl())
 
     def get_position_size(self, asset: Asset) -> Decimal:
-        """Return the position size for a symbol, or zero if not found."""
+        """
+        Return the position size for an asset, or zero if not found.
+
+        Args:
+            asset (Asset): The asset for which to get the position size.
+
+        Returns:
+            Decimal: The position size as a Decimal.
+        """
         pos = self.positions.get(asset)
         return pos.size if pos else Decimal()
 
