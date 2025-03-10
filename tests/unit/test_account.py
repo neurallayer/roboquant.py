@@ -24,16 +24,13 @@ class TestAccount(unittest.TestCase):
         acc = Account()
         now = datetime.now()
         acc.cash = Wallet(Amount(USD, 1_000.0))
-        prices = {}
-        for i in range(10):
+        for i in range(5):
             symbol = Stock(f"AA${i}")
-            price = 10.0 + i
-            acc.positions[symbol] = Position(Decimal(10), price, price)
-            prices[symbol] = price
+            acc.positions[symbol] = Position(Decimal(10), 10.0, 11.0)
 
-        self.assertAlmostEqual(acc.mkt_value().convert_to(USD, now), 1450.0)
-        self.assertAlmostEqual(acc.equity_value(), 2450.0)
-        self.assertAlmostEqual(acc.unrealized_pnl().convert_to(USD, now), 0.0)
+        self.assertAlmostEqual(acc.mkt_value().convert_to(USD, now), 5*10*11.0)
+        self.assertAlmostEqual(acc.equity_value(), 1_000.0 + (5*10*11.0))
+        self.assertAlmostEqual(acc.unrealized_pnl().convert_to(USD, now), 50.0)
 
 
 if __name__ == "__main__":

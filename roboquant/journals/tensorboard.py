@@ -11,9 +11,11 @@ class TensorboardJournal(Journal):
 
     def __init__(self, writer, *metrics: Metric):
         """
+        Initialize the TensorboardJournal.
+
         Parameters:
-            writer: a tensorboard writer instance (`tensorboard.summary.Writer`)
-            metrics: the metrics that should be calculated and be added to the tensorboard writer
+            writer: A tensorboard writer instance (`tensorboard.summary.Writer`).
+            metrics: The metrics that should be calculated and added to the tensorboard writer.
         """
         super().__init__()
         self.__writer = writer
@@ -21,6 +23,17 @@ class TensorboardJournal(Journal):
         self.metrics = metrics
 
     def track(self, event, account, signals, orders):
+        """
+        Track the metrics and record them to the tensorboard writer.
+
+        Parameters:
+            event: The event containing the time and other relevant information.
+            account: The account information.
+            signals: The signals generated during the event.
+            orders: The orders generated during the event.
+
+        The wall time is set to the event time, and the metrics are recorded with the current step.
+        """
         time = event.time.timestamp()
         for metric in self.metrics:
             result = metric.calc(event, account, signals, orders)
