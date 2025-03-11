@@ -18,7 +18,7 @@ from .event import Event, PriceItem, Bar, Trade, Quote
 from .signal import Signal, SignalType
 from .order import Order
 from .monetary import Amount, Wallet
-from .asset import Asset, Stock, Crypto, Option
+from .asset import Asset, Stock, Crypto, Forex, Option
 from .run import run
 from .timeframe import Timeframe, utcnow
 
@@ -47,6 +47,7 @@ __all__ = [
     "Asset",
     "Stock",
     "Crypto",
+    "Forex",
     "Option",
     "run",
     "Timeframe",

@@ -139,7 +139,7 @@ class Stock(Asset):
 
 @dataclass(frozen=True, slots=True)
 class Crypto(Asset):
-    """Crypto-currency asset"""
+    """Crypto-currency asset, like BTC/USDT"""
 
     @staticmethod
     def from_symbol(symbol: str, sep: str = "/"):
@@ -176,6 +176,48 @@ class Crypto(Asset):
         asset_class, symbol, currency = value.split(":")
         assert asset_class == "Crypto"
         return Crypto(symbol, Currency(currency))
+
+
+@dataclass(frozen=True, slots=True)
+class Forex(Asset):
+    """Forex asset, so a currency pair like EUR/USD"""
+
+    @staticmethod
+    def from_symbol(symbol: str, sep: str = "/"):
+        """Create a Forex asset from a symbol string. The second part of the symbol is the
+        currency.
+
+        Args:
+            symbol (str): The symbol string of the forex asset.
+            sep (str, optional): The separator used in the symbol string. Defaults to "/".
+
+        Returns:
+            Forex: The created forex asset.
+        """
+        currency = symbol.split(sep)[-1]
+        return Forex(symbol, Currency(currency))
+
+    def serialize(self):
+        """Serialize the crypto asset to a string representation.
+
+        Returns:
+            str: The serialized string representation of the crypto asset.
+        """
+        return f"Forex:{self.symbol}:{self.currency}"
+
+    @staticmethod
+    def deserialize(value: str) -> "Forex":
+        """Deserialize a string value to a crypto asset.
+
+        Args:
+            value (str): The serialized string representation of the crypto asset.
+
+        Returns:
+            Forex: The deserialized crypto asset.
+        """
+        asset_class, symbol, currency = value.split(":")
+        assert asset_class == "Forex"
+        return Forex(symbol, Currency(currency))
 
 
 @dataclass(frozen=True, slots=True)

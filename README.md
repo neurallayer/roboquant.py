@@ -18,7 +18,7 @@ The following code snippet shows the steps required to run a full back-test on a
 ```python
 import roboquant as rq
 
-feed = rq.feeds.YahooFeed("JPM", "IBM", "F", start_date="2000-01-01")
+feed = rq.feeds.YahooFeed("JPM", "IBM", "F", "TSLA")
 strategy = rq.strategies.EMACrossover()
 account = rq.run(feed, strategy)
 print(account)

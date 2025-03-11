@@ -1,7 +1,7 @@
 from decimal import Decimal
 import unittest
 
-from roboquant.asset import Crypto, Stock, Option
+from roboquant.asset import Crypto, Stock, Option, Forex
 from roboquant.monetary import USD, Currency
 
 
@@ -27,6 +27,15 @@ class TestAsset(unittest.TestCase):
         tesla2 = Crypto.deserialize(v)
         self.assertEqual(btc, tesla2)
         self.assertRaises(AssertionError, Crypto.deserialize, "Crypto2:BTC/USDT:USDT")
+
+    def test_forex(self):
+        btc = Forex.from_symbol("EUR/USD")
+        self.assertEqual("EUR/USD", btc.symbol)
+        self.assertEqual(Currency("USD"), btc.currency)
+        v = btc.serialize()
+        tesla2 = Forex.deserialize(v)
+        self.assertEqual(btc, tesla2)
+        self.assertRaises(AssertionError, Forex.deserialize, "Forex2:EUR/USD:USD")
 
     def test_option(self):
         tesla = Option("TSLA250228C00100000")
