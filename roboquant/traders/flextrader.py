@@ -244,13 +244,15 @@ class FlexTrader(Trader):
         """Return zero or more orders for the provided asset and size.
         The default implementation:
         - creates a single order
-        - with the limit price being exactly the `self.price_type`
+        - with the limit price being the `self.price_type` rounded to two decimals
         - the gtd set to the time of the event + `self.valid_for`
 
         Overwrite this method if you want to implement different logic.
         """
         gtd = None if not self.valid_for else time + self.valid_for
-        result = [Order(asset, size, item.price(self.price_type), gtd)]
+        price = item.price(self.price_type)
+        limit = round(price, 2)
+        result = [Order(asset, size, limit, gtd)]
         logger.info("<== %s converted signal into new order(s) %s", time.replace(tzinfo=None), result)
         return result
 

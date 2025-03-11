@@ -1,3 +1,4 @@
+import logging
 from abc import ABC, abstractmethod
 from dataclasses import dataclass
 from decimal import Decimal
@@ -6,12 +7,15 @@ from typing import Type
 from roboquant.monetary import Amount, Currency, USD
 
 
+logger = logging.getLogger(__name__)
+
+
 @dataclass(frozen=True, slots=True)
 class Asset(ABC):
     """Abstract base class for all types of assets, ranging from stocks to cryptocurrencies.
     Every asset has always at least a `symbol` and `currency` defined. Assets are immutable.
 
-    The combination of class, symbol, and currency should be unique for each asset. If that is not the case, the symbol
+    The combination of the class, symbol, and currency should be unique for each asset. If that is not the case, the symbol
     could be extended with some additional information to make it unique. For example, for stocks,
     the exchange could be added to the symbol.
     """
@@ -225,6 +229,7 @@ def register_asset_class(clazz: Type[Asset]):
         clazz (Type[Asset]): The asset class to register.
     """
     __asset_classes[clazz.__name__] = clazz
+    logging.info("registered asset class %s", clazz.__name__)
 
 
 def deserialize_to_asset(value: str) -> Asset:

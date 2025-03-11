@@ -45,7 +45,13 @@ def _get_asset(symbol: str, asset_class: AssetClass) -> Asset:
 
 
 class AlpacaLiveFeed(LiveFeed):
-    """Subscribe to live market data for stocks, cryptocurrencies or options"""
+    """Subscribe to live market data for stocks, cryptocurrencies or options.
+
+    Args:
+        api_key (str): The API key for Alpaca.
+        secret_key (str): The secret key for Alpaca.
+        market (Literal["iex", "sip", "crypto", "option"], optional): The market to subscribe to. Defaults to "iex".
+    """
 
     __one_minute = str(timedelta(minutes=1))
 
@@ -73,6 +79,7 @@ class AlpacaLiveFeed(LiveFeed):
         thread.start()
 
     async def close(self):
+        """Close the live feed connection."""
         await self.stream.close()
 
     def __put_item(self, time, item):
@@ -95,12 +102,27 @@ class AlpacaLiveFeed(LiveFeed):
         self.__put_item(data.timestamp, item)
 
     def subscribe_trades(self, *symbols: str):
+        """Subscribe to trade data for the given symbols.
+
+        Args:
+            *symbols (str): The symbols to subscribe to.
+        """
         self.stream.subscribe_trades(self.__handle_trades, *symbols)
 
     def subscribe_quotes(self, *symbols: str):
+        """Subscribe to quote data for the given symbols.
+
+        Args:
+            *symbols (str): The symbols to subscribe to.
+        """
         self.stream.subscribe_quotes(self.__handle_quotes, *symbols)
 
     def subscribe_bars(self, *symbols: str):
+        """Subscribe to bar data for the given symbols.
+
+        Args:
+            *symbols (str): The symbols to subscribe to.
+        """
         if not isinstance(self.stream, OptionDataStream):
             self.stream.subscribe_bars(self.__handle_bars, *symbols)
         else:
@@ -141,7 +163,14 @@ class _AlpacaHistoricFeed(HistoricFeed):
 
 class AlpacaHistoricStockFeed(_AlpacaHistoricFeed):
     """Get historic stock prices from Alpaca.
+
     Support for bars, trades and quotes.
+
+    Args:
+        api_key (str): The API key for Alpaca.
+        secret_key (str): The secret key for Alpaca.
+        feed (DataFeed, optional): The data feed to use. Defaults to DataFeed.IEX.
+        **kwargs: Additional keyword arguments.
     """
 
     def __init__(self, api_key:str, secret_key:str, feed: DataFeed = DataFeed.IEX, **kwargs):
@@ -150,6 +179,15 @@ class AlpacaHistoricStockFeed(_AlpacaHistoricFeed):
         self.feed = feed
 
     def retrieve_bars(self, *symbols, start=None, end=None, resolution: TimeFrame | None = None, adjustment=Adjustment.ALL):
+        """Retrieve bar data for the given symbols.
+
+        Args:
+            *symbols: The symbols to retrieve bar data for.
+            start (datetime, optional): The start time for the data. Defaults to None.
+            end (datetime, optional): The end time for the data. Defaults to None.
+            resolution (TimeFrame, optional): The resolution of the data. Defaults to None.
+            adjustment (Adjustment, optional): The adjustment type. Defaults to Adjustment.ALL.
+        """
         resolution = resolution or TimeFrame(amount=1, unit=TimeFrameUnit.Day)
         req = StockBarsRequest(
             symbol_or_symbols=list(symbols), timeframe=resolution, start=start, end=end, adjustment=adjustment, feed=self.feed
@@ -160,12 +198,26 @@ class AlpacaHistoricStockFeed(_AlpacaHistoricFeed):
         self._process_bars(res.data, freq, AssetClass.US_EQUITY)
 
     def retrieve_trades(self, *symbols, start=None, end=None):
+        """Retrieve trade data for the given symbols.
+
+        Args:
+            *symbols: The symbols to retrieve trade data for.
+            start (datetime, optional): The start time for the data. Defaults to None.
+            end (datetime, optional): The end time for the data. Defaults to None.
+        """
         req = StockTradesRequest(symbol_or_symbols=list(symbols), start=start, end=end, feed=self.feed)
         res = self.client.get_stock_trades(req)
         assert isinstance(res, TradeSet)
         self._process_trades(res.data, AssetClass.US_EQUITY)
 
     def retrieve_quotes(self, *symbols: str, start=None, end=None):
+        """Retrieve quote data for the given symbols.
+
+        Args:
+            *symbols (str): The symbols to retrieve quote data for.
+            start (datetime, optional): The start time for the data. Defaults to None.
+            end (datetime, optional): The end time for the data. Defaults to None.
+        """
         req = StockQuotesRequest(symbol_or_symbols=list(symbols), start=start, end=end, feed=self.feed)
         res = self.client.get_stock_quotes(req)
         assert isinstance(res, QuoteSet)
@@ -174,7 +226,13 @@ class AlpacaHistoricStockFeed(_AlpacaHistoricFeed):
 
 class AlpacaHistoricCryptoFeed(_AlpacaHistoricFeed):
     """Get historic cryptocurrency prices from Alpaca.
+
     Support for bars and trades.
+
+    Args:
+        api_key (str): The API key for Alpaca.
+        secret_key (str): The secret key for Alpaca.
+        **kwargs: Additional keyword arguments.
     """
 
     def __init__(self, api_key:str, secret_key:str, **kwargs):
@@ -182,6 +240,14 @@ class AlpacaHistoricCryptoFeed(_AlpacaHistoricFeed):
         self.client = CryptoHistoricalDataClient(api_key, secret_key, **kwargs)
 
     def retrieve_bars(self, *symbols, start=None, end=None, resolution: TimeFrame | None = None):
+        """Retrieve bar data for the given symbols.
+
+        Args:
+            *symbols: The symbols to retrieve bar data for.
+            start (datetime, optional): The start time for the data. Defaults to None.
+            end (datetime, optional): The end time for the data. Defaults to None.
+            resolution (TimeFrame, optional): The resolution of the data. Defaults to None.
+        """
         resolution = resolution or TimeFrame(amount=1, unit=TimeFrameUnit.Day)
         req = CryptoBarsRequest(symbol_or_symbols=list(symbols), timeframe=resolution, start=start, end=end)
         res = self.client.get_crypto_bars(req)
@@ -190,6 +256,13 @@ class AlpacaHistoricCryptoFeed(_AlpacaHistoricFeed):
         self._process_bars(res.data, freq, AssetClass.CRYPTO)
 
     def retrieve_trades(self, *symbols, start=None, end=None):
+        """Retrieve trade data for the given symbols.
+
+        Args:
+            *symbols: The symbols to retrieve trade data for.
+            start (datetime, optional): The start time for the data. Defaults to None.
+            end (datetime, optional): The end time for the data. Defaults to None.
+        """
         req = CryptoTradesRequest(symbol_or_symbols=list(symbols), start=start, end=end)
         res = self.client.get_crypto_trades(req)
         assert isinstance(res, TradeSet)

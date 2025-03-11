@@ -43,6 +43,14 @@ class Order:
     negative for sell orders. So the remaining size is `size - fill`"""
 
     def __init__(self, asset: Asset, size: Decimal | str | int | float, limit: float, gtd: datetime | None = None, **kwargs):
+        """
+        Args:
+            asset (Asset): The asset of this order.
+            size (Decimal | str | int | float): The size of the order. Positive for buy orders, negative for sell orders.
+            limit (float): The limit price of the order, denoted in the currency of the asset.
+            gtd (datetime | None, optional): The good till date of the order, or None if no expiration date.
+            **kwargs: Any additional information about the order.
+        """
         self.asset = asset
         self.size = Decimal(size)
         assert not self.size.is_zero(), "Cannot create a new order with size is zero"
@@ -54,8 +62,12 @@ class Order:
         self.gtd = gtd
 
     def cancel(self) -> "Order":
-        """Create a cancellation order. You can only cancel an order that has an `id` assigned to it.
+        """
+        Create a cancellation order. You can only cancel an order that has an `id` assigned to it.
         The returned order is a regular order, but with its `size` set to zero. All additional properties are kept.
+
+        Returns:
+            Order: A new order with the same properties but size set to zero.
         """
         assert self.id is not None, "Can only cancel orders with an already assigned id"
         result = deepcopy(self)
@@ -63,17 +75,32 @@ class Order:
         return result
 
     def is_expired(self, dt: datetime) -> bool:
-        """Return True of this order has expired, False otherwise"""
+        """
+        Return True if this order has expired, False otherwise.
+
+        Args:
+            dt (datetime): The current datetime to check against the good till date.
+
+        Returns:
+            bool: True if the order has expired, False otherwise.
+        """
         return dt > self.gtd if self.gtd else False
 
     def modify(
         self, size: Decimal | str | int | float | None = None, limit: float | None = None) -> "Order":
-        """Create an update-order. You can update the size and limit of an order.
+        """
+        Create an update-order. You can update the size and limit of an order.
         The returned order has the same id as the original order. You can only update existing orders that have an id.
 
         If you want to cancel an order, use the `cancel` method instead. The size of an order cannot be modified to zero.
-        """
 
+        Args:
+            size (Decimal | str | int | float | None, optional): The new size of the order.
+            limit (float | None, optional): The new limit price of the order.
+
+        Returns:
+            Order: A new order with the updated size and limit.
+        """
         assert self.id, "Can only update an already assigned id"
         size = Decimal(size) if size is not None else None
         if size is not None:
@@ -85,49 +112,93 @@ class Order:
         return result
 
     def __deepcopy__(self, _):
+        """
+        Create a deep copy of the order.
+
+        Args:
+            _ : Unused parameter for deepcopy.
+
+        Returns:
+            Order: A deep copy of the order.
+        """
         result = Order(self.asset, self.size, self.limit, self.gtd, **self.info)
         result.id = self.id
         result.fill = self.fill
         return result
 
     def value(self) -> float:
-        """Return the total contract value of this order, it ignores the already filled part of the order"""
+        """
+        Return the total contract value of this order, it ignores the already filled part of the order.
+
+        Returns:
+            float: The total contract value of the order.
+        """
         return self.asset.contract_value(self.size, self.limit)
 
     def remaining_value(self) -> float:
-        """Return the remaining contract value of this order"""
+        """
+        Return the remaining contract value of this order.
+
+        Returns:
+            float: The remaining contract value of the order.
+        """
         return self.asset.contract_value(self.remaining, self.limit)
 
     def amount(self) -> Amount:
-        """Return the total value of this order as a single Amount denoted in the currency of the asset"""
+        """
+        Return the total value of this order as a single Amount denoted in the currency of the asset.
+
+        Returns:
+            Amount: The total value of the order.
+        """
         return Amount(self.asset.currency, self.value())
 
     @property
-    def is_cancellation(self):
-        """Return True if this is a cancellation order, False otherwise"""
+    def is_cancellation(self) -> bool:
+        """
+        Return True if this is a cancellation order, False otherwise.
+
+        Returns:
+            bool: True if this is a cancellation order, False otherwise.
+        """
         return self.size.is_zero()
 
     @property
     def is_buy(self) -> bool:
-        """Return True if this is a BUY order, False otherwise"""
+        """
+        Return True if this is a BUY order, False otherwise.
+
+        Returns:
+            bool: True if this is a BUY order, False otherwise.
+        """
         return self.size > 0
 
     @property
     def is_sell(self) -> bool:
-        """Return True if this is a SELL order, False otherwise"""
+        """
+        Return True if this is a SELL order, False otherwise.
+
+        Returns:
+            bool: True if this is a SELL order, False otherwise.
+        """
         return self.size < 0
 
     @property
     def completed(self) -> bool:
-        """Return True if the order is completed (completely filled)"""
+        """
+        Return True if the order is completed (completely filled).
+
+        Returns:
+            bool: True if the order is completed, False otherwise.
+        """
         return not self.remaining
 
     @property
     def remaining(self) -> Decimal:
-        """Return the remaining order size that still needs to be filled.
-        ```
-        size = fill + remaining
-        ```
-        In case of a sell order, the remaining will be a negative number.
+        """
+        Return the remaining order size that still needs to be filled.
+
+        Returns:
+            Decimal: The remaining order size.
         """
         return self.size - self.fill

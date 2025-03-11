@@ -36,12 +36,12 @@ class Signal:
     it is again up to the `trader` to handle these types correctly.
 
     Examples:
-    ```python
-    apple = Stock("AAPL")
-    signal1 = Signal.buy(apple)
-    signal2 = Signal.sell(apple, SignalType.EXIT)
-    signal3 = Signal(apple, 0.5, SignalType.ENTRY)
-    ```
+        ```python
+        apple = Stock("AAPL")
+        signal1 = Signal.buy(apple)
+        signal2 = Signal.sell(apple, SignalType.EXIT)
+        signal3 = Signal(apple, 0.5, SignalType.ENTRY)
+        ```
     """
 
     asset: Asset
@@ -55,30 +55,62 @@ class Signal:
 
     @staticmethod
     def buy(asset: Asset, signal_type: SignalType=SignalType.ENTRY_EXIT) -> "Signal":
-        """Create a BUY signal with a rating of 1.0"""
+        """Create a BUY signal with a rating of 1.0
+
+        Args:
+            asset (Asset): The asset this signal is for.
+            signal_type (SignalType): The type of signal. Default is ENTRY_EXIT.
+
+        Returns:
+            Signal: A new Signal instance with a rating of 1.0.
+        """
         return Signal(asset, 1.0, signal_type)
 
     @staticmethod
     def sell(asset: Asset, signal_type: SignalType=SignalType.ENTRY_EXIT) -> "Signal":
-        """Create a SELL signal with a rating of -1.0"""
+        """Create a SELL signal with a rating of -1.0
+
+        Args:
+            asset (Asset): The asset this signal is for.
+            signal_type (SignalType): The type of signal. Default is ENTRY_EXIT.
+
+        Returns:
+            Signal: A new Signal instance with a rating of -1.0.
+        """
         return Signal(asset, -1.0, signal_type)
 
     @property
     def is_buy(self) -> bool:
-        """Return True if this is a BUY signal, False otherwise"""
+        """Return True if this is a BUY signal, False otherwise
+
+        Returns:
+            bool: True if this is a BUY signal, False otherwise.
+        """
         return self.rating > 0.0
 
     @property
     def is_sell(self) -> bool:
-        """Return True if this is a SELL signal, False otherwise"""
+        """Return True if this is a SELL signal, False otherwise
+
+        Returns:
+            bool: True if this is a SELL signal, False otherwise.
+        """
         return self.rating < 0.0
 
     @property
     def is_entry(self) -> bool:
-        """Return True if this is an ENTRY or ENTRY_EXIT signal, False otherwise"""
+        """Return True if this is an ENTRY or ENTRY_EXIT signal, False otherwise
+
+        Returns:
+            bool: True if this is an ENTRY or ENTRY_EXIT signal, False otherwise.
+        """
         return SignalType.ENTRY in self.type
 
     @property
     def is_exit(self) -> bool:
-        """Return True if this is an EXIT or ENTRY_EXIT signal, False otherwise"""
+        """Return True if this is an EXIT or ENTRY_EXIT signal, False otherwise
+
+        Returns:
+            bool: True if this is an EXIT or ENTRY_EXIT signal, False otherwise.
+        """
         return SignalType.EXIT in self.type
