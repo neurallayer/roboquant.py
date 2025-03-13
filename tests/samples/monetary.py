@@ -5,8 +5,8 @@ from roboquant.monetary import EUR, USD, JPY, ECBConversion, Amount, Wallet
 # %%
 amt1 = 20@USD
 amt2 = amt1 + 30@USD
-assert isinstance(amt2, Amount)
-assert amt2 == 50@USD
+assert isinstance(amt2, Wallet)
+assert amt2[USD] == 50.0
 
 # %%
 # Different ways to create Amounts and add them to a wallet

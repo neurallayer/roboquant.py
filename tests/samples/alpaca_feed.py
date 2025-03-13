@@ -19,5 +19,5 @@ feed.subscribe_quotes(*symbols)
 
 timeframe = Timeframe.next(minutes=1)
 channel = feed.play_background(timeframe)
-while event := channel.get():
+while event := channel.get(timeout=10.0):
     print(event.time, event.items)
