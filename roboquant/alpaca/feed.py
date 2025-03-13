@@ -57,7 +57,6 @@ class AlpacaLiveFeed(LiveFeed):
 
     def __init__(self, api_key:str, secret_key: str, market: Literal["iex", "sip", "crypto", "option"] = "iex") -> None:
         super().__init__()
-        self.market = market
 
         match market:
             case "sip":

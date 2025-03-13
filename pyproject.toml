@@ -64,7 +64,7 @@ torch = [
   "sb3-contrib>=2.5.0",
 ]
 ibkr = ["python-ibapi-stable~=10.30.1"]
-alpaca = ["alpaca-py>=0.38.0"]
+alpaca = ["alpaca-py>=0.39.0"]
 avro = ["fastavro>=1.9.7"]
 parquet = ["pyarrow>=19.0.0"]
 

@@ -38,7 +38,7 @@ wheels = [
 
 [[package]]
 name = "alpaca-py"
-version = "0.38.0"
+version = "0.39.0"
 source = { registry = "https://pypi.org/simple" }
 dependencies = [
     { name = "msgpack" },
@@ -48,9 +48,9 @@ dependencies = [
     { name = "sseclient-py" },
     { name = "websockets" },
 ]
-sdist = { url = "https://files.pythonhosted.org/packages/04/c8/305460cf47189be050bb17373b2f2b818703585f4bc5c93106659a0bdc00/alpaca_py-0.38.0.tar.gz", hash = "sha256:acf5b43c12835ec9bcd4fe22addcaf735b38447891555ca04dd5d0cbe1b6e329", size = 97098 }
+sdist = { url = "https://files.pythonhosted.org/packages/ab/27/c65a69e435ee5cdb7eae646b6f7ce73e0161dfdc2fa6da685c94df190335/alpaca_py-0.39.0.tar.gz", hash = "sha256:0aa5d8c69d624bdc07e5966527e9aa7a251e625688b54b2d7ea4ddd2a06ae3e0", size = 97099 }
 wheels = [
-    { url = "https://files.pythonhosted.org/packages/8e/72/4e0eada9c9b0b305d072430cfef5a596454b7651720f918600339c42bcb7/alpaca_py-0.38.0-py3-none-any.whl", hash = "sha256:2831077d1152e31da1d299566f113a2b5c8abb5c98e94a203315e7f16a6bbf8f", size = 121501 },
+    { url = "https://files.pythonhosted.org/packages/10/dc/6e1cac0a6e7c13e9768d377d0ec4776cec6a0817f343c0b2267acd71d2ef/alpaca_py-0.39.0-py3-none-any.whl", hash = "sha256:37145e0f946190674abaaf179b8483ac3bc7ebd81c3e6d67e76a9322c6bd09b1", size = 121526 },
 ]
 
 [[package]]
@@ -1323,7 +1323,7 @@ wheels = [
 
 [[package]]
 name = "roboquant"
-version = "1.2.0"
+version = "1.4.0"
 source = { editable = "." }
 dependencies = [
     { name = "numpy" },
@@ -1366,7 +1366,7 @@ talib = [
 
 [package.metadata]
 requires-dist = [
-    { name = "alpaca-py", marker = "extra == 'alpaca'", specifier = ">=0.38.0" },
+    { name = "alpaca-py", marker = "extra == 'alpaca'", specifier = ">=0.39.0" },
     { name = "fastavro", marker = "extra == 'avro'", specifier = ">=1.9.7" },
     { name = "numpy", specifier = ">=1.26.4" },
     { name = "pyarrow", marker = "extra == 'parquet'", specifier = ">=19.0.0" },
