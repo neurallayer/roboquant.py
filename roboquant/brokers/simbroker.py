@@ -14,16 +14,17 @@ logger = logging.getLogger(__name__)
 
 @dataclass(slots=True, frozen=True)
 class _Trx:
-    """transaction for an executed trade"""
+    """transaction for an executed trade, so the size is always non-zero"""
 
     asset: Asset
     """The asset that was traded"""
 
     size: Decimal
-    """The size of the trade"""
+    """The size of the trade, positive for a BUY and negative for a SELL"""
 
     price: float
     """The price of the trade denoted in the currency of the asset"""
+
 
 class SimBroker(Broker):
     """Implementation of a Broker that simulates order execution and can be used in back tests.
@@ -62,11 +63,16 @@ class SimBroker(Broker):
         self._account.buying_power = self.initial_deposit
         self._order_id = 0
 
+    def _fee(self, trx: _Trx) -> Amount:
+        """Calculate any additional transaction fee, default is zero"""
+        return Amount(trx.asset.currency, 0.0)
+
     def _update_account(self, trx: _Trx):
         """Update a position and cash based on a new transaction"""
         acc = self._account
         asset = trx.asset
         acc.cash -= asset.contract_amount(trx.size, trx.price)
+        acc.cash -= self._fee(trx)
 
         size = acc.get_position_size(asset)
 

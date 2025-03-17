@@ -30,6 +30,11 @@ class Position:
         """Return True if this is a long position, False otherwise"""
         return self.size > 0
 
+    @staticmethod
+    def zero():
+        """Return a zero position size with no known prices"""
+        return Position(Decimal(), float("nan"), float("nan"))
+
 
 class Account:
     """Represents a trading account. The account maintains the following state during a run:
