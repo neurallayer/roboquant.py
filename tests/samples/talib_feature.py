@@ -16,7 +16,7 @@ class RSIFeature(TaFeature):
 
     def _calc(self, asset: Asset, ohlcv: OHLCVBuffer) -> float:
         close = ohlcv.close()
-        return ta.RSI(close, timeperiod=self.timeperiod)  # type: ignore
+        return ta.RSI(close, timeperiod=self.timeperiod)
 
 
 # %%

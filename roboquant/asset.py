@@ -15,7 +15,7 @@ class Asset(ABC):
     """Abstract base class for all types of assets, ranging from stocks to cryptocurrencies.
     Every asset has always at least a `symbol` and `currency` defined. Assets are immutable.
 
-    The combination of the class, symbol, and currency should be unique for each asset. If that is not the case, the symbol
+    The combination of the class, symbol, and currency has to be unique for each asset. If that is not the case, the symbol
     could be extended with some additional information to make it unique. For example, for stocks,
     the exchange could be added to the symbol.
     """

@@ -30,7 +30,7 @@ class Currency(str):
     """
 
     def __rmatmul__(self, other: float | int):
-        """Create a new `Amount` using this currency and the provided value.
+        """Create a new `Amount` using this currency and the provided `other` value.
 
         Args:
             other (float | int): The monetary value.
@@ -127,7 +127,8 @@ class CurrencyConverter(ABC):
 
 
 class NoConversion(CurrencyConverter):
-    """The default currency converter that doesn't convert between currencies."""
+    """The default currency converter that doesn't convert between currencies. If you don't trade in different currencies, this
+    will be sufficient."""
 
     def convert(self, amount: "Amount", to_currency: Currency, dt: datetime) -> float:
         """Raise an error as no conversion is supported."""

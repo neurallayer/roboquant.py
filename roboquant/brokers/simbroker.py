@@ -187,11 +187,12 @@ class SimBroker(Broker):
                     logger.info("executed order=%s trx=%s", order, trx)
                     self._update_account(trx)
                     order.fill += trx.size
-                    if order.completed:
+                    if not order.remaining:
                         logger.info("completed order %s", order)
                         self._remove_order(order)
 
     def _calculate_open_orders(self):
+        """Calculate the buying power required for the open orders"""
         result = Wallet()
         for order in self._account.orders:
             result += self._account.required_buying_power(order)
@@ -205,7 +206,8 @@ class SimBroker(Broker):
         return reserved
 
     def _calculate_buyingpower(self) -> Amount:
-        """Calculate buying power, based on:
+        """Calculate the buying power.
+        The default implementation uses the following calculation:
 
         buying_power = cash - open_orders - short_positions
         """

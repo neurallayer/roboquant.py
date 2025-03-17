@@ -36,7 +36,7 @@ class Order:
     """Any additional information about the order"""
 
     id: str | None
-    """The unique id of the order, set by the broker only"""
+    """The unique id of the order. This is set by the broker only"""
 
     fill: Decimal
     """The filled size of the order, set by the broker only. Just like the size, positive for buy orders,
@@ -70,6 +70,8 @@ class Order:
             Order: A new order with the same properties but size set to zero.
         """
         assert self.id is not None, "Can only cancel orders with an already assigned id"
+        assert self.size, "Cannot cancel a cancellation order, size has to be non-zero"
+
         result = deepcopy(self)
         result.size = Decimal(0)
         return result
@@ -89,8 +91,8 @@ class Order:
     def modify(
         self, size: Decimal | str | int | float | None = None, limit: float | None = None) -> "Order":
         """
-        Create an update-order. You can update the size and limit of an order.
-        The returned order has the same id as the original order. You can only update existing orders that have an id.
+        Create an modify-order. You can update the size and/or the limit of an order.
+        The returned order has the same id as the original order. You can only update existing orders that have an id assigned.
 
         If you want to cancel an order, use the `cancel` method instead. The size of an order cannot be modified to zero.
 
@@ -102,6 +104,8 @@ class Order:
             Order: A new order with the updated size and limit.
         """
         assert self.id, "Can only update an already assigned id"
+        assert self.size, "Cannot modify a cancellation order, size has to be non-zero"
+
         size = Decimal(size) if size is not None else None
         if size is not None:
             assert not size.is_zero(), "size cannot be set to zero, use order.cancel() to cancel an order"
@@ -182,16 +186,6 @@ class Order:
             bool: True if this is a SELL order, False otherwise.
         """
         return self.size < 0
-
-    @property
-    def completed(self) -> bool:
-        """
-        Return True if the order is completed (completely filled).
-
-        Returns:
-            bool: True if the order is completed, False otherwise.
-        """
-        return not self.remaining
 
     @property
     def remaining(self) -> Decimal:
