@@ -162,7 +162,7 @@ class Feed(ABC):
         ax : matplotlib axes
             The matplotlib.pyplot axis where the plot will be drawn. If none is specified, the default pyplot will be used
         **kwargs
-            Additional keyword arguments to pass to the plt.plot() function.
+            Additional keyword arguments to pass to the `ax.plot()` function.
         """
         if not ax:
             _, ax = plt.subplots()

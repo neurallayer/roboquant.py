@@ -1,4 +1,4 @@
-from dataclasses import dataclass
+from dataclasses import dataclass, asdict
 from datetime import datetime
 from decimal import Decimal
 
@@ -213,6 +213,16 @@ class Account:
         """
         pos = self.positions.get(asset)
         return pos.size if pos else Decimal()
+
+    def get_positions_list(self) -> list[dict]:
+        """Return all open positions including their pnl as a list of dicts"""
+        result = []
+        for asset, pos in self.positions.items():
+            i = asdict(asset)
+            i.update(asdict(pos))
+            i["pnl"] = asset.contract_value(pos.size, pos.mkt_price - pos.avg_price)
+            result.append(i)
+        return result
 
     def __repr__(self) -> str:
         p = [f"{v.size}@{k.symbol}" for k, v in self.positions.items()]
