@@ -90,7 +90,7 @@ class TradingEnv(gym.Env):
         if self.journal:
             self.journal.track(self.event, self.account, signals, orders)
 
-        self.event = next(self.event_gen)
+        self.event = next(self.event_gen, None)
 
         if self.event:
             self.account = self.broker.sync(self.event)
