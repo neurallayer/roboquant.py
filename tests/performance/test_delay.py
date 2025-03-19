@@ -35,11 +35,10 @@ class TestDelay(unittest.TestCase):
         feed = AlpacaLiveFeed(api_key, secret_key, market="iex")
         feed.subscribe_quotes(*TestDelay.__symbols)
         timeframe = Timeframe.next(minutes=1)
-        channel = feed.play_background(timeframe, 1000)
 
         delays = []
         n = 0
-        while event := channel.get(10):
+        for event in feed.play(timeframe):
             if event.items:
                 n += len(event.items)
                 delays.append(time.time() - event.time.timestamp())

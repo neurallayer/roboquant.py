@@ -8,7 +8,6 @@ import pyarrow.parquet as pq
 
 from roboquant.event import Quote, Bar, Trade
 from roboquant.event import Event
-from roboquant.feeds.eventchannel import EventChannel
 from roboquant.feeds.feed import Feed
 from roboquant.asset import deserialize_to_asset, Asset
 from roboquant.timeframe import Timeframe
@@ -37,13 +36,13 @@ class ParquetFeed(Feed):
         """Check if the parquet file exists"""
         return os.path.exists(self.parquet_path)
 
-    def play(self, channel: EventChannel):
+    def play(self, timeframe: Timeframe | None = None):
         # pylint: disable=too-many-locals
         dataset = pq.ParquetFile(self.parquet_path)
         last_time: Any = None
         items = []
 
-        row_group_indexes = self.__get_row_group_indexes(channel.timeframe)
+        row_group_indexes = self.__get_row_group_indexes(timeframe)
 
         for batch in dataset.iter_batches(row_groups=row_group_indexes):
             times = batch.column("time")
@@ -55,7 +54,7 @@ class ParquetFeed(Feed):
                     if items:
                         now = last_time.as_py()
                         event = Event(now, items)
-                        channel.put(event)
+                        yield event
                     last_time = n
                     items = []
 
@@ -75,7 +74,7 @@ class ParquetFeed(Feed):
         if items:
             now = last_time.as_py()
             event = Event(now, items)
-            channel.put(event)
+            yield event
 
     def __get_row_group_indexes(self, timeframe: Timeframe | None) -> Iterable[int]:
         md = pq.read_metadata(self.parquet_path)
@@ -123,9 +122,8 @@ class ParquetFeed(Feed):
         """Record a feed to a parquet file so it can be replayed later on"""
 
         with pq.ParquetWriter(self.parquet_path, schema=ParquetFeed.__schema, use_dictionary=True) as writer:
-            channel = feed.play_background(timeframe)
             items = []
-            while event := channel.get():
+            for event in feed.play(timeframe):
                 t = event.time
 
                 for item in event.items:

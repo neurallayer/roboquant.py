@@ -5,7 +5,6 @@ from itertools import chain
 from roboquant.asset import Asset
 from roboquant.event import Event, PriceItem
 from roboquant.timeframe import Timeframe
-from .eventchannel import EventChannel
 from .feed import Feed
 
 
@@ -68,11 +67,16 @@ class HistoricFeed(Feed, ABC):
             self.__assets = {item.asset for item in price_items}
             self.__modified = False
 
-    def play(self, channel: EventChannel):
+    def play(self, timeframe: Timeframe | None = None):
         self._update()
         for k, v in self.__data.items():
-            evt = Event(k, v)
-            channel.put(evt)
+            if not timeframe or k in timeframe:
+                yield Event(k, v)
+            elif k <= timeframe.start:
+                continue
+            else:
+                break
+
 
     def __repr__(self) -> str:
         feed = self.__class__.__name__

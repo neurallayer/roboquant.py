@@ -1,14 +1,11 @@
 from datetime import datetime
-import logging
-import threading
 from abc import ABC, abstractmethod
-from typing import Sequence
+from typing import Any, Generator, Sequence
 from matplotlib import pyplot as plt
 import matplotlib.axes
 
 from roboquant.asset import Asset
-from roboquant.event import Bar
-from roboquant.feeds.eventchannel import EventChannel, ChannelClosed
+from roboquant.event import Bar, Event
 from roboquant.timeframe import Timeframe
 
 
@@ -19,14 +16,14 @@ class Feed(ABC):
     """
 
     @abstractmethod
-    def play(self, channel: EventChannel):
+    def play(self, timeframe: Timeframe| None = None) -> Generator[Event, Any, None]:
         """
-        (Re-)play the events in the feed and put them on the provided event channel.
+        (Re-)play the events contained in the feed.
 
         Parameters
         ----------
-        channel : EventChannel
-            EventChannel where the events will be placed.
+        timeframe : Timeframe
+            An optional timeframe to limit the ectns to.
         """
         ...
 
@@ -34,40 +31,6 @@ class Feed(ABC):
         """Return the timeframe of this feed, default is Timeframe.INFINITE"""
         return Timeframe.INFINITE
 
-    def play_background(self, timeframe: Timeframe | None = None, channel_capacity: int = 10) -> EventChannel:
-        """
-        Plays this feed in the background on its own thread.
-
-        Parameters
-        ----------
-        timeframe : Timeframe or None, optional
-            The timeframe in which to limit the events in the feed. If None, all events will be played.
-        channel_capacity : int, optional
-            The capacity of the event channel (default is 10)
-
-        Returns
-        -------
-        EventChannel
-            The EventChannel used for playback.
-        """
-
-        channel = EventChannel(timeframe, channel_capacity)
-
-        def __background():
-            # pylint: disable=broad-exception-caught
-            try:
-                self.play(channel)
-            except ChannelClosed:
-                # this exception we can expect
-                pass
-            except Exception as e:
-                logging.error("Error during playback", exc_info=e)
-            finally:
-                channel.close()
-
-        thread = threading.Thread(None, __background, daemon=True)
-        thread.start()
-        return channel
 
     def get_ohlcv(self, asset: Asset, timeframe: Timeframe | None = None) -> dict[datetime, Sequence[float]]:
         """Get the OHLCV values for an asset in this feed.
@@ -76,8 +39,7 @@ class Feed(ABC):
         """
 
         result: dict[datetime, Sequence[float]] = {}
-        channel = self.play_background(timeframe)
-        while event := channel.get():
+        for event in self.play(timeframe):
             item = event.price_items.get(asset)
             if item and isinstance(item, Bar):
                 result[event.time] = item.ohlcv
@@ -89,28 +51,25 @@ class Feed(ABC):
         This is mostly useful for debugging purposes to see what items a feed generates.
         """
 
-        channel = self.play_background(timeframe)
-        while event := channel.get(timeout):
+        for event in self.play(timeframe):
             print(event.time)
             for item in event.items:
                 print("======> ", item)
 
-    def count_events(self, timeframe: Timeframe | None = None, timeout: float | None = None, include_empty=False) -> int:
+    def count_events(self, timeframe: Timeframe | None = None, include_empty=False) -> int:
         """Count the number of events in a feed"""
 
-        channel = self.play_background(timeframe)
         events = 0
-        while evt := channel.get(timeout):
+        for evt in self.play(timeframe):
             if evt.items or include_empty:
                 events += 1
         return events
 
-    def count_items(self, timeframe: Timeframe | None = None, timeout: float | None = None) -> int:
+    def count_items(self, timeframe: Timeframe | None = None) -> int:
         """Count the number of events in a feed"""
 
-        channel = self.play_background(timeframe)
         items = 0
-        while evt := channel.get(timeout):
+        for evt in self.play(timeframe):
             items += len(evt.items)
         return items
 
@@ -121,8 +80,7 @@ class Feed(ABC):
 
         assert assets, "provide at least 1 asset"
         result = {asset.symbol: [] for asset in assets}
-        channel = self.play_background(timeframe)
-        while evt := channel.get():
+        for evt in self.play(timeframe):
             for asset in assets:
                 price = evt.get_price(asset, price_type)
                 result[asset.symbol].append(price)
@@ -192,8 +150,7 @@ class Feed(ABC):
         """
         x = []
         y = []
-        channel = self.play_background(timeframe)
-        while event := channel.get():
+        for event in self.play(timeframe):
             price = event.get_price(asset, price_type)
             if price:
                 x.append(event.time)

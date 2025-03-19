@@ -8,7 +8,6 @@ from fastavro import writer, reader, parse_schema, block_reader
 
 from roboquant.event import Quote, Bar, Trade
 from roboquant.event import Event
-from roboquant.feeds.eventchannel import EventChannel
 from roboquant.feeds.feed import Feed
 from roboquant.asset import deserialize_to_asset
 from roboquant.timeframe import Timeframe
@@ -55,10 +54,10 @@ class AvroFeed(Feed):
                         result.append(datetime.fromisoformat(t))
         return result
 
-    def play(self, channel: EventChannel):
+    def play(self, timeframe: Timeframe | None = None):
         t_old = ""
         items = []
-        start_time = channel.timeframe.start.isoformat() if channel.timeframe else "1900-01-01T00:00:00Z"
+        start_time = timeframe.start.isoformat() if timeframe else "1900-01-01T00:00:00Z"
 
         with open(self.avro_file, "rb") as fo:
             for row in reader(fo):
@@ -70,7 +69,7 @@ class AvroFeed(Feed):
                     if items:
                         dt = datetime.fromisoformat(t)
                         event = Event(dt, items)
-                        channel.put(event)
+                        yield event
                         items = []
                     t_old = t
 
@@ -96,14 +95,13 @@ class AvroFeed(Feed):
         """
 
         schema = parse_schema(AvroFeed._schema)
-        channel = feed.play_background(timeframe)
 
         if not append and self.exists():
             os.remove(self.avro_file)
 
         with open(self.avro_file, "a+b") as out:
             records = []
-            while event := channel.get():
+            for event in feed.play(timeframe):
                 t = event.time.isoformat()
                 for item in event.items:
                     asset_str = item.asset.serialize()

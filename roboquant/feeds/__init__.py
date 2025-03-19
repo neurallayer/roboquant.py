@@ -1,6 +1,5 @@
 from .util import BarAggregatorFeed, TimeGroupingFeed
 from .csvfeed import CSVFeed
-from .eventchannel import EventChannel
 from .feed import Feed
 from .historic import HistoricFeed
 from .randomwalk import RandomWalk
@@ -13,7 +12,6 @@ except ImportError:
 
 __all__ = [
     "Feed",
-    "EventChannel",
     "CSVFeed",
     "HistoricFeed",
     "RandomWalk",

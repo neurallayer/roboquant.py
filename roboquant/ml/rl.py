@@ -13,7 +13,6 @@ from roboquant.account import Account
 from roboquant.asset import Asset
 from roboquant.brokers.simbroker import SimBroker
 from roboquant.event import Event
-from roboquant.feeds.eventchannel import EventChannel
 from roboquant.feeds.feed import Feed
 from roboquant.journals.journal import Journal
 from roboquant.ml.features import Feature
@@ -46,7 +45,7 @@ class TradingEnv(gym.Env):
         journal_factory: Callable[[str], Journal] | None = None
     ):
         self.broker: SimBroker = broker or SimBroker()
-        self.channel = EventChannel()
+        self.event_gen = feed.play(timeframe)
         self.feed = feed
         self.event: Event | None = None
         self.account: Account = self.broker.sync()
@@ -91,7 +90,7 @@ class TradingEnv(gym.Env):
         if self.journal:
             self.journal.track(self.event, self.account, signals, orders)
 
-        self.event = self.channel.get()
+        self.event = next(self.event_gen)
 
         if self.event:
             self.account = self.broker.sync(self.event)
@@ -114,12 +113,12 @@ class TradingEnv(gym.Env):
         self.reward_feature.reset()
         self.epoch += 1
 
-        self.channel = self.feed.play_background(self.timefame)
+        self.event_gen = self.feed.play(self.timefame)
         if self.journal_factory:
             self.journal = self.journal_factory(f"epoch-{self.epoch}")
 
         while True:
-            self.event = self.channel.get()
+            self.event = next(self.event_gen, None)
             assert self.event is not None, "empty event during warmup"
             self.account = self.broker.sync(self.event)
             observation = self.get_observation(self.event)

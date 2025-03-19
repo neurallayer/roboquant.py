@@ -16,8 +16,6 @@ def run(
     journal: Journal | None = None,
     broker: Broker | None = None,
     timeframe: Timeframe | None = None,
-    capacity: int = 10,
-    heartbeat_timeout: float | None = None
 ) -> Account:
     """Start a new run. A run can be seen as a simulation of a trading strategy. It will use the provided feed to
     generate events and the strategy to create signals. The trader will convert these signals into orders that will be sent
@@ -33,20 +31,15 @@ def run(
         journal: Journal to use to log and/or store progress and metrics, default is None
         broker: The broker you want to use. If None is specified, the `SimBroker` will be used with its default settings
         timeframe: Optionally limit the run to events within this timeframe. The default is None
-        capacity: The max capacity of the used event channel. Default is 10 events.
-        heartbeat_timeout: Optionally, a heartbeat (is an empty event) will be generated if no other events are received
-        within the specified timeout in seconds. The default is None. This should normally only be used with live feeds since
-        the timestamp used for the heartbeat is the current time.
 
     Returns:
         The latest version of the account
     """
 
     broker = broker or SimBroker()
-    channel = feed.play_background(timeframe, capacity)
     trader = trader or FlexTrader()
 
-    while event := channel.get(heartbeat_timeout):
+    for event in feed.play(timeframe):
         account = broker.sync(event)
         signals = strategy.create_signals(event) if strategy else []
         orders = trader.create_orders(signals, event, account)
@@ -55,3 +48,4 @@ def run(
             journal.track(event, account, signals, orders)
 
     return broker.sync()
+

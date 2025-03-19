@@ -18,6 +18,5 @@ feed.subscribe_quotes(*symbols)
 # feed.subscribe("SPXW240312C05190000")
 
 timeframe = Timeframe.next(minutes=1)
-channel = feed.play_background(timeframe)
-while event := channel.get(timeout=10.0):
+for event in feed.play():
     print(event.time, event.items)

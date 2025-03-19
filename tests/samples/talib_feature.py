@@ -23,8 +23,7 @@ class RSIFeature(TaFeature):
 feed = rq.feeds.YahooFeed("IBM", "AAPL", start_date="2024-01-01", end_date="2024-02-01")
 feature = RSIFeature(*feed.assets(), timeperiod=15)
 account = rq.Account()
-channel = feed.play_background()
 
-while evt := channel.get():
+for evt in feed.play():
     result = feature.calc(evt)
     print(result)

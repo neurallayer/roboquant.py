@@ -9,7 +9,6 @@ from roboquant.asset import deserialize_to_asset
 from roboquant.event import Bar, PriceItem, Quote
 from roboquant.event import Event
 from roboquant.timeframe import Timeframe
-from roboquant.feeds.eventchannel import EventChannel
 from roboquant.feeds.feed import Feed
 
 logger = logging.getLogger(__name__)
@@ -96,16 +95,15 @@ class SQLFeed(Feed):
             prices = row[2:6]
             return Quote(asset, array("f", prices))
 
-    def play(self, channel: EventChannel):
+    def play(self, timeframe: Timeframe | None = None):
         """Play back the data in the database to the channel"""
         with sqlite3.connect(self.db_file) as con:
             cur = con.cursor()
             t_old = ""
             items = []
-            tf = channel.timeframe
             result = (
-                cur.execute(SQLFeed._sql_select_by_date, [tf.start.isoformat(), tf.end.isoformat()])
-                if tf
+                cur.execute(SQLFeed._sql_select_by_date, [timeframe.start.isoformat(), timeframe.end.isoformat()])
+                if timeframe
                 else cur.execute(SQLFeed._sql_select_all)
             )
 
@@ -116,7 +114,7 @@ class SQLFeed(Feed):
                     if items:
                         dt = datetime.fromisoformat(t_old)
                         event = Event(dt, items)
-                        channel.put(event)
+                        yield event
                         items = []
                     t_old = t
 
@@ -127,7 +125,7 @@ class SQLFeed(Feed):
         if items:
             dt = datetime.fromisoformat(t_old)
             event = Event(dt, items)
-            channel.put(event)
+            yield event
 
 
     def record(self, feed: Feed, timeframe=None, append=False, batch_size=10_000):
@@ -145,9 +143,8 @@ class SQLFeed(Feed):
             cur.execute(create_sql)
             price_type = self.price_type
 
-            channel = feed.play_background(timeframe)
             data = []
-            while event := channel.get():
+            for event in feed.play(timeframe):
                 t = event.time
                 for item in event.items:
                     if isinstance(item, Bar) and price_type == "bar":

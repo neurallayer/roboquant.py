@@ -37,9 +37,8 @@ class TestFeatures(unittest.TestCase):
             VolumeFeature(symbol2),
             DayOfWeekFeature(),
         )
-        channel = feed.play_background()
         result = None
-        while evt := channel.get():
+        for evt in feed.play():
             result = feature.calc(evt)
             self.assertTrue(len(result) == feature.size())
 
@@ -50,8 +49,7 @@ class TestFeatures(unittest.TestCase):
             PriceFeature(*feed.assets()),
         )
 
-        channel = feed.play_background()
-        while evt := channel.get():
+        for evt in feed.play():
             result1 = feature.calc(evt).sum()
             result2 = feature.calc(evt).sum()
             if not np.isnan(result1):
@@ -69,8 +67,7 @@ class TestFeatures(unittest.TestCase):
         )
 
         norm_feature = NormalizeFeature(feature, 10)
-        channel = feed.play_background()
-        while evt := channel.get():
+        for evt in feed.play():
             result = norm_feature.calc(evt)
             self.assertTrue(len(result) == feature.size())
 

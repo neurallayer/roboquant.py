@@ -4,7 +4,7 @@ from typing import Literal
 
 from roboquant.asset import Asset
 from roboquant.event import Event, Bar, Trade, Quote
-from .eventchannel import EventChannel
+from roboquant.timeframe import Timeframe
 from .feed import Feed
 
 
@@ -63,18 +63,17 @@ class BarAggregatorFeed(Feed):
             result[symbol] = b
         return result
 
-    def play(self, channel: EventChannel):
+    def play(self, timeframe: Timeframe | None = None):
         bars: dict[Asset, Bar] = {}
-        src_channel = self.feed.play_background(channel.timeframe, channel.maxsize)
         next_time = None
         bar_freq = str(self.freq)
-        while event := src_channel.get():
+        for event in self.feed.play(timeframe):
             if not next_time:
                 next_time = event.time + self.freq
             elif event.time >= next_time:
                 items = list(bars.values())
                 evt = Event(next_time, items)
-                channel.put(evt)
+                yield evt
                 bars = {} if not self.continuation else self.__get_continued_bars(bars)
                 next_time += self.freq
 
@@ -83,7 +82,7 @@ class BarAggregatorFeed(Feed):
         if bars and self.send_remaining and next_time:
             items = list(bars.values())
             evt = Event(next_time, items)
-            channel.put(evt)
+            yield evt
 
 
 class TimeGroupingFeed(Feed):
@@ -100,18 +99,17 @@ class TimeGroupingFeed(Feed):
         self.feed = feed
         self.timeout = timeout
 
-    def play(self, channel: EventChannel):
-        src_channel = self.feed.play_background(channel.timeframe, channel.maxsize)
+    def play(self, timeframe: Timeframe | None = None):
         items = []
         time = None
         remaining = self.timeout
-        while event := src_channel.get(remaining):
+        for event in self.feed.play(timeframe):
             time = time or event.time
             remaining = self.timeout - (event.time - time).total_seconds()
 
             if remaining <= 0.0:
                 new_event = Event(time, items)
-                channel.put(new_event)
+                yield new_event
                 items = []
                 time = event.time
                 remaining = self.timeout
@@ -120,4 +118,4 @@ class TimeGroupingFeed(Feed):
 
         if time:
             new_event = Event(time, items)
-            channel.put(new_event)
+            yield new_event

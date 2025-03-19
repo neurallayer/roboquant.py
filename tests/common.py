@@ -25,11 +25,9 @@ def get_recent_start_date(days=10):
 def run_price_item_feed(feed: Feed, assets: Iterable[Asset], test_case: TestCase, timeframe=None, min_items=1):
     """Common test for all feeds that produce price-items. It validates the data and the order of the items"""
 
-    channel = feed.play_background(timeframe)
-
     last = datetime.fromisoformat("1900-01-01T00:00:00+00:00")
     n_items = 0
-    while event := channel.get(30.0):
+    for event in feed.play():
         test_case.assertIsInstance(event.time, datetime)
         test_case.assertEqual("UTC", event.time.tzname())
         test_case.assertGreater(event.time, last, f"{event} < {last}, items={event.items}")
@@ -65,9 +63,8 @@ def run_strategy(strategy: Strategy, test_case: TestCase):
     """Run and test a strategy on a feed"""
     feed = get_feed()
     all_assets = feed.assets()
-    channel = feed.play_background()
     total_signals = 0
-    while event := channel.get():
+    for event in feed.play():
         signals = strategy.create_signals(event)
         for signal in signals:
             asset = signal.asset

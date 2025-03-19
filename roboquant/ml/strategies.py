@@ -164,10 +164,9 @@ class RNNStrategy(FeatureStrategy):
 
     def __get_xy(self, feed, timeframe=None, warmup=0) -> tuple[NDArray, NDArray]:
         """Extract input and label features from the feed."""
-        channel = feed.play_background(timeframe)
         x = []
         y = []
-        while evt := channel.get():
+        for evt in feed.play(timeframe):
             if warmup:
                 self.label_feature.calc(evt)
                 self.input_feature.calc(evt)
