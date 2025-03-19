@@ -12,7 +12,6 @@ path = "roboquant/__init__.py"
 select = ["E", "F", "W"]
 
 [tool.pyright]
-# reportOptionalOperand = "none"
 typeCheckingMode = "standard"
 # typeCheckingMode = "strict"
 

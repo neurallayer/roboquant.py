@@ -30,7 +30,6 @@ class MyStrategy(TaStrategy):
 
         return None
 
-
 # %%
 feed = rq.feeds.YahooFeed("IBM", "AAPL")
 

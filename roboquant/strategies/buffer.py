@@ -57,27 +57,27 @@ class OHLCVBuffer(NumpyBuffer):
     It stores the data in a `NumpyBuffer`.
     """
 
-    def __init__(self, capacity: int, dtype: DTypeLike = "float64") -> None:
+    def __init__(self, capacity: int) -> None:
         """Create a new OHLCV buffer"""
-        super().__init__(capacity, 5, dtype)
+        super().__init__(capacity, 5, "float64")
 
-    def open(self) -> NDArray:
+    def open(self) -> NDArray[np.float64]:
         """Return the open prices as a Numpy array"""
         return self._get(0)
 
-    def high(self) -> NDArray:
+    def high(self) -> NDArray[np.float64]:
         """Return the high prices as a Numpy array"""
         return self._get(1)
 
-    def low(self) -> NDArray:
+    def low(self) -> NDArray[np.float64]:
         """Return the low prices as a Numpy array"""
         return self._get(2)
 
-    def close(self) -> NDArray:
+    def close(self) -> NDArray[np.float64]:
         """Return the close prices as a Numpy array"""
         return self._get(3)
 
-    def volume(self) -> NDArray:
+    def volume(self) -> NDArray[np.float64]:
         """Return the volumes as a Numpy array"""
         return self._get(4)
 
