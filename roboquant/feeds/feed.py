@@ -1,8 +1,6 @@
 from datetime import datetime
 from abc import ABC, abstractmethod
 from typing import Any, Generator, Sequence
-from matplotlib import pyplot as plt
-import matplotlib.axes
 
 from roboquant.asset import Asset
 from roboquant.event import Bar, Event
@@ -103,7 +101,7 @@ class Feed(ABC):
         asset: Asset,
         price_type: str = "DEFAULT",
         timeframe: Timeframe | None = None,
-        ax: matplotlib.axes.Axes | None = None,
+        ax = None,
         **kwargs,
     ):
         """
@@ -123,6 +121,7 @@ class Feed(ABC):
             Additional keyword arguments to pass to the `ax.plot()` function.
         """
         if not ax:
+            from matplotlib import pyplot as plt
             _, ax = plt.subplots()
 
         times, prices = self.get_asset_prices(asset, price_type, timeframe)

@@ -1,11 +1,8 @@
 from datetime import datetime
-import matplotlib.axes
-from matplotlib import pyplot as plt
 
 from roboquant.journals.journal import Journal
 from roboquant.journals.metric import Metric
 from roboquant.journals.pnlmetric import PNLMetric
-
 
 
 class MetricsJournal(Journal):
@@ -44,10 +41,11 @@ class MetricsJournal(Journal):
                 values.append(metrics[metric_name])
         return timeline, values
 
-    def plot(self, metric_name: str, plot_x: bool = True, ax: matplotlib.axes.Axes | None  = None, **kwargs):
+    def plot(self, metric_name: str, plot_x: bool = True, ax = None, **kwargs):
         """Plot one of the metrics. Optional a `matplotlib.axes.Axes` can be provided
         This requires matplotlib to be installed."""
         if not ax:
+            from matplotlib import pyplot as plt
             _, ax = plt.subplots()
 
         x, y = self.get_metric(metric_name)
