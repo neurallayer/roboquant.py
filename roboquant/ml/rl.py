@@ -1,5 +1,5 @@
 import logging
-from typing import Callable
+from typing import Callable, Generator, Any
 import gymnasium as gym
 from gymnasium import spaces
 from gymnasium.envs.registration import register
@@ -45,10 +45,11 @@ class TradingEnv(gym.Env):
         journal_factory: Callable[[str], Journal] | None = None
     ):
         self.broker: SimBroker = broker or SimBroker()
-        self.event_gen = feed.play(timeframe)
         self.feed = feed
+
+        self._event_gen: Generator[Event, Any, None] = None # type: ignore
         self.event: Event | None = None
-        self.account: Account = self.broker.sync()
+        self.account: Account = None # type: ignore
         self.obs_feature = obs_feature
         self.reward_feature = reward_feature
         self.timefame = timeframe
@@ -90,7 +91,7 @@ class TradingEnv(gym.Env):
         if self.journal:
             self.journal.track(self.event, self.account, signals, orders)
 
-        self.event = next(self.event_gen, None)
+        self.event = next(self._event_gen, None)
 
         if self.event:
             self.account = self.broker.sync(self.event)
@@ -113,13 +114,14 @@ class TradingEnv(gym.Env):
         self.reward_feature.reset()
         self.epoch += 1
 
-        self.event_gen = self.feed.play(self.timefame)
+        self._event_gen = self.feed.play(self.timefame)
         if self.journal_factory:
             self.journal = self.journal_factory(f"epoch-{self.epoch}")
 
+        # Warmup the environment until we have the first valid observation
         while True:
-            self.event = next(self.event_gen, None)
-            assert self.event is not None, "empty event during warmup"
+            self.event = next(self._event_gen, None)
+            assert self.event is not None, "exhausted events already during warmup"
             self.account = self.broker.sync(self.event)
             observation = self.get_observation(self.event)
             self.get_reward(self.account)

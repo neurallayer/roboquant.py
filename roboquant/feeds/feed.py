@@ -54,7 +54,7 @@ class Feed(ABC):
             for item in event.items:
                 print("======> ", item)
 
-    def count_events(self, timeframe: Timeframe | None = None, include_empty=False) -> int:
+    def count_events(self, timeframe: Timeframe | None = None, include_empty: bool=False) -> int:
         """Count the number of events in a feed"""
 
         events = 0
@@ -77,7 +77,7 @@ class Feed(ABC):
         """Return the prices of one or more assets as a dict with the key being the symbol name."""
 
         assert assets, "provide at least 1 asset"
-        result = {asset.symbol: [] for asset in assets}
+        result: dict[str, list[float | None]] = {asset.symbol: [] for asset in assets}
         for evt in self.play(timeframe):
             for asset in assets:
                 price = evt.get_price(asset, price_type)
@@ -130,7 +130,7 @@ class Feed(ABC):
         return result
 
 
-    def get_asset_prices(self, asset: Asset, price_type="DEFAULT", timeframe: Timeframe | None = None
+    def get_asset_prices(self, asset: Asset, price_type : str ="DEFAULT", timeframe: Timeframe | None = None
     ) -> tuple[list[datetime], list[float]]:
         """
         Retrieve the prices of a given asset, optional over a specified timeframe.
@@ -147,8 +147,8 @@ class Feed(ABC):
                 - A list of datetime objects representing the times at which prices were recorded.
                 - A list of float values representing the prices of the asset at the corresponding times.
         """
-        x = []
-        y = []
+        x :list[datetime] = []
+        y : list[float] = []
         for event in self.play(timeframe):
             price = event.get_price(asset, price_type)
             if price:

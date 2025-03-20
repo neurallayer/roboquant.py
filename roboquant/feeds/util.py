@@ -20,8 +20,8 @@ class BarAggregatorFeed(Feed):
         feed: Feed,
         frequency: timedelta,
         price_type: Literal["trade", "quote"] = "quote",
-        send_remaining=False,
-        continuation=True,
+        send_remaining : bool =False,
+        continuation : bool =True,
     ):
         super().__init__()
         self.feed = feed

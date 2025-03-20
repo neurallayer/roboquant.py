@@ -4,11 +4,7 @@ import numpy as np
 from enum import Enum
 from typing import Tuple
 from numpy.typing import NDArray
-
-try:
-    import talib._ta_lib as _ta_lib  # type: ignore
-except ImportError:
-    pass
+import talib._ta_lib as _ta_lib  # type: ignore
 
 class MA_Type(Enum):
     SMA = 0

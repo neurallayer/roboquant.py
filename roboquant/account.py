@@ -1,6 +1,7 @@
 from dataclasses import dataclass, asdict
 from datetime import datetime
 from decimal import Decimal
+from typing import Any
 
 from roboquant.asset import Asset
 from roboquant.order import Order
@@ -214,9 +215,9 @@ class Account:
         pos = self.positions.get(asset)
         return pos.size if pos else Decimal()
 
-    def get_positions_list(self) -> list[dict]:
+    def get_positions_list(self) -> list[dict[str, Any]]:
         """Return all open positions including their pnl as a list of dicts"""
-        result = []
+        result: list[dict[str, Any]] = []
         for asset, pos in self.positions.items():
             i = asdict(asset)
             i.update(asdict(pos))

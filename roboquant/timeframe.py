@@ -22,7 +22,7 @@ class Timeframe:
     INFINITE: "Timeframe"
     """Represents an infinite timeframe, with a start time set to the year 1900 and an end time set to the year 2200."""
 
-    def __init__(self, start: datetime, end: datetime, inclusive=False):
+    def __init__(self, start: datetime, end: datetime, inclusive: bool =False):
         """
         Create a new timeframe. All datetimes will be stored in the UTC timezone.
 
@@ -38,7 +38,7 @@ class Timeframe:
         assert self.start <= self.end, "start > end"
 
     @classmethod
-    def fromisoformat(cls, start: str, end: str, inclusive=False):
+    def fromisoformat(cls, start: str, end: str, inclusive : bool =False):
         """
         Create an instance of Timeframe based on a start- and end-datetime in ISO 8601 format.
 
@@ -68,7 +68,8 @@ class Timeframe:
         return self.start == self.end and not self.inclusive
 
     @staticmethod
-    def previous(inclusive=False, **kwargs) -> "Timeframe":
+    def previous(inclusive : bool = False, days: float=0, seconds: float=0, microseconds: float=0,
+                milliseconds: float=0, minutes: float=0, hours: float=0, weeks: float=0) -> "Timeframe":
         """
         Convenient method to create a historic timeframe, the kwargs arguments will be passed to the timedelta.
 
@@ -83,13 +84,14 @@ class Timeframe:
             tf = Timeframe.previous(days=365)
         """
 
-        td = timedelta(**kwargs)
+        td = timedelta(days, seconds, microseconds, milliseconds, minutes, hours, weeks)
         end = datetime.now(timezone.utc)
         start = end - td
         return Timeframe(start, end, inclusive)
 
     @staticmethod
-    def next(inclusive=False, **kwargs) -> "Timeframe":
+    def next(inclusive : bool = False,days: float=0, seconds: float=0, microseconds: float=0,
+                milliseconds: float=0, minutes: float=0, hours: float=0, weeks: float=0) -> "Timeframe":
         """
         Convenient method to create a future timeframe, the kwargs arguments will be passed to the timedelta.
 
@@ -104,7 +106,7 @@ class Timeframe:
             tf = Timeframe.next(minutes=30)
         """
 
-        td = timedelta(**kwargs)
+        td = timedelta(days, seconds, microseconds, milliseconds, minutes, hours, weeks)
         start = datetime.now(timezone.utc)
         end = start + td
         return Timeframe(start, end, inclusive)
@@ -184,7 +186,7 @@ class Timeframe:
 
         period = self.duration / n if isinstance(n, int) else n
         end = self.start
-        result = []
+        result: list[Timeframe] = []
         while end < self.end:
             start = end
             end = start + period
@@ -214,7 +216,7 @@ class Timeframe:
             It can contain duplicates and the resulting timeframes can overlap.
         """
 
-        result = []
+        result: list[Timeframe] = []
         end = self.end - duration
         if end < self.start:
             raise ValueError("sample duration is too large for this timeframe")

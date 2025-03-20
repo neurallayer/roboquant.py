@@ -1,6 +1,6 @@
 # %%
 # pylint: disable=no-member
-import talib.stream as ta # type: ignore
+import roboquant.ta as ta
 import roboquant as rq
 from roboquant.asset import Asset
 from roboquant.ml.features import TaFeature
@@ -10,7 +10,7 @@ from roboquant.strategies.buffer import OHLCVBuffer
 class RSIFeature(TaFeature):
     """Example using talib to create an RSI feature"""
 
-    def __init__(self, *assets: Asset, timeperiod=10) -> None:
+    def __init__(self, *assets: Asset, timeperiod:int=10) -> None:
         self.timeperiod = timeperiod
         super().__init__(*assets, history_size=timeperiod + 1)
 

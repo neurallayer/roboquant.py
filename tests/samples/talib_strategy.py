@@ -16,7 +16,6 @@ class MyStrategy(TaStrategy):
 
         period = self.size - 1
         close_prices = ohlcv.close()
-
         rsi = ta.RSI(close_prices, timeperiod=period)
 
         upper, _, lower = ta.BBANDS(close_prices, timeperiod=period, nbdevup=2, nbdevdn=2)
