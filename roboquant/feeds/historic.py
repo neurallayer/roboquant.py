@@ -41,7 +41,15 @@ class HistoricFeed(Feed, ABC):
         return list(self.__assets)
 
     def get_asset(self, symbol: str) -> Asset:
-        """Return the first asset that matches the provided symbol name, or None if not found"""
+        """Retrieve the first asset that matches the provided symbol name.
+
+        Args:
+            symbol (str): The symbol name of the asset to retrieve.
+        Returns:
+            Asset: The first asset object that matches the provided symbol.
+        Raises:
+            ValueError: If no asset is found with the specified symbol.
+        """
         try:
             return next(asset for asset in self.assets() if asset.symbol == symbol)
         except StopIteration:

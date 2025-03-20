@@ -24,7 +24,7 @@ class Asset(ABC):
     """The symbol name of the asset, for example, AAPL"""
 
     currency: Currency = USD
-    """The currency of the asset, default is USD"""
+    """The currency of the asset, default is `USD`"""
 
     def contract_value(self, size: Decimal, price: float) -> float:
         """Return the total contract value given the provided size and price.
@@ -297,3 +297,4 @@ def deserialize_to_asset(value: str) -> Asset:
 register_asset_class(Stock)
 register_asset_class(Option)
 register_asset_class(Crypto)
+register_asset_class(Forex)
