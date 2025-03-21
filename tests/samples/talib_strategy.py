@@ -7,9 +7,9 @@ from roboquant.strategies import OHLCVBuffer, TaStrategy
 # %%
 class MyStrategy(TaStrategy):
     """Example using ta-lib to create a combined RSI/BollingerBand strategy:
-    - BUY => RSI < 30 and close < lower band
-    - SELL => RSI > 70 and close > upper band
-    - otherwise do nothing
+    - BUY if `RSI < 30 and close < lower band`
+    - SELL if `RSI > 70 and close > upper band`
+    - Otherwise do nothing
     """
 
     def process_asset(self, asset: rq.Asset, ohlcv: OHLCVBuffer):

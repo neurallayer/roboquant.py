@@ -14,8 +14,11 @@ FEED = rq.feeds.YahooFeed("GOOG", "MSFT", "NVDA", start_date="2000-01-01")
 print(FEED)
 
 
-def walk_forward(params):
-    """Perform a run over the provided timeframe and EMA parameters"""
+def walk_forward(params: tuple[rq.Timeframe, tuple[int, int]]) -> float:
+    """Perform a run over the provided timeframe and EMA parameters
+    The return value is the equity value at the end of the run. In general,
+    the return value needs to be serialized to be able to pass it back to the main process.
+    """
     timeframe, (fast, slow) = params
     strategy = rq.strategies.EMACrossover(fast, slow)
     acc = rq.run(FEED, strategy, timeframe=timeframe)

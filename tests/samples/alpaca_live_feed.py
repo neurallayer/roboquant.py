@@ -18,5 +18,8 @@ feed.subscribe_quotes(*symbols)
 # feed.subscribe("SPXW240312C05190000")
 
 timeframe = Timeframe.next(minutes=1)
-for event in feed.play():
-    print(event.time, event.items)
+for event in feed.play(timeframe):
+    if event.is_empty():
+        print("Are you sure the market is open?")
+    else:
+        print(event.time, event.items)
