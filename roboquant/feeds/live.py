@@ -24,34 +24,42 @@ class LiveFeed(Feed):
         self._queue: Queue | None = None
         self._last_time = datetime.fromisoformat("1900-01-01T00:00:00+00:00")
         self.increment = timedelta(microseconds=1)
+        self.heartbeat_timeout = 10
 
     def play(self, timeframe: Timeframe | None = None) -> Generator[Event, Any, None]:
         self._queue = Queue()
+        timeout = self.heartbeat_timeout
         while True:
             try:
-                if event := self._queue.get(timeout=30):
+                if event := self._queue.get(timeout=timeout):
                     if not timeframe or event.time in timeframe:
-                        self._last_time = event.time
                         yield event
-                    elif event.time <= timeframe.start:
+                    elif event.time < timeframe.start:
                         continue
                     else:
                         break
             except Empty:
-                yield Event(datetime.now(tz=timezone.utc), [])
+                # We are here due to a timeout, so we need to send a heartbeat event
+                event = Event(datetime.now(tz=timezone.utc), [])
+                if not timeframe or event.time in timeframe:
+                    yield event
+                elif event.time < timeframe.start:
+                    continue
+                else:
+                    break
 
         self._queue.close()
         self._queue = None
 
     def _put(self, event: Event):
-        """Put an event on the channel. If the event is not monotonic in time, it will be corrected.
+        """Put an event on the queue. If the event is not monotonic in time, it will be corrected.
         Subclasses should call this method to publish new live events.
         """
         if self._queue:
             try:
                 if event.time <= self._last_time:
                     event.time = self._last_time + self.increment
-                self._queue.put(event)
                 self._last_time = event.time
+                self._queue.put(event)
             except Full:
                 pass

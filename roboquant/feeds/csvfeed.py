@@ -1,5 +1,5 @@
 import csv
-from enum import Enum
+from dataclasses import dataclass
 import logging
 import os
 import pathlib
@@ -12,24 +12,24 @@ from roboquant.feeds.historic import HistoricFeed
 
 logger = logging.getLogger(__name__)
 
+@dataclass(frozen=True, slots=True)
+class CSVColumns:
+    date: str = "Date"
+    open: str = "Open"
+    high: str = "High"
+    low: str = "Low"
+    close: str = "Close"
+    volume: str | None = "Volume"
+    adj_close: str | None = "Adj Close"
+    time: str | None = None
 
-class _CSVColumn(str, Enum):
-    DATE = "Date"
-    OPEN = "Open"
-    HIGH = "High"
-    LOW = "Low"
-    CLOSE = "Close"
-    VOLUME = "Volume"
-    ADJ_CLOSE = "Adj CLose"
-    TIME = "Time"
+    def get_ohlcv(self, dict: dict[str, str]) -> array:
+        if self.volume is None:
+            data = [dict[self.open], dict[self.high], dict[self.low], dict[self.close], "nan"]
+        else:
+            data = [dict[self.open], dict[self.high], dict[self.low], dict[self.close], dict[self.volume]]
 
-    def __repr__(self) -> str:
-        return self.value
-
-    @staticmethod
-    def merge(d: dict["_CSVColumn", str]) -> list[str]:
-        return [d.get(e, e.value) for e in _CSVColumn]
-
+        return array("f", [float(x) for x in data])
 
 class CSVFeed(HistoricFeed):
     """Use CSV files with historic market data as a feed."""
@@ -48,6 +48,8 @@ class CSVFeed(HistoricFeed):
     ):
         super().__init__()
         columns = columns or ["Date", "Open", "High", "Low", "Close", "Volume", "Adj Close", "Time"]
+        assert len(columns) == 8 , "Invalid number of columns"
+
         self.ohlcv_columns = columns[1:6]
         self.adj_close_column = columns[6] if adj_close else None
         self.date_column = columns[0]
@@ -118,7 +120,7 @@ class CSVFeed(HistoricFeed):
     @classmethod
     def stooq_us_daily(cls, path):
         """Parse one or more CSV files that meet the stooq daily file format"""
-        columns = ["<DATE>", "<OPEN>", "<HIGH>", "<LOW>", "<CLOSE>", "<VOL>"]
+        columns = ["<DATE>", "<OPEN>", "<HIGH>", "<LOW>", "<CLOSE>", "<VOL>", None, None]
 
         class StooqDailyFeed(CSVFeed):
             def __init__(self):
@@ -133,7 +135,7 @@ class CSVFeed(HistoricFeed):
     @classmethod
     def stooq_us_intraday(cls, path):
         """Parse one or more CSV files that meet the stooq intraday file format"""
-        columns = ["<DATE>", "<OPEN>", "<HIGH>", "<LOW>", "<CLOSE>", "<VOL>", "", "<TIME>"]
+        columns = ["<DATE>", "<OPEN>", "<HIGH>", "<LOW>", "<CLOSE>", "<VOL>", None, "<TIME>"]
 
         class StooqIntradayFeed(CSVFeed):
             def __init__(self):
@@ -148,5 +150,5 @@ class CSVFeed(HistoricFeed):
     @classmethod
     def yahoo(cls, path, frequency="1d"):
         """Parse one or more CSV files that meet the Yahoo Finance format"""
-        columns = ["Date", "Open", "High", "Low", "Close", "Volume", "Adj Close"]
+        columns = ["Date", "Open", "High", "Low", "Close", "Volume", "Adj Close", None]
         return cls(path, columns=columns, adj_close=True, time_offset="21:00:00+00:00", frequency=frequency)

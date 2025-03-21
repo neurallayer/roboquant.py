@@ -2,7 +2,8 @@ import unittest
 from datetime import datetime, timezone
 from decimal import Decimal
 
-from roboquant import Event, Order, Trade
+from roboquant.event import Event, Trade
+from roboquant.order import Order
 from roboquant.account import Account
 from roboquant.asset import Stock
 from roboquant.brokers import SimBroker

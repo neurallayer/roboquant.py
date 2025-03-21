@@ -2,7 +2,7 @@ from datetime import datetime, timedelta, timezone
 import unittest
 from decimal import Decimal
 
-from roboquant import Order
+from roboquant.order import Order
 from roboquant.asset import Stock
 
 

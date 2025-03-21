@@ -5,7 +5,7 @@ import warnings
 
 import yfinance
 
-from roboquant.asset import Stock
+from roboquant.asset import Asset, Stock
 from roboquant.event import Bar
 from roboquant.feeds.historic import HistoricFeed
 
@@ -60,7 +60,7 @@ class YahooFeed(HistoricFeed):
 
         self._update()
 
-    def _get_asset(self, symbol: str):
+    def _get_asset(self, symbol: str) -> Asset:
         """Get the asset for the given symbol. The default implementation will return a Stock denoted in USD.
         Subclasses can override this method to provide a different asset type."""
         return Stock(symbol)

@@ -16,7 +16,7 @@ logger = logging.getLogger(__name__)
 
 
 class ParquetFeed(Feed):
-    """PriceItems stored in Parquet Files"""
+    """PriceItems stored in Parquet files, supports a mix of `Bar`, `Trade`, and `Quote` price-items."""
 
     __schema = pa.schema(
         [
@@ -119,7 +119,26 @@ class ParquetFeed(Feed):
         return f"ParquetFeed(path={self.parquet_path})"
 
     def record(self, feed: Feed, timeframe: Timeframe | None = None, row_group_size: int=10_000):
-        """Record a feed to a parquet file so it can be replayed later on"""
+        """
+        Records a feed to a Parquet file for later replay.
+
+        This method processes events from the provided feed and writes them to a Parquet file.
+        Each event is serialized into a specific format based on its type (Quote, Bar, or Trade).
+        The data is written in batches to optimize performance.
+
+        Args:
+            feed (Feed): The feed containing events to be recorded.
+            timeframe (Timeframe | None, optional): The timeframe to filter events. If None, all events are processed.
+            row_group_size (int, optional): The number of rows to include in each batch written to the Parquet file.
+            Defaults to 10,000.
+
+        Notes:
+            - Events are serialized with the following structure:
+            - `time`: The timestamp of the event.
+            - `type`: The type of the event (1 for Quote, 2 for Bar, 3 for Trade).
+            - `asset`: Serialized representation of the asset.
+            - `prices`: A list of price-related data specific to the event type.
+        """
 
         with pq.ParquetWriter(self.parquet_path, schema=ParquetFeed.__schema, use_dictionary=True) as writer:
             items = []
@@ -127,6 +146,8 @@ class ParquetFeed(Feed):
                 t = event.time
 
                 for item in event.items:
+                    if not isinstance(item, (Quote, Bar, Trade)):
+                        continue
                     asset = item.asset.serialize()
                     match item:
                         case Quote():

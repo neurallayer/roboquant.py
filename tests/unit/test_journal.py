@@ -4,7 +4,7 @@ import unittest
 from roboquant.feeds import CSVFeed
 from roboquant.journals import RunMetric
 from roboquant.strategies.emacrossover import EMACrossover
-from roboquant import run
+from roboquant.run import run
 from roboquant.journals.plotjournal import PlotJournal
 
 

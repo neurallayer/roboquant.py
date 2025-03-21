@@ -2,7 +2,7 @@ from datetime import datetime
 import unittest
 from decimal import Decimal
 
-from roboquant import Account, Position
+from roboquant.account import Account, Position
 from roboquant.asset import Stock
 from roboquant.monetary import Wallet, Amount, USD
 

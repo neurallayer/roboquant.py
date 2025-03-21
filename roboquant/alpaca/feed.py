@@ -58,6 +58,8 @@ class AlpacaLiveFeed(LiveFeed):
     def __init__(self, api_key:str, secret_key: str, market: Literal["iex", "sip", "crypto", "option"] = "iex") -> None:
         super().__init__()
 
+        assert market in ["iex", "sip", "crypto", "option"], "invalid market"
+
         match market:
             case "sip":
                 self.stream = StockDataStream(api_key, secret_key, feed=DataFeed.SIP)
@@ -71,8 +73,6 @@ class AlpacaLiveFeed(LiveFeed):
             case "option":
                 self.stream = OptionDataStream(api_key, secret_key)
                 self.asset_class = AssetClass.US_OPTION
-            case _:
-                raise ValueError(f"unsupported value market={market}")
 
         thread = threading.Thread(None, self.stream.run, daemon=True)
         thread.start()
