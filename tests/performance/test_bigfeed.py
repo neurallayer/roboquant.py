@@ -9,7 +9,7 @@ class TestBigFeed(unittest.TestCase):
     """Run two large back tests, one over daily bars and one over 5-minutes bars"""
 
     @staticmethod
-    def _print(account, journal, feed, load_time, runtime):
+    def _print(account, journal: rq.journals.BasicJournal, n_assets, load_time, runtime):
         print("", account, journal, sep="\n\n")
 
         candles = journal.items / 1_000_000.0
@@ -18,8 +18,8 @@ class TestBigFeed(unittest.TestCase):
         # Print statistics
         print()
         print(f"load time  = {load_time:.1f}s")
-        print(f"files      = {len(feed.assets())}")
-        print(f"throughput = {len(feed.assets()) / load_time:.0f} files/s")
+        print(f"files      = {n_assets}")
+        print(f"throughput = {n_assets / load_time:.0f} files/s")
         print(f"run time   = {runtime:.1f}s")
         print(f"candles    = {candles:.1f}M")
         print(f"throughput = {throughput:.1f}M candles/s")
@@ -42,7 +42,7 @@ class TestBigFeed(unittest.TestCase):
 
         journal = rq.journals.BasicJournal()
         account, runtime = self._run(feed, journal)
-        self._print(account, journal, feed, load_time, runtime)
+        self._print(account, journal, len(feed.assets()), load_time, runtime)
 
     def test_big_feed_intraday(self):
         print("============ 5 Min Bars ============")
@@ -53,7 +53,7 @@ class TestBigFeed(unittest.TestCase):
 
         journal = rq.journals.BasicJournal()
         account, runtime = self._run(feed, journal)
-        self._print(account, journal, feed, load_time, runtime)
+        self._print(account, journal, len(feed.assets()), load_time, runtime)
 
 
 if __name__ == "__main__":

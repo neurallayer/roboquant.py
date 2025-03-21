@@ -24,10 +24,10 @@ class Timeframe:
 
     def __init__(self, start: datetime, end: datetime, inclusive: bool =False):
         """
-        Create a new timeframe. All datetimes will be stored in the UTC timezone.
+        Create a new timeframe. The start- and end-datetime will be stored in the UTC timezone.
 
         Args:
-            start (datetime): Start datetime.
+            start (datetime): Start datetime, this is always inclusive.
             end (datetime): End datetime.
             inclusive (bool): Should the end datetime be inclusive, default is False.
         """

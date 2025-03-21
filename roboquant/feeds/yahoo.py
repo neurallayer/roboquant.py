@@ -13,8 +13,8 @@ logger = logging.getLogger(__name__)
 
 
 class YahooFeed(HistoricFeed):
-    """A feed using the Yahoo Finance API to retrieve historic market data. By default, it will retrieve daily data, but
-    you can also specify a different intervals."""
+    """A feed using the Yahoo Finance to retrieve historic market data. By default, it will retrieve daily data, but
+    you can specify a different interval."""
 
     def __init__(self, *symbols: str, start_date: str = "2010-01-01", end_date: str | None = None, interval="1d"):
         """
