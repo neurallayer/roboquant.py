@@ -12,8 +12,21 @@ from roboquant.feeds.historic import HistoricFeed
 
 logger = logging.getLogger(__name__)
 
+
 @dataclass(frozen=True, slots=True)
 class CSVColumns:
+    """Define the columns in a CSV file that contains historic market data.
+    args:
+    - date: the column name for the date
+    - open: the column name for the open price
+    - high: the column name for the high price
+    - low: the column name for the low price
+    - close: the column name for the close price
+    - volume: the column name for the volume, or None if not available
+    - adj_close: the column name for the adjusted close price, or None if not available
+    - time: the column name for the time, or None if not available
+    """
+
     date: str = "Date"
     open: str = "Open"
     high: str = "High"
@@ -23,23 +36,33 @@ class CSVColumns:
     adj_close: str | None = "Adj Close"
     time: str | None = None
 
-    def get_ohlcv(self, dict: dict[str, str]) -> array:
+    def get_ohlcv(self, row: dict[str, str]) -> array:
+        """Return an array containing the open, high, low, close, and volume from a row in the CSV file"""
+
         if self.volume is None:
-            data = [dict[self.open], dict[self.high], dict[self.low], dict[self.close], "nan"]
+            data = [row[self.open], row[self.high], row[self.low], row[self.close], "nan"]
         else:
-            data = [dict[self.open], dict[self.high], dict[self.low], dict[self.close], dict[self.volume]]
+            data = [row[self.open], row[self.high], row[self.low], row[self.close], row[self.volume]]
 
         return array("f", [float(x) for x in data])
 
+
 class CSVFeed(HistoricFeed):
-    """Use CSV files with historic market data as a feed."""
+    """Use CSV files with historic market data as a feed.
+    args:
+    - path: the path to the CSV file or directory with CSV files
+    - columns: the columns in the CSV file, the default one is for Yahoo Finance
+    - time_offset: the time offset to apply to the data, default is None
+    - date_fmt: the date format to use, or None if the date is in ISO format
+    - time_fmt: the time format to use, or None if the time is in ISO format
+    - endswith: the file extension to use to select the files
+    - frequency: the frequency of the data, use as part of the `Bar` object but no functional impact
+    """
 
     def __init__(
         self,
         path: str | pathlib.Path,
-        columns=None,
-        adj_close=False,
-        has_time_column=False,
+        columns=CSVColumns(),
         time_offset: str | None = None,
         date_fmt: str | None = None,
         time_fmt: str | None = None,
@@ -47,16 +70,9 @@ class CSVFeed(HistoricFeed):
         frequency="",
     ):
         super().__init__()
-        columns = columns or ["Date", "Open", "High", "Low", "Close", "Volume", "Adj Close", "Time"]
-        assert len(columns) == 8 , "Invalid number of columns"
-
-        self.ohlcv_columns = columns[1:6]
-        self.adj_close_column = columns[6] if adj_close else None
-        self.date_column = columns[0]
-        self.time_column = columns[7] if has_time_column else None
+        self.columns = columns
         self.date_fmt = date_fmt
         self.time_fmt = time_fmt
-        self.adj_close = adj_close
         self.freq = frequency
         self.endswith = endswith
         self.time_offset = time.fromisoformat(time_offset) if time_offset is not None else None
@@ -83,12 +99,12 @@ class CSVFeed(HistoricFeed):
 
     def _parse_csvfiles(self, filenames: list[str]):
         # pylint: disable=too-many-locals
-        adj_close_column = self.adj_close_column
+        get_ohlcv = self.columns.get_ohlcv
+        adj_close_column = self.columns.adj_close
         date_fmt = self.date_fmt
         time_fmt = self.time_fmt
-        ohlcv_columns = self.ohlcv_columns
-        date_column = self.date_column
-        time_column = self.time_column
+        date_column = self.columns.date
+        time_column = self.columns.time
         freq = self.freq
         time_offset = self.time_offset
 
@@ -108,7 +124,7 @@ class CSVFeed(HistoricFeed):
                     if time_offset:
                         dt = datetime.combine(dt, time_offset)
 
-                    ohlcv = array("f", [float(row[column]) for column in ohlcv_columns])
+                    ohlcv = get_ohlcv(row)
                     if adj_close_column:
                         adj_close = float(row[adj_close_column])
                         pb = Bar.from_adj_close(asset, ohlcv, adj_close, freq)
@@ -120,7 +136,9 @@ class CSVFeed(HistoricFeed):
     @classmethod
     def stooq_us_daily(cls, path):
         """Parse one or more CSV files that meet the stooq daily file format"""
-        columns = ["<DATE>", "<OPEN>", "<HIGH>", "<LOW>", "<CLOSE>", "<VOL>", None, None]
+        columns = CSVColumns(
+            date="<DATE>", open="<OPEN>", high="<HIGH>", low="<LOW>", close="<CLOSE>", volume="<VOL>", adj_close=None
+        )
 
         class StooqDailyFeed(CSVFeed):
             def __init__(self):
@@ -135,11 +153,20 @@ class CSVFeed(HistoricFeed):
     @classmethod
     def stooq_us_intraday(cls, path):
         """Parse one or more CSV files that meet the stooq intraday file format"""
-        columns = ["<DATE>", "<OPEN>", "<HIGH>", "<LOW>", "<CLOSE>", "<VOL>", None, "<TIME>"]
+        columns = CSVColumns(
+            date="<DATE>",
+            open="<OPEN>",
+            high="<HIGH>",
+            low="<LOW>",
+            close="<CLOSE>",
+            volume="<VOL>",
+            time="<TIME>",
+            adj_close=None,
+        )
 
         class StooqIntradayFeed(CSVFeed):
             def __init__(self):
-                super().__init__(path, columns=columns, has_time_column=True, endswith=".txt")
+                super().__init__(path, columns=columns, endswith=".txt")
 
             def _get_asset(self, filename: str):
                 base = pathlib.Path(filename).stem
@@ -150,5 +177,4 @@ class CSVFeed(HistoricFeed):
     @classmethod
     def yahoo(cls, path, frequency="1d"):
         """Parse one or more CSV files that meet the Yahoo Finance format"""
-        columns = ["Date", "Open", "High", "Low", "Close", "Volume", "Adj Close", None]
-        return cls(path, columns=columns, adj_close=True, time_offset="21:00:00+00:00", frequency=frequency)
+        return cls(path, time_offset="21:00:00+00:00", frequency=frequency)
