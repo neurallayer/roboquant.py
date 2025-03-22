@@ -99,13 +99,15 @@ class FlexTrader(Trader):
     - min_order_perc: the min percentage of the equity to allocate to a new order, default is 0.02 (2%)
     - shorting: allow orders that could result in a short position, default is false
     - price_type: the price type to use when determining order value, for example "CLOSE". Default is "DEFAULT"
+    - shuffle_signals: shuffle the signals before processing them, default is false
+    - valid_for: the time delta for which the order is valid, default is 3 days
 
     It might be sometimes challenging to understand why a signal isn't converted into an order. The flex-trader logs
-    at INFO level when certain rules have been fired.
-
-    Setting higher logging:
-        logging.basicConfig(level=logging.WARNING)
+    at INFO level when certain rules have been fired. Enable higher logging:
+    ```
+        logging.basicConfig()
         logging.getLogger("roboquant.traders.flextrader").setLevel(logging.INFO)
+    ```
     """
 
     def __init__(

@@ -6,6 +6,7 @@ from functools import cached_property
 from typing import Any
 
 from roboquant.asset import Asset
+from datetime import datetime, timezone
 
 
 @dataclass(slots=True)
@@ -21,10 +22,11 @@ class PriceItem:
 
     @abstractmethod
     def price(self, price_type: str = "DEFAULT") -> float:
-        """Returns the price for the provided price_type.
+        """Returns the price for the provided price_type. If a type is unknown, returns the `DEFAULT` price.
 
         Args:
-            price_type (str): The type of price to return. For example, `OPEN` or `CLOSE`.
+            price_type (str): The type of price to return. A price-type is by convention always a capatalized string.
+            For example, `OPEN`, `CLOSE`, `HIGH`, `LOW`, `BID` or `ASK.
 
         Returns:
             float: The price for the provided price_type. If the type is unknown, returns the `DEFAULT` price.
@@ -32,7 +34,7 @@ class PriceItem:
 
     @abstractmethod
     def volume(self, volume_type: str = "DEFAULT") -> float:
-        """Return the volume of the price-item.
+        """Return the volume of the price-item. If a type is unknown, returns the `DEFAULT` volume.
 
         Args:
             volume_type (str): The type of volume to return. For example, `BID` or `ASK`.
@@ -251,13 +253,41 @@ class Bar(PriceItem):
 
 class Event:
     """
-    An event contains zero or more items of information happening at the same moment in time.
+    The `Event` class represents a snapshot of information occurring at a specific moment in time.
+    It is designed to encapsulate a collection of items, such as market data or other relevant information,
+    that are associated with a particular timestamp.
+    Events often represent market activities like trades, quotes, or bars. However, it is flexible enough to handle
+    other types of data, such as fundamental metrics or social media signals.
 
-    Attributes:
-        time (datetime): A datetime object with the timezone set at UTC.
-        items (list[Any]): A list of items. The most common use-cases are of the type `PriceItem`,
-                           like `Quote`, `Trade` or `Bar`. But items could also represent other types of information like
-                           fundamental data or social-media posts.
+    Args:
+        time (datetime): The timestamp of the event, which must be in UTC timezone. This ensures
+                         consistency when dealing with events across different systems.
+        items (list[Any]): A list of items associated with the event. These items can represent
+                           various types of information, such as `PriceItem` instances (e.g., `Quote`,
+                           `Trade`, or `Bar`) or other custom data types.
+    Methods:
+        __init__(dt: datetime, items: list[Any]):
+            Initializes an `Event` instance with a specific timestamp and a list of associated items.
+        empty(dt: datetime) -> Event:
+            Creates and returns an empty `Event` instance with the specified timestamp.
+        is_empty() -> bool:
+            Checks whether the event contains any items. Returns `True` if the event is empty,
+            otherwise `False`.
+        price_items() -> dict[Asset, PriceItem]:
+            A cached property that returns a dictionary mapping each asset to its corresponding
+            price item. This is useful for quickly accessing price-related data.
+        get_prices(price_type: str = "DEFAULT") -> dict[Asset, float]:
+            Retrieves the prices of all assets in the event for a specified price type. Returns a
+            dictionary mapping each asset to its price.
+        get_price(asset: Asset, price_type: str = "DEFAULT") -> float | None:
+            Retrieves the price of a specific asset for a given price type. Returns the price as a
+            float, or `None` if the asset is not found.
+        get_volume(asset: Asset, volume_type: str = "DEFAULT") -> float | None:
+            Retrieves the volume of a specific asset for a given volume type. Returns the volume as
+            a float, or `None` if the asset is not found.
+        __repr__() -> str:
+            Returns a string representation of the `Event` instance, including its timestamp and
+            the number of items it contains.
     """
 
     def __init__(self, dt: datetime, items: list[Any]):

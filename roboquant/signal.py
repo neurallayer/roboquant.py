@@ -7,8 +7,8 @@ from roboquant.asset import Asset
 class SignalType(Flag):
     """Indicates how a signal can be used, either:
 
-    - ENTRY: enter/increase a position size
-    - EXIT: close/reduce a position size
+    - ENTRY: enter or increase a position size
+    - EXIT: close or reduce a position size
     - ENTRY_EXIT: can be used both to enter/increase or close/reduce position sizes.
     """
 
@@ -27,10 +27,11 @@ class SignalType(Flag):
 
 @dataclass(slots=True, frozen=True)
 class Signal:
-    """Signal that a strategy can create. It contains both a rating and the type of signal.
+    """Signal that a strategy can create that indicates a BUY or SELL of an asset.
+    It contains both the rating and the type of signal.
 
     A rating is a float normally between -1.0 and 1.0, where -1.0 is a strong sell, and 1.0 is a strong buy.
-    But this range isn't enforced. It is up to the used `trader` to handle these values.
+    But this range isn't enforced. It is up to the used `Trader` to use these values when converting signals to orders.
 
     The type indicates if it is an `ENTRY`, `EXIT` or `ENTRY_EXIT` signal. The default is `ENTRY_EXIT`. Please note that
     it is again up to the `trader` to handle these types correctly.

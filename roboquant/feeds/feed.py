@@ -112,7 +112,7 @@ class Feed(ABC):
         asset : Asset
             The asset for which to plot prices.
         price_type : str, optional
-            The type of price to plot, e.g. open, close, high, low. (default is "DEFAULT")
+            The type of price to plot, e.g. "OPEN" or  "CLOSE". (default is "DEFAULT")
         timeframe : Timeframe or None, optional
             The timeframe over which to plot prices. If None, the entire feed timeframe is used. (default is None)
         ax : matplotlib axes
