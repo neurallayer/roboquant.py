@@ -35,28 +35,31 @@ class YahooFeed(HistoricFeed):
         columns = ["Open", "High", "Low", "Close", "Volume", "Adj Close"]
 
         for symbol in symbols:
-            logger.debug("requesting symbol=%s", symbol)
-            df = yfinance.Ticker(symbol).history(
-                start=start_date, end=end_date, auto_adjust=False, actions=False, interval=interval, timeout=30
-            )[columns]
+            try:
+                logger.debug("requesting symbol=%s", symbol)
+                df = yfinance.Ticker(symbol).history(
+                    start=start_date, end=end_date, auto_adjust=False, actions=False, interval=interval, timeout=30
+                )[columns]
 
-            assert df is not None
+                assert df is not None
 
-            if len(df) == 0:
-                logger.warning("no data retrieved for symbol=%s", symbol)
-                continue
+                if len(df) == 0:
+                    logger.warning("no data retrieved for symbol=%s", symbol)
+                    continue
 
-            # yFinance one doesn't correct the volume, so we use our own auto-adjust
-            self.__auto_adjust(df)
+                # yFinance one doesn't correct the volume, so we use our own auto-adjust
+                self.__auto_adjust(df)
 
-            for t in df.itertuples(index=True):
-                dt = t[0].to_pydatetime().astimezone(timezone.utc)
-                prices = t[1:6]
-                asset = self._get_asset(symbol)
-                b = Bar(asset, array("f", prices), interval)
-                self._add_item(dt, b)
+                for t in df.itertuples(index=True):
+                    dt = t[0].to_pydatetime().astimezone(timezone.utc)
+                    prices = t[1:6]
+                    asset = self._get_asset(symbol)
+                    b = Bar(asset, array("f", prices), interval)
+                    self._add_item(dt, b)
 
-            logger.info("retrieved symbol=%s items=%s", symbol, len(df))
+                logger.info("retrieved symbol=%s items=%s", symbol, len(df))
+            except:  # noqa: E722
+                logger.warning("Error retrieving symbol=%s", symbol)
 
         self._update()
 

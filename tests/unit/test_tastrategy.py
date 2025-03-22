@@ -18,7 +18,6 @@ class _MyStrategy(TaStrategy):
             return Signal.sell(asset)
         return None
 
-
 class TestTaStrategy(unittest.TestCase):
 
     def test_my_ta_strategy(self):

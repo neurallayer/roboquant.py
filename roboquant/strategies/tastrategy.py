@@ -43,3 +43,35 @@ class TaStrategy(Strategy):
         ```
         """
         ...
+
+
+class TaMultiAssetStrategy(Strategy):
+    """Abstract base class for other strategies that helps to implement trading solutions
+    based on technical indicators using a history of bars (aka candlesticks).
+
+    Compared to the `TaStrategy`, this class is designed to work with multiple assets at the same time.
+    So you can create signals based on the history of multiple assets.
+
+    Subclasses should implement the `process_assets` method. This method is only invoked once
+    there is at least one asset that has `size` data available.
+    """
+
+    def __init__(self, size: int) -> None:
+        super().__init__()
+        self._data = OHLCVBuffers(size)
+        self.size = size
+
+    def create_signals(self, event: Event) -> list[Signal]:
+        assets = self._data.add_event(event)
+        if assets:
+            data = {asset: self._data[asset] for asset in assets}
+            return self.process_assets(data)
+        return []
+
+    @abstractmethod
+    def process_assets(self, data: dict[Asset, OHLCVBuffer]) -> list[Signal]:
+        """
+        Create zero or more signals for the provided assets, or return an empty list if no signal is created.
+        Subclasses should implement this method.
+        """
+        ...

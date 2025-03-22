@@ -65,6 +65,7 @@ class _Context:
             )
 
     def log_orders(self, orders):
+        """Log an exit due to to a signal being converted into an order"""
         if logger.isEnabledFor(logging.INFO):
             logger.info(
                 "<== %s converter signal into order(s) %s",
@@ -73,7 +74,7 @@ class _Context:
             )
 
     def log_rule(self, rule: str, **kwargs: Any):
-        """Log an exit due to a rule"""
+        """Log an exit due to a signal being discarded by a triggered rule"""
         if logger.isEnabledFor(logging.INFO):
             extra = " ".join(f"{k}={v}" for k, v in kwargs.items())
             logger.info(

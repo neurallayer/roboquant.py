@@ -6,7 +6,6 @@ from functools import cached_property
 from typing import Any
 
 from roboquant.asset import Asset
-from datetime import datetime, timezone
 
 
 @dataclass(slots=True)
