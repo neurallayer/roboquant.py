@@ -7,11 +7,11 @@ from roboquant.journals.pnlmetric import PNLMetric
 
 class MetricsJournal(Journal):
     """
-    A journal that allows for metrics to be added and calculated at each step. It will store
+    Implementation of a journal that allows for metrics to be added and calculated at each step. It will store
     the results in memory.
 
     The calculated metric values can be retrieved via the `get_metric` method. There is also
-    functionality to plot a metric.
+    convenience method to plot a metric.
     """
 
     def __init__(self, *metrics: Metric):
@@ -24,7 +24,7 @@ class MetricsJournal(Journal):
         return cls(PNLMetric())
 
     def track(self, event, account, signals, orders):
-        result = {}
+        result: dict[str, float] = {}
         for metric in self.metrics:
             new_result = metric.calc(event, account, signals, orders)
             result.update(new_result)
@@ -58,9 +58,9 @@ class MetricsJournal(Journal):
         ax.set_title(metric_name)
         return result
 
-    def get_metric_names(self) -> set[str]:
-        """return all the recorded metric names"""
+    def get_metric_names(self) -> list[str]:
+        """Return a list of the recorded metric names"""
         result: set[str] = set()
         for _, m in self._history:
             result.update(m.keys())
-        return result
+        return list(result)

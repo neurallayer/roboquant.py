@@ -36,7 +36,7 @@ class RandomWalk(HistoricFeed):
         assets = self.__get_assets(rnd, n_symbols, symbol_len)
         assert len(assets) == n_symbols
 
-        start_date = start_date if isinstance(start_date, datetime) else datetime.fromisoformat(start_date)
+        start_date = start_date if isinstance(start_date, datetime) else datetime.fromisoformat(str(start_date))
         start_date = start_date.astimezone(timezone.utc)
         timeline = [start_date + frequency * i for i in range(n_prices)]
 
