@@ -17,5 +17,5 @@ print("Asset correlations", df.corr(), sep="\n")
 # %%
 strategy = rq.strategies.EMACrossover()
 account = rq.run(feed, strategy)
-df = pd.DataFrame(account.get_positions_list())
+df = pd.DataFrame(account.get_position_list())
 print("Open positions", df, sep="\n")

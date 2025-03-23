@@ -1,4 +1,4 @@
-from dataclasses import dataclass, asdict
+from dataclasses import dataclass
 from datetime import datetime
 from decimal import Decimal
 from typing import Any
@@ -215,15 +215,41 @@ class Account:
         pos = self.positions.get(asset)
         return pos.size if pos else Decimal()
 
-    def get_positions_list(self) -> list[dict[str, Any]]:
+    def get_position_list(self) -> list[dict[str, Any]]:
         """Return all open positions including their pnl as a list of dicts"""
         result: list[dict[str, Any]] = []
         for asset, pos in self.positions.items():
-            i = asdict(asset)
-            i.update(asdict(pos))
-            i["pnl"] = asset.contract_value(pos.size, pos.mkt_price - pos.avg_price)
-            result.append(i)
+            result.append({
+                "asset class" : asset.asset_class(),
+                "symbol" : asset.symbol,
+                "currency" : asset.currency,
+                "size" : pos.size,
+                "type" : "LONG" if pos.is_long else "SHORT",
+                "avg price": pos.avg_price,
+                "mkt price" : pos.mkt_price,
+                "value" : asset.contract_value(pos.size, pos.mkt_price),
+                "pnl" : asset.contract_value(pos.size, pos.mkt_price - pos.avg_price)
+            })
         return result
+
+    def get_order_list(self) -> list[dict[str, Any]]:
+        """Return all open orders as a list of dicts"""
+        result: list[dict[str, Any]] = []
+        for order in self.orders:
+            result.append({
+                "id" : order.id,
+                "asset class" : order.asset.asset_class(),
+                "symbol" : order.asset.symbol,
+                "currency" : order.asset.currency,
+                "size" : order.size,
+                "type" : "BUY" if order.is_buy else "SELL",
+                "value": order.value(),
+                "fill" : order.fill,
+                "gtd" : order.gtd,
+                "info" : str(order.info) if order.info else "-"
+            })
+        return result
+
 
     def __repr__(self) -> str:
         p = [f"{v.size}@{k.symbol}" for k, v in self.positions.items()]

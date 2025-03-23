@@ -77,6 +77,15 @@ class Asset(ABC):
         """
         return hash(self.symbol)
 
+    def asset_class(self) -> str:
+        """Return the class name of the asset, the default implementation returns the class name of the instance.
+
+        Returns:
+            str: The class name of the asset.
+        """
+        return self.__class__.__name__
+
+
     @abstractmethod
     def serialize(self) -> str:
         """Serialize the asset to a string representation that can be used to reconstruct the asset later on.
@@ -104,15 +113,6 @@ class Asset(ABC):
 @dataclass(frozen=True, slots=True)
 class Stock(Asset):
     """Stock (or equity) asset"""
-
-    @staticmethod
-    def asset_class() -> str:
-        """Return the class name of the asset.
-
-        Returns:
-            str: The class name of the asset.
-        """
-        return "Stock"
 
     def serialize(self):
         """Serialize the stock asset to a string representation.
