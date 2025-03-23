@@ -124,16 +124,16 @@ class Feed(ABC):
             from matplotlib import pyplot as plt
             _, ax = plt.subplots()
 
-        times, prices = self.get_asset_prices(asset, price_type, timeframe)
+        times, prices = self.get_prices(asset, price_type, timeframe)
         result = ax.plot(times, prices, **kwargs)  # type: ignore
         ax.set_title(asset.symbol)
         return result
 
 
-    def get_asset_prices(self, asset: Asset, price_type : str ="DEFAULT", timeframe: Timeframe | None = None
+    def get_prices(self, asset: Asset, price_type : str ="DEFAULT", timeframe: Timeframe | None = None
     ) -> tuple[list[datetime], list[float]]:
         """
-        Retrieve the prices of a given asset, optional over a specified timeframe.
+        Retrieve the prices for a given asset, optional over a specified timeframe.
 
         Args:
             asset (Asset): The asset for which to retrieve prices.
