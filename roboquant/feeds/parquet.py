@@ -59,16 +59,19 @@ class ParquetFeed(Feed):
                     items = []
 
                 asset = deserialize_to_asset(a.as_py())
-                if t.as_py() == 1:
-                    item = Quote(asset, array("f", p.as_py()))
-                    items.append(item)
-                if t.as_py() == 2:
-                    item = Bar(asset, array("f", p.as_py()))
-                    items.append(item)
-                if t.as_py() == 3:
-                    price, volume = p.as_py()
-                    item = Trade(asset, price, volume)
-                    items.append(item)
+                match t.as_py():
+                    case 1:
+                        item = Quote(asset, array("f", p.as_py()))
+                        items.append(item)
+                    case 2:
+                        item = Bar(asset, array("f", p.as_py()))
+                        items.append(item)
+                    case 3:
+                        price, volume = p.as_py()
+                        item = Trade(asset, price, volume)
+                        items.append(item)
+                    case _:
+                        logger.warning("Unknown type %s", t.as_py())
 
         # any remainders
         if items:

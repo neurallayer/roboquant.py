@@ -105,20 +105,19 @@ class Feed(ABC):
         **kwargs,
     ):
         """
-        Plot the prices of a single asset. This requires matplotlib to be installed. It returns the plotted chart.
+        Plots the prices of a single asset. This function requires matplotlib to be installed.
 
-        Parameters
-        ----------
-        asset : Asset
-            The asset for which to plot prices.
-        price_type : str, optional
-            The type of price to plot, e.g. "OPEN" or  "CLOSE". (default is "DEFAULT")
-        timeframe : Timeframe or None, optional
-            The timeframe over which to plot prices. If None, the entire feed timeframe is used. (default is None)
-        ax : matplotlib axes
-            The matplotlib.pyplot axis where the plot will be drawn. If none is specified, the default pyplot will be used
-        **kwargs
-            Additional keyword arguments to pass to the `ax.plot()` function.
+        Args:
+            asset (Asset): The asset for which to plot prices.
+            price_type (str, optional): The type of price to plot, e.g., "OPEN" or "CLOSE". Defaults to "DEFAULT".
+            timeframe (Timeframe | None, optional): The timeframe over which to plot prices. If None, the entire feed 
+                timeframe is used. Defaults to None.
+            ax (matplotlib.axes.Axes, optional): The matplotlib axis where the plot will be drawn. If not specified, 
+                the default pyplot axis will be used.
+            **kwargs: Additional keyword arguments to pass to the `ax.plot()` function.
+
+        Returns:
+            list: The result of the `ax.plot()` function, which is a list of Line2D objects.
         """
         if not ax:
             from matplotlib import pyplot as plt

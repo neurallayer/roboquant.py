@@ -1,6 +1,6 @@
 import logging
 from array import array
-from datetime import timezone
+from datetime import date, datetime, timezone
 import warnings
 
 import yfinance
@@ -16,12 +16,18 @@ class YahooFeed(HistoricFeed):
     """A feed using the Yahoo Finance to retrieve historic market data. By default, it will retrieve daily data, but
     you can specify a different interval."""
 
-    def __init__(self, *symbols: str, start_date: str = "2010-01-01", end_date: str | None = None, interval="1d"):
+    def __init__(
+        self,
+        *symbols: str,
+        start_date: str | date | datetime | None = None,
+        end_date: str | date | datetime | None = None,
+        interval="1d",
+    ):
         """
         Create a new YahooFeed instance
         Parameters:
         - symbols: list of symbols to retrieve
-        - start_date: the start date of the data to retrieve, default is `2010-01-01`
+        - start_date: the start date of the data to retrieve, default in `None`
         - end_date: the end date of the data to retrieve, default is `None` (today)
         - interval: the interval of the data to retrieve, default is `1d` (daily)
         """
@@ -33,6 +39,9 @@ class YahooFeed(HistoricFeed):
         warnings.simplefilter(action="ignore", category=DeprecationWarning)
 
         columns = ["Open", "High", "Low", "Close", "Volume", "Adj Close"]
+
+        start_date = str(start_date) if start_date else None
+        end_date = str(end_date) if end_date else None
 
         for symbol in symbols:
             try:
