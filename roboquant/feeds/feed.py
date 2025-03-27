@@ -110,9 +110,9 @@ class Feed(ABC):
         Args:
             asset (Asset): The asset for which to plot prices.
             price_type (str, optional): The type of price to plot, e.g., "OPEN" or "CLOSE". Defaults to "DEFAULT".
-            timeframe (Timeframe | None, optional): The timeframe over which to plot prices. If None, the entire feed 
+            timeframe (Timeframe | None, optional): The timeframe over which to plot prices. If None, the entire feed
                 timeframe is used. Defaults to None.
-            ax (matplotlib.axes.Axes, optional): The matplotlib axis where the plot will be drawn. If not specified, 
+            ax (matplotlib.axes.Axes, optional): The matplotlib axis where the plot will be drawn. If not specified,
                 the default pyplot axis will be used.
             **kwargs: Additional keyword arguments to pass to the `ax.plot()` function.
 

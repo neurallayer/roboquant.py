@@ -41,7 +41,7 @@ class Account:
     """Represents a trading account. The account maintains the following state during a run:
 
     - Available buying power for orders in the base currency of the account.
-    - Cash available in the base currency of the account.
+    - Cash available in the account.
     - The open positions, each denoted in the currency of the asset.
     - The open orders, each denoted in the currency of the asset.
     - Calculated derived equity value of the account in the base currency of the account.
@@ -84,7 +84,7 @@ class Account:
 
     def convert(self, x: Wallet | Amount) -> float:
         """
-        Convert a wallet or amount into the base currency of the account.
+        Convert a wallet or amount into the base currency of the account at the last update time.
 
         Args:
             x (Wallet | Amount): The wallet or amount to convert.
@@ -127,7 +127,8 @@ class Account:
 
     def contract_value(self, asset: Asset, size: Decimal, price: float) -> float:
         """
-        Contract value denoted in the base currency of the account.
+        Contract value denoted in the base currency of the account. So if the asset is denoted in another
+        currency, an automatic currency conversion will done.
 
         Args:
             asset (Asset): The asset for which to calculate the contract value.
@@ -250,6 +251,25 @@ class Account:
             })
         return result
 
+    def get_order(self, order_id: str) -> Order | None:
+        """Return an order by its id, or None if no matching order can be found"""
+        for order in self.orders:
+            if order.id == order_id:
+                return order
+
+    def close_position_order(self, asset: Asset, limit: float | None = None, gtd : datetime | None = None) -> Order | None:
+        """Return an order that will close the position for the provided asset.
+
+        If no limit price is provided, the last known martket price is used a the limit price. If there is no known
+        market price, no order will be generated.
+
+        Please note that if there is no open position for the asset, also no order will be generated.
+        """
+        if position := self.positions.get(asset):
+            limit = position.mkt_price if limit is None else limit
+            if limit and position.size:
+                order = Order(asset, - position.size, limit, gtd)
+                return order
 
     def __repr__(self) -> str:
         p = [f"{v.size}@{k.symbol}" for k, v in self.positions.items()]
