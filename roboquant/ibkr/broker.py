@@ -134,6 +134,7 @@ ContractInfo = TypedDict(
 _asset_2_conid: dict[rq.Asset, int] = {}
 _conid_2_asset: dict[int, rq.Asset] = {}
 
+
 def _update_cache(asset: rq.Asset, conid: int):
     _conid_2_asset[conid] = asset
     _asset_2_conid[asset] = conid
@@ -144,14 +145,14 @@ answers = {
     QuestionType.ORDER_VALUE_LIMIT: True,
     QuestionType.MISSING_MARKET_DATA: True,
     QuestionType.STOP_ORDER_RISKS: True,
-    "exceeds the Size Limit": True
+    "exceeds the Size Limit": True,
 }
 
 
 class IBKRBroker(LiveBroker):
     """Broker implementation for Interactive Brokers using the IBKR Web API.
-    This class provides an interface to interact with Interactive Brokers (IBKR) for live trading. 
-    It supports operations such as retrieving account information, managing positions, placing 
+    This class provides an interface to interact with Interactive Brokers (IBKR) for live trading.
+    It supports operations such as retrieving account information, managing positions, placing
     and modifying orders, and fetching live orders. Currently, it only supports stocks.
 
     Attributes:
@@ -307,13 +308,13 @@ class IBKRBroker(LiveBroker):
     def _update_order(self, order: rq.Order):
         assert order.id, "no known order id"
         req = self.__get_order_request(order)
-        result = self.client.modify_order(order.id, req, answers=answers) # type: ignore
-        logger.info("update order result %s",result)
+        result = self.client.modify_order(order.id, req, answers=answers)  # type: ignore
+        logger.info("update order result %s", result)
 
     def _place_order(self, order: rq.Order):
         assert not order.id, "cannot place an existing order"
         req = self.__get_order_request(order)
-        result = self.client.place_order(req, answers=answers) # type: ignore
+        result = self.client.place_order(req, answers=answers)  # type: ignore
         logger.info("place order result %s", result)
 
     def _cancel_order(self, order: rq.Order):
