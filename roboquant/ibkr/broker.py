@@ -1,245 +1,315 @@
-import logging
-import threading
-import time
-from datetime import datetime, timedelta
 from decimal import Decimal
-
-from ibapi.order_cancel import OrderCancel
-from ibapi import VERSION
-from ibapi.account_summary_tags import AccountSummaryTags
-from ibapi.client import EClient
-from ibapi.contract import Contract
-from ibapi.order import Order as IBKROrder
-from ibapi.order_state import OrderState
-from ibapi.wrapper import EWrapper
-
-from roboquant.account import Account, Position
-from roboquant.asset import Asset, Stock
-from roboquant.event import Event
-from roboquant.order import Order
+import logging
+from time import sleep
+from typing import Any, TypedDict
 from roboquant.brokers.broker import LiveBroker
-from roboquant.monetary import Amount, Wallet, Currency, USD
+import roboquant as rq
 
-assert VERSION["major"] == 10 and VERSION["minor"] == 30, "Wrong version of the IBAPI found, required 10.30.x"
+
+from ibind import IbkrClient, StockQuery, OrderRequest, QuestionType  # noqa: E402
+
 
 logger = logging.getLogger(__name__)
 
+AccountInfo = TypedDict(
+    "AccountInfo",
+    {
+        "id": str,
+        "PrepaidCrypto-Z": bool,
+        "PrepaidCrypto-P": bool,
+        "brokerageAccess": bool,
+        "accountId": str,
+        "accountVan": str,
+        "accountTitle": str,
+        "displayName": str,
+        "accountAlias": str | None,
+        "accountStatus": int,
+        "currency": str,
+        "type": str,
+        "tradingType": str,
+        "businessType": str,
+        "category": str,
+        "ibEntity": str,
+        "faclient": bool,
+        "clearingStatus": str,
+        "covestor": bool,
+        "noClientTrading": bool,
+        "trackVirtualFXPortfolio": bool,
+        "acctCustType": str,
+        "parent": dict,
+        "desc": str,
+    },
+    total=True,
+)
 
-# noinspection PyPep8Naming
-class _IBApi(EWrapper, EClient):
-    def __init__(self):
-        EClient.__init__(self, self)
-        self.__tmp_orders: dict[str, Order] = {}
-        self.orders: list[Order] = []
-        self.positions: dict[Asset, Position] = {}
-        self.__account = {
-            AccountSummaryTags.TotalCashValue: Amount(USD, 0.0),
-            AccountSummaryTags.BuyingPower: Amount(USD, 0.0),
-        }
-        self.__account_end = threading.Condition()
-        self.__order_id = 0
 
-    def nextValidId(self, orderId: int):
-        self.__order_id = orderId
-        logger.debug("The next valid order id is: %s", orderId)
+PositionInfo = TypedDict(
+    "PositionInfo",
+    {
+        "acctId": str,
+        "conid": int,
+        "contractDesc": str,
+        "position": float,
+        "mktPrice": float,
+        "mktValue": float,
+        "currency": str,
+        "avgCost": float,
+        "avgPrice": float,
+        "realizedPnl": float,
+        "unrealizedPnl": float,
+        "exchs": str | None,
+        "expiry": str | None,
+        "putOrCall": str | None,
+        "multiplier": float,
+        "strike": str,
+        "exerciseStyle": str | None,
+        "conExchMap": list,
+        "assetClass": str,
+        "undConid": int,
+        "model": str,
+        "baseMktValue": float,
+        "baseMktPrice": float,
+        "baseAvgCost": float,
+        "baseAvgPrice": float,
+        "baseRealizedPnl": float,
+        "baseUnrealizedPnl": float,
+        "incrementRules": list,
+        "displayRule": dict,
+        "time": int,
+        "chineseName": str,
+        "allExchanges": str,
+        "listingExchange": str,
+        "countryCode": str,
+        "name": str,
+        "lastTradingDay": str | None,
+        "group": str,
+        "sector": str,
+        "sectorGroup": str,
+        "ticker": str,
+        "type": str,
+        "hasOptions": bool,
+        "fullName": str,
+        "isUS": bool,
+        "isEventContract": bool,
+        "pageSize": int,
+    },
+    total=True,
+)
 
-    def get_next_order_id(self):
-        result = str(self.__order_id)
-        self.__order_id += 1
-        return result
 
-    def position(self, account: str, contract: Contract, position: Decimal, avgCost: float):
-        logger.debug("position=%s symbol=%s  avgCost=%s", position, contract.localSymbol, avgCost)
-        symbol = contract.localSymbol or contract.symbol
-        currency = Currency(contract.currency)
-        asset = Stock(symbol, currency)
-        old_position = self.positions.get(asset)
-        mkt_price = old_position.mkt_price if old_position else avgCost
-        self.positions[asset] = Position(position, avgCost, mkt_price)
+ContractInfo = TypedDict(
+    "ContractInfo",
+    {
+        "cfi_code": str,
+        "symbol": str,
+        "cusip": str | None,
+        "expiry_full": str | None,
+        "con_id": int,
+        "maturity_date": str | None,
+        "industry": str,
+        "instrument_type": str,
+        "trading_class": str,
+        "valid_exchanges": str,
+        "allow_sell_long": bool,
+        "is_zero_commission_security": bool,
+        "local_symbol": str,
+        "contract_clarification_type": str | None,
+        "classifier": str | None,
+        "currency": str,
+        "text": str | None,
+        "underlying_con_id": int,
+        "r_t_h": bool,
+        "multiplier": str | None,
+        "underlying_issuer": str | None,
+        "contract_month": str | None,
+        "company_name": str,
+        "smart_available": bool,
+        "exchange": str,
+        "category": str,
+    },
+    total=True,
+)
 
-    def accountSummary(self, reqId: int, account: str, tag: str, value: str, currency: str):
-        logger.debug("account %s=%s", tag, value)
-        if tag in self.__account:
-            self.__account[tag] = Amount(Currency(currency), float(value))
 
-    def accountSummaryEnd(self, reqId: int):
-        with self.__account_end:
-            self.__account_end.notify_all()
+_asset_2_conid: dict[rq.Asset, int] = {}
+_conid_2_asset: dict[int, rq.Asset] = {}
 
-    def openOrder(self, orderId: int, contract, order: IBKROrder, orderState: OrderState):
-        logger.debug(
-            "openOrder orderId=%s status=%s size=%s limit=%s",
-            orderId,
-            orderState.status,
-            order.totalQuantity,
-            order.lmtPrice,
-        )
-        size = order.totalQuantity if order.action == "BUY" else -order.totalQuantity
-        symbol = contract.localSymbol
-        currency = Currency(contract.currency)
-        asset = Stock(symbol, currency)
-        rq_order = Order(asset, size, order.lmtPrice)
-        rq_order.id = str(orderId)
-        # rq_order.created_at = datetime.fromisoformat(order.activeStartTime)
-        self.__tmp_orders[rq_order.id] = rq_order
+def _update_cache(asset: rq.Asset, conid: int):
+    _conid_2_asset[conid] = asset
+    _asset_2_conid[asset] = conid
 
-    def openOrderEnd(self):
-        logger.debug("open orders ended")
-        self.orders = list(self.__tmp_orders.values())
-        self.__tmp_orders.clear()
 
-    def request_account(self):
-        """blocking call till account summary has been received"""
-        buyingpower_tag = AccountSummaryTags.BuyingPower
-        cash_tag = AccountSummaryTags.TotalCashValue
-        with self.__account_end:
-            super().reqAccountSummary(1, "All", f"{buyingpower_tag},{cash_tag}")
-            self.__account_end.wait()
-
-    def get_buying_power(self):
-        return self.__account[AccountSummaryTags.BuyingPower] or Amount(USD, 0.0)
-
-    def get_cash(self):
-        return self.__account[AccountSummaryTags.TotalCashValue] or Amount(USD, 0.0)
+answers = {
+    QuestionType.PRICE_PERCENTAGE_CONSTRAINT: True,
+    QuestionType.ORDER_VALUE_LIMIT: True,
+    QuestionType.MISSING_MARKET_DATA: True,
+    QuestionType.STOP_ORDER_RISKS: True,
+    "exceeds the Size Limit": True
+}
 
 
 class IBKRBroker(LiveBroker):
-    """
-    Attributes
-    ==========
-    contract_mapping
-        Map symbols to IBKR contracts.
-        If a symbol is not found, the symbol is assumed to represent a US stock
-
-    host
-        the ip number of the host where TWS or IB Gateway is running.
-
-    port
-       By default, TWS uses socket port 7496 for live sessions and 7497 for paper sessions.
-       IB Gateway, by contrast, uses 4001 for live sessions and 4002 for paper sessions.
-       However, these are just defaults, and can be configured in the API settings of TWS or IB Gateway.
-
-    client_id
-        The client id to use to connect to TWS or IB Gateway. The default is 123. This will showup as a
-        separate tab in the IB Gateway GUI.
-    """
-
-    def __init__(self, host: str = "127.0.0.1", port: int = 4002, client_id: int = 123) -> None:
+    def __init__(self, account_id: str | None = None):
         super().__init__()
-        self.__account = Account()
-        self.contract_mapping: dict[Asset, Contract] = {}
-        api = _IBApi()
-        api.connect(host, port, client_id)
-        self.__api = api
-        self.__has_new_orders_since_sync = False
-        self.price_type = "DEFAULT"
-        self.sleep_after_cancel = 0.0
+        client = IbkrClient()
+        ok = client.check_health()
+        assert ok, "health not ok"
+        sleep(1)
 
-        # Start the handling in a thread
-        self.__api_thread = threading.Thread(target=api.run, daemon=True)
-        self.__api_thread.start()
-        time.sleep(3.0)
+        accounts = {}
+        while not accounts:
+            accounts = client.receive_brokerage_accounts().data
+            sleep(1)
 
-    @classmethod
-    def use_tws(cls, client_id: int = 123):
-        """Return a broker connected to the TWS papertrade instance with its default port (7497) settings"""
-        return cls("127.0.0.1", 7497, client_id)
+        account_id = account_id or accounts["accounts"][0]  # type: ignore
+        client.account_id = account_id
+        account_summary: AccountInfo = client.portfolio_account_information().data  # type: ignore
+        self.base_currency = rq.monetary.Currency(account_summary["currency"])
+        logger.info(f"using account={account_id} with base-currency={self.base_currency}")
 
-    @classmethod
-    def use_gateway(cls, client_id: int = 123):
-        """Return a broker connected to a IB Gateway papertrade instance with its default port (4002) settings"""
-        return cls("127.0.0.1", 4002, client_id)
+        # We also need to call this once before using other code
+        client.live_orders()
+        sleep(1)
+        self.client = client
 
-    def disconnect(self):
-        self.__api.reader.conn.disconnect()  # type: ignore
+    def _find_conid(self, asset: rq.Asset) -> int | None:
+        if conid := _asset_2_conid.get(asset):
+            return conid
 
-    def _should_sync(self, now: datetime):
-        """Avoid too many API calls"""
-        return self.__has_new_orders_since_sync or now - self.__account.last_update > timedelta(seconds=1)
+        if asset.currency == rq.monetary.USD:
+            filter = {"isUS": True}
+        else:
+            filter = {"isUS": False}
 
-    def sync(self, event: Event | None = None) -> Account:
-        """Sync with the IBKR account"""
-        now = self.guard(event)
+        query = StockQuery(asset.symbol, contract_conditions=filter)
 
-        api = self.__api
-        acc = self.__account
-        if self._should_sync(now):
-            acc.last_update = now
-            self.__has_new_orders_since_sync = False
+        data = self.client.security_stocks_by_symbol([query], default_filtering=False).data
+        if data and len(data) == 1:
+            conid = data[0]["conid"]
+            logger.info("converted asset=%s into conid=%s", asset, conid)
+            _update_cache(asset, conid)
+            return conid
 
-            api.reqPositions()
-            api.reqOpenOrders()
-            api.request_account()
+        logger.warning("couldn't determine conid for asset %s", asset)
 
-            acc.positions = {k: v for k, v in api.positions.items() if not v.size.is_zero()}
-            acc.orders = list(api.orders)
-            acc.buying_power = api.get_buying_power()
-            acc.cash = Wallet(api.get_cash())
+    def _get_asset(self, conid: int) -> rq.Asset | None:
+        if asset := _conid_2_asset.get(int(conid)):
+            return asset
 
-        self._update_positions(acc, event)
-        return acc
+        contract: ContractInfo = self.client.contract_information_by_conid(conid).data  # type: ignore
+        match contract["instrument_type"]:
+            case "STK":
+                asset = rq.Stock(contract["symbol"], rq.monetary.Currency(contract["currency"]))
+            case _:
+                logger.warning("unssuppored asset class %s", contract["instrument_type"])
 
-    def place_orders(self, orders):
-        self.__has_new_orders_since_sync = len(orders) > 0
+        if asset:
+            logger.info("converted contract=%s into asset=%s", contract, asset)
+            _update_cache(asset, conid)
+        else:
+            logger.warning("could create asset for conid %s", conid)
 
-        for idx, order in enumerate(orders, start=1):
-            if idx % 25 == 0:
-                # avoid too many API calls
-                time.sleep(1)
+        return asset
 
-            if order.size.is_zero():
-                if order.id is None:
-                    logger.warning("can only cancel orders with an id")
+    def _get_positions(self):
+        result: dict[rq.Asset, rq.Position] = {}
+        positions: list[PositionInfo] = self.client.positions().data or []  # type: ignore
+        for position in positions:
+            conid = position["conid"]
+            if asset := self._get_asset(conid):
+                p = rq.Position(Decimal(position["position"]), position["avgPrice"], position["mktPrice"])
+                result[asset] = p
+            else:
+                logger.warning("ignoring position %s because couldn't map conid to asset", position)
+        return result
+
+    def _get_orders(self) -> list[rq.Order]:
+        result: dict[Any, rq.Order] = {}
+        closed_status = {"Cancelled", "Filled", "Rejected", "Inactive"}
+        orders = self.client.live_orders(force=False).data["orders"]  # type: ignore
+        for order in orders:
+            if order["orderType"] != "Limit":
+                logger.warning("ignoring order that is not a limit order %s", order)
+                continue
+            conid = order["conid"]
+            if asset := self._get_asset(conid):
+                if order["status"] in closed_status:
+                    logger.info("ignoring closed order %s", order)
                     continue
+                size = order["totalSize"]
+                if order["side"] == "SELL":
+                    size = -size
+                new_order = rq.Order(asset, Decimal(size), float(order["price"]))
+                new_order.id = order["orderId"]
+                fill = order["filledQuantity"]
+                if order["side"] == "SELL":
+                    fill = -fill
+                new_order.fill = Decimal(fill)
 
-                self.__api.cancelOrder(int(order.id), OrderCancel())
-                if self.sleep_after_cancel:
-                    time.sleep(self.sleep_after_cancel)
-            else:
-                if order.id is None:
-                    order.id = self.__api.get_next_order_id()
-                ibkr_order = self._get_order(order)
-                contract = self._get_contract(order)
-                self.__api.placeOrder(int(order.id), contract, ibkr_order)
+                if "cancel" in order["order_ccp_status"]:
+                    new_order.size = Decimal()
 
-    @staticmethod
-    def __update_ibkr_object(obj, update):
-        if not update:
-            return
-        assert isinstance(update, dict)
-        for name, value in update.items():
-            if hasattr(obj, name):
-                setattr(obj, name, value)
-            else:
-                logger.warning("unknown field name=%s value=%s", name, value)
+                # store the latest order info found for an id
+                result[new_order.id] = new_order
 
-    def _get_contract(self, order: Order) -> Contract:
-        """Map an order to an IBKR contract."""
+        return list(result.values())
 
-        c = self.contract_mapping.get(order.asset)
+    def _get_order_request(self, order: rq.Order) -> OrderRequest:
+        extra_info = {"outside_rth"}
+        kwargs = {k: v for k, v in order.info.items() if k in extra_info}
 
-        if not c:
-            c = Contract()
-            c.symbol = order.asset.symbol
-            c.secType = "STK"
-            c.currency = order.asset.currency
-            c.exchange = "SMART"  # use smart routing by default
+        conid = self._find_conid(order.asset)
+        if conid:
+            qty = float(abs(order.size))
+            side = "BUY" if order.size > 0 else "SELL"
+            req = OrderRequest(
+                conid=int(conid),
+                side=side,
+                quantity=qty,
+                order_type="LMT",
+                acct_id=str(self.client.account_id),
+                price=order.limit,
+                **kwargs,
+            )
+            return req
+        else:
+            raise ValueError(f"Cannot find contract-id for order {order}")
 
-        # Override attributes
-        IBKRBroker.__update_ibkr_object(c, order.info.get("contract"))
+    def _update_order(self, order: rq.Order):
+        assert order.id, "no known order id"
+        req = self._get_order_request(order)
+        result = self.client.modify_order(order.id, req, answers=answers) # type: ignore
+        print(result)
 
-        return c
+    def _place_order(self, order: rq.Order):
+        assert not order.id, "cannot place an existing order"
+        req = self._get_order_request(order)
+        result = self.client.place_order(req, answers=answers) # type: ignore
+        print(result)
 
-    def _get_order(self, order: Order) -> IBKROrder:
-        """Map an order to an IBKR order."""
-        o = IBKROrder()
-        o.action = "BUY" if order.is_buy else "SELL"
-        o.totalQuantity = abs(order.size)
-        o.tif = "GTC"
-        o.orderType = "LMT"
-        o.lmtPrice = order.limit
+    def _cancel_order(self, order: rq.Order):
+        assert order.id, "cancel order needs an id"
+        result = self.client.cancel_order(order.id)
+        logger.info("cancel order result %s", result)
 
-        # Override attributes
-        IBKRBroker.__update_ibkr_object(o, order.info.get("order"))
+    def _get_account(self):
+        account = rq.account.Account()
+        account.positions = self._get_positions()
+        account.orders = self._get_orders()
+        cash, bp = self._get_cash_bp()
+        account.last_update = rq.utcnow()
+        account.cash[self.base_currency] = cash
+        account.buying_power = rq.Amount(self.base_currency, bp)
+        return account
 
-        return o
+    def _get_cash_bp(self):
+        summary: dict = self.client.account_summary().data  # type: ignore
+        bp = summary["buyingPower"]
+        cash = 0.0
+        balances: list = summary["cashBalances"]
+        for balance in balances:
+            ccy: str = balance["currency"]
+            if ccy.startswith("Total"):
+                cash = balance["balance"]
+                break
+        return cash, bp

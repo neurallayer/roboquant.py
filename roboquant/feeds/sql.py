@@ -3,9 +3,9 @@ import os.path
 import sqlite3
 from array import array
 from datetime import datetime
-from typing import Literal
+from typing import Any, Literal
 
-from roboquant.asset import deserialize_to_asset
+from roboquant.asset import deserialize_to_asset, Asset
 from roboquant.event import Bar, PriceItem, Quote
 from roboquant.event import Event
 from roboquant.timeframe import Timeframe
@@ -75,15 +75,15 @@ class SQLFeed(Feed):
                 return Timeframe.fromisoformat(row[0], row[1], True)
             return Timeframe.EMPTY
 
-    def assets(self):
+    def assets(self) -> list[Asset]:
         """Return all the assets in the database"""
         with sqlite3.connect(self.db_file) as con:
             result = con.execute(SQLFeed._sql_select_assets).fetchall()
             con.commit()
             assets = {deserialize_to_asset(columns[0]) for columns in result}
-            return assets
+            return list(assets)
 
-    def _get_item(self, row) -> PriceItem:
+    def _get_item(self, row: list[Any]) -> PriceItem:
         """Get a PriceItem from a row in the database"""
         asset_str = row[1]
         asset = deserialize_to_asset(asset_str)
@@ -127,8 +127,7 @@ class SQLFeed(Feed):
             event = Event(dt, items)
             yield event
 
-
-    def record(self, feed: Feed, timeframe=None, append=False, batch_size=10_000):
+    def record(self, feed: Feed, timeframe: Timeframe | None = None, append: bool = False, batch_size: int = 10_000):
         """Record another feed into this SQLite database.
         It supports Bars and Quotes, other types of price-items are ignored."""
         with sqlite3.connect(self.db_file) as con:

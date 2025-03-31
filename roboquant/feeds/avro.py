@@ -97,6 +97,7 @@ class AvroFeed(Feed):
         schema = parse_schema(AvroFeed._schema)
 
         if not append and self.exists():
+            logger.info("removing existing avro file %s", self.avro_file)
             os.remove(self.avro_file)
 
         with open(self.avro_file, "a+b") as out:

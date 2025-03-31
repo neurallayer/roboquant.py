@@ -22,6 +22,8 @@ dynamic = ["version"]
 authors = [{ name = "roboquant team", email = "info@roboquant.org" }]
 description = "A fast algo-trading platform with support for AI based strategies"
 readme = "README.md"
+license = "Apache-2.0"
+license-files = ["LICENSE"]
 requires-python = ">=3.11, <3.13"
 classifiers = [
   "Development Status :: 4 - Beta",
@@ -62,7 +64,7 @@ torch = [
   "stable-baselines3[extra]>=2.5.0",
   "sb3-contrib>=2.5.0",
 ]
-ibkr = ["python-ibapi-stable~=10.30.1"]
+ibkr = ["ibind[oauth]>=0.1.13"]
 alpaca = ["alpaca-py>=0.39.0"]
 avro = ["fastavro>=1.9.7"]
 parquet = ["pyarrow>=19.0.0"]

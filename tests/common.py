@@ -4,7 +4,7 @@ from datetime import date, datetime, timedelta
 from typing import Iterable
 from unittest import TestCase
 
-from roboquant import PriceItem, Bar, Quote, Trade
+from roboquant import PriceItem, Bar, Quote, Trade, Timeframe
 from roboquant.asset import Asset
 from roboquant.feeds import CSVFeed
 from roboquant.feeds.feed import Feed
@@ -17,12 +17,14 @@ def get_feed() -> CSVFeed:
     return CSVFeed(str(root), time_offset="21:00:00+00:00")
 
 
-def get_recent_start_date(days=10):
+def get_recent_start_date(days: int = 10):
     start = date.today() - timedelta(days=days)
     return start.strftime("%Y-%m-%d")
 
 
-def run_price_item_feed(feed: Feed, assets: Iterable[Asset], test_case: TestCase, timeframe=None, min_items=1):
+def run_price_item_feed(
+    feed: Feed, assets: Iterable[Asset], test_case: TestCase, timeframe: Timeframe | None = None, min_items: int = 1
+):
     """Common test for all feeds that produce price-items. It validates the data and the order of the items"""
 
     last = datetime.fromisoformat("1900-01-01T00:00:00+00:00")

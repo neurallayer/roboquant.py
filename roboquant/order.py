@@ -42,6 +42,7 @@ class Order:
     """The filled size of the order, set by the broker only. Just like the size, positive for buy orders,
     negative for sell orders. So the remaining size is `size - fill`"""
 
+
     def __init__(self, asset: Asset, size: Decimal | str | int | float, limit: float, gtd: datetime | None = None, **kwargs):
         """
         Args:
@@ -49,7 +50,8 @@ class Order:
             size (Decimal | str | int | float): The size of the order. Positive for buy orders, negative for sell orders.
             limit (float): The limit price of the order, denoted in the currency of the asset.
             gtd (datetime | None, optional): The good till date of the order, or None if no expiration date.
-            **kwargs: Any additional information about the order.
+            **kwargs: Any additional information about the order. It is passed to the broker in the `info` attribute, but not
+            maintained over time. Typically used by the broker for additional arguments to their API calls.
         """
         self.asset = asset
         self.size = Decimal(size)
@@ -158,16 +160,6 @@ class Order:
         return Amount(self.asset.currency, self.value())
 
     @property
-    def is_cancellation(self) -> bool:
-        """
-        Return True if this is a cancellation order, False otherwise.
-
-        Returns:
-            bool: True if this is a cancellation order, False otherwise.
-        """
-        return self.size.is_zero()
-
-    @property
     def is_buy(self) -> bool:
         """
         Return True if this is a BUY order, False otherwise.
@@ -196,3 +188,13 @@ class Order:
             Decimal: The remaining order size.
         """
         return self.size - self.fill
+
+    @property
+    def is_cancellation(self) -> bool:
+        """
+        Return True if this is a cancellation order, False otherwise.
+
+        Returns:
+            bool: True if this is a cancellation order, False otherwise.
+        """
+        return self.size.is_zero()

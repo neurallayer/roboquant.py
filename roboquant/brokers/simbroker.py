@@ -161,7 +161,7 @@ class SimBroker(Broker):
             if not orig_order:
                 logger.info("couldn't find order with id %s", order.id)
                 continue
-            if order.is_cancellation:
+            if order.size == 0:
                 logger.info("cancelled order %s", orig_order)
                 self._remove_order(orig_order)
             else:

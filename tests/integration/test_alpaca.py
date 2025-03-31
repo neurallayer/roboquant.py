@@ -58,8 +58,6 @@ class TestAlpaca(unittest.TestCase):
         account = broker.sync()
         print(account)
         cancel_orders = [order.cancel() for order in account.orders]
-        for o in cancel_orders:
-            assert o.is_cancellation
         print(cancel_orders)
         broker.place_orders(cancel_orders)
         time.sleep(10)

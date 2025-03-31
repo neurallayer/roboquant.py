@@ -60,7 +60,7 @@ class HistoricFeed(Feed, ABC):
         self._update()
         return list(self.__data.keys())
 
-    def timeframe(self):
+    def timeframe(self) -> Timeframe:
         """Return the timeframe of this feed"""
         tl = self.timeline()
         if tl:

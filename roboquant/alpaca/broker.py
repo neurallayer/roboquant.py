@@ -1,5 +1,4 @@
 import logging
-import time
 from decimal import Decimal
 from alpaca.trading.client import TradingClient
 from alpaca.trading.enums import AssetClass, OrderSide, QueryOrderStatus, TimeInForce
@@ -10,9 +9,7 @@ from alpaca.trading.models import Order as AOrder
 from alpaca.trading.requests import GetOrdersRequest, LimitOrderRequest, ReplaceOrderRequest
 from roboquant.account import Account, Position
 from roboquant.asset import Asset, Crypto, Option, Stock
-from roboquant.event import Event
-from roboquant.brokers.broker import LiveBroker
-from roboquant.order import Order
+from roboquant.brokers.broker import LiveBroker, Order
 from roboquant.monetary import Wallet, Amount, USD
 
 logger = logging.getLogger(__name__)
@@ -23,10 +20,7 @@ class AlpacaBroker(LiveBroker):
 
     def __init__(self, api_key: str, secret_key: str) -> None:
         super().__init__()
-        self.__account: Account = Account()
         self.__client = TradingClient(api_key, secret_key)
-        self.price_type = "DEFAULT"
-        self.sleep_after_cancel = 0.0
 
     def _get_asset(self, symbol: str, asset_class: AssetClass) -> Asset:
         match asset_class:
@@ -42,6 +36,7 @@ class AlpacaBroker(LiveBroker):
         request = GetOrdersRequest(status=QueryOrderStatus.OPEN)
         alpaca_orders: list[AOrder] = self.__client.get_orders(request)  # type: ignore
         for alpaca_order in alpaca_orders:
+            alpaca_order.status
             asset = self._get_asset(alpaca_order.symbol, alpaca_order.asset_class)  # type: ignore
             order = Order(
                 asset,
@@ -52,56 +47,49 @@ class AlpacaBroker(LiveBroker):
             order.id = str(alpaca_order.id)
             orders.append(order)
 
-        self.__account.orders = orders
+        return orders
 
     def _sync_positions(self):
+        positions: dict[Asset, Position] = {}
         open_pos: list[APosition] = self.__client.get_all_positions()  # type: ignore
-        self.__account.positions.clear()
+
         for p in open_pos:
             size = Decimal(p.qty)
             if p.side == "short":
                 size = -size
             new_pos = Position(size, float(p.avg_entry_price), float(p.current_price or "nan"))
             asset = self._get_asset(p.symbol, p.asset_class)
-            self.__account.positions[asset] = new_pos
+            positions[asset] = new_pos
+        return positions
 
-    def sync(self, event: Event | None = None) -> Account:
-        now = self.guard(event)
-
-        client = self.__client
-        acc: TradeAccount = client.get_account()  # type: ignore
+    def _get_account(self) -> Account:
+        account = Account()
+        acc: TradeAccount = self.__client.get_account()  # type: ignore
         if acc.buying_power:
-            self.__account.buying_power = Amount(USD, float(acc.buying_power))
+            account.buying_power = Amount(USD, float(acc.buying_power))
         if acc.cash:
-            self.__account.cash = Wallet(Amount(USD, float(acc.cash)))
+            account.cash = Wallet(Amount(USD, float(acc.cash)))
 
-        self.__account.last_update = now
+        account.positions = self._sync_positions()
+        account.orders = self._sync_orders()
+        return account
 
-        self._sync_positions()
-        self._sync_orders()
-        return self.__account
+    def _cancel_order(self, order: Order):
+        assert order.id is not None
+        self.__client.cancel_order_by_id(order.id)
 
-    def place_orders(self, orders):
+    def _update_order(self, order: Order):
+        assert order.id is not None
+        if order.gtd:
+            logger.warning("no support for GTD type of orders, ignoring gtd=%s", order.gtd)
+        req = ReplaceOrderRequest(qty=int(abs(float(order.size))), limit_price=order.limit)
+        self.__client.replace_order_by_id(order.id, req)
 
-        for order in orders:
-
-            if order.gtd:
-                logger.warning("no support for GTD type of orders, ignoring gtd=%s", order.gtd)
-
-            if order.is_cancellation:
-                assert order.id is not None, "can only cancel orders with an id"
-                self.__client.cancel_order_by_id(order.id)
-                if self.sleep_after_cancel:
-                    time.sleep(self.sleep_after_cancel)
-            else:
-                if order.id is None:
-                    req = self._get_order_request(order)
-                    alpaca_order = self.__client.submit_order(req)
-                    order.id = str(alpaca_order.id)  # type: ignore
-                    self.__account.orders.append(order)
-                else:
-                    req = self._get_replace_request(order)
-                    self.__client.replace_order_by_id(order.id, req)
+    def _place_order(self, order: Order):
+        if order.gtd:
+            logger.warning("no support for GTD type of orders, ignoring gtd=%s", order.gtd)
+        req = self._get_order_request(order)
+        self.__client.submit_order(req)
 
     def _get_order_request(self, order: Order):
         side = OrderSide.BUY if order.is_buy else OrderSide.SELL
@@ -113,6 +101,3 @@ class AlpacaBroker(LiveBroker):
             time_in_force=TimeInForce.GTC,
         )
 
-    def _get_replace_request(self, order: Order):
-        result = ReplaceOrderRequest(qty=int(abs(float(order.size))), limit_price=order.limit)
-        return result

@@ -267,8 +267,8 @@ class StaticConversion(CurrencyConverter):
 
 
 class One2OneConversion(CurrencyConverter):
-    """Currency converter that always converts 1 to 1 between currencies.
-    So for example, 1 USD equals 1 EUR equals 1 GPB.
+    """Currency converter that always converts 1 to 1 between currencies, you should only use this
+    for testing purposes, never real trading. So for example, 1 USD equals 1 EUR equals 1 GPB.
     """
 
     def convert(self, amount: "Amount", to_currency: Currency, dt: datetime) -> float:

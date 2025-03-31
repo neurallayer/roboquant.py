@@ -257,20 +257,6 @@ class Account:
             if order.id == order_id:
                 return order
 
-    def close_position_order(self, asset: Asset, limit: float | None = None, gtd : datetime | None = None) -> Order | None:
-        """Return an order that will close the position for the provided asset.
-
-        If no limit price is provided, the last known martket price is used a the limit price. If there is no known
-        market price, no order will be generated.
-
-        Please note that if there is no open position for the asset, also no order will be generated.
-        """
-        if position := self.positions.get(asset):
-            limit = position.mkt_price if limit is None else limit
-            if limit and position.size:
-                order = Order(asset, - position.size, limit, gtd)
-                return order
-
     def __repr__(self) -> str:
         p = [f"{v.size}@{k.symbol}" for k, v in self.positions.items()]
         p_str = ", ".join(p) or "none"

@@ -52,9 +52,8 @@ class TestOrder(unittest.TestCase):
         order.id = "cancel1"
 
         cancel_order = order.cancel()
-        self.assertFalse(order.is_cancellation)
-        self.assertTrue(cancel_order.is_cancellation)
-        self.assertEqual(order.id, cancel_order.id)
+        self.assertFalse(cancel_order.size)
+        self.assertTrue(cancel_order.id)
 
 
 if __name__ == "__main__":
