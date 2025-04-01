@@ -563,8 +563,7 @@ class TaFeature(Feature[Event]):
                 if asset not in self._data:
                     self._data[asset] = OHLCVBuffer(self._size)
                 ohlcv = self._data[asset]
-                ohlcv.append(item.ohlcv)
-                if ohlcv.is_full():
+                if ohlcv.append(item.ohlcv):
                     v = self._calc(asset, ohlcv)
 
             result.append(v)

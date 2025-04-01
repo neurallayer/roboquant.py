@@ -1,14 +1,17 @@
 """Set of stubs for the streaming version of the ta-lib indicators that makes them discoverable and typed."""
 
 import numpy as np
+import logging
 from enum import Enum
 from typing import Tuple
 from numpy.typing import NDArray
 
+logger = logging.getLogger(__name__)
+
 try:
     import talib._ta_lib as _ta_lib  # type: ignore
 except ImportError:
-    print("TA-Lib not installed, TA functions will not be available")
+    logger.warning("TA-Lib is not installed, TA functions will all return None")
 
 class MA_Type(Enum):
     SMA = 0
@@ -22,8 +25,9 @@ class MA_Type(Enum):
     T3 = 8
 
 
-# Overlap Studies Functions
+_exception = NotImplementedError("Not implemented, is TA-LIB installed?")
 
+# Overlap Studies Functions
 
 def BBANDS(
     real: NDArray[np.float64], timeperiod: int = 5, nbdevup: float = 2, nbdevdn: float = 2, matype: MA_Type = MA_Type.SMA

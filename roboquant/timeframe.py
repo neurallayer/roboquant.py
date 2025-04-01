@@ -60,7 +60,7 @@ class Timeframe:
 
     def is_empty(self) -> bool:
         """
-        Return true if this is an empty timeframe.
+        Return true if this is an empty timeframe, so a timeframe that cannot hold events.
 
         Returns:
             bool: True if the timeframe is empty, False otherwise.
@@ -200,7 +200,7 @@ class Timeframe:
 
     def sample(self, duration: timedelta | Any, n: int = 1) -> list["Timeframe"]:
         """
-        Sample one or more periods of `duration` with replacements from this timeframe.
+        Sample one or more timeframes of `duration` length with replacements from this timeframe.
 
         Args:
             duration (timedelta | Any): The duration of each sample.
@@ -213,7 +213,7 @@ class Timeframe:
             ValueError: If the sample duration is too large for this timeframe.
 
         Note:
-            It can contain duplicates and the resulting timeframes can overlap.
+            The returned list can contain duplicates and the resulting timeframes can overlap.
         """
 
         result: list[Timeframe] = []

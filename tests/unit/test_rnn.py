@@ -12,7 +12,7 @@ from tests.common import get_feed
 
 
 class _MyModel(nn.Module):
-    """Sample LSTM based model for testign purposes"""
+    """Sample LSTM based model for testing purposes"""
 
     def __init__(self) -> None:
         super().__init__()

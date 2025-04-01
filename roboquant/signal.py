@@ -28,7 +28,7 @@ class SignalType(Flag):
 @dataclass(slots=True, frozen=True)
 class Signal:
     """Signal that a strategy can create that indicates a BUY or SELL of an asset.
-    It contains both the rating and the type of signal.
+    It contains both the `rating` and the `type` of signal.
 
     A rating is a float normally between -1.0 and 1.0, where -1.0 is a strong sell, and 1.0 is a strong buy.
     But this range isn't enforced. It is up to the used `Trader` to use these values when converting signals to orders.
