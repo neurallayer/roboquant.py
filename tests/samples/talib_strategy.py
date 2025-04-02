@@ -30,7 +30,7 @@ class MyStrategy(TaStrategy):
         return None
 
 # %%
-feed = rq.feeds.YahooFeed("IBM", "AAPL")
+feed = rq.feeds.YahooFeed("IBM", "AAPL", "JPM", "TSLA")
 
 # ensure the size is enough for the used indicators
 strategy = MyStrategy(14)
