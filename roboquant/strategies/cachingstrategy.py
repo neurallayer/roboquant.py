@@ -20,6 +20,13 @@ class CachingStrategy(Strategy):
             cache[event.time] = signals
         self.__cache = cache
 
+    def timeframe(self):
+        if self.__cache:
+            timeline = list(self.__cache.keys())
+            return Timeframe(timeline[0], timeline[-1], True)
+        else:
+            return Timeframe.EMPTY
+
     def create_signals(self, event: Event) -> list[Signal]:
         result = self.__cache.get(event.time)
         if result is None:
