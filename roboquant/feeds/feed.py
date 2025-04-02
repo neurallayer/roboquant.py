@@ -9,8 +9,8 @@ from roboquant.timeframe import Timeframe
 
 class Feed(ABC):
     """
-    A Feed represents a source of (financial) events that can be (re-)played.
-    It provides methods for playing events, plotting prices, and playing events in the background on a separate thread.
+    A Feed represents a source of (financial) events that can be (re-)played to feed a run.
+    It provides methods for playing the events and some smaller utility methods, like plotting prices.
     """
 
     @abstractmethod
@@ -32,7 +32,7 @@ class Feed(ABC):
 
     def get_ohlcv(self, asset: Asset, timeframe: Timeframe | None = None) -> dict[datetime, Sequence[float]]:
         """Get the OHLCV values for an asset in this feed.
-        The returned value is a `dict` with the keys being the `datetime` and the value being an `array`
+        The returned value is a `dict` with the key being the `datetime` and the value being an `array`
         of the OHLCV values.
         """
 

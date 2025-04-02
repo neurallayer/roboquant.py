@@ -9,7 +9,10 @@ from roboquant.timeframe import Timeframe
 logger = logging.getLogger(__name__)
 
 class CachingStrategy(Strategy):
-    """Cache the results of a strategy, usefull for shorter back tests"""
+    """Cache the signal results of another strategy, usefull for shorter back tests.
+    Rather than re-calculating the signals at a certain time, they will be cached and
+    replayed once that same time appears again.
+    """
 
     def __init__(self, feed: Feed, strategy: Strategy, timeframe: Timeframe | None = None):
         super().__init__()
@@ -30,7 +33,7 @@ class CachingStrategy(Strategy):
     def create_signals(self, event: Event) -> list[Signal]:
         result = self.__cache.get(event.time)
         if result is None:
-            logging.warning("received unknown timestamp %s, returning no signals", event.time)
+            logging.warning("received non-cached timestamp %s, returning no signals", event.time)
             return []
         return result
 

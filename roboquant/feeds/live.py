@@ -17,6 +17,9 @@ class LiveFeed(Feed):
     timestamp will be corrected so the event occurs after the previous event.
 
     The default is to increment it by 1 microsecond over the previous event, but this is configurable.
+
+    There is also support for creating an empty event (heartbeat) if for a certain duration no event was
+    received.
     """
 
     def __init__(self):
