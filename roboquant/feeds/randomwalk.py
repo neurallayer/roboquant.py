@@ -12,7 +12,7 @@ from .historic import HistoricFeed
 
 
 class RandomWalk(HistoricFeed):
-    """This feed simulates the random-walk of stock prices.
+    """This feed simulates a random-walk of stock prices.
     It can generate `Trade`, `Quote`, or `Bar` prices."""
 
     def __init__(
@@ -95,4 +95,5 @@ class RandomWalk(HistoricFeed):
         change = rnd.normal(loc=1.0, scale=scale, size=(n,))
         change[0] = rnd.uniform(min_price, max_price)
         price = change.cumprod()
+        price[price < 0.01] = 0.01
         return price

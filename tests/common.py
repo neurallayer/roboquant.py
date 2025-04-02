@@ -49,7 +49,8 @@ def run_price_item_feed(
                     test_case.assertTrue(math.isnan(v) or v >= 0.0)
                     for i in range(0, 4):
                         test_case.assertGreaterEqual(ohlcv[1], ohlcv[i])  # High >= OHLC
-                        test_case.assertGreaterEqual(ohlcv[i], ohlcv[2])  # OHLC >= Low
+                        test_case.assertGreaterEqual(ohlcv[i], ohlcv[2])
+                        test_case.assertGreaterEqual(ohlcv[i], 0.0)
                 case Trade():
                     test_case.assertTrue(math.isfinite(item.trade_price))
                     test_case.assertTrue(math.isfinite(item.trade_volume))
