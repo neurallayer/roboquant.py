@@ -20,9 +20,9 @@ class IBSStrategy(Strategy):
         result = []
         for asset, item in event.price_items.items():
             if isinstance(item, Bar):
-                _, h, l, c, _ = item.ohlcv # noqa: E741
-                if h != l:
-                    ibs = (c - l) / (h - l)
+                _, H, L, C, _ = item.ohlcv
+                if H != L:
+                    ibs = (C - L) / (H - L)
                     if ibs < self.__buy:
                         result.append(Signal(asset, 1.0 - ibs))
                     elif ibs > self.__sell:

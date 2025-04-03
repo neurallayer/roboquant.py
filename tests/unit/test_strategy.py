@@ -26,7 +26,7 @@ class TestStrategy(unittest.TestCase):
         strategy = EMACrossover()
         feed = get_feed()
         caching_strategy = CachingStrategy(feed, strategy)
-        self.assertEquals(feed.timeframe(), caching_strategy.timeframe())
+        self.assertEqual(feed.timeframe(), caching_strategy.timeframe())
         run_strategy(caching_strategy, self)
 
 if __name__ == "__main__":
