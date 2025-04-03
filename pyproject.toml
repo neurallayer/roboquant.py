@@ -15,12 +15,11 @@ select = ["E", "F", "W"]
 typeCheckingMode = "standard"
 # typeCheckingMode = "strict"
 
-
 [project]
 name = "roboquant"
 dynamic = ["version"]
 authors = [{ name = "roboquant team", email = "info@roboquant.org" }]
-description = "A fast algo-trading platform with support for AI based strategies"
+description = "A fast algorithmic trading platform with support for AI based strategies"
 readme = "README.md"
 license = "Apache-2.0"
 license-files = ["LICENSE"]
@@ -39,6 +38,7 @@ classifiers = [
   "Topic :: Office/Business :: Financial :: Investment",
 ]
 keywords = [
+  "algorithmic",
   "trading",
   "machine learning",
   "AI",
