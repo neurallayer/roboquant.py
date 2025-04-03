@@ -1,10 +1,10 @@
-from datetime import datetime
 import unittest
 from decimal import Decimal
 
 from roboquant.account import Account, Position
 from roboquant.asset import Stock
 from roboquant.monetary import Wallet, Amount, USD
+from roboquant.timeframe import utcnow
 
 
 class TestAccount(unittest.TestCase):
@@ -12,17 +12,19 @@ class TestAccount(unittest.TestCase):
     def test_account_init(self):
         acc = Account()
         acc.cash = Wallet(Amount(USD, 1_000.0))
-        now = datetime.now()
+        now = utcnow()
+        acc.last_update = now
         self.assertEqual(acc.buying_power.value, 0.0)
         self.assertEqual(acc.buying_power.currency, USD)
         self.assertEqual(acc.base_currency, USD)
         self.assertEqual(acc.unrealized_pnl().convert_to(USD, now), 0.0)
         self.assertEqual(acc.mkt_value().convert_to(USD, now), 0.0)
         self.assertEqual(acc.equity_value(), 1_000.0)
+        self.assertEqual(acc.last_update, now)
 
     def test_account_positions(self):
         acc = Account()
-        now = datetime.now()
+        now = utcnow()
         acc.cash = Wallet(Amount(USD, 1_000.0))
         for i in range(5):
             symbol = Stock(f"AA${i}")
