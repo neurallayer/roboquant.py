@@ -42,11 +42,11 @@ class MultiStrategy(Strategy):
                 s = {s.asset: s for s in reversed(signals)}
                 return list(s.values())
             case "mean":
-                result = []
+                result: list[Signal] = []
                 for key, group in groupby(signals, lambda signal: signal.asset):
                     rating = mean(signal.rating for signal in group)
                     if rating:
                         result.append(Signal(key, rating))
                 return result
-
-        raise ValueError("unsupported signal filter")
+            case _:
+                raise ValueError("unsupported signal filter")

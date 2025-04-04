@@ -3,7 +3,7 @@ from array import array
 from dataclasses import dataclass
 from datetime import datetime
 from functools import cached_property
-from typing import Any
+from typing import Any, Sequence
 
 from roboquant.asset import Asset
 
@@ -51,7 +51,7 @@ class Quote(PriceItem):
         data (array): An array containing [ask-price, ask-volume, bid-price, bid-volume].
     """
 
-    data: array  # [ask-price, ask-volume, bid-price, bid-volume]
+    data: Sequence[float]  # [ask-price, ask-volume, bid-price, bid-volume]
 
     def price(self, price_type: str = "MID") -> float:
         """Return the price, the default being the mid-point price.
@@ -194,14 +194,14 @@ class Bar(PriceItem):
         frequency (str): The frequency of the bar, for example, 1s, 15m, 4h, 1d.
     """
 
-    ohlcv: array  # [open, high, low, close, volume]
+    ohlcv: Sequence[float]  # [open, high, low, close, volume]
     """The open, high, low, close and volume data of the bar stored in an array of floats"""
 
     frequency: str = ""  # f.e 1s , 15m, 4h, 1d
     """The frequency of the bar, for example, 1s, 15m, 4h, 1d"""
 
     @classmethod
-    def from_adj_close(cls, asset: Asset, ohlcv: array, adj_close: float, frequency=""):
+    def from_adj_close(cls, asset: Asset, ohlcv: Sequence[float], adj_close: float, frequency: str=""):
         """Create a Bar instance from adjusted close price.
 
         Args:

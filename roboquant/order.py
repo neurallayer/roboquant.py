@@ -35,7 +35,7 @@ class Order:
     """
 
     tif: Literal["GTC", "DAY"]
-    """The time in force of the order. GTC = Good Till Cancelled, DAY = valid for the current day only"""
+    """The time in force of the order. `GTC` = Good Till Cancelled, `DAY` = valid for a day only."""
 
     info: dict[str, Any]
     """Any additional information about the order"""
@@ -51,7 +51,12 @@ class Order:
     negative for sell orders. So the remaining size is `size - fill`"""
 
     def __init__(
-        self, asset: Asset, size: Decimal | str | int | float, limit: float, tif: Literal["GTC", "DAY"] = "DAY", **kwargs
+        self,
+        asset: Asset,
+        size: Decimal | str | int | float,
+        limit: float,
+        tif: Literal["GTC", "DAY"] = "DAY",
+        **kwargs: dict[str, Any],
     ):
         """
         Args:

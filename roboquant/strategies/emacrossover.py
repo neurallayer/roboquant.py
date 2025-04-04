@@ -19,7 +19,7 @@ class EMACrossover(Strategy):
         self.cancel_orders_older_than = timedelta(days=5)
 
     def create_signals(self, event: Event) -> list[Signal]:
-        result = []
+        result : list[Signal] = []
         for asset, price in event.get_prices(self.price_type).items():
             if asset not in self._history:
                 self._history[asset] = self._Calculator(self.fast, self.slow, price=price)
