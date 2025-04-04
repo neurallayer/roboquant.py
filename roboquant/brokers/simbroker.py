@@ -1,5 +1,5 @@
 from dataclasses import dataclass
-from datetime import datetime, timedelta
+from datetime import date, datetime, timezone
 from decimal import Decimal
 import logging
 
@@ -33,13 +33,21 @@ class SimBroker(Broker):
     This class can be extended to support different types of use-cases, like margin trading.
     """
 
-    def __init__(self, initial_deposit: Amount=Amount(USD, 1_000_000.0), price_type:str="OPEN", slippage:float=0.001):
+    def __init__(
+        self,
+        initial_deposit: Amount = Amount(USD, 1_000_000.0),
+        price_type: str = "OPEN",
+        slippage: float = 0.001,
+        timezone: timezone = timezone.utc,
+    ):
         """Create a new SimBroker instance.
         params:
-        - initial_deposit: The initial deposit of cash in the account. The currency of the deposit is used as the base currency
+        - initial_deposit: The initial deposit of cash in the account. The currency of the deposit is also as the base currency
         for the account.
-        - price_type: The price type to use for the execution, like OPEN, CLOSE, HIGH, LOW
+        - price_type: The price type to use for the execution, like OPEN, CLOSE, HIGH or LOW. Default is OPEN.
         - slippage: The slippage to use for the execution, a percentage value. Default is 0.1% (0.001)
+        - timezone: The timezone to use for to determine order expiration when the order time in force is set to `DAY`.
+            Default is UTC.
         """
 
         super().__init__()
@@ -53,7 +61,8 @@ class SimBroker(Broker):
         self.slippage = slippage
         self.price_type = price_type
         self.initial_deposit = initial_deposit
-        self._order_entry : dict[str, datetime] = {}
+        self._order_entry: dict[str, date] = {}
+        self.timezone = timezone
 
     def reset(self):
         """Reset the broker with the cash and buying power set to the initial deposit."""
@@ -63,7 +72,7 @@ class SimBroker(Broker):
         self._account.cash = Wallet(self.initial_deposit)
         self._account.buying_power = self.initial_deposit
         self._order_id = 0
-        self._order_entry : dict[str, datetime] = {}
+        self._order_entry: dict[str, date] = {}
 
     def _fee(self, trx: _Trx) -> Amount:
         """Calculate any additional transaction fee, default is zero"""
@@ -177,17 +186,17 @@ class SimBroker(Broker):
 
         self._modify_orders = []
 
-
     def _order_is_expired(self, order: Order, time: datetime) -> bool:
         assert order.id is not None, "order has no id yet"
         if order.tif == "GTC":
             return False
 
+        # We are now in the DAY tif branch
         if entry_time := self._order_entry.get(order.id):
-            return (entry_time - time) >= timedelta(days=1)
+            return time.astimezone(self.timezone).date() > entry_time
         else:
             # first time we see this order
-            self._order_entry[order.id] = time
+            self._order_entry[order.id] = time.astimezone(self.timezone).date()
 
         return False
 
