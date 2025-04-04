@@ -1,4 +1,5 @@
 from dataclasses import dataclass
+from datetime import datetime, timedelta
 from decimal import Decimal
 import logging
 
@@ -41,7 +42,6 @@ class SimBroker(Broker):
         - slippage: The slippage to use for the execution, a percentage value. Default is 0.1% (0.001)
         """
 
-
         super().__init__()
         self._account = Account(initial_deposit.currency)
         self._modify_orders: list[Order] = []
@@ -53,6 +53,7 @@ class SimBroker(Broker):
         self.slippage = slippage
         self.price_type = price_type
         self.initial_deposit = initial_deposit
+        self._order_entry : dict[str, datetime] = {}
 
     def reset(self):
         """Reset the broker with the cash and buying power set to the initial deposit."""
@@ -62,6 +63,7 @@ class SimBroker(Broker):
         self._account.cash = Wallet(self.initial_deposit)
         self._account.buying_power = self.initial_deposit
         self._order_id = 0
+        self._order_entry : dict[str, datetime] = {}
 
     def _fee(self, trx: _Trx) -> Amount:
         """Calculate any additional transaction fee, default is zero"""
@@ -172,13 +174,28 @@ class SimBroker(Broker):
 
         self._modify_orders = []
 
+
+    def _order_is_expired(self, order: Order, time: datetime) -> bool:
+        assert order.id is not None, "order has no id"
+        if order.tif == "GTC":
+            return False
+
+        if entry_time := self._order_entry.get(order.id):
+            if (entry_time - time) <= timedelta(days=1):
+                return False
+            return True
+        else:
+            # first time we see this order
+            self._order_entry[order.id] = time
+            return False
+
     def _process_open_orders(self, event: Event | None):
         if not event or not self._account.orders:
             return
         prices = event.price_items
 
         for order in self._account.orders.copy():
-            if order.is_expired(event.time):
+            if self._order_is_expired(order, event.time):
                 logger.info("expired order %s", order)
                 self._remove_order(order)
             elif item := prices.get(order.asset):

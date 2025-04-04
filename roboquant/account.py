@@ -246,7 +246,7 @@ class Account:
                 "type" : "BUY" if order.is_buy else "SELL",
                 "value": order.value(),
                 "fill" : order.fill,
-                "gtd" : order.gtd,
+                "tif" : order.tif,
                 "info" : str(order.info) if order.info else "-"
             })
         return result

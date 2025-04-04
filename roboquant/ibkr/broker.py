@@ -25,6 +25,7 @@ class AssetMapper:
         self.client = client
 
     def update_mapping(self, asset: rq.Asset, conid: int):
+        logger.debug("updating mapping asset=%s conid=%s", asset, conid)
         self._conid_2_asset[conid] = asset
         self._asset_2_conid[asset] = conid
 
@@ -36,12 +37,13 @@ class AssetMapper:
         filter = {"isUS": True} if asset.currency == rq.monetary.USD else  {"isUS": False}
 
         query = StockQuery(asset.symbol, contract_conditions=filter)
-        data = self.client.security_stocks_by_symbol([query], default_filtering=False).data
-        if data and len(data) == 1:
-            conid = data[0]["conid"]
-            logger.info("converted asset=%s into conid=%s", asset, conid)
-            self.update_mapping(asset, conid)
-            return conid
+        data : dict = self.client.security_stocks_by_symbol([query], default_filtering=False).data  # type: ignore
+        if contract_info := data.get(asset.symbol):
+            if len(contract_info) == 1 and len(contract_info[0]["contracts"]) == 1:
+                conid = contract_info[0]["contracts"][0]["conid"]
+                logger.info("converted asset=%s into conid=%s", asset, conid)
+                self.update_mapping(asset, conid)
+                return conid
 
         logger.warning("couldn't determine conid for asset %s, result was %d", asset, data)
 
@@ -200,6 +202,7 @@ class IBKRBroker(LiveBroker):
             order_type="LMT",
             acct_id=str(self.client.account_id),
             price=order.limit,
+            tif=order.tif,
             **order.info
         )
 

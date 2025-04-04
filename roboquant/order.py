@@ -1,8 +1,7 @@
 from copy import deepcopy
 from dataclasses import dataclass
-from datetime import datetime
 from decimal import Decimal
-from typing import Any
+from typing import Any, Literal
 
 from roboquant.asset import Asset
 from roboquant.monetary import Amount
@@ -29,8 +28,8 @@ class Order:
     limit: float
     """The limit price of the order, denoted in the currency of the asset"""
 
-    gtd: datetime | None
-    """The good till date of the order, or None if no expiration date"""
+    tif: Literal["GTC", "DAY"]
+    """The time in force of the order. GTC = Good Till Cancelled, DAY = valid for the current day only"""
 
     info: dict[str, Any]
     """Any additional information about the order"""
@@ -42,8 +41,9 @@ class Order:
     """The filled size of the order, set by the broker only. Just like the size, positive for buy orders,
     negative for sell orders. So the remaining size is `size - fill`"""
 
-
-    def __init__(self, asset: Asset, size: Decimal | str | int | float, limit: float, gtd: datetime | None = None, **kwargs):
+    def __init__(
+        self, asset: Asset, size: Decimal | str | int | float, limit: float, tif: Literal["GTC", "DAY"] = "DAY", **kwargs
+    ):
         """
         Args:
             asset (Asset): The asset of this order.
@@ -61,7 +61,7 @@ class Order:
         self.id = None
         self.fill = Decimal(0)
         self.info = kwargs
-        self.gtd = gtd
+        self.tif = tif
 
     def cancel(self) -> "Order":
         """
@@ -78,20 +78,7 @@ class Order:
         result.size = Decimal(0)
         return result
 
-    def is_expired(self, dt: datetime) -> bool:
-        """
-        Return True if this order has expired, False otherwise.
-
-        Args:
-            dt (datetime): The current datetime to check against the good till date.
-
-        Returns:
-            bool: True if the order has expired, False otherwise.
-        """
-        return dt > self.gtd if self.gtd else False
-
-    def modify(
-        self, size: Decimal | str | int | float | None = None, limit: float | None = None) -> "Order":
+    def modify(self, size: Decimal | str | int | float | None = None, limit: float | None = None) -> "Order":
         """
         Create an modify-order. You can update the size and/or the limit of an order.
         The returned order has the same id as the original order. You can only update existing orders that have an id assigned.
@@ -127,7 +114,7 @@ class Order:
         Returns:
             Order: A deep copy of the order.
         """
-        result = Order(self.asset, self.size, self.limit, self.gtd, **self.info)
+        result = Order(self.asset, self.size, self.limit, self.tif, **self.info)
         result.id = self.id
         result.fill = self.fill
         return result

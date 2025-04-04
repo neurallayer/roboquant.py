@@ -80,15 +80,11 @@ class AlpacaBroker(LiveBroker):
 
     def _update_order(self, order: Order):
         assert order.id is not None
-        if order.gtd:
-            logger.warning("no support for GTD type of orders, ignoring gtd=%s", order.gtd)
         req = ReplaceOrderRequest(qty=int(abs(float(order.size))), limit_price=order.limit)
         result = self.__client.replace_order_by_id(order.id, req)
         logger.info("result update order oder=%s result=%s", order, result)
 
     def _place_order(self, order: Order):
-        if order.gtd:
-            logger.warning("no support for GTD type of orders, ignoring gtd=%s", order.gtd)
         req = self._get_order_request(order)
         result = self.__client.submit_order(req)
         logger.info("result place order oder=%s result=%s", order, result)
@@ -100,6 +96,6 @@ class AlpacaBroker(LiveBroker):
             qty=abs(float(order.size)),
             side=side,
             limit_price=order.limit,
-            time_in_force=TimeInForce.GTC,
+            time_in_force=TimeInForce.GTC if order.tif == "GTC" else TimeInForce.DAY,
         )
 

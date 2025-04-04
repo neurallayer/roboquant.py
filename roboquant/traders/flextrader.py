@@ -1,4 +1,4 @@
-from datetime import datetime, timedelta
+from datetime import datetime
 import logging
 from decimal import Decimal
 from enum import Flag, auto
@@ -133,7 +133,6 @@ class FlexTrader(Trader):
         self.max_position_perc = max_position_perc
         self.price_type = price_type
         self.shuffle_signals = shuffle_signals
-        self.valid_for: timedelta | None = timedelta(days=3)
 
     def _get_order_size(self, rating: float, contract_price: float, max_order_value: float) -> Decimal:
         """Return the order size"""
@@ -248,14 +247,13 @@ class FlexTrader(Trader):
         The default implementation:
         - creates a single order
         - with the limit price being the `self.price_type` rounded to two decimals
-        - the gtd set to the time of the event + `self.valid_for`
+        - the tif is set to the default "DAY"
 
         Overwrite this method if you want to implement different logic.
         """
-        gtd = None if not self.valid_for else time + self.valid_for
         price = item.price(self.price_type)
         limit = round(price, 2)
-        result = [Order(asset, size, limit, gtd)]
+        result = [Order(asset, size, limit)]
         logger.info("<== %s converted signal into new order(s) %s", time.replace(tzinfo=None), result)
         return result
 
