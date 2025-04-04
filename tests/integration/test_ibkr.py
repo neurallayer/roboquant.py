@@ -20,7 +20,7 @@ class TestIBKR(unittest.TestCase):
         logging.basicConfig(level=logging.DEBUG)
         logging.getLogger("ibapi").setLevel(logging.WARNING)
         asset = Stock("JPM")
-        limit = 230.0
+        limit = 210.0
 
         broker = IBKRBroker()
 
