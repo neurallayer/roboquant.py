@@ -149,13 +149,16 @@ class SimBroker(Broker):
         for order in orders:
             if order.id is None:
                 order.id = self.__next_order_id()
+                assert order.size != 0, "order size of a new order cannot be zero"
                 self._create_orders.append(order)
             else:
                 self._modify_orders.append(order)
 
     def _remove_order(self, order: Order):
         """Remove an order from the account, called when an order is completed, expired or cancelled."""
+        assert order.id is not None, "order has no id"
         self._account.orders.remove(order)
+        self._order_entry.pop(order.id)
 
     def _process_modify_orders(self):
         for order in self._modify_orders:
@@ -176,18 +179,17 @@ class SimBroker(Broker):
 
 
     def _order_is_expired(self, order: Order, time: datetime) -> bool:
-        assert order.id is not None, "order has no id"
+        assert order.id is not None, "order has no id yet"
         if order.tif == "GTC":
             return False
 
         if entry_time := self._order_entry.get(order.id):
-            if (entry_time - time) <= timedelta(days=1):
-                return False
-            return True
+            return (entry_time - time) >= timedelta(days=1)
         else:
             # first time we see this order
             self._order_entry[order.id] = time
-            return False
+
+        return False
 
     def _process_open_orders(self, event: Event | None):
         if not event or not self._account.orders:

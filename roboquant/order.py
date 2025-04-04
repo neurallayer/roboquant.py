@@ -20,13 +20,19 @@ class Order:
     """
 
     asset: Asset
-    """The asset of this order"""
+    """The asset of this order."""
 
     size: Decimal
-    """The size of the order. Positive for buy orders, negative for sell orders"""
+    """The size of the order. Positive for buy orders, negative for sell orders.
+    """
 
     limit: float
-    """The limit price of the order, denoted in the currency of the asset"""
+    """The limit price of the order, denoted in the currency of the asset.
+    The limit price is the maximum price you are willing to pay for a buy order,
+    or the minimum price you are willing to accept for a sell order.
+    Make sure to set the limit price in the currency of the asset and not include more decimal places than
+    supported by the broker. For example, for stocks, set the limit price to 2 decimal places.
+    """
 
     tif: Literal["GTC", "DAY"]
     """The time in force of the order. GTC = Good Till Cancelled, DAY = valid for the current day only"""
@@ -35,7 +41,10 @@ class Order:
     """Any additional information about the order"""
 
     id: str | None
-    """The unique id of the order. This is set by the broker only"""
+    """The unique id of the order. This is set by the broker only and should not be updated by the user.
+    The id is None for new orders and set to a non-empty string when the order is placed with the broker.
+    The id is used to identify the order when modifying or cancelling it.
+    """
 
     fill: Decimal
     """The filled size of the order, set by the broker only. Just like the size, positive for buy orders,
