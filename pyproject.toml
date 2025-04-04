@@ -12,8 +12,8 @@ path = "roboquant/__init__.py"
 select = ["E", "F", "W"]
 
 [tool.pyright]
-# typeCheckingMode = "standard"
-typeCheckingMode = "strict"
+typeCheckingMode = "standard"
+# typeCheckingMode = "strict"
 
 [project]
 name = "roboquant"

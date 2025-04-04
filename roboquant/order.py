@@ -56,7 +56,7 @@ class Order:
         size: Decimal | str | int | float,
         limit: float,
         tif: Literal["GTC", "DAY"] = "DAY",
-        **kwargs: dict[str, Any],
+        **kwargs: Any,
     ):
         """
         Args:
