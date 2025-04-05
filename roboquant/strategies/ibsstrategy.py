@@ -5,10 +5,10 @@ from roboquant.strategies.strategy import Strategy
 
 class IBSStrategy(Strategy):
     """Internal Bar Strength indicator based strategy, that follows the following rules:
-    - If IBS indicator is below the buy-threshold, create a BUY Signal with rating `1.0 - IBS`
-    - If IBS indicator is above the sell-threshold, create a SELL Signal with rating `- IBS`
+    - If IBS indicator is below the buy-threshold, create a BUY Signal with rating of `1.0 - IBS`
+    - If IBS indicator is above the sell-threshold, create a SELL Signal with rating of `- IBS`
 
-    So this is a mean-reversion strategy that uses IBS to identify oversold or overbought opportunities.
+    So this is a mean-reversion strategy that uses the IBS indicator to identify oversold or overbought opportunities.
     """
 
     def __init__(self, buy_threshold: float = 0.2, sell_threshold: float = 0.8):

@@ -10,7 +10,8 @@ from roboquant.monetary import Amount, Wallet, USD, Currency
 
 @dataclass(slots=True)
 class Position:
-    """The position of an asset in the account"""
+    """The position of an asset in the account. The position prices are denoted in the currency of the asset.
+    """
 
     size: Decimal
     """Position size as a Decimal"""
@@ -84,7 +85,7 @@ class Account:
 
     def convert(self, x: Wallet | Amount) -> float:
         """
-        Convert a wallet or amount into the base currency of the account at the last update time.
+        Convert a wallet or amount into the `base_currency` of the account at the `last_update` time.
 
         Args:
             x (Wallet | Amount): The wallet or amount to convert.
