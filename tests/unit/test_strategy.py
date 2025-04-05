@@ -1,6 +1,6 @@
 import unittest
 
-from roboquant.strategies import EMACrossover, MultiStrategy, IBSStrategy, CachingStrategy
+from roboquant.strategies import EMACrossover, MultiStrategy, IBSStrategy, CachedStrategy
 from tests.common import run_strategy, get_feed
 
 
@@ -25,7 +25,7 @@ class TestStrategy(unittest.TestCase):
     def test_caching_strategy(self):
         strategy = EMACrossover()
         feed = get_feed()
-        caching_strategy = CachingStrategy(feed, strategy)
+        caching_strategy = CachedStrategy(feed, strategy)
         self.assertEqual(feed.timeframe(), caching_strategy.timeframe())
         run_strategy(caching_strategy, self)
 
