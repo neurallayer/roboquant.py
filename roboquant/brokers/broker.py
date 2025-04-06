@@ -147,14 +147,14 @@ class LiveBroker(Broker):
 
         self._has_new_orders = True
         for order in orders:
-            if order.id is not None and order.size == 0:
+            if order.id and order.size.is_zero():
                 self.metrics["cancel"] += 1
                 self._cancel_order(order)
                 time.sleep(self.sleep_after_cancel)
-            elif order.id is not None:
+            elif order.id:
                 self.metrics["update"] += 1
                 self._update_order(order)
-            elif order.id is None and order.size != 0:
+            elif not order.id and not order.size.is_zero():
                 self.metrics["new"] += 1
                 self._place_order(order)
             else:

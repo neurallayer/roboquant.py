@@ -156,7 +156,7 @@ class SimBroker(Broker):
         Orders placed at time `t`, will be processed during time `t+1`. This protects against future bias.
         """
         for order in orders:
-            if order.id is None:
+            if not order.id:
                 order.id = self.__next_order_id()
                 assert order.size != 0, "order size of a new order cannot be zero"
                 self._create_orders.append(order)
@@ -165,17 +165,18 @@ class SimBroker(Broker):
 
     def _remove_order(self, order: Order):
         """Remove an order from the account, called when an order is completed, expired or cancelled."""
-        assert order.id is not None, "order has no id"
         self._account.orders.remove(order)
         self._order_entry.pop(order.id)
 
     def _process_modify_orders(self):
+        """Process the modify orders. Modify orders will allways be handled and not propagate to the next sync call."""
+
         for order in self._modify_orders:
             orig_order = next((o for o in self._account.orders if o.id == order.id), None)
             if not orig_order:
                 logger.info("couldn't find order with id %s", order.id)
                 continue
-            if order.size == 0:
+            if order.size.is_zero():
                 logger.info("cancelled order %s", orig_order)
                 self._remove_order(orig_order)
             else:
@@ -187,7 +188,6 @@ class SimBroker(Broker):
         self._modify_orders = []
 
     def _order_is_expired(self, order: Order, time: datetime) -> bool:
-        assert order.id is not None, "order has no id yet"
         if order.tif == "GTC":
             return False
 

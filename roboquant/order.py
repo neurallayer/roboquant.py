@@ -40,9 +40,9 @@ class Order:
     info: dict[str, Any]
     """Any additional information about the order"""
 
-    id: str | None
+    id: str
     """The unique id of the order. This is set by the broker only and should not be updated by the user.
-    The id is None for new orders and set to a non-empty string when the order is placed with the broker.
+    The id is an empty string for new orders and set to a non-empty string when the order is placed with the broker.
     The id is used to identify the order when modifying or cancelling it.
     """
 
@@ -63,7 +63,7 @@ class Order:
             asset (Asset): The asset of this order.
             size (Decimal | str | int | float): The size of the order. Positive for buy orders, negative for sell orders.
             limit (float): The limit price of the order, denoted in the currency of the asset.
-            gtd (datetime | None, optional): The good till date of the order, or None if no expiration date.
+            tif (Literal["GTC", "DAY"], optional): The time in force of the order. Defaults to "DAY".
             **kwargs: Any additional information about the order. It is passed to the broker in the `info` attribute, but not
             maintained over time. Typically used by the broker for additional arguments to their API calls.
         """
@@ -72,7 +72,7 @@ class Order:
         assert not self.size.is_zero(), "Cannot create a new order with size is zero"
 
         self.limit = limit
-        self.id = None
+        self.id = ""
         self.fill = Decimal(0)
         self.info = kwargs
         self.tif = tif
@@ -85,7 +85,7 @@ class Order:
         Returns:
             Order: A new order with the same properties but size set to zero.
         """
-        assert self.id is not None, "Can only cancel orders with an already assigned id"
+        assert self.id, "Can only cancel orders with an already assigned id"
         assert self.size, "Cannot cancel a cancellation order, size has to be non-zero"
 
         result = deepcopy(self)
@@ -106,7 +106,7 @@ class Order:
         Returns:
             Order: A new order with the updated size and limit.
         """
-        assert self.id, "Can only update an already assigned id"
+        assert self.id, "Can only update an order with an assigned id"
         assert self.size, "Cannot modify a cancellation order, size has to be non-zero"
 
         size = Decimal(size) if size is not None else None

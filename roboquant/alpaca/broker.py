@@ -75,11 +75,9 @@ class AlpacaBroker(LiveBroker):
         return account
 
     def _cancel_order(self, order: Order):
-        assert order.id is not None
         self.__client.cancel_order_by_id(order.id)
 
     def _update_order(self, order: Order):
-        assert order.id is not None
         req = ReplaceOrderRequest(qty=int(abs(float(order.size))), limit_price=order.limit)
         result = self.__client.replace_order_by_id(order.id, req)
         logger.info("result update order oder=%s result=%s", order, result)

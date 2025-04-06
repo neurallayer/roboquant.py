@@ -13,7 +13,7 @@ class TestOrder(unittest.TestCase):
     def test_order_create(self):
         order = Order(apple, 100, 120.0)
         self.assertEqual(120.0, order.limit)
-        self.assertEqual(None, order.id)
+        self.assertEqual("", order.id)
         self.assertEqual(apple, order.asset)
         self.assertEqual("DAY", order.tif)
 
