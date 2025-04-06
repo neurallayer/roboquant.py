@@ -199,3 +199,17 @@ class Order:
             bool: True if this is a cancellation order, False otherwise.
         """
         return self.size.is_zero()
+
+    def is_executable(self, price: float) -> bool:
+        """
+        Check if this order is executable at the given price.
+
+        Args:
+            price (float): The price to check against.
+
+        Returns:
+            bool: True if the order is executable at the given price, False otherwise.
+        """
+        if self.is_buy:
+            return price <= self.limit
+        return price >= self.limit

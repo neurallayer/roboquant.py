@@ -117,35 +117,18 @@ class SimBroker(Broker):
         return price * (1.0 + correction)
 
     def _execute(self, order: Order, item: PriceItem) -> _Trx | None:
-        """Simulate a market execution for the three order types"""
+        """Simulate a market execution and return a transaction object if the order has (partially) executed."""
 
         price = self._get_execution_price(order, item)
-        fill = self._get_fill(order, price)
-        if fill:
-            return _Trx(order.asset, fill, price)
+        if order.is_executable(price):
+            return _Trx(order.asset, order.remaining, price)
         return None
 
     def __next_order_id(self):
+        """Generate a new order id. The order id is a simple integer that is incremented for each new order."""
         result = str(self._order_id)
         self._order_id += 1
         return result
-
-    def _get_fill(self, order: Order, price: float) -> Decimal:
-        """Return the fill for the order given the provided price.
-
-        The default implementation is:
-
-        - A market order is always fully filled,
-        - A limit order only when the limit is below the BUY price or above the SELL price.
-
-        Overwrite this method in a subclass if you require more advanced behavior, like partial fills.
-        """
-        if order.is_buy and price <= order.limit:
-            return order.remaining
-        if order.is_sell and price >= order.limit:
-            return order.remaining
-
-        return Decimal(0)
 
     def place_orders(self, orders: list[Order]):
         """Place new orders at this broker. The orders get assigned a unique order-id if there isn't one already.
