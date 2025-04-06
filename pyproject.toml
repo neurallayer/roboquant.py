@@ -64,7 +64,7 @@ torch = [
   "stable-baselines3[extra]>=2.5.0",
   "sb3-contrib>=2.5.0",
 ]
-ibkr = ["ibind[oauth]>=0.1.13"]
+ibkr = ["ibind[oauth]>=0.1.14"]
 alpaca = ["alpaca-py>=0.39.0"]
 avro = ["fastavro>=1.9.7"]
 parquet = ["pyarrow>=19.0.0"]

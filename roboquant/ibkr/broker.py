@@ -52,6 +52,7 @@ class AssetMapper:
             return asset
 
         contract: ContractInfo = self.client.contract_information_by_conid(conid).data  # type: ignore
+
         match contract["instrument_type"]:
             case "STK":
                 asset = rq.Stock(contract["symbol"], rq.monetary.Currency(contract["currency"]))
@@ -66,8 +67,7 @@ class AssetMapper:
 
         return asset
 
-
-
+# Default answers to questions asked by IBKR when placing orders.
 default_answers = {
     QuestionType.PRICE_PERCENTAGE_CONSTRAINT: True,
     QuestionType.ORDER_VALUE_LIMIT: True,

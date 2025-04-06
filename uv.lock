@@ -400,13 +400,13 @@ wheels = [
 
 [[package]]
 name = "ibind"
-version = "0.1.13"
+version = "0.1.14"
 source = { registry = "https://pypi.org/simple" }
 dependencies = [
     { name = "requests" },
     { name = "websocket-client" },
 ]
-sdist = { url = "https://files.pythonhosted.org/packages/42/b5/7cbf90d917d9c487261e4a6ce37f9bb2c577f8e8a0bfbef65dd450eb9eb3/ibind-0.1.13.tar.gz", hash = "sha256:ca1fde4e2e734d3cd245b33bc4300eaebe8b781b4aee406a0672115b128df741", size = 102352 }
+sdist = { url = "https://files.pythonhosted.org/packages/e8/34/f9cd487815cd42075c7c4692b7b12896c96bfffa284eeb22d6de7922e1b9/ibind-0.1.14.tar.gz", hash = "sha256:8a28ddd62c579101b0bd5e1b64c608d6533a9ae50f081687fccecc9fdfdbbfb1", size = 97694 }
 
 [package.optional-dependencies]
 oauth = [
@@ -1404,7 +1404,7 @@ talib = [
 requires-dist = [
     { name = "alpaca-py", marker = "extra == 'alpaca'", specifier = ">=0.39.0" },
     { name = "fastavro", marker = "extra == 'avro'", specifier = ">=1.9.7" },
-    { name = "ibind", extras = ["oauth"], marker = "extra == 'ibkr'", specifier = ">=0.1.13" },
+    { name = "ibind", extras = ["oauth"], marker = "extra == 'ibkr'", specifier = ">=0.1.14" },
     { name = "numpy", specifier = ">=1.26.4" },
     { name = "pyarrow", marker = "extra == 'parquet'", specifier = ">=19.0.0" },
     { name = "python-ibapi-stable" },
