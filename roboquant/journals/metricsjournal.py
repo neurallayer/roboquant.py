@@ -3,6 +3,11 @@ from datetime import datetime
 from roboquant.journals.journal import Journal
 from roboquant.journals.metric import Metric
 from roboquant.journals.pnlmetric import PNLMetric
+from roboquant.account import Account
+from roboquant.signal import Signal
+from roboquant.event import Event
+from roboquant.order import Order
+from typing import Dict, List
 
 
 class MetricsJournal(Journal):
@@ -23,8 +28,8 @@ class MetricsJournal(Journal):
         """Return a metrics journal pre-configured with the PNL metric"""
         return cls(PNLMetric())
 
-    def track(self, event, account, signals, orders):
-        result: dict[str, float] = {}
+    def track(self, event: Event, account: Account, signals: List[Signal], orders: List[Order]) -> None:
+        result: Dict[str, float] = {}
         for metric in self.metrics:
             new_result = metric.calc(event, account, signals, orders)
             result.update(new_result)

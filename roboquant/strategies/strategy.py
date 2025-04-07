@@ -12,5 +12,10 @@ class Strategy(ABC):
 
     @abstractmethod
     def create_signals(self, event: Event) -> list[Signal]:
-        """Create zero or more signals given the provided event."""
+        """Create zero or more signals given the provided event.
+        args:
+            event: The event containing items to be processed.
+        returns:
+            A list of signals generated based on the event.
+        """
         ...

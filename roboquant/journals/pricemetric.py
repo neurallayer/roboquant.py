@@ -1,4 +1,9 @@
 from roboquant.journals.metric import Metric
+from typing import Dict
+from roboquant.event import Event
+from roboquant.account import Account
+from roboquant.signal import Signal
+from roboquant.order import Order
 
 
 class PriceItemMetric(Metric):
@@ -11,7 +16,7 @@ class PriceItemMetric(Metric):
         self.price_type = price_type
         self.volume_type = volume_type
 
-    def calc(self, event, account, signals, orders) -> dict[str, float]:
+    def calc(self, event: Event, account: Account, signals: list[Signal], orders: list[Order]) -> Dict[str, float]:
         result = {}
         for asset, item in event.price_items.items():
             symbol = asset.symbol

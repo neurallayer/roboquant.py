@@ -1,5 +1,10 @@
 from dataclasses import dataclass
 from roboquant.journals.metric import Metric
+from typing import List, Dict
+from roboquant.event import Event
+from roboquant.account import Account
+from roboquant.signal import Signal
+from roboquant.order import Order
 
 
 @dataclass(slots=True)
@@ -17,7 +22,7 @@ class RunMetric(Metric):
     orders: int = 0  # Total number of orders processed
     signals: int = 0 # Total number of signals processed
 
-    def calc(self, event, account, signals, orders) -> dict[str, float]:
+    def calc(self, event: Event, account: Account, signals: List[Signal], orders: List[Order]) -> Dict[str, float]:
         """
         Update the metrics based on the provided event, account, signals, and orders.
 
