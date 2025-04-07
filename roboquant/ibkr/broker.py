@@ -34,6 +34,10 @@ class _AssetMapper:
         if conid := self._asset_2_conid.get(asset):
             return conid
 
+        if not isinstance(asset, rq.Stock):
+            logger.warning("only stocks are supported, got %s", asset)
+            return None
+
         filter = {"isUS": True} if asset.currency == rq.monetary.USD else  {"isUS": False}
 
         query = StockQuery(asset.symbol, contract_conditions=filter)
@@ -56,6 +60,8 @@ class _AssetMapper:
         match contract["instrument_type"]:
             case "STK":
                 asset = rq.Stock(contract["symbol"], rq.monetary.Currency(contract["currency"]))
+            case "OPT":
+                asset = rq.Option(contract["local_symbol"], rq.monetary.Currency(contract["currency"]))
             case _:
                 logger.warning("unsupported asset class %s", contract["instrument_type"])
 

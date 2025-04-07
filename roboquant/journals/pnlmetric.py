@@ -42,7 +42,7 @@ class PNLMetric(Metric):
             "pnl/unrealized": unrealized,
         }
 
-    def __get_pnl_values(self, equity, account: Account):
+    def __get_pnl_values(self, equity: float, account: Account):
         if self.first_equity is None:
             self.first_equity = equity
 
@@ -51,7 +51,7 @@ class PNLMetric(Metric):
         realized = total - unrealized
         return total, realized, unrealized
 
-    def __get_new_pnl(self, equity):
+    def __get_new_pnl(self, equity: float):
         if self.prev_equity is None:
             self.prev_equity = equity
 
@@ -59,13 +59,13 @@ class PNLMetric(Metric):
         self.prev_equity = equity
         return result
 
-    def __get_max_drawdown(self, equity) -> float:
+    def __get_max_drawdown(self, equity: float) -> float:
         self.max_equity = max(equity, self.max_equity)
         drawdown = equity / self.max_equity - 1.0
         self.max_drawdown = min(drawdown, self.max_drawdown)
         return self.max_drawdown
 
-    def __get_max_gain(self, equity) -> float:
+    def __get_max_gain(self, equity: float) -> float:
         self.min_equity = min(equity, self.min_equity)
         gain = equity / self.min_equity - 1.0
         self.max_gain = max(gain, self.max_gain)
