@@ -3,6 +3,11 @@ from matplotlib import pyplot as plt
 from roboquant.asset import Asset
 from roboquant.journals.journal import Journal
 from roboquant.journals.metric import Metric
+from roboquant.event import Event
+from roboquant.account import Account
+from roboquant.signal import Signal
+from roboquant.order import Order
+from typing import List
 
 
 class _DataHolder:
@@ -31,7 +36,7 @@ class PlotJournal(Journal):
         self._metrics = {}
 
 
-    def track(self, event, account, signals, orders):
+    def track(self, event: Event, account: Account, signals: List[Signal], orders: List[Order]) -> None:
         time = event.time
         if price := event.get_price(self._asset):
             self._prices.add(time, price)

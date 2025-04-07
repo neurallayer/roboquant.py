@@ -2,6 +2,10 @@ import sys
 
 from roboquant.account import Account
 from roboquant.journals.metric import Metric
+from roboquant.event import Event
+from roboquant.order import Order
+from roboquant.signal import Signal
+from typing import Dict, List
 
 
 class PNLMetric(Metric):
@@ -23,7 +27,7 @@ class PNLMetric(Metric):
         self.max_equity = sys.float_info.min
         self.min_equity = sys.float_info.max
 
-    def calc(self, event, account, signals, orders) -> dict[str, float]:
+    def calc(self, event: Event, account: Account, signals: List[Signal], orders: List[Order]) -> Dict[str, float]:
         equity = account.equity_value()
 
         total, realized, unrealized = self.__get_pnl_values(equity, account)
