@@ -13,7 +13,7 @@ from ibind import IbkrClient, StockQuery, OrderRequest, QuestionType  # noqa: E4
 logger = logging.getLogger(__name__)
 
 
-class AssetMapper:
+class _AssetMapper:
     """Takes care of mapping between roboquant assets and IBKR contract-ids.
     It will cache previous results, so only for new assets or contracts it will make
     an API call.
@@ -123,11 +123,11 @@ class IBKRBroker(LiveBroker):
         self.base_currency = rq.monetary.Currency(account_summary["currency"])
         logger.info(f"using account={account_id} with base-currency={self.base_currency}")
 
-        # We also need to call this once before using other code
+        # We also need to call this once before using other order related calls
         client.live_orders()
         sleep(1)
         self.client = client
-        self._mapper = AssetMapper(client)
+        self._mapper = _AssetMapper(client)
 
 
     def __get_positions(self) -> dict[rq.Asset, rq.Position]:
@@ -207,19 +207,16 @@ class IBKRBroker(LiveBroker):
         )
 
     def _update_order(self, order: rq.Order):
-        assert order.id, "no known order id"
         req = self.__create_order_request(order)
         result = self.client.modify_order(order.id, req, answers=default_answers)
         logger.info("update order result %s", result)
 
     def _place_order(self, order: rq.Order):
-        assert not order.id, "cannot place an existing order"
         req = self.__create_order_request(order)
         result = self.client.place_order(req, answers=default_answers)
         logger.info("place order result %s", result)
 
     def _cancel_order(self, order: rq.Order):
-        assert order.id, "cancel order needs an id"
         result = self.client.cancel_order(order.id)
         logger.info("cancel order result %s", result)
 

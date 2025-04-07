@@ -1,7 +1,11 @@
 import logging
 from dataclasses import dataclass
 
+from roboquant.order import Order
+from roboquant.signal import Signal
+from roboquant.account import Account
 from roboquant.asset import Asset
+from roboquant.event import Event
 from roboquant.journals.journal import Journal
 
 logger = logging.getLogger(__name__)
@@ -32,7 +36,7 @@ class BasicJournal(Journal):
         self.__log_level = log_level
         self._assets: set[Asset] = set()
 
-    def track(self, event, account, signals, orders):
+    def track(self, event: Event, account: Account, signals: list[Signal], orders: list[Order]) -> None:
         self.items += len(event.items)
         self._assets = self._assets.union(event.price_items.keys())
         self.assets = len(self._assets)
