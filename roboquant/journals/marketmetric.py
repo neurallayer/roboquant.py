@@ -30,11 +30,24 @@ class MarketMetric(Metric):
             else:
                 self.positions[asset].mkt_price = price
 
+        if not self.positions:
+            return {
+                "market/pnl" : 0.0,
+                "market/avg_pnl" : 0.0,
+                "market/pnl_perc" : 0.0
+            }
+
         # Calculate the total PNL for all positions
         w = Wallet()
         for asset, position in self.positions.items():
             w += asset.contract_amount(position.size, position.mkt_price - position.avg_price)
 
+        pnl = account.convert(w)
+        avg_pnl = pnl / len(self.positions)
+        pnl_perc = pnl / ( account.convert(self.initial_amount) * len(self.positions))
+
         return {
-            "market/pnl" : account.convert(w)
+            "market/pnl" : pnl,
+            "market/avg_pnl" : avg_pnl,
+            "market/pnl_perc" : pnl_perc
         }

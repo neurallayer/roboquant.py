@@ -1,7 +1,7 @@
 import logging
 from decimal import Decimal
 from alpaca.trading.client import TradingClient
-from alpaca.trading.enums import AssetClass, OrderSide, QueryOrderStatus, TimeInForce
+from alpaca.trading.enums import AssetClass, OrderSide, QueryOrderStatus, TimeInForce, PositionSide
 from alpaca.trading.models import TradeAccount
 from alpaca.trading.models import Position as APosition
 from alpaca.trading.models import Order as AOrder
@@ -55,7 +55,7 @@ class AlpacaBroker(LiveBroker):
 
         for p in open_pos:
             size = Decimal(p.qty)
-            if p.side == "short":
+            if p.side == PositionSide.SHORT:
                 size = -size
             new_pos = Position(size, float(p.avg_entry_price), float(p.current_price or "nan"))
             asset = self._get_asset(p.symbol, p.asset_class)
