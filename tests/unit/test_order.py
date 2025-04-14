@@ -29,8 +29,9 @@ class TestOrder(unittest.TestCase):
 
     def test_order_update(self):
         order = Order(apple, 100, 120.0)
-        order.id = "update1"
+        self.assertRaises(Exception, order.modify)
 
+        order.id = "update1"
         update_order = order.modify(size=50)
         self.assertEqual(Decimal(100), order.size)
         self.assertEqual(Decimal(50), update_order.size)
@@ -38,11 +39,12 @@ class TestOrder(unittest.TestCase):
 
     def test_order_cancel(self):
         order = Order(apple, 100, 120.0)
-        order.id = "cancel1"
+        self.assertRaises(Exception, order.cancel)
 
+        order.id = "cancel1"
         cancel_order = order.cancel()
         self.assertFalse(cancel_order.size)
-        self.assertTrue(cancel_order.id)
+        self.assertEqual(order.id, cancel_order.id)
 
 
 if __name__ == "__main__":

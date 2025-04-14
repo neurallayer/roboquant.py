@@ -129,6 +129,8 @@ class AlpacaLiveFeed(LiveFeed):
 
 
 class _AlpacaHistoricFeed(HistoricFeed):
+    """Base class for Alpaca historic feeds.
+    This class is not intended to be used directly."""
 
     def _process_bars(self, bar_set, freq: str, asset_class: AssetClass):
         for symbol, data in bar_set.items():

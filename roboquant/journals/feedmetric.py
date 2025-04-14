@@ -6,13 +6,14 @@ from roboquant.order import Order
 from roboquant.signal import Signal
 
 
-class MarketReturnMetric(Metric):
-    """Tracks the performance of the market, aka the price-items found in the event.
-    It will calculate the latest return of the market based on the price-items found
-    in the event and track the total return of the market.
+class FeedMetric(Metric):
+    """Tracks the combined performance of the price-items found in the feed. It will:
+    - calculate the latest pnl of the assets compared to their previous price
+    - track the combined total pnl till this point in time
+    - count the number of unique assets so for encountered
     """
 
-    def __init__(self, price_type: str="DEFAULT"):
+    def __init__(self, price_type: str = "DEFAULT"):
         self._prev_prices: dict[Asset, float] = {}
         self.price_type = price_type
         self._last_total = 1.0
@@ -31,4 +32,8 @@ class MarketReturnMetric(Metric):
 
         self._last_total *= 1.0 + result
 
-        return {"feed/pnl": result, "feed/total_pnl": self._last_total - 1.0}
+        return {
+            "feed/pnl": result,
+            "feed/total_pnl": self._last_total - 1.0,
+            "feed/assets": len(self._prev_prices)
+        }

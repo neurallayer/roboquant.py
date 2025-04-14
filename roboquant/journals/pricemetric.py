@@ -7,10 +7,22 @@ from roboquant.order import Order
 
 
 class PriceItemMetric(Metric):
-    """Tracks the price and volume of individual price-items found in the event.
+    """Tracks the price and volume of individual assets found in the event.
     """
 
     def __init__(self, *symbols: str, price_type="DEFAULT", volume_type="DEFAULT"):
+        """Initialize PriceMetric with specified symbols and price/volume types.
+        Args:
+            *symbols: Variable length argument list of str symbols to track. If none are provided,
+            all encountered symbols will be included.
+            price_type: Type of price to use for calculations. Defaults to "DEFAULT".
+            volume_type: Type of volume to use for calculations. Defaults to "DEFAULT".
+        Returns:
+            None
+        Examples:
+            >>> metric = PriceMetric("AAPL", "MSFT", price_type="CLOSE")
+        """
+
         super().__init__()
         self.symbols = symbols
         self.price_type = price_type

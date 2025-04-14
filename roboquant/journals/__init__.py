@@ -1,6 +1,6 @@
 from roboquant.journals.alphabeta import AlphaBeta
 from roboquant.journals.basicjournal import BasicJournal
-from roboquant.journals.marketreturnmetric import MarketReturnMetric
+from roboquant.journals.feedmetric import FeedMetric
 from roboquant.journals.marketmetric import MarketMetric
 from roboquant.journals.journal import Journal
 from roboquant.journals.metric import Metric
@@ -13,7 +13,7 @@ from roboquant.journals.tensorboard import TensorboardJournal
 __all__ = [
     "AlphaBeta",
     "BasicJournal",
-    "MarketReturnMetric",
+    "FeedMetric",
     "MarketMetric",
     "Journal",
     "Metric",

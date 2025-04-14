@@ -206,7 +206,7 @@ class Account:
 
     def get_position_size(self, asset: Asset) -> Decimal:
         """
-        Return the position size for an asset, or zero if not found.
+        Return the position size for an asset, or zero if there is no open position for that asset.
 
         Args:
             asset (Asset): The asset for which to get the position size.

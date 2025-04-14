@@ -9,7 +9,7 @@ from roboquant.timeframe import utcnow
 
 class TestAccount(unittest.TestCase):
 
-    def test_account_init(self):
+    def test_account_without(self):
         acc = Account()
         acc.cash = Wallet(Amount(USD, 1_000.0))
         now = utcnow()
@@ -22,7 +22,7 @@ class TestAccount(unittest.TestCase):
         self.assertEqual(acc.equity_value(), 1_000.0)
         self.assertEqual(acc.last_update, now)
 
-    def test_account_positions(self):
+    def test_account_with_positions(self):
         acc = Account()
         now = utcnow()
         acc.cash = Wallet(Amount(USD, 1_000.0))

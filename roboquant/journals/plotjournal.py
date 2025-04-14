@@ -72,6 +72,10 @@ class PlotJournal(Journal):
         """
         ratios = [5,] + [1 for _ in self._metrics]
         fig, axes = plt.subplots(1 + len(self._metrics), sharex=True, gridspec_kw={'height_ratios': ratios})
+
+        if not hasattr(axes, "__getitem__"):
+            axes = [axes]
+
         # fig.subplots_adjust(hspace=0)
         # fig.set_size_inches(15, 5 + (2 * len(ratios)))
         fig.set_size_inches(8.27, 11.69) # A4

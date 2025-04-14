@@ -16,7 +16,10 @@ logger = logging.getLogger(__name__)
 
 
 class AlpacaBroker(LiveBroker):
-    """Alpaca Broker implementation for live trading"""
+    """Broker implementation for live and paper trading using the Alpaca trading API.
+    This broker supports US equities, options, and crypto trading.
+    It requires an Alpaca API key and secret key.
+    """
 
     def __init__(self, api_key: str, secret_key: str) -> None:
         super().__init__()
