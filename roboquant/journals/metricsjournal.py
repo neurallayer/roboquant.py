@@ -12,8 +12,8 @@ from typing import Dict, List
 
 class MetricsJournal(Journal):
     """
-    Implementation of a journal that allows for metrics to be added and calculated at each step. It will store
-    the results in memory.
+    Implementation of a journal that allows for metrics to be added and captured at each step. It will store
+    the results of the metrics in memory.
 
     The calculated metric values can be retrieved via the `get_metric` method. There is also
     convenience method to plot a metric.

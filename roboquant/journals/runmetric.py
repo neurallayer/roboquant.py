@@ -11,10 +11,10 @@ from roboquant.order import Order
 class RunMetric(Metric):
     """
     Calculates a number of basic metrics of a run:
-    - total number of events
-    - total number of items
-    - total number of signals
-    - total number of orders
+    - total number of events in the run
+    - total number of items in the events
+    - total number of signals generated
+    - total number of orders created
     """
 
     events: int = 0  # Total number of events processed
