@@ -156,12 +156,12 @@ class SQLFeed(Feed):
                         data.append(elem)
                 if len(data) >= batch_size:
                     cur.executemany(insert_sql, data)
+                    data = []
 
             if data:
                 cur.executemany(insert_sql, data)
 
             con.commit()
-            logger.info("inserted rows=%s", len(data))
 
     def __repr__(self) -> str:
-        return f"SQLFeed(timeframe={self.timeframe()} items={self.number_items()} assets={len(self.assets())})"
+        return f"SQLFeed(path={self.db_file} is_bar={self.is_bar})"

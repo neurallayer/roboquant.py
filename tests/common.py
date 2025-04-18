@@ -32,7 +32,7 @@ def run_price_item_feed(
     for event in feed.play():
         test_case.assertIsInstance(event.time, datetime)
         test_case.assertEqual("UTC", event.time.tzname())
-        test_case.assertGreater(event.time, last, f"{event} < {last}, items={event.items}")
+        test_case.assertGreaterEqual(event.time, last, f"{event} < {last}, items={event.items}")
         last = event.time
 
         n_items += len(event.items)

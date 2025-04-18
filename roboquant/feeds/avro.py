@@ -55,20 +55,20 @@ class AvroFeed(Feed):
         return result
 
     def play(self, timeframe: Timeframe | None = None):
-        t_old = ""
+        t_old = None
         items = []
-        start_time = timeframe.start.isoformat() if timeframe else "1900-01-01T00:00:00Z"
+        timeframe = timeframe or Timeframe.INFINITE
+        t = None
 
         with open(self.avro_file, "rb") as fo:
             for row in reader(fo):
-                t = row["timestamp"]  # type: ignore
-                if t < start_time:
+                t = datetime.fromisoformat(row["timestamp"])  # type: ignore
+                if t not in timeframe:
                     continue
 
                 if t != t_old:
                     if items:
-                        dt = datetime.fromisoformat(t)
-                        event = Event(dt, items)
+                        event = Event(t, items)
                         yield event
                         items = []
                     t_old = t
@@ -88,6 +88,12 @@ class AvroFeed(Feed):
                         items.append(item)
                     case _:
                         raise ValueError(f"Unsupported priceItem type={price_type}")
+
+        if items and t:
+            event = Event(t, items)
+            yield event
+
+
 
     def record(self, feed: Feed, timeframe: Timeframe | None=None, append: bool=False, batch_size: int=10_000):
         """Record another feed into an Avro file. It supports a mix of `Quote`, `Trade`, and `Bar` prices.
