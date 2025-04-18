@@ -85,7 +85,6 @@ class HistoricFeed(Feed, ABC):
             else:
                 break
 
-
     def __repr__(self) -> str:
         feed = self.__class__.__name__
         return f"{feed}(assets={len(self.assets())} timeframe={self.timeframe()})"

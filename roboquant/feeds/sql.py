@@ -16,11 +16,13 @@ logger = logging.getLogger(__name__)
 
 class SQLFeed(Feed):
     """SQLFeed supports recording price-items from another feed and then play them back during a run.
-    There is support for either Bars or Quotes. It is also possible to append values to an existing database.
+    There is support for Bars and Quotes. It is also possible to append values to an existing database.
 
     Under the hood, the data is stored in an SQLite database. The database schema is created automatically when
     the first item is recorded. The database schema is different for Bars and Quotes, so you can only store
     one type of price-items in a single database.
+
+    Please be aware that databases can become very large if using high frequent market data and long periods.
     """
 
     # Used SQL statements in this class

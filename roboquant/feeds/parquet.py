@@ -32,7 +32,7 @@ class ParquetFeed(Feed):
         self.parquet_path = parquet_path
         logger.info("parquet feed path=%s", parquet_path)
 
-    def exists(self):
+    def exists(self) -> bool:
         """Check if the parquet file exists"""
         return os.path.exists(self.parquet_path)
 
@@ -80,6 +80,22 @@ class ParquetFeed(Feed):
             yield event
 
     def __get_row_group_indexes(self, timeframe: Timeframe | None) -> Iterable[int]:
+        """
+        Determines the row group indexes in a Parquet file that fall within a specified timeframe.
+
+        This method reads the metadata of a Parquet file and identifies the row groups whose
+        timestamps overlap with the given timeframe. If no timeframe is provided, it returns
+        all row group indexes.
+
+        Args:
+            timeframe (Timeframe | None): The timeframe to filter row groups. If None, all
+            row groups are included.
+
+        Returns:
+            Iterable[int]: A range object or list of integers representing the indexes of
+            the row groups that match the specified timeframe. Returns an empty list if no
+            row groups match the timeframe.
+        """
         md = pq.read_metadata(self.parquet_path)
         if not timeframe:
             return range(0, md.num_row_groups)
@@ -121,13 +137,14 @@ class ParquetFeed(Feed):
     def __repr__(self) -> str:
         return f"ParquetFeed(path={self.parquet_path})"
 
-    def record(self, feed: Feed, timeframe: Timeframe | None = None, row_group_size: int=10_000):
+    def record(self, feed: Feed, timeframe: Timeframe | None = None, row_group_size: int = 10_000):
         """
         Records a feed to a Parquet file for later replay.
 
         This method processes events from the provided feed and writes them to a Parquet file.
         Each event is serialized into a specific format based on its type (Quote, Bar, or Trade).
-        The data is written in batches to optimize performance.
+        The data is written in batches to optimize performance. As soon as the number of items is equal or greater
+        than the `row_group_size`, it is written as a batch to disk.
 
         Args:
             feed (Feed): The feed containing events to be recorded.
@@ -151,18 +168,18 @@ class ParquetFeed(Feed):
                 for item in event.items:
                     if not isinstance(item, (Quote, Bar, Trade)):
                         continue
-                    asset = item.asset.serialize()
+                    asset_str = item.asset.serialize()
                     match item:
                         case Quote():
-                            items.append({"time": t, "type": 1, "asset": asset, "prices": item.data.tolist()})
+                            items.append({"time": t, "type": 1, "asset": asset_str, "prices": item.data.tolist()})
                         case Bar():
-                            items.append({"time": t, "type": 2, "asset": asset, "prices": item.ohlcv.tolist()})
+                            items.append({"time": t, "type": 2, "asset": asset_str, "prices": item.ohlcv.tolist()})
                         case Trade():
                             items.append(
                                 {
                                     "time": t,
                                     "type": 3,
-                                    "asset": asset,
+                                    "asset": asset_str,
                                     "prices": [item.trade_price, item.trade_volume],
                                 }
                             )
@@ -172,6 +189,7 @@ class ParquetFeed(Feed):
                     writer.write_batch(batch)
                     items = []
 
+            # Check for remaining items and write to disk
             if items:
                 batch = pa.RecordBatch.from_pylist(items, schema=ParquetFeed.__schema)
                 writer.write_batch(batch)
