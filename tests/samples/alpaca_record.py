@@ -10,17 +10,17 @@ from dotenv import load_dotenv
 
 load_dotenv()
 # %%
-print("The retrieval of historical data will take some time")
+print("Retrieving historical data...")
 api_key = os.environ["ALPACA_API_KEY"]
 secret_key = os.environ["ALPACA_SECRET"]
 alpaca_feed = AlpacaHistoricStockFeed(api_key, secret_key)
 alpaca_feed.retrieve_quotes("AAPL", start="2024-05-09T18:00:00Z", end="2024-05-09T19:00:00Z")
-print("timeframe:", alpaca_feed.timeframe())
-print("events:", alpaca_feed.count_events())
-print("items:", alpaca_feed.count_items())
+print("Original timeframe:", alpaca_feed.timeframe())
+print("Original events:", alpaca_feed.count_events())
+print("Original items:", alpaca_feed.count_items())
 
 # %%
-def print_results(feed, file):
+def print_results(feed: AvroFeed | ParquetFeed | SQLFeed, file: str):
     try:
         os.remove(file)
     except OSError:

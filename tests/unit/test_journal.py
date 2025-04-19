@@ -5,7 +5,7 @@ from roboquant.feeds import CSVFeed
 from roboquant.journals import RunMetric, MetricsJournal, FeedMetric, MarketMetric, PNLMetric
 from roboquant.strategies.emacrossover import EMACrossover
 from roboquant.run import run
-from roboquant.journals.plotjournal import PlotJournal
+from roboquant.journals.chartingjournal import ChartingJournal
 
 
 class TestJournal(unittest.TestCase):
@@ -20,7 +20,7 @@ class TestJournal(unittest.TestCase):
         feed = CSVFeed.yahoo(root)
         apple = feed.get_asset("AAPL")
         strategy = EMACrossover()
-        journal = PlotJournal(apple, RunMetric())
+        journal = ChartingJournal(apple, RunMetric())
 
         run(feed, strategy, journal=journal)
         journal.plot()

@@ -9,6 +9,7 @@ from roboquant.journals.pnlmetric import PNLMetric
 from roboquant.journals.pricemetric import PriceItemMetric
 from roboquant.journals.runmetric import RunMetric
 from roboquant.journals.tensorboard import TensorboardJournal
+from roboquant.journals.chartingjournal import ChartingJournal
 
 __all__ = [
     "AlphaBeta",
@@ -22,4 +23,5 @@ __all__ = [
     "PriceItemMetric",
     "RunMetric",
     "TensorboardJournal",
+    "ChartingJournal"
 ]

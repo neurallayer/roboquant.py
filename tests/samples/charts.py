@@ -45,3 +45,12 @@ for timeframe in timeframes:
     journal = rq.journals.MetricsJournal.pnl()
     rq.run(feed, strategy, journal=journal, timeframe=timeframe)
     journal.plot("pnl/equity", plot_x=False, ax=ax, linewidth=0.5, color="grey")
+
+
+# %%
+# Using the plot journal
+strategy = rq.strategies.EMACrossover()
+asset = feed.assets()[0]
+journal = rq.journals.ChartingJournal(asset, rq.journals.PNLMetric())
+rq.run(feed, strategy, journal=journal)
+journal.plot()
