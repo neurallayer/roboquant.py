@@ -5,7 +5,7 @@ from roboquant.feeds import CSVFeed
 from roboquant.journals import RunMetric, MetricsJournal, FeedMetric, MarketMetric, PNLMetric
 from roboquant.strategies.emacrossover import EMACrossover
 from roboquant.run import run
-from roboquant.journals.chartingjournal import ChartingJournal
+from roboquant.journals.scorecard import ScoreCard
 
 
 class TestJournal(unittest.TestCase):
@@ -18,17 +18,14 @@ class TestJournal(unittest.TestCase):
     def test_plot_journal(self):
         root = self._get_root_dir("yahoo")
         feed = CSVFeed.yahoo(root)
-        apple = feed.get_asset("AAPL")
         strategy = EMACrossover()
-        journal = ChartingJournal(apple, RunMetric())
-
+        journal = ScoreCard(RunMetric())
         run(feed, strategy, journal=journal)
         journal.plot()
 
     def test_metrics(self):
         root = self._get_root_dir("yahoo")
         feed = CSVFeed.yahoo(root)
-        # apple = feed.get_asset("AAPL")
         strategy = EMACrossover()
         journal = MetricsJournal(RunMetric(), FeedMetric(), MarketMetric(), PNLMetric())
         run(feed, strategy, journal=journal)

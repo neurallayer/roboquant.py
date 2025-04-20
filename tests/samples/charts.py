@@ -51,6 +51,6 @@ for timeframe in timeframes:
 # Using the plot journal
 strategy = rq.strategies.EMACrossover()
 asset = feed.assets()[0]
-journal = rq.journals.ChartingJournal(asset, rq.journals.PNLMetric())
+journal = rq.journals.ScoreCard(rq.journals.PNLMetric(), include_prices=True)
 rq.run(feed, strategy, journal=journal)
 journal.plot()
