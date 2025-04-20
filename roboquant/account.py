@@ -10,7 +10,8 @@ from roboquant.monetary import Amount, Wallet, USD, Currency
 
 @dataclass(slots=True)
 class Position:
-    """The position of an asset in the account. The position prices are denoted in the currency of the asset.
+    """The position of an asset in the account. The position prices are denoted in the currency of the asset that
+    is linked to this posistion. See also `Account.positions`.
     """
 
     size: Decimal
@@ -97,10 +98,11 @@ class Account:
 
     def position_value(self, asset: Asset) -> float:
         """
-        Return position value denoted in the base currency of the account.
+        Return position value denoted in the base currency of the account. If there is no
+        open position, 0.0 wil lbe returned. Short positions will return a negative value.
 
         Args:
-            asset (Asset): The asset for which to get the position value.
+            asset (Asset): The asset for which to calculate the position value.
 
         Returns:
             float: The position value in the base currency.
@@ -110,7 +112,7 @@ class Account:
 
     def short_positions(self) -> dict[Asset, Position]:
         """
-        Return all the short positions in the account.
+        Return all the open short positions in the account.
 
         Returns:
             dict[Asset, Position]: A dictionary of assets and their corresponding short positions.
@@ -119,7 +121,7 @@ class Account:
 
     def long_positions(self) -> dict[Asset, Position]:
         """
-        Return all the long positions in the account.
+        Return all the open long positions in the account.
 
         Returns:
             dict[Asset, Position]: A dictionary of assets and their corresponding long positions.
@@ -133,8 +135,8 @@ class Account:
 
         Args:
             asset (Asset): The asset for which to calculate the contract value.
-            size (Decimal): The size of the position.
-            price (float): The price of the asset.
+            size (Decimal): The size of the contract.
+            price (float): The price of the contract.
 
         Returns:
             float: The contract value in the base currency.
@@ -145,8 +147,6 @@ class Account:
         """
         Return the equity of the account.
         It calculates the sum of market values of each open position and adds the available cash.
-
-        The returned value is denoted in the base currency of the account.
 
         Returns:
             Wallet: The equity of the account.
@@ -165,8 +165,6 @@ class Account:
     def unrealized_pnl(self) -> Wallet:
         """
         Return the sum of the unrealized profit and loss for the open positions.
-
-        The returned value is denoted in the base currency of the account.
 
         Returns:
             Wallet: The unrealized profit and loss.

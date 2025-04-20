@@ -239,7 +239,7 @@ class Bar(PriceItem):
                 return self.ohlcv[3]
 
     def volume(self, volume_type: str = "DEFAULT") -> float:
-        """Return the volume of the bar.
+        """Return the volume of the bar. A bar has only one type of volume.
 
         Args:
             volume_type (str): The type of volume to return. Default is `DEFAULT`.

@@ -23,7 +23,7 @@ class Order:
     """The asset of this order."""
 
     size: Decimal
-    """The size of the order. Positive for buy orders, negative for sell orders.
+    """The size (number of contracts) of the order. Positive for buy orders, negative for sell orders.
     """
 
     limit: float
@@ -31,7 +31,7 @@ class Order:
     The limit price is the maximum price you are willing to pay for a buy order,
     or the minimum price you are willing to accept for a sell order.
     Make sure to set the limit price in the currency of the asset and not include more decimal places than
-    supported by the broker. For example, for stocks, set the limit price to 2 decimal places.
+    supported by the broker.
     """
 
     tif: Literal["GTC", "DAY"]

@@ -53,21 +53,20 @@ dependencies = [
   "numpy>=1.26.4",
   "websocket-client~=1.8.0",
   "requests>=2.32.0",
-  "yfinance~=0.2.55",
-  "python-ibapi-stable",
+  "yfinance~=0.2.55"
 ]
 
 [project.optional-dependencies]
 torch = [
   "torch>=2.6.0",
   "tensorboard>=2.19.0",
-  "stable-baselines3[extra]>=2.5.0",
-  "sb3-contrib>=2.5.0",
+  "stable-baselines3[extra]>=2.6.0",
+  "sb3-contrib>=2.6.0",
 ]
 ibkr = ["ibind[oauth]>=0.1.14"]
-alpaca = ["alpaca-py>=0.39.0"]
-avro = ["fastavro>=1.9.7"]
-parquet = ["pyarrow>=19.0.0"]
+alpaca = ["alpaca-py>=0.39.4"]
+avro = ["fastavro>=1.10.0"]
+parquet = ["pyarrow>=19.0.1"]
 
 [project.urls]
 Homepage = "https://roboquant.org"
@@ -76,11 +75,11 @@ Issues = "https://github.com/neurallayer/roboquant.py/issues"
 
 [dependency-groups]
 dev = [
-  "matplotlib>=3.10.0",
-  "python-dotenv>=1.0.1",
-  "pyright>=1.1.396",
+  "matplotlib>=3.10.1",
+  "python-dotenv>=1.1.0",
+  "pyright>=1.1.399",
   "ipykernel>=6.29.5",
 ]
 talib = [
-  "ta-lib>=0.6.3"
+  "ta-lib==0.6.3"
 ]

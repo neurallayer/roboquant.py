@@ -17,7 +17,7 @@ logger = logging.getLogger(__name__)
 
 class ParquetFeed(Feed):
     """PriceItems stored in a single Parquet file, supports a mix of `Bar`, `Trade`, and `Quote` price-items.
-    Parquet files provide a good balance between speed and size, making it a great option to store
+    Parquet files provide a good balance between speed, memory-size and disk-size, making it a great option to store
     historic market data for back testing.
     """
 
