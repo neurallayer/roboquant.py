@@ -16,7 +16,10 @@ logger = logging.getLogger(__name__)
 
 
 class ParquetFeed(Feed):
-    """PriceItems stored in Parquet files, supports a mix of `Bar`, `Trade`, and `Quote` price-items."""
+    """PriceItems stored in a single Parquet file, supports a mix of `Bar`, `Trade`, and `Quote` price-items.
+    Parquet files provide a good balance between speed and size, making it a great option to store
+    historic market data for back testing.
+    """
 
     __schema = pa.schema(
         [
@@ -24,6 +27,7 @@ class ParquetFeed(Feed):
             pa.field("asset", pa.string(), False),
             pa.field("type", pa.uint8(), False),
             pa.field("prices", pa.list_(pa.float32()), False),
+            pa.field("freq", pa.string(), True),  # only used for Bars
         ]
     )
 
@@ -49,7 +53,8 @@ class ParquetFeed(Feed):
             assets = batch.column("asset")
             prices = batch.column("prices")
             types = batch.column("type")
-            for n, a, p, t in zip(times, assets, prices, types):
+            freqs = batch.column("freq")
+            for n, a, p, t, f in zip(times, assets, prices, types, freqs):
                 if n != last_time:
                     if items:
                         now = last_time.as_py()
@@ -64,7 +69,7 @@ class ParquetFeed(Feed):
                         item = Quote(asset, array("f", p.as_py()))
                         items.append(item)
                     case 2:
-                        item = Bar(asset, array("f", p.as_py()))
+                        item = Bar(asset, array("f", p.as_py()), f.as_py())
                         items.append(item)
                     case 3:
                         price, volume = p.as_py()
@@ -173,15 +178,18 @@ class ParquetFeed(Feed):
                         case Quote():
                             items.append({"time": t, "type": 1, "asset": asset_str, "prices": item.data.tolist()})
                         case Bar():
-                            items.append({"time": t, "type": 2, "asset": asset_str, "prices": item.ohlcv.tolist()})
-                        case Trade():
                             items.append(
                                 {
                                     "time": t,
-                                    "type": 3,
+                                    "type": 2,
                                     "asset": asset_str,
-                                    "prices": [item.trade_price, item.trade_volume],
+                                    "prices": item.ohlcv.tolist(),
+                                    "freq": item.frequency,
                                 }
+                            )
+                        case Trade():
+                            items.append(
+                                {"time": t, "type": 3, "asset": asset_str, "prices": [item.trade_price, item.trade_volume]}
                             )
 
                 if len(items) >= row_group_size:

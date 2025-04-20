@@ -278,6 +278,8 @@ def deserialize_to_asset(value: str) -> Asset:
     """Based on the provided string value, deserialize it to the correct asset. The asset class needs to be registered
     first using the `register_asset_class` method.
 
+    Under the hood is uses caching to improve performance when repeatedly deserializing the same asset strings.
+
     Args:
         value (str): The serialized string representation of the asset.
 
