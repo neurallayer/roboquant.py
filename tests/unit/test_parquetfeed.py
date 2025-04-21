@@ -23,6 +23,7 @@ class TestParquetFeed(unittest.TestCase):
 
         self.assertEqual(set(origin_feed.assets()), set(feed.assets()))
         self.assertEqual(origin_feed.timeframe(), feed.timeframe())
+        self.assertEqual(origin_feed.count_items(), feed.count_items())
 
         run_price_item_feed(feed, origin_feed.assets(), self)
         run_price_item_feed(feed, origin_feed.assets(), self, timeframe=feed.timeframe())

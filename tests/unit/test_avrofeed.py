@@ -20,7 +20,7 @@ class TestAvroFeed(unittest.TestCase):
         origin_feed = get_feed()
         feed.record(origin_feed)
         self.assertTrue(db_file.exists())
-        # print(feed.index())
+        self.assertEqual(origin_feed.count_items(), feed.count_items())
 
         run_price_item_feed(feed, origin_feed.assets(), self)
         db_file.unlink(missing_ok=True)
