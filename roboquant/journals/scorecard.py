@@ -28,9 +28,10 @@ class ScoreCard(Journal):
     - any metric that is provided
     """
 
-    def __init__(self, *metrics: Metric, include_prices: bool = True):
+    def __init__(self, *metrics: Metric, include_prices: bool = True, price_type: str = "DEFAULT"):
         super().__init__()
         self._include_prices = include_prices
+        self._price_type = price_type
         self._step = 0
         self.metrics = metrics
         self._prices: dict[Asset, _Timeseries] = defaultdict(_Timeseries)
@@ -41,7 +42,7 @@ class ScoreCard(Journal):
     def track(self, event: Event, account: Account, signals: List[Signal], orders: List[Order]) -> None:
         time = event.time
         if self._include_prices:
-            for asset, price in event.get_prices().items():
+            for asset, price in event.get_prices(self._price_type).items():
                 self._prices[asset].add(time, price)
 
             for order in orders:
@@ -62,7 +63,7 @@ class ScoreCard(Journal):
         """
         from matplotlib import pyplot as plt
 
-        ratios = [5 for _ in self._prices] + [1 for _ in self._metric_results]
+        ratios = [5 for _ in self._prices] + [2 for _ in self._metric_results]
         fig, axes = plt.subplots(
             len(self._prices) + len(self._metric_results), sharex=True, gridspec_kw={"height_ratios": ratios}
         )
@@ -70,8 +71,6 @@ class ScoreCard(Journal):
         if not hasattr(axes, "__getitem__"):
             axes = [axes]
 
-        # fig.subplots_adjust(hspace=0)
-        # fig.set_size_inches(15, 5 + (2 * len(ratios)))
         fig.set_size_inches(8.27, 11.69)  # A4
         fig.tight_layout()
 

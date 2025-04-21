@@ -79,6 +79,7 @@ dev = [
   "python-dotenv>=1.1.0",
   "pyright>=1.1.399",
   "ipykernel>=6.29.5",
+  "ipywidgets>=8.1.6"
 ]
 talib = [
   "ta-lib==0.6.3"
