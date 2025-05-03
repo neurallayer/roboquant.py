@@ -13,11 +13,12 @@ from roboquant.strategies.strategy import Strategy
 
 
 def get_feed() -> CSVFeed:
+    """Return a CSV feed based on some stock data in Yahoo format"""
     root = pathlib.Path(__file__).parent.resolve().joinpath("data", "yahoo")
-    return CSVFeed(str(root), time_offset="21:00:00+00:00")
-
+    return CSVFeed.yahoo(str(root))
 
 def get_recent_start_date(days: int = 10):
+    """Get a recent (in the past) date"""
     start = date.today() - timedelta(days=days)
     return start.strftime("%Y-%m-%d")
 
@@ -65,7 +66,7 @@ def run_price_item_feed(
 
 
 def run_strategy(strategy: Strategy, test_case: TestCase):
-    """Run and test a strategy on a feed"""
+    """Run and test a strategy on the default feed"""
     feed = get_feed()
     all_assets = feed.assets()
     total_signals = 0
