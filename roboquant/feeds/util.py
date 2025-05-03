@@ -86,7 +86,7 @@ class BarAggregatorFeed(Feed):
 
 
 class TimeGroupingFeed(Feed):
-    """Group events that occur close after each other into a single event. It uses the time of the events to
+    """Group events that occur closely after each other into a single event. It uses the time of the events to
     determine if they are close to each other.
     """
 
@@ -102,7 +102,6 @@ class TimeGroupingFeed(Feed):
     def play(self, timeframe: Timeframe | None = None):
         items = []
         time = None
-        remaining = self.timeout
         for event in self.feed.play(timeframe):
             time = time or event.time
             remaining = self.timeout - (event.time - time).total_seconds()
@@ -112,7 +111,6 @@ class TimeGroupingFeed(Feed):
                 yield new_event
                 items = []
                 time = event.time
-                remaining = self.timeout
 
             items.extend(event.items)
 

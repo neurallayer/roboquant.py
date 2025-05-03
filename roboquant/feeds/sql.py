@@ -50,7 +50,7 @@ class SQLFeed(Feed):
 
     def create_index(self):
         """Create an index on the date column. The database will become larger. But the performance will improve
-        when querying data for specific timeframes, for example, in case of a walk-forward back test.
+        when querying data for specific timeframes, for example, in the case of a walk-forward back test.
         If you benefit from this index, best to invoke this method after all the data has been recorded.
         """
         with sqlite3.connect(self.db_file) as con:

@@ -39,7 +39,6 @@ class AlpacaBroker(LiveBroker):
         request = GetOrdersRequest(status=QueryOrderStatus.OPEN)
         alpaca_orders: list[AOrder] = self.__client.get_orders(request)  # type: ignore
         for alpaca_order in alpaca_orders:
-            alpaca_order.status
             asset = self._get_asset(alpaca_order.symbol, alpaca_order.asset_class)  # type: ignore
             order = Order(
                 asset,
@@ -90,7 +89,7 @@ class AlpacaBroker(LiveBroker):
         result = self.__client.submit_order(req)
         logger.info("result place order oder=%s result=%s", order, result)
 
-    def _get_order_request(self, order: Order):
+    def _get_order_request(self, order: Order) -> LimitOrderRequest:
         side = OrderSide.BUY if order.is_buy else OrderSide.SELL
         return LimitOrderRequest(
             symbol=order.asset.symbol,

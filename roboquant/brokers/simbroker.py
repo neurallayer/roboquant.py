@@ -135,7 +135,7 @@ class SimBroker(Broker):
 
         Orders that are placed that have already an order-id are either update- or cancellation-orders.
 
-        There is no trading simulation yet performed or account updated. This is done during the `sync` method.
+        There is no trading simulation yet performed or an account updated. This is done during the `sync` method.
         Orders placed at time `t`, will be processed during time `t+1`. This protects against future bias.
         """
         for order in orders:
@@ -178,7 +178,7 @@ class SimBroker(Broker):
         if entry_time := self._order_entry.get(order.id):
             return time.astimezone(self.timezone).date() > entry_time
         else:
-            # first time we see this order
+            # The first time we see this order
             self._order_entry[order.id] = time.astimezone(self.timezone).date()
 
         return False

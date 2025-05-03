@@ -44,7 +44,7 @@ class Feed(ABC):
 
         return result
 
-    def print_items(self, timeframe: Timeframe | None = None, timeout: float | None = None) -> None:
+    def print_items(self, timeframe: Timeframe | None = None) -> None:
         """Print the items in a feed to the console.
         This is mostly useful for debugging purposes to see what items a feed generates.
         """

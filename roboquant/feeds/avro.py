@@ -97,7 +97,7 @@ class AvroFeed(Feed):
 
     def record(self, feed: Feed, timeframe: Timeframe | None=None, append: bool=False, batch_size: int=10_000):
         """Record another feed into an Avro file. It supports a mix of `Quote`, `Trade`, and `Bar` prices.
-        Later you can then use this Avro file as a feed to play back the data.
+        Later, you can then use this Avro file as a feed to play back the data.
         """
 
         schema = parse_schema(AvroFeed._schema)

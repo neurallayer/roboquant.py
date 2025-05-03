@@ -55,7 +55,8 @@ class LiveFeed(Feed):
         self._queue = None
 
     def _put(self, event: Event):
-        """Put an event on the queue. If the event is not monotonic in time, it will be corrected.
+        """Put an event onto the queue.
+        If the event is not monotonic in time, it will be corrected.
         Subclasses should call this method to publish new live events.
         """
         if self._queue:

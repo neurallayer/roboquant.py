@@ -12,7 +12,7 @@ class TaStrategy(Strategy):
     based on technical indicators using a history of bars (aka candlesticks).
 
     Subclasses should implement the `process_asset` method. This method is only invoked once
-    there is at least `size` history for an individual asset available.
+    there is at least the `size` history for an individual asset available.
     """
 
     def __init__(self, size: int) -> None:
@@ -32,7 +32,7 @@ class TaStrategy(Strategy):
     @abstractmethod
     def process_asset(self, asset: Asset, ohlcv: OHLCVBuffer) -> Signal | None:
         """
-        Create a signal for the provided asset, or return None if no signal should be created.
+        Create a signal for the provided asset or return None if no signal should be created.
         Subclasses should implement this method.
 
         Sample:
@@ -71,7 +71,7 @@ class TaMultiAssetStrategy(Strategy):
     @abstractmethod
     def process_assets(self, data: dict[Asset, OHLCVBuffer]) -> list[Signal]:
         """
-        Create zero or more signals for the provided assets, or return an empty list if no signal is created.
+        Create zero or more signals for the provided assets or return an empty list if no signal is created.
         Subclasses should implement this method.
         """
         ...

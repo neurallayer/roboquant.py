@@ -116,7 +116,7 @@ class ParquetFeed(Feed):
         return [] if start is None else range(start, md.num_row_groups)
 
     def timeframe(self) -> Timeframe:
-        """Return the timeframe of this feed, if the feed is empty it will return an empty timeframe"""
+        """Return the timeframe of this feed. If the feed is empty, it will return an empty timeframe"""
         d = pq.read_metadata(self.parquet_path).to_dict()
         if d["row_groups"]:
             start = d["row_groups"][0]["columns"][0]["statistics"]["min"]

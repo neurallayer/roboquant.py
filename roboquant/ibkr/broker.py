@@ -30,7 +30,7 @@ class _AssetMapper:
         self._asset_2_conid[asset] = conid
 
     def get_conid(self, asset: rq.Asset) -> int | None:
-        # First check the mapping table
+        # First, check the mapping table
         if conid := self._asset_2_conid.get(asset):
             return conid
 
@@ -38,9 +38,9 @@ class _AssetMapper:
             logger.warning("only stocks are supported, got %s", asset)
             return None
 
-        filter = {"isUS": True} if asset.currency == rq.monetary.USD else  {"isUS": False}
+        contract_filter = {"isUS": True} if asset.currency == rq.monetary.USD else  {"isUS": False}
 
-        query = StockQuery(asset.symbol, contract_conditions=filter)
+        query = StockQuery(asset.symbol, contract_conditions=contract_filter)
         data : dict = self.client.security_stocks_by_symbol([query], default_filtering=False).data  # type: ignore
         if contract_info := data.get(asset.symbol):
             if len(contract_info) == 1 and len(contract_info[0]["contracts"]) == 1:

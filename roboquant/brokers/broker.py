@@ -31,7 +31,7 @@ class Broker(ABC):
 
     @abstractmethod
     def sync(self, event: Event | None = None) -> Account:
-        """Sync the state, and return an updated account to reflect the latest state. So all brokers
+        """Sync the state and return an updated account to reflect the latest state. So all brokers
         return the same account object, making it easier to switch from back-testing to live-trading.
 
         Args:
@@ -72,7 +72,7 @@ class LiveBroker(Broker):
             and synchronized orders.
     Methods:
         sync(event: Event | None = None) -> Account:
-            Synchronizes the account state with the broker, ensuring it is up-to-date.
+            Synchronizes the account state with the broker, ensuring it is up to date.
         _get_account() -> Account:
             Abstract method to retrieve the current account state. Must be implemented
             by subclasses.
@@ -111,8 +111,8 @@ class LiveBroker(Broker):
 
         diff_time = now - self._account.last_update
 
-        # We always get new account state if we just placed orders
-        # or if we are due to a refresh
+        # We always get a new account state if we just placed orders
+        # or if we are due to refresh
         if self._has_new_orders or diff_time > self.max_delay_sync:
             self.metrics["sync"] += 1
             self._account = self._get_account()
