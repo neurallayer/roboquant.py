@@ -1,14 +1,15 @@
 import logging
 from decimal import Decimal
 from alpaca.trading.client import TradingClient
-from alpaca.trading.enums import AssetClass, OrderSide, QueryOrderStatus, TimeInForce, PositionSide
+from alpaca.trading.enums import OrderSide, QueryOrderStatus, TimeInForce, PositionSide
 from alpaca.trading.models import TradeAccount
 from alpaca.trading.models import Position as APosition
 from alpaca.trading.models import Order as AOrder
 
 from alpaca.trading.requests import GetOrdersRequest, LimitOrderRequest, ReplaceOrderRequest
 from roboquant.account import Account, Position
-from roboquant.asset import Asset, Crypto, Option, Stock
+from roboquant.alpaca.feed import _get_asset
+from roboquant.asset import Asset
 from roboquant.brokers.broker import LiveBroker, Order
 from roboquant.monetary import Wallet, Amount, USD
 
@@ -24,15 +25,6 @@ class AlpacaBroker(LiveBroker):
     def __init__(self, api_key: str, secret_key: str) -> None:
         super().__init__()
         self.__client = TradingClient(api_key, secret_key)
-
-    def _get_asset(self, symbol: str, asset_class: AssetClass) -> Asset:
-        match asset_class:
-            case AssetClass.US_EQUITY:
-                return Stock(symbol)
-            case AssetClass.US_OPTION:
-                return Option(symbol)
-            case AssetClass.CRYPTO:
-                return Crypto.from_symbol(symbol)
 
     def _sync_orders(self):
         orders: list[Order] = []
@@ -60,7 +52,7 @@ class AlpacaBroker(LiveBroker):
             if p.side == PositionSide.SHORT:
                 size = -size
             new_pos = Position(size, float(p.avg_entry_price), float(p.current_price or "nan"))
-            asset = self._get_asset(p.symbol, p.asset_class)
+            asset = _get_asset(p.symbol, p.asset_class)
             positions[asset] = new_pos
         return positions
 
