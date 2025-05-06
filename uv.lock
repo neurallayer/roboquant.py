@@ -233,6 +233,27 @@ wheels = [
 ]
 
 [[package]]
+name = "curl-cffi"
+version = "0.10.0"
+source = { registry = "https://pypi.org/simple" }
+dependencies = [
+    { name = "certifi" },
+    { name = "cffi" },
+]
+sdist = { url = "https://files.pythonhosted.org/packages/7d/c0/18e408334c480f2cacca02feec8cd01dba9e3f1637cd03fd21b033c2bfa3/curl_cffi-0.10.0.tar.gz", hash = "sha256:3e37b35268ca58492f54ed020ae4b50c33ee0debad4145db9f746f04ed466eb0", size = 144434 }
+wheels = [
+    { url = "https://files.pythonhosted.org/packages/56/6c/f3a27db82305540ecab0db688a5977162ed7d64e274c09ea7c9ed3f4a541/curl_cffi-0.10.0-cp39-abi3-macosx_10_9_x86_64.whl", hash = "sha256:15053d01c6a3e3c4c5331ce9e07e1dc31ca5aa063babca05d18b1b5aad369fac", size = 5224229 },
+    { url = "https://files.pythonhosted.org/packages/7c/cc/5dc45cf5f52c82979daef5b414108a39f9eeaa164a6810da1368d307b468/curl_cffi-0.10.0-cp39-abi3-macosx_11_0_arm64.whl", hash = "sha256:3969e4260ad4dab638fb6dbe349623f9f5f022435c7fd21daf760231380367fa", size = 2700826 },
+    { url = "https://files.pythonhosted.org/packages/f7/58/fff44c797abf4a101723f167259801cde5d7bcfc7621bb37baeeb3e03fdc/curl_cffi-0.10.0-cp39-abi3-manylinux_2_17_aarch64.manylinux2014_aarch64.whl", hash = "sha256:458f53c41bd76d90d8974d60c3a8a0dd902a1af1f9056215cf24f454bcedc6fd", size = 7067933 },
+    { url = "https://files.pythonhosted.org/packages/24/1f/a51248f89b958216cf29342b8a43befefc62301781576693b25caea5c24f/curl_cffi-0.10.0-cp39-abi3-manylinux_2_17_i686.manylinux2014_i686.whl", hash = "sha256:cfc74f09e44d2d8d61b8e8fda3a7004b5bc0217a703fbbe9e16ef8caa1f3d4e4", size = 6624491 },
+    { url = "https://files.pythonhosted.org/packages/09/50/028ab0c0ef9717af285801e7ba5b1d83e42073e06d2c62c7a9e8a0b9a0fa/curl_cffi-0.10.0-cp39-abi3-manylinux_2_17_x86_64.manylinux2014_x86_64.whl", hash = "sha256:f03f4b17dc679c82bd3c946feb1ad38749b2ad731d7c26daefaac857d1c72fd9", size = 7447104 },
+    { url = "https://files.pythonhosted.org/packages/07/54/0406653d8dbcfa766fe33c43aa19438003bdee03119cb9c1b070b03a10ee/curl_cffi-0.10.0-cp39-abi3-musllinux_1_1_aarch64.whl", hash = "sha256:f1b0c7b7b81afca15a0e56c593d3c2bdcd4fd4c9ca49b9ded5b9d8076ba78ff9", size = 7892220 },
+    { url = "https://files.pythonhosted.org/packages/ee/68/a83946686cd96f87f1611b26dbee10dc41c7dbfc2558c8f4c762caf975c5/curl_cffi-0.10.0-cp39-abi3-musllinux_1_1_x86_64.whl", hash = "sha256:04b1d23f0f54f94b8298ed417e6bece85a635d674723cde2b155da686efbf78f", size = 7831954 },
+    { url = "https://files.pythonhosted.org/packages/20/0f/78b0221782c43cba88cb09b74484bc0fc7db09c85ddefaf9817381a9414f/curl_cffi-0.10.0-cp39-abi3-win32.whl", hash = "sha256:1e60b8ecc80bfb0da4ff73ac9d194e80482b50ecbb8aefec1b0edaf45fafd80e", size = 1087075 },
+    { url = "https://files.pythonhosted.org/packages/26/80/dbc3a5119afe233ddc9dfc14d5b175636443e5d6349f4cdce3eaa9e1523a/curl_cffi-0.10.0-cp39-abi3-win_amd64.whl", hash = "sha256:59389773a1556e087120e91eac1e33f84f1599d853e1bc168b153e4cdf360002", size = 1374008 },
+]
+
+[[package]]
 name = "cycler"
 version = "0.12.1"
 source = { registry = "https://pypi.org/simple" }
@@ -1416,7 +1437,7 @@ requires-dist = [
     { name = "tensorboard", marker = "extra == 'torch'", specifier = ">=2.19.0" },
     { name = "torch", marker = "extra == 'torch'", specifier = ">=2.6.0" },
     { name = "websocket-client", specifier = "~=1.8.0" },
-    { name = "yfinance", specifier = "~=0.2.55" },
+    { name = "yfinance", specifier = "~=0.2.58" },
 ]
 provides-extras = ["alpaca", "avro", "ibkr", "parquet", "torch"]
 
@@ -1758,10 +1779,11 @@ wheels = [
 
 [[package]]
 name = "yfinance"
-version = "0.2.55"
+version = "0.2.58"
 source = { registry = "https://pypi.org/simple" }
 dependencies = [
     { name = "beautifulsoup4" },
+    { name = "curl-cffi" },
     { name = "frozendict" },
     { name = "multitasking" },
     { name = "numpy" },
@@ -1771,7 +1793,7 @@ dependencies = [
     { name = "pytz" },
     { name = "requests" },
 ]
-sdist = { url = "https://files.pythonhosted.org/packages/6c/f3/fbcbf24ff111e84e627566cbb8c54e34101aebf2e08fa62c237bc3a02adc/yfinance-0.2.55.tar.gz", hash = "sha256:a17f62874b12a2e52f66a220033f34b066584db210aa9da88a7add84f4b312ed", size = 119440 }
+sdist = { url = "https://files.pythonhosted.org/packages/be/db/2849fe0eaa0505a549676e48daf8ac807f7e28ce950e86c76a40145d82ae/yfinance-0.2.58.tar.gz", hash = "sha256:4bf61714544aa57f82b9c157c17f40ede53ec70ce9a0ec170661a9cba737cbe2", size = 122788 }
 wheels = [
-    { url = "https://files.pythonhosted.org/packages/42/88/2127d45519d1d413f564d4be9e8d12857ba42c4d76f87aec2f78e99233e4/yfinance-0.2.55-py2.py3-none-any.whl", hash = "sha256:e34529ab69a5e48458b66f8369afeb396cf8c28d0e17cc392c4a02a7f31f1af0", size = 109792 },
+    { url = "https://files.pythonhosted.org/packages/fa/6f/dba34a52f77ee05490eaff20fec1934f3cf12afaf538f1de1c81367f7dbc/yfinance-0.2.58-py2.py3-none-any.whl", hash = "sha256:b8572ac086ae24259e6b3d967b949bf4e6783e72fda9ea5d0926b69b8b410852", size = 113672 },
 ]
