@@ -46,6 +46,20 @@ class MetricsJournal(Journal):
                 values.append(metrics[metric_name])
         return timeline, values
 
+    def to_dataframe(self, metric_name: str, time_index: bool = False):
+        """Return the metric as a Pandas dataframe optionally with the time being the index
+        and the value being the column.
+        """
+        import pandas as pd
+
+        times, values = self.get_metric(metric_name)
+        d = {
+            "time": times,
+            "value": values
+        }
+        df = pd.DataFrame.from_dict(d, orient="columns")
+        return df.set_index("time") if time_index else df  # type: ignore
+
     def plot(self, metric_name: str, plot_x: bool = True, ax = None, **kwargs):
         """Plot one of the metrics. Optional a `matplotlib.axes.Axes` can be provided
         This requires matplotlib to be installed."""

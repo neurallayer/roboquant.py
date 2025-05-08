@@ -3,7 +3,10 @@ from array import array
 from datetime import date, datetime, timezone
 import warnings
 
-import yfinance
+try:
+    import yfinance
+except ImportError:
+    yfinance = None
 
 from roboquant.asset import Asset, Stock
 from roboquant.event import Bar
@@ -33,6 +36,7 @@ class YahooFeed(HistoricFeed):
         """
 
         super().__init__()
+        assert yfinance, "didn't load yfinance package, perhaps not installed"
 
         # Disable some yfinance warnings
         warnings.simplefilter(action="ignore", category=FutureWarning)

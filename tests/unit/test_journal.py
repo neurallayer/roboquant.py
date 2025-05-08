@@ -22,7 +22,10 @@ class TestJournal(unittest.TestCase):
         journal = MetricsJournal(RunMetric(), FeedMetric(), MarketMetric(), PNLMetric())
         run(feed, strategy, journal=journal)
         self.assertTrue(journal.get_metric_names())
-        self.assertTrue(journal.get_metric("pnl/equity"))
+        self.assertEqual(1218, len(journal.get_metric("pnl/equity")[0]))
+
+        df = journal.to_dataframe("pnl/equity")
+        self.assertEqual(1218, len(df))
 
 
 if __name__ == "__main__":
