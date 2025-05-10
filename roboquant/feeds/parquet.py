@@ -19,6 +19,8 @@ class ParquetFeed(Feed):
     """PriceItems stored in a single Parquet file, supports a mix of `Bar`, `Trade`, and `Quote` price-items.
     Parquet files provide a good balance between speed, memory-size and disk-size, making it a great option to store
     historic market data for back testing.
+
+    Use the `record` method to move data from any other feed into a `ParquetFeed`.
     """
 
     __schema = pa.schema(
@@ -35,6 +37,14 @@ class ParquetFeed(Feed):
         super().__init__()
         self.parquet_path = parquet_path
         logger.info("parquet feed path=%s", parquet_path)
+
+    @staticmethod
+    def us_stocks_10():
+        """Return a ParquetFeed with the market data for 10 popular S&P 500 companies for 10 years.
+        This is included for demo purposes and should not be relied upon for serious back testing.
+        """
+        path = os.path.join(os.path.dirname(__file__), 'resources', 'us10.parquet')
+        return ParquetFeed(path)
 
     def exists(self) -> bool:
         """Check if the parquet file exists"""
@@ -142,7 +152,7 @@ class ParquetFeed(Feed):
     def __repr__(self) -> str:
         return f"ParquetFeed(path={self.parquet_path})"
 
-    def record(self, feed: Feed, timeframe: Timeframe | None = None, row_group_size: int = 10_000):
+    def record(self, feed: Feed, timeframe: Timeframe | None = None, row_group_size: int = 10_000, priceitem_filter = None):
         """
         Records a feed to a Parquet file for later replay.
 
@@ -172,6 +182,8 @@ class ParquetFeed(Feed):
 
                 for item in event.items:
                     if not isinstance(item, (Quote, Bar, Trade)):
+                        continue
+                    if priceitem_filter and not priceitem_filter(item):
                         continue
                     asset_str = item.asset.serialize()
                     match item:

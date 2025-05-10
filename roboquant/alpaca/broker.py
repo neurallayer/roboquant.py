@@ -31,7 +31,7 @@ class AlpacaBroker(LiveBroker):
         request = GetOrdersRequest(status=QueryOrderStatus.OPEN)
         alpaca_orders: list[AOrder] = self.__client.get_orders(request)  # type: ignore
         for alpaca_order in alpaca_orders:
-            asset = self._get_asset(alpaca_order.symbol, alpaca_order.asset_class)  # type: ignore
+            asset = _get_asset(alpaca_order.symbol, alpaca_order.asset_class)  # type: ignore
             order = Order(
                 asset,
                 Decimal(alpaca_order.qty),  # type: ignore

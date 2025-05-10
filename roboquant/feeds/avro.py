@@ -4,7 +4,6 @@ from datetime import datetime
 from array import array
 
 from fastavro import writer, reader, parse_schema, block_reader
-# from fastavro._read_py import block_reader
 
 from roboquant.event import Quote, Bar, Trade
 from roboquant.event import Event

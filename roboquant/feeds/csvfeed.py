@@ -146,7 +146,9 @@ class CSVFeed(HistoricFeed):
 
             def _get_asset(self, filename: str):
                 base = pathlib.Path(filename).stem
-                return Stock(base.split(".")[0].upper())
+                symbol = base.split(".")[0].upper()
+                symbol = symbol.replace("-", ".")
+                return Stock(symbol)
 
         return StooqDailyFeed()
 
@@ -170,7 +172,9 @@ class CSVFeed(HistoricFeed):
 
             def _get_asset(self, filename: str):
                 base = pathlib.Path(filename).stem
-                return Stock(base.split(".")[0].upper())
+                symbol = base.split(".")[0].upper()
+                symbol = symbol.replace("-", ".")
+                return Stock(symbol)
 
         return StooqIntradayFeed()
 

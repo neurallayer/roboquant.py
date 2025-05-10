@@ -1388,7 +1388,6 @@ source = { editable = "." }
 dependencies = [
     { name = "numpy" },
     { name = "requests" },
-    { name = "websocket-client" },
     { name = "yfinance" },
 ]
 
@@ -1436,7 +1435,6 @@ requires-dist = [
     { name = "stable-baselines3", extras = ["extra"], marker = "extra == 'torch'", specifier = ">=2.6.0" },
     { name = "tensorboard", marker = "extra == 'torch'", specifier = ">=2.19.0" },
     { name = "torch", marker = "extra == 'torch'", specifier = ">=2.6.0" },
-    { name = "websocket-client", specifier = "~=1.8.0" },
     { name = "yfinance", specifier = "~=0.2.58" },
 ]
 provides-extras = ["alpaca", "avro", "ibkr", "parquet", "torch"]
