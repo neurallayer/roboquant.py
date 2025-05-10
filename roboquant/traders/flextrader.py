@@ -3,7 +3,7 @@ import logging
 from decimal import Decimal
 from enum import Flag, auto
 import random
-from typing import Any
+from typing import Any, Literal
 
 from roboquant.asset import Asset
 from roboquant.event import Event
@@ -101,7 +101,9 @@ class FlexTrader(Trader):
     - shorting: allow orders that could result in a short position, default is false
     - price_type: the price type to use when determining order value, for example "CLOSE". Default is "DEFAULT"
     - shuffle_signals: shuffle the signals before processing them, default is false
-    - valid_for: the time delta for which the order is valid, default is 3 days
+    - limit_offset_perc: the offset as percentage for the order limit price. A value of 0.01 means the limit price will be
+    1% below market price for buy orders and 1% above the market price for sell orders. Default is 0.0.
+    - tif: the time-in-force policy to use, default is `DAY`
 
     It might be sometimes challenging to understand why a signal isn't converted into an order. The flex-trader logs
     at INFO level when certain rules have been fired. Enable higher logging:
@@ -122,6 +124,8 @@ class FlexTrader(Trader):
         max_position_perc: float = 0.1,
         price_type: str = "DEFAULT",
         shuffle_signals: bool = False,
+        limit_offset_perc: float = 0.0,
+        tif: Literal["DAY", "GTC"] = "DAY"
     ) -> None:
         super().__init__()
         self.one_order_only = one_order_only
@@ -133,6 +137,8 @@ class FlexTrader(Trader):
         self.max_position_perc = max_position_perc
         self.price_type = price_type
         self.shuffle_signals = shuffle_signals
+        self.limit_offset_perc: float = limit_offset_perc
+        self.tif: Literal["DAY", "GTC"] = tif
 
     def _get_order_size(self, rating: float, contract_price: float, max_order_value: float) -> Decimal:
         """Return the order size"""
@@ -251,9 +257,10 @@ class FlexTrader(Trader):
 
         Overwrite this method if you want to implement different logic.
         """
-        price = item.price(self.price_type)
+        multiplier = 1.0 - self.limit_offset_perc if size > 0 else 1.0 + self.limit_offset_perc
+        price = item.price(self.price_type) * multiplier
         limit = round(price, 2)
-        result = [Order(asset, size, limit)]
+        result = [Order(asset, size, limit, self.tif)]
         logger.info("<== %s converted signal into new order(s) %s", time.replace(tzinfo=None), result)
         return result
 

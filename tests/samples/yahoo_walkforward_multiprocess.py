@@ -17,7 +17,8 @@ print(FEED)
 def walk_forward(params: tuple[rq.Timeframe, tuple[int, int]]) -> float:
     """Perform a run over the provided timeframe and EMA parameters
     The return value is the equity value at the end of the run. In general,
-    the return value needs to be serialized to be able to pass it back to the main process.
+    the return value needs to be serialized to be able to pass it back to the
+    main process.
     """
     timeframe, (fast, slow) = params
     strategy = rq.strategies.EMACrossover(fast, slow)
@@ -44,6 +45,6 @@ if __name__ == "__main__":
         # run the walk-forward in parallel
         equities = p.map(walk_forward, all_params)
 
-        # print some result
+        # print some results
         print("max equity =>", max(equities))
         print("min equity =>", min(equities))

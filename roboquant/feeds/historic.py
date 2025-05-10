@@ -12,7 +12,7 @@ class HistoricFeed(Feed, ABC):
     """
     Abstract base class for feeds that produce historic price-items.
     Internally, it uses a sorted-by-datetime dictionary to store the data. So all data
-    is kept in memory
+    is kept in memory.
     """
 
     def __init__(self):
