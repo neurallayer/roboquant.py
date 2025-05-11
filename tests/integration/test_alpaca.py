@@ -20,7 +20,6 @@ class TestAlpaca(unittest.TestCase):
     stocks = ["AAPL", "TSLA"]
     assets = [Stock(symbol) for symbol in stocks]
     cryptos = [Crypto.from_symbol("BTC/USDT")]
- 
 
     def test_alpaca_stock_feed_bars(self):
         feed = AlpacaHistoricStockFeed(*_get_credentials())

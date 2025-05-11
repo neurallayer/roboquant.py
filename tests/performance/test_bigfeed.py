@@ -36,7 +36,7 @@ class TestBigFeed(unittest.TestCase):
     def test_big_feed_daily(self):
         print("============ Daily Bars ============")
         start = time.time()
-        path = os.path.expanduser("~/data/nyse_stocks/")
+        path = os.path.expanduser("~/data/daily/us/nyse stocks/")
         feed = rq.feeds.CSVFeed.stooq_us_daily(path)
         load_time = time.time() - start
 
@@ -47,7 +47,7 @@ class TestBigFeed(unittest.TestCase):
     def test_big_feed_intraday(self):
         print("============ 5 Min Bars ============")
         start = time.time()
-        path = os.path.expanduser("~/data/intra/")
+        path = os.path.expanduser("~/data/5 min/us/nyse stocks/")
         feed = rq.feeds.CSVFeed.stooq_us_intraday(path)
         load_time = time.time() - start
 

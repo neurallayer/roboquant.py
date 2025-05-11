@@ -6,7 +6,7 @@ from pstats import Stats, SortKey
 import roboquant as rq
 
 
-path = os.path.expanduser("~/data/nasdaq_stocks/1")
+path = os.path.expanduser("~/data/daily/us/nasdaq stocks/1")
 feed = rq.feeds.CSVFeed.stooq_us_daily(path)
 
 class TestProfile(unittest.TestCase):
