@@ -52,47 +52,47 @@ class ParquetFeed(Feed):
 
     def play(self, timeframe: Timeframe | None = None):
         # pylint: disable=too-many-locals
-        dataset = pq.ParquetFile(self.parquet_path)
-        last_time: Any = None
-        items = []
+        with pq.ParquetFile(self.parquet_path) as dataset:
+            last_time: Any = None
+            items = []
 
-        row_group_indexes = self.__get_row_group_indexes(timeframe)
+            row_group_indexes = self.__get_row_group_indexes(timeframe)
 
-        for batch in dataset.iter_batches(row_groups=row_group_indexes):
-            times = batch.column("time")
-            assets = batch.column("asset")
-            prices = batch.column("prices")
-            types = batch.column("type")
-            freqs = batch.column("freq")
-            for n, a, p, t, f in zip(times, assets, prices, types, freqs):
-                if n != last_time:
-                    if items:
-                        now = last_time.as_py()
-                        event = Event(now, items)
-                        yield event
-                    last_time = n
-                    items = []
+            for batch in dataset.iter_batches(row_groups=row_group_indexes):
+                times = batch.column("time")
+                assets = batch.column("asset")
+                prices = batch.column("prices")
+                types = batch.column("type")
+                freqs = batch.column("freq")
+                for n, a, p, t, f in zip(times, assets, prices, types, freqs):
+                    if n != last_time:
+                        if items:
+                            now = last_time.as_py()
+                            event = Event(now, items)
+                            yield event
+                        last_time = n
+                        items = []
 
-                asset = deserialize_to_asset(a.as_py())
-                match t.as_py():
-                    case 1:
-                        item = Quote(asset, array("f", p.as_py()))
-                        items.append(item)
-                    case 2:
-                        item = Bar(asset, array("f", p.as_py()), f.as_py())
-                        items.append(item)
-                    case 3:
-                        price, volume = p.as_py()
-                        item = Trade(asset, price, volume)
-                        items.append(item)
-                    case _:
-                        logger.warning("Unknown type %s", t.as_py())
+                    asset = deserialize_to_asset(a.as_py())
+                    match t.as_py():
+                        case 1:
+                            item = Quote(asset, array("f", p.as_py()))
+                            items.append(item)
+                        case 2:
+                            item = Bar(asset, array("f", p.as_py()), f.as_py())
+                            items.append(item)
+                        case 3:
+                            price, volume = p.as_py()
+                            item = Trade(asset, price, volume)
+                            items.append(item)
+                        case _:
+                            logger.warning("Unknown type %s", t.as_py())
 
-        # any remainders
-        if items:
-            now = last_time.as_py()
-            event = Event(now, items)
-            yield event
+            # any remainders
+            if items:
+                now = last_time.as_py()
+                event = Event(now, items)
+                yield event
 
     def __get_row_group_indexes(self, timeframe: Timeframe | None) -> Iterable[int]:
         """
