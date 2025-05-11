@@ -21,19 +21,13 @@ class TestDelay(unittest.TestCase):
 
     This route includes the following paths if you run this script from home:
 
-    - From IEX to the market data provider (Alpaca)
-    - Provider holds it for 15ms (requirement from IEX)
+    - From exchange to the market data provider (Alpaca)
+    - Provider holds it for 15ms in case of IEX
     - From provider to the modem/access-point in your house
     - From the access-point to your computer (f.e lan or Wi-Fi)
     """
 
-    __symbols = ["TSLA", "MSFT", "NVDA", "AMD", "AAPL", "AMZN", "META", "GOOG", "XOM", "JPM", "NLFX", "BA", "INTC", "V"]
-
-    def test_alpaca_delay(self):
-        api_key = os.environ["ALPACA_API_KEY"]
-        secret_key = os.environ["ALPACA_SECRET"]
-        feed = AlpacaLiveFeed(api_key, secret_key, market="iex")
-        feed.subscribe_quotes(*TestDelay.__symbols)
+    def _measure(self, feed):
         timeframe = Timeframe.next(minutes=1)
 
         delays = []
@@ -50,6 +44,25 @@ class TestDelay(unittest.TestCase):
            f"max={max(delays):.3f} min={min(delays):.3f} events={len(delays)} items={n}"
         )
 
+    def test_alpaca_delay_stocks(self):
+        symbols = ["TSLA", "MSFT", "NVDA", "AMD", "AAPL", "AMZN", "META", "GOOG", "XOM", "JPM", "NLFX", "BA", "INTC", "V"]
+
+        api_key = os.environ["ALPACA_API_KEY"]
+        secret_key = os.environ["ALPACA_SECRET"]
+        feed = AlpacaLiveFeed(api_key, secret_key, market="iex")
+        feed.subscribe_quotes(*symbols)
+        print("\nIEX delay\n############################")
+        self._measure(feed)
+
+    def test_alpaca_delay_crypto(self):
+        symbols = ["BTC/USD", "BCH/USD", "BAT/USD", "ETH/USD"]
+
+        api_key = os.environ["ALPACA_API_KEY"]
+        secret_key = os.environ["ALPACA_SECRET"]
+        feed = AlpacaLiveFeed(api_key, secret_key, market="crypto")
+        feed.subscribe_quotes(*symbols)
+        print("\nCrypto delay\n############################")
+        self._measure(feed)
 
 if __name__ == "__main__":
     unittest.main()
