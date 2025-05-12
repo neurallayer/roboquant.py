@@ -12,9 +12,9 @@ load_dotenv()
 
 class TestDelay(unittest.TestCase):
     """
-    Measure the delay of receiving live market data using Alpaca. It will take a minute to run and will
-    collect the quotes for a number of populair stocks or crypto currencies. The delay is the time between the moment
-    the quote was generated and the moment it was received by the system.
+    Measure the delay of receiving live market data using Alpaca. It will take two times one minute to run and will
+    collect the quotes for a number of populair stocks and crypto currencies. The delay is the time between the moment
+    the quote was generated on the exchange and the moment it was received by your system.
 
     It requires that the system clock of your computer is set correctly.
     You can navigate to https://time.is/ to get a rough idea about its accuracy.
