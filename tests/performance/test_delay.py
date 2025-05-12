@@ -12,9 +12,9 @@ load_dotenv()
 
 class TestDelay(unittest.TestCase):
     """
-    Measure the delay of receiving live market data from IEX using Alpaca. It will take a minute to run and will
-    collect the quotes for a number of populair stocks. The delay is the time between the moment the quote was
-    generated and the moment it was received by the system.
+    Measure the delay of receiving live market data using Alpaca. It will take a minute to run and will
+    collect the quotes for a number of populair stocks or crypto currencies. The delay is the time between the moment
+    the quote was generated and the moment it was received by the system.
 
     It requires that the system clock of your computer is set correctly.
     You can navigate to https://time.is/ to get a rough idea about its accuracy.
@@ -22,7 +22,7 @@ class TestDelay(unittest.TestCase):
     This route includes the following paths if you run this script from home:
 
     - From exchange to the market data provider (Alpaca)
-    - Provider holds it for 15ms in case of IEX
+    - Provider holds it for 15ms in case of IEX stock data
     - From provider to the modem/access-point in your house
     - From the access-point to your computer (f.e lan or Wi-Fi)
     """
