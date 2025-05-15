@@ -1,9 +1,11 @@
 # %%
+import os
 import roboquant as rq
 from roboquant.feeds.parquet import ParquetFeed
 
 # %%
-csv_feed = rq.feeds.CSVFeed.stooq_us_daily("/tmp/us")
+path = os.path.expanduser("~/data/daily/us/")
+csv_feed = rq.feeds.CSVFeed.stooq_us_daily(path)
 
 # 10 popular symbols
 symbols_str = "MSFT,NVDA,AAPL,AMZN,META,GOOGL,AVGO,JPM,XOM,TSLA"

@@ -22,7 +22,8 @@ assert wallet[EUR] == 40.0
 print("The wallet contains", wallet)
 
 # %%
-# Install the ECB currency converter
+# Install the ECB currency converter so we cans
+# convert between different currencies
 ECBConversion().register()
 
 # %%
@@ -33,10 +34,10 @@ print("The total value of the wallet today is", wallet@USD)
 # %%
 # Convert between amounts
 amt = 100@USD
-print("100@USD =", amt@JPY)
+print(amt, "=", amt@JPY)
 
 yesterday = utcnow() - timedelta(days=1)
-print("100@@USD", amt.convert_to(JPY, yesterday))
+print(amt,"in JYP yesterday is", amt.convert_to(JPY, yesterday))
 
 # %%
 # Convert a wallet to a single currency at different dates
@@ -45,5 +46,3 @@ print("Value of wallet in USD in 2010 is", wallet.convert_to(USD, dt1))
 
 dt2 = datetime.fromisoformat("2020-01-01")
 print("Value of wallet in USD in 2020 is", wallet.convert_to(USD, dt2))
-
-# %%
