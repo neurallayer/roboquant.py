@@ -39,12 +39,11 @@ class TestDelay(unittest.TestCase):
 
         if not delays:
             print("Didn't receive any quotes, is it perhaps outside trading hours?")
-            return
-
-        print(
-           f"delays mean={mean(delays):.3f} stdev={stdev(delays):.3f}",
-           f"max={max(delays):.3f} min={min(delays):.3f} events={len(delays)} items={n}"
-        )
+        else:
+            print(
+                f"delays mean={mean(delays):.3f} stdev={stdev(delays):.3f}",
+                f"max={max(delays):.3f} min={min(delays):.3f} events={len(delays)} items={n}",
+            )
 
     def test_alpaca_delay_stocks(self):
         symbols = ["TSLA", "MSFT", "NVDA", "AMD", "AAPL", "AMZN", "META", "GOOG", "XOM", "JPM", "NLFX", "BA", "INTC", "V"]
@@ -65,6 +64,7 @@ class TestDelay(unittest.TestCase):
         feed.subscribe_quotes(*symbols)
         print("\nCrypto delay\n############################")
         self._measure(feed)
+
 
 if __name__ == "__main__":
     unittest.main()
