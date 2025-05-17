@@ -27,7 +27,11 @@ class TestDelay(unittest.TestCase):
     - From the access-point to your computer (f.e lan or Wi-Fi)
     """
 
-    def _measure(self, feed):
+    def _measure(self, title, feed):
+        print()
+        print(title)
+        print("=" * len(title))
+
         timeframe = Timeframe.next(minutes=1)
 
         delays = []
@@ -52,18 +56,17 @@ class TestDelay(unittest.TestCase):
         secret_key = os.environ["ALPACA_SECRET"]
         feed = AlpacaLiveFeed(api_key, secret_key, market="iex")
         feed.subscribe_quotes(*symbols)
-        print("\nIEX delay\n############################")
-        self._measure(feed)
+        self._measure("IEX Exchange Delay", feed)
 
     def test_alpaca_delay_crypto(self):
-        symbols = ["BTC/USD", "BCH/USD", "BAT/USD", "ETH/USD"]
+        cryptos = ["BTC", "ETH", "XRB", "BNB", "SOL", "DOGE"]
+        symbols = [f"{c}/USD" for c in cryptos] + [f"{c}/USDT" for c in cryptos] + [f"{c}/USDC" for c in cryptos]
 
         api_key = os.environ["ALPACA_API_KEY"]
         secret_key = os.environ["ALPACA_SECRET"]
         feed = AlpacaLiveFeed(api_key, secret_key, market="crypto")
         feed.subscribe_quotes(*symbols)
-        print("\nCrypto delay\n############################")
-        self._measure(feed)
+        self._measure("Crypto Exchange Delay", feed)
 
 
 if __name__ == "__main__":

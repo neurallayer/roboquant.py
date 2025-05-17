@@ -10,7 +10,6 @@ feed = rq.feeds.YahooFeed("JPM", "IBM", "F", "MSFT", "V", "GE", "CSCO", "WMT", "
 hyper_params = [(5, 10), (12, 25), (25, 50)]
 
 for p1, p2 in hyper_params:
-
     # Each run will be logged to a different directory
     log_dir = f"runs/ema_{p1}_{p2}"
     writer = Writer(log_dir)
