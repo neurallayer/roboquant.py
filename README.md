@@ -25,14 +25,12 @@ print(account)
 ```
 
 ## Install
-Roboquant can be installed like most other Python packages, using pip or conda.
+Roboquant can be installed like most other Python packages, using tools like `uv`, `pip` or `conda`.
 Make sure you have Python version 3.11 or higher installed.
 
 ```shell
 python3 -m pip install --upgrade roboquant
 ```
-If you don't want to install anything locally, you can try out roboquant in an online Jupyter environment like
-[![Open In Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/neurallayer/roboquant-interactive/blob/main/intro_roboquant.ipynb)
 
 The core of roboquant limits the number of dependencies. 
 But you can install roboquant including one or more of the optional dependencies if you require certain functionality:

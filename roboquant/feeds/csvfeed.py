@@ -5,6 +5,7 @@ import os
 import pathlib
 from array import array
 from datetime import datetime, time, timezone
+from typing import Callable
 
 from roboquant.asset import Asset, Stock
 from roboquant.event import Bar
@@ -57,6 +58,7 @@ class CSVFeed(HistoricFeed):
     - time_fmt: the time format to use, or None if the time is in ISO format
     - endswith: the file extension to use to select the files
     - frequency: the frequency of the data, use as part of the `Bar` object but no functional impact
+    - asset_filter: optionally disaalow certain assets from being used.
     """
 
     def __init__(
@@ -68,6 +70,7 @@ class CSVFeed(HistoricFeed):
         time_fmt: str | None = None,
         endswith=".csv",
         frequency="",
+        asset_filter: Callable[[Asset], bool] | None = None,
     ):
         super().__init__()
         self.columns = columns
@@ -76,6 +79,7 @@ class CSVFeed(HistoricFeed):
         self.freq = frequency
         self.endswith = endswith
         self.time_offset = time.fromisoformat(time_offset) if time_offset is not None else None
+        self.asset_filter = asset_filter
 
         files = self._get_files(path)
         logger.info("located %s files in path %s", len(files), path)
@@ -110,6 +114,8 @@ class CSVFeed(HistoricFeed):
 
         for filename in filenames:
             asset = self._get_asset(filename)
+            if self.asset_filter and not self.asset_filter(asset):
+                continue
             with open(filename, encoding="utf8") as csvfile:
                 reader = csv.DictReader(csvfile)
 
@@ -134,7 +140,7 @@ class CSVFeed(HistoricFeed):
                     self._add_item(dt.astimezone(timezone.utc), pb)
 
     @classmethod
-    def stooq_us_daily(cls, path):
+    def stooq_us_daily(cls, path, asset_filter=None):
         """Parse one or more CSV files that meet the stooq daily file format"""
         columns = CSVColumns(
             date="<DATE>", open="<OPEN>", high="<HIGH>", low="<LOW>", close="<CLOSE>", volume="<VOL>", adj_close=None
@@ -142,7 +148,14 @@ class CSVFeed(HistoricFeed):
 
         class StooqDailyFeed(CSVFeed):
             def __init__(self):
-                super().__init__(path, columns=columns, time_offset="21:00:00+00:00", endswith=".txt", frequency="1d")
+                super().__init__(
+                    path,
+                    columns=columns,
+                    time_offset="21:00:00+00:00",
+                    endswith=".txt",
+                    frequency="1d",
+                    asset_filter=asset_filter,
+                )
 
             def _get_asset(self, filename: str):
                 base = pathlib.Path(filename).stem
@@ -153,7 +166,7 @@ class CSVFeed(HistoricFeed):
         return StooqDailyFeed()
 
     @classmethod
-    def stooq_us_intraday(cls, path):
+    def stooq_us_intraday(cls, path, asset_filter=None):
         """Parse one or more CSV files that meet the stooq intraday file format"""
         columns = CSVColumns(
             date="<DATE>",
@@ -168,7 +181,7 @@ class CSVFeed(HistoricFeed):
 
         class StooqIntradayFeed(CSVFeed):
             def __init__(self):
-                super().__init__(path, columns=columns, endswith=".txt")
+                super().__init__(path, columns=columns, endswith=".txt", asset_filter=asset_filter)
 
             def _get_asset(self, filename: str):
                 base = pathlib.Path(filename).stem

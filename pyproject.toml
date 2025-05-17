@@ -50,7 +50,7 @@ keywords = [
   "forex",
 ]
 dependencies = [
-  "numpy>=1.26.4",
+  "numpy>=2.2.5",
   "requests>=2.32.0",
   "yfinance~=0.2.58",
   "pyarrow>=20.0.0",

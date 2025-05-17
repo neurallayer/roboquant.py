@@ -11,7 +11,7 @@ logger = logging.getLogger(__name__)
 try:
     import talib._ta_lib as _ta_lib  # type: ignore
 except ImportError:
-    logger.warning("TA-Lib is not installed, TA functions will all return None")
+    logger.warning("TA-Lib is not installed, TA functions will raise an exception")
 
 
 class MA_Type(Enum):
