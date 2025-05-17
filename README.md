@@ -46,13 +46,10 @@ python3 -m pip install --upgrade "roboquant[ibkr]"
 
 # Integration with Alpaca
 python3 -m pip install --upgrade "roboquant[alpaca]"
-
-# Install Avro feed dependencies
-python3 -m pip install --upgrade "roboquant[avro]"
-
-# Install Avro feed dependencies
-python3 -m pip install --upgrade "roboquant[parquet]"
 ```
+
+Additionally, if you want to use the any of TA-Lib techncial indicators, you'll need to install it first. You can read a more about that on [ta-lib-python GitHub](https://github.com/ta-lib/ta-lib-python)
+
 
 ## Building from source
 Roboquant.py uses `uv` as the main tool for handling package dependencies.
