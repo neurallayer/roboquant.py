@@ -140,7 +140,7 @@ class CSVFeed(HistoricFeed):
                     self._add_item(dt.astimezone(timezone.utc), pb)
 
     @classmethod
-    def stooq_us_daily(cls, path, asset_filter=None):
+    def stooq_us_daily(cls, path, asset_filter: Callable[[Asset], bool] | None = None):
         """Parse one or more CSV files that meet the stooq daily file format"""
         columns = CSVColumns(
             date="<DATE>", open="<OPEN>", high="<HIGH>", low="<LOW>", close="<CLOSE>", volume="<VOL>", adj_close=None
@@ -166,7 +166,7 @@ class CSVFeed(HistoricFeed):
         return StooqDailyFeed()
 
     @classmethod
-    def stooq_us_intraday(cls, path, asset_filter=None):
+    def stooq_us_intraday(cls, path, asset_filter: Callable[[Asset], bool] | None = None):
         """Parse one or more CSV files that meet the stooq intraday file format"""
         columns = CSVColumns(
             date="<DATE>",
@@ -192,6 +192,6 @@ class CSVFeed(HistoricFeed):
         return StooqIntradayFeed()
 
     @classmethod
-    def yahoo(cls, path, frequency="1d"):
+    def yahoo(cls, path, frequency="1d", asset_filter: Callable[[Asset], bool] | None = None):
         """Parse one or more CSV files that meet the Yahoo Finance format"""
-        return cls(path, time_offset="21:00:00+00:00", frequency=frequency)
+        return cls(path, time_offset="21:00:00+00:00", frequency=frequency, asset_filter=asset_filter)

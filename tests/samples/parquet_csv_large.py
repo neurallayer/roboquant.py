@@ -3,7 +3,6 @@ import os
 import roboquant as rq
 from roboquant.feeds.parquet import ParquetFeed
 
-
 # %%
 feed = ParquetFeed("/tmp/us_nasdaq.parquet")
 if not feed.exists():
