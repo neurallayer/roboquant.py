@@ -19,7 +19,7 @@ class TensorboardJournal(Journal):
         """
         super().__init__()
         self.__writer = writer
-        self._step = 0
+        self._step : int = 0
         self.metrics = metrics
 
     def track(self, event, account, signals, orders):

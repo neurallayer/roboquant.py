@@ -64,12 +64,12 @@ class CSVFeed(HistoricFeed):
     def __init__(
         self,
         path: str | pathlib.Path,
-        columns=CSVColumns(),
+        columns: CSVColumns = CSVColumns(),
         time_offset: str | None = None,
         date_fmt: str | None = None,
         time_fmt: str | None = None,
-        endswith=".csv",
-        frequency="",
+        endswith: str = ".csv",
+        frequency: str = "",
         asset_filter: Callable[[Asset], bool] | None = None,
     ):
         super().__init__()
@@ -86,7 +86,7 @@ class CSVFeed(HistoricFeed):
         self._parse_csvfiles(files)  # type: ignore
         self._update()
 
-    def _get_files(self, path):
+    def _get_files(self, path: str | pathlib.Path) -> list[str | pathlib.Path]:
         if pathlib.Path(path).is_file():
             return [path]
 

@@ -7,8 +7,7 @@ from roboquant.order import Order
 
 
 class PriceItemMetric(Metric):
-    """Tracks the price and volume of individual assets found in the event.
-    """
+    """Tracks the price and volume of individual assets found in the event."""
 
     def __init__(self, *symbols: str, price_type="DEFAULT", volume_type="DEFAULT"):
         """Initialize PriceMetric with specified symbols and price/volume types.

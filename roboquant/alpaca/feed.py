@@ -1,7 +1,7 @@
 import logging
 import threading
 from array import array
-from datetime import timedelta
+from datetime import datetime, timedelta
 from typing import Literal
 
 import numpy as np
@@ -26,7 +26,7 @@ from alpaca.data.timeframe import TimeFrame, TimeFrameUnit
 from alpaca.trading.enums import AssetClass
 
 from roboquant.asset import Asset, Crypto, Option, Stock
-from roboquant.event import Bar, Event, Quote, Trade
+from roboquant.event import Bar, Event, PriceItem, Quote, Trade
 from roboquant.feeds.historic import HistoricFeed
 from roboquant.feeds.live import LiveFeed
 
@@ -78,10 +78,10 @@ class AlpacaLiveFeed(LiveFeed):
         thread.start()
 
     async def close(self):
-        """Close the live feed connection."""
+        """Close the live feed connection sxtream."""
         await self.stream.close()
 
-    def __put_item(self, time, item):
+    def __put_item(self, time: datetime, item: PriceItem):
         event = Event(time, [item])
         self._put(event)
 

@@ -18,7 +18,7 @@ class HistoricFeed(Feed, ABC):
     def __init__(self):
         super().__init__()
         self.__data: dict[datetime, list[PriceItem]] = {}
-        self.__modified = False
+        self.__modified: bool = False
         self.__assets: set[Asset] = set()
 
     def _add_item(self, dt: datetime, item: PriceItem):

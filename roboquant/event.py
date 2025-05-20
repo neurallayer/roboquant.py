@@ -1,7 +1,7 @@
 from abc import abstractmethod
 from array import array
 from dataclasses import dataclass
-from datetime import datetime
+from datetime import datetime, timezone
 from functools import cached_property
 from typing import Any, Sequence
 
@@ -259,8 +259,8 @@ class Event:
     other types of data, such as fundamental metrics or social media signals.
 
     Args:
-        time (datetime): The timestamp of the event, which must be in UTC timezone. This ensures
-                         consistency when dealing with events across different systems.
+        time (datetime): The timestamp of the event, which will converted to be in UTC timezone. This ensures
+                         consistency when dealing with events across different systems and improves performance.
         items (list[Any]): A list of items associated with the event. These items can represent
                            various types of information, such as `PriceItem` instances (e.g., `Quote`,
                            `Trade`, or `Bar`) or other custom data types.
@@ -293,11 +293,10 @@ class Event:
         """Initialize an Event instance.
 
         Args:
-            dt (datetime): The datetime of the event. Must be in UTC timezone.
+            dt (datetime): The datetime of the event, will be converted to UTC timezone.
             items (list[Any]): A list of items associated with the event.
         """
-        assert dt.tzname() == "UTC", "event with non UTC timezone"
-        self.time: datetime = dt
+        self.time: datetime = dt.astimezone(timezone.utc)
         self.items: list[Any] = items
 
     @staticmethod

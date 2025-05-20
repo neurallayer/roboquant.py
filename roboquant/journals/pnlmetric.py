@@ -20,12 +20,12 @@ class PNLMetric(Metric):
 
     def __init__(self):
         super().__init__()
-        self.max_drawdown = 0.0
-        self.max_gain = 0.0
-        self.first_equity = None
-        self.prev_equity = None
-        self.max_equity = sys.float_info.min
-        self.min_equity = sys.float_info.max
+        self.max_drawdown: float = 0.0
+        self.max_gain: float = 0.0
+        self.first_equity: float | None = None
+        self.prev_equity: float | None = None
+        self.max_equity: float = sys.float_info.min
+        self.min_equity: float = sys.float_info.max
 
     def calc(self, event: Event, account: Account, signals: List[Signal], orders: List[Order]) -> Dict[str, float]:
         equity = account.equity_value()
