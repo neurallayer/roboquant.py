@@ -15,6 +15,13 @@ from roboquant.ibkr.broker import IBKRBroker  # noqa: E402
 
 class TestIBKR(unittest.TestCase):
 
+    def test_account(self):
+        broker = IBKRBroker()
+        account = broker.sync()
+        print(account)
+        self.assertTrue(account.equity_value() > 0)
+
+
     def test_ibkr_order(self):
         Amount.register_converter(One2OneConversion())
         logging.basicConfig(level=logging.DEBUG)

@@ -88,30 +88,15 @@ class IBKRBroker(LiveBroker):
     This class provides an interface to interact with Interactive Brokers (IBKR) for live trading.
     It supports operations such as retrieving account information, managing positions, placing
     and modifying orders, and fetching live orders. Currently, it only supports stocks.
-
-    Attributes:
-        base_currency (rq.monetary.Currency): The base currency of the account.
-        client (IbkrClient): The IBKR client used for API communication.
-    Methods:
-        __init__(account_id: str | None = None):
-            Initializes the IBKRBroker instance and sets up the client connection.
-        _get_positions() -> dict[rq.Asset, rq.Position]:
-            Retrieves the current positions in the account.
-        _get_orders() -> list[rq.Order]:
-            Retrieves the list of active orders in the account.
-        _update_order(order: rq.Order):
-            Updates an existing order in IBKR.
-        _place_order(order: rq.Order):
-            Places a new order in IBKR.
-        _cancel_order(order: rq.Order):
-            Cancels an existing order in IBKR.
-        _get_account() -> rq.account.Account:
-            Retrieves the account information, including positions, orders, cash, and buying power.
-        _get_cash_bp() -> tuple[float, float]:
-            Retrieves the cash balance and buying power of the account.
     """
 
     def __init__(self, account_id: str | None = None, ibkr_client: IbkrClient | None = None):
+        """Initialize the IBKRBroker instance.
+        Args:
+            account_id (str | None): The account ID to use. If None, the first available account will be used.
+            ibkr_client (IbkrClient | None): An optional IBKR client instance. If None, a new client will be created.
+        """
+
         super().__init__()
         client = ibkr_client or IbkrClient()
         ok = client.check_health()
@@ -126,7 +111,7 @@ class IBKRBroker(LiveBroker):
         account_id = account_id or accounts["accounts"][0]  # type: ignore
         client.account_id = account_id
         account_summary: AccountInfo = client.portfolio_account_information().data  # type: ignore
-        self.base_currency = rq.monetary.Currency(account_summary["currency"])
+        self.base_currency = rq.monetary.Currency(account_summary["currency"]) # type: ignore
         logger.info(f"using account={account_id} with base-currency={self.base_currency}")
 
         # We also need to call this once before using other order related calls
@@ -140,14 +125,14 @@ class IBKRBroker(LiveBroker):
         """Return all the open positions"""
         result: dict[rq.Asset, rq.Position] = {}
         positions: list[PositionInfo] = self.client.positions().data or []  # type: ignore
-        for position in positions:
-            conid = position["conid"]
+        for pos_info in positions:
+            conid = pos_info["conid"]
             if asset := self._mapper.get_asset(conid):
-                if size := position["position"]:
-                    p = rq.Position(Decimal(size), position["avgPrice"], position["mktPrice"])
-                    result[asset] = p
+                if size := pos_info["position"]:
+                    position = rq.Position(Decimal(size), pos_info["avgPrice"], pos_info["mktPrice"])
+                    result[asset] = position
             else:
-                logger.warning("ignoring position %s because couldn't map conid to asset", position)
+                logger.warning("ignoring position %s because couldn't map conid to asset", pos_info)
         return result
 
     def __get_orders(self) -> list[rq.Order]:
