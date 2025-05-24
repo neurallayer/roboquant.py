@@ -101,12 +101,13 @@ class IBKRBroker(LiveBroker):
         client = ibkr_client or IbkrClient()
         ok = client.check_health()
         assert ok, "health not ok"
-        sleep(1)
 
         accounts = {}
         while not accounts:
-            accounts = client.receive_brokerage_accounts().data
             sleep(1)
+            logger.info("trying to retrieve available brokerage accounts")
+            accounts = client.receive_brokerage_accounts().data
+            logger.info("found accounts %s", accounts)
 
         account_id = account_id or accounts["accounts"][0]  # type: ignore
         client.account_id = account_id
