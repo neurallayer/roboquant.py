@@ -25,11 +25,19 @@ class _AssetMapper:
         self.client = client
 
     def update_mapping(self, asset: rq.Asset, conid: int):
+        """Update the mapping between asset and conid.
+        This method is used to add a new mapping or update an existing one."""
         logger.debug("updating mapping asset=%s conid=%s", asset, conid)
         self._conid_2_asset[conid] = asset
         self._asset_2_conid[asset] = conid
 
     def get_conid(self, asset: rq.Asset) -> int | None:
+        """Get the contract-id (conid) for a given asset.
+        If the asset is already mapped, it will return the cached conid.
+        Right now only stocks are supported.
+        If the asset is not mapped, it will make an API call to retrieve the conid.
+        If the conid is not found, it will return None.
+        """
         # First, check the mapping table
         if conid := self._asset_2_conid.get(asset):
             return conid
@@ -52,6 +60,11 @@ class _AssetMapper:
         logger.warning("couldn't determine conid for asset %s, result was %d", asset, data)
 
     def get_asset(self, conid: int) -> rq.Asset | None:
+        """Get the asset for a given contract-id (conid).
+        If the conid is already mapped, it will return the cached asset.
+        If the conid is not mapped, it will make an API call to retrieve the asset.
+        If the asset is not found, it will return None.
+        """
         if asset := self._conid_2_asset.get(int(conid)):
             return asset
 
@@ -85,9 +98,11 @@ default_answers = {
 
 class IBKRBroker(LiveBroker):
     """Broker implementation for Interactive Brokers using the IBKR Web API.
-    This class provides an interface to interact with Interactive Brokers (IBKR) for live trading.
+    This class provides an interface to interact with Interactive Brokers (IBKR) for paper and live trading.
     It supports operations such as retrieving account information, managing positions, placing
-    and modifying orders, and fetching live orders. Currently, it only supports stocks.
+    and modifying orders, and fetching orders. Currently, it only supports stock assets.
+
+    It can be extended to support other asset classes like options, futures, etc or different order types.
     """
 
     def __init__(self, account_id: str | None = None, ibkr_client: IbkrClient | None = None):
@@ -137,6 +152,10 @@ class IBKRBroker(LiveBroker):
         return result
 
     def __get_orders(self) -> list[rq.Order]:
+        """Get all the open limit orders from IBKR and convert them into roboquant orders.
+        It requires that the contract-id (conid) can be mapped to a roboquant asset.
+        """
+
         result: dict[Any, rq.Order] = {}
         closed_status = {"Cancelled", "Filled", "Rejected", "Inactive"}
         orders = self.client.live_orders(force=False).data["orders"]  # type: ignore
@@ -150,20 +169,21 @@ class IBKRBroker(LiveBroker):
                     logger.info("ignoring closed order %s", order)
                     continue
                 size = order["totalSize"]
-                if order["side"] == "SELL":
-                    size = -size
-                new_order = rq.Order(asset, Decimal(size), float(order["price"]))
-                new_order.id = order["orderId"]
                 fill = order["filledQuantity"]
                 if order["side"] == "SELL":
-                    fill = -fill
-                new_order.fill = Decimal(fill)
+                    new_order = self._sell_order(asset, size, order["price"], fill)
+                else:
+                    new_order = self._buy_order(asset, size, order["price"], fill)
+
+                new_order.id = order["orderId"]
 
                 if "cancel" in order["order_ccp_status"]:
                     new_order.size = Decimal()
 
                 # store the latest order info found for an id
                 result[new_order.id] = new_order
+            else:
+                logger.warning("ignoring order %s because couldn't map conid to asset", order)
 
         return list(result.values())
 
@@ -180,7 +200,7 @@ class IBKRBroker(LiveBroker):
                 break
         return cash, bp
 
-    def __create_order_request(self, order: rq.Order) -> OrderRequest:
+    def _create_order_request(self, order: rq.Order) -> OrderRequest:
         conid = self._mapper.get_conid(order.asset)
         if conid is None:
             raise ValueError(f"Cannot determine contract-id for asset {order.asset}")
@@ -199,12 +219,12 @@ class IBKRBroker(LiveBroker):
         )
 
     def _update_order(self, order: rq.Order):
-        req = self.__create_order_request(order)
+        req = self._create_order_request(order)
         result = self.client.modify_order(order.id, req, answers=default_answers)
         logger.info("update order result %s", result)
 
     def _place_order(self, order: rq.Order):
-        req = self.__create_order_request(order)
+        req = self._create_order_request(order)
         result = self.client.place_order(req, answers=default_answers)
         logger.info("place order result %s", result)
 

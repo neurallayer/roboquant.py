@@ -54,7 +54,7 @@ class Order:
         self,
         asset: Asset,
         size: Decimal | str | int | float,
-        limit: float,
+        limit: float | str,
         tif: Literal["GTC", "DAY"] = "DAY",
         **kwargs: Any,
     ):
@@ -71,9 +71,9 @@ class Order:
         self.size = Decimal(size)
         assert not self.size.is_zero(), "Cannot create a new order with size is zero"
 
-        self.limit = limit
+        self.limit = float(limit)
         self.id = ""
-        self.fill = Decimal(0)
+        self.fill = Decimal()
         self.info = kwargs
         self.tif = tif
 
@@ -89,7 +89,7 @@ class Order:
         assert self.size, "Cannot cancel a cancellation order, size has to be non-zero"
 
         result = deepcopy(self)
-        result.size = Decimal(0)
+        result.size = Decimal()
         return result
 
     def modify(self, size: Decimal | str | int | float | None = None, limit: float | None = None) -> "Order":
@@ -199,17 +199,3 @@ class Order:
             bool: True if this is a cancellation order, False otherwise.
         """
         return self.size.is_zero()
-
-    def is_executable(self, price: float) -> bool:
-        """
-        Check if this order is executable at the given price.
-
-        Args:
-            price (float): The price to check against.
-
-        Returns:
-            bool: True if the order is executable at the given price, False otherwise.
-        """
-        if self.is_buy:
-            return price <= self.limit
-        return price >= self.limit

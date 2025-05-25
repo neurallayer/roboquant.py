@@ -120,7 +120,8 @@ class SimBroker(Broker):
         """Simulate a market execution and return a transaction object if the order has (partially) executed."""
 
         price = self._get_execution_price(order, item)
-        if order.is_executable(price):
+        executable = price <= order.limit if order.is_buy else price >= order.limit
+        if executable:
             return _Trx(order.asset, order.remaining, price)
         return None
 

@@ -1,8 +1,10 @@
 from abc import ABC, abstractmethod
 from datetime import timedelta
+from decimal import Decimal
 import time
 
 from roboquant.account import Account
+from roboquant.asset import Asset
 from roboquant.event import Event
 from roboquant.order import Order
 from roboquant.timeframe import Timeframe, utcnow
@@ -140,6 +142,43 @@ class LiveBroker(Broker):
     def _place_order(self, order: Order):
         """subclasses should implement this method"""
         pass
+
+    @staticmethod
+    def _sell_order(
+        asset: Asset,
+        size: Decimal | str | int | float,
+        limit: float|str,
+        fill:Decimal | str | int | float,
+        ):
+        """
+        Create a new SELL order for the given asset. This method assumes the order is a sell order, meaning the size and fill
+        are positive values.
+        """
+        order = Order(
+            asset=asset,
+            size=-Decimal(size),  # Negative size for sell orders
+            limit=float(limit),
+        )
+        order.fill = - Decimal(fill)
+        return order
+
+    @staticmethod
+    def _buy_order(
+        asset: Asset,
+        size: Decimal | str | int | float,
+        limit: float|str,
+        fill:Decimal | str | int | float,
+        ):
+        """
+        Create a new buy order for the given asset.
+        """
+        order = Order(
+            asset=asset,
+            size=Decimal(size),
+            limit=float(limit),
+        )
+        order.fill = Decimal(fill)
+        return order
 
     def place_orders(self, orders: list[Order]):
         if not orders:
