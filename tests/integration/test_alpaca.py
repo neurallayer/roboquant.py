@@ -58,8 +58,28 @@ class TestAlpaca(unittest.TestCase):
         time.sleep(5)
         account = broker.sync()
         print(account)
+
+        # cleanup
         cancel_orders = [order.cancel() for order in account.orders]
         print(cancel_orders)
+        broker.place_orders(cancel_orders)
+        time.sleep(10)
+        print(account)
+
+    def test_alpaca_sell_order(self):
+        broker = AlpacaBroker(*_get_credentials())
+        account = broker.sync()
+        print(account)
+
+        order = Order(self.assets[0], -10, 100.0, "GTC")
+        print(order)
+        broker.place_orders([order])
+        time.sleep(5)
+        account = broker.sync()
+        print(account)
+
+        # cleanup
+        cancel_orders = [order.cancel() for order in account.orders]
         broker.place_orders(cancel_orders)
         time.sleep(10)
         print(account)

@@ -1,4 +1,4 @@
-from typing import TypedDict
+from typing import Literal, TypedDict
 
 AccountInfo = TypedDict(
     "AccountInfo",
@@ -31,6 +31,41 @@ AccountInfo = TypedDict(
     total=True,
 )
 
+OrderInfo = TypedDict(
+    "OrderInfo",
+    {
+        "acct": str,
+        "conidex": str,
+        "conid": int,
+        "account": str,
+        "orderId": int,
+        "cashCcy": str,
+        "sizeAndFills": str,
+        "orderDesc": str,
+        "description1": str,
+        "ticker": str,
+        "secType": Literal['STK'],
+        "listingExchange": str,
+        "remainingQuantity": float,
+        "filledQuantity": float,
+        "totalSize": float,
+        "companyName": str,
+        "status": str,
+        "order_ccp_status": str,
+        "outsideRTH": bool,
+        "origOrderType": str,
+        "supportsTaxOpt": str,
+        "lastExecutionTime": str,
+        "orderType": str,
+        "bgColor": str,
+        "fgColor": str,
+        "isEventTrading": str,
+        "price": str,
+        "timeInForce": str,
+        "lastExecutionTime_r": int,
+        "side": Literal['BUY', 'SELL'],
+    }
+)
 
 PositionInfo = TypedDict(
     "PositionInfo",

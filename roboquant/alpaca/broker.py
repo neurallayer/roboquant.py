@@ -32,13 +32,13 @@ class AlpacaBroker(LiveBroker):
         alpaca_orders: list[AOrder] = self.__client.get_orders(request)  # type: ignore
         for alpaca_order in alpaca_orders:
             asset = _get_asset(alpaca_order.symbol, alpaca_order.asset_class)  # type: ignore
-            order = Order(
-                asset,
-                Decimal(alpaca_order.qty),  # type: ignore
-                float(alpaca_order.limit_price),  # type: ignore
-            )
-            order.fill = Decimal(alpaca_order.filled_qty)  # type: ignore
-            order.id = str(alpaca_order.id)
+            id = str(alpaca_order.id)
+            tif = "GTC" if alpaca_order.time_in_force == TimeInForce.GTC else "DAY"
+            if alpaca_order.side == OrderSide.SELL:
+                order = self._sell_order(id, asset, alpaca_order.qty,alpaca_order.limit_price,alpaca_order.filled_qty, tif)  # type: ignore
+            else:
+                order = self._buy_order(id, asset, alpaca_order.qty, alpaca_order.limit_price,alpaca_order.filled_qty, tif)  # type: ignore
+
             orders.append(order)
 
         return orders

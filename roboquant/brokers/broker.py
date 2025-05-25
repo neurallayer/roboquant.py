@@ -2,6 +2,7 @@ from abc import ABC, abstractmethod
 from datetime import timedelta
 from decimal import Decimal
 import time
+from typing import Literal
 
 from roboquant.account import Account
 from roboquant.asset import Asset
@@ -145,29 +146,36 @@ class LiveBroker(Broker):
 
     @staticmethod
     def _sell_order(
+        id: str | int,
         asset: Asset,
         size: Decimal | str | int | float,
         limit: float|str,
         fill:Decimal | str | int | float,
+        tif: Literal['GTC', 'DAY'] = "DAY",
         ):
         """
-        Create a new SELL order for the given asset. This method assumes the order is a sell order, meaning the size and fill
-        are positive values.
+        Create a roboquant SELL order for the given asset. This method assumes the order is a sell order, meaning the size
+        and fill are positive values. This method is used to create an order based on the state of an existing order at
+        the broker.
         """
         order = Order(
             asset=asset,
             size=-Decimal(size),  # Negative size for sell orders
             limit=float(limit),
+            tif=tif,
         )
         order.fill = - Decimal(fill)
+        order.id = str(id)
         return order
 
     @staticmethod
     def _buy_order(
+        id: str | int,
         asset: Asset,
         size: Decimal | str | int | float,
         limit: float|str,
         fill:Decimal | str | int | float,
+        tif: Literal['GTC', 'DAY'] = "DAY",
         ):
         """
         Create a new buy order for the given asset.
@@ -176,8 +184,10 @@ class LiveBroker(Broker):
             asset=asset,
             size=Decimal(size),
             limit=float(limit),
+            tif = tif
         )
         order.fill = Decimal(fill)
+        order.id = str(id)
         return order
 
     def place_orders(self, orders: list[Order]):

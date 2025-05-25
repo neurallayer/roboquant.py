@@ -4,7 +4,7 @@ from time import sleep
 from typing import Any
 from roboquant.brokers.broker import LiveBroker
 import roboquant as rq
-from roboquant.ibkr.types import AccountInfo, ContractInfo, PositionInfo
+from roboquant.ibkr.types import AccountInfo, ContractInfo, PositionInfo, OrderInfo
 
 
 from ibind import IbkrClient, StockQuery, OrderRequest, QuestionType  # noqa: E402
@@ -151,39 +151,46 @@ class IBKRBroker(LiveBroker):
                 logger.warning("ignoring position %s because couldn't map conid to asset", pos_info)
         return result
 
+
+    def __convert_order(self, info: OrderInfo) -> rq.Order | None:
+        """Convert a single order info into a roboquant order.
+        Returns None if the order is not a limit order, order is already closed,
+        or if the asset cannot be mapped.
+        """
+        if info["orderType"].upper() != "LIMIT":
+            logger.warning("ignoring order that is not a limit order %s", info)
+            return None
+
+        if info["status"] in {"Cancelled", "Filled", "Rejected", "Inactive"}:
+            logger.info("ignoring order %s because status is closed", info)
+            return None
+
+        conid = info["conid"]
+        if asset := self._mapper.get_asset(conid):
+            size = info["totalSize"]
+            fill = info["filledQuantity"]
+            order_id = info["orderId"]
+            tif = "DAY" if info["timeInForce"] == "CLOSE" else "GTC"
+
+            if info["side"] == "SELL":
+                return self._sell_order(order_id, asset, size, info["price"], fill, tif)
+            else:
+                return self._buy_order(order_id, asset, size, info["price"], fill, tif)
+
+        logger.warning("ignoring order %s because couldn't map conid to asset", info)
+
+
     def __get_orders(self) -> list[rq.Order]:
         """Get all the open limit orders from IBKR and convert them into roboquant orders.
         It requires that the contract-id (conid) can be mapped to a roboquant asset.
         """
-
         result: dict[Any, rq.Order] = {}
-        closed_status = {"Cancelled", "Filled", "Rejected", "Inactive"}
-        orders = self.client.live_orders(force=False).data["orders"]  # type: ignore
-        for order in orders:
-            if order["orderType"] != "Limit":
-                logger.warning("ignoring order that is not a limit order %s", order)
-                continue
-            conid = order["conid"]
-            if asset := self._mapper.get_asset(conid):
-                if order["status"] in closed_status:
-                    logger.info("ignoring closed order %s", order)
-                    continue
-                size = order["totalSize"]
-                fill = order["filledQuantity"]
-                if order["side"] == "SELL":
-                    new_order = self._sell_order(asset, size, order["price"], fill)
-                else:
-                    new_order = self._buy_order(asset, size, order["price"], fill)
+        orders: list[OrderInfo] = self.client.live_orders(force=False).data["orders"]  # type: ignore
 
-                new_order.id = order["orderId"]
-
-                if "cancel" in order["order_ccp_status"]:
-                    new_order.size = Decimal()
-
-                # store the latest order info found for an id
+        for order_info in orders:
+            new_order = self.__convert_order(order_info)
+            if new_order:
                 result[new_order.id] = new_order
-            else:
-                logger.warning("ignoring order %s because couldn't map conid to asset", order)
 
         return list(result.values())
 
