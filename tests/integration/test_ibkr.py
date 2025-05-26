@@ -6,6 +6,7 @@ from decimal import Decimal
 from roboquant import Order
 from roboquant.asset import Stock
 from roboquant.monetary import Amount, One2OneConversion
+from roboquant.feeds import YahooFeed
 from dotenv import load_dotenv
 
 load_dotenv()
@@ -21,16 +22,26 @@ class TestIBKR(unittest.TestCase):
         print(account)
         self.assertTrue(account.equity_value() > 0)
 
+    def _get_last_price(self, asset: Stock):
+        feed = YahooFeed(asset.symbol)
+        last_event = feed.get_last_event()
+        if last_event is None:
+            raise ValueError(f"No data available for {asset.symbol}")
+        price = last_event.get_price(asset, "CLOSE")
+        if price is None:
+            raise ValueError(f"No price available for {asset.symbol}")
+        return round(price, 2)
+
 
     def test_ibkr_order(self):
         Amount.register_converter(One2OneConversion())
         logging.basicConfig(level=logging.DEBUG)
         logging.getLogger("ibapi").setLevel(logging.WARNING)
+
         asset = Stock("JPM")
-        limit = 210.0
+        limit = self._get_last_price(asset)
 
         broker = IBKRBroker()
-
         account = broker.sync()
         self.assertGreater(account.equity_value(), 0)
         old_len_orders = len(account.orders)

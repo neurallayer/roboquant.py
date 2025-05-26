@@ -20,7 +20,7 @@ class ParquetFeed(Feed):
     Parquet files provide a good balance between speed, memory-size and disk-size, making it a great option to store
     historic market data for back testing.
 
-    Use the `record` method to move data from any other feed into a `ParquetFeed`.
+    Use the `record` method to copy data from any other feed into a `ParquetFeed`.
     """
 
     __schema = pa.schema(
