@@ -12,13 +12,13 @@ from roboquant.event import Event, Bar, Quote
 from roboquant.strategies.buffer import OHLCVBuffer
 
 T = TypeVar("T")
-
+FloatArray = NDArray[np.float32]
 
 class Feature(Generic[T]):
     """Base class for all types of features"""
 
     @abstractmethod
-    def calc(self, value: T) -> NDArray:
+    def calc(self, value: T) -> FloatArray:
         """
         Perform the calculation and return the result as a 1-dimensional NDArray.
         The result should always be the same size. If a value cannot be calculated at a certain
@@ -42,11 +42,11 @@ class Feature(Generic[T]):
     def _ones(self):
         return np.ones(self._shape(), dtype=np.float32)
 
-    def _full_nan(self):
+    def _full_nan(self) -> FloatArray:
         return np.full(self._shape(), float("nan"), dtype=np.float32)
 
     def cache(self, validate=False) -> "Feature[T]":
-        return CacheFeature(self, validate)
+        return CacheFeature(self, validate)  # type: ignore
 
     def returns(self, period=1) -> "Feature[T]":
         if period == 1:
@@ -63,7 +63,7 @@ class Feature(Generic[T]):
 class EquityFeature(Feature[Account]):
     """Calculates the total equity value of the account"""
 
-    def calc(self, value):
+    def calc(self, value: Account) -> FloatArray:
         return np.array(value.equity_value(), dtype=np.float32)
 
     def size(self):
@@ -158,7 +158,7 @@ class BarFeature(Feature[Event]):
         super().__init__()
         self.assets = assets
 
-    def calc(self, value):
+    def calc(self, value: Event) -> FloatArray:
         result = self._full_nan()
         for idx, asset in enumerate(self.assets):
             item = value.price_items.get(asset)
@@ -179,7 +179,7 @@ class QuoteFeature(Feature[Event]):
         super().__init__()
         self.assets = assets
 
-    def calc(self, value):
+    def calc(self, value: Event) -> FloatArray:
         result = self._full_nan()
         for idx, asset in enumerate(self.assets):
             item = value.price_items.get(asset)
@@ -213,10 +213,10 @@ class CombinedFeature(Feature):
             feature.reset()
 
 
-class NormalizeFeature(Feature):
+class NormalizeFeature(Feature[T]):
     """online normalization calculator"""
 
-    def __init__(self, feature: Feature, min_count: int = 3) -> None:
+    def __init__(self, feature: Feature[T], min_count: int = 3) -> None:
         super().__init__()
         self.feature = feature
         self.min_count = min_count
@@ -239,14 +239,14 @@ class NormalizeFeature(Feature):
         delta2 = new_value - mean
         m2[mask] += delta[mask] * delta2[mask]
 
-    def __normalize_values(self, values):
+    def __normalize_values(self, values) -> FloatArray:
         (count, mean, m2) = self.existing_aggregate
         stdev = self._full_nan()
         mask = count >= self.min_count
         stdev[mask] = np.sqrt(m2[mask] / count[mask]) + 1e-12
         return (values - mean) / stdev
 
-    def calc(self, value):
+    def calc(self, value: T) -> FloatArray:
         values = self.feature.calc(value)
         self.__update(values)
         return self.__normalize_values(values)
@@ -282,16 +282,16 @@ class FillFeature(Feature):
         return self.feature.size()
 
 
-class FillWithConstantFeature(Feature):
+class FillWithConstantFeature(Feature[T]):
     """If a feature contains a NaN value, fill with a constant value"""
 
-    def __init__(self, feature: Feature, constant: float = 0.0) -> None:
+    def __init__(self, feature: Feature[T], constant: float = 0.0) -> None:
         super().__init__()
         self.feature: Feature = feature
         self.fill = self._zeros()
         self.fill = np.full(self._shape(), constant, dtype=np.float32)
 
-    def calc(self, value):
+    def calc(self, value: T) -> FloatArray:
         values = self.feature.calc(value)
         mask = np.isnan(values)
         values[mask] = self.fill[mask]
@@ -304,22 +304,21 @@ class FillWithConstantFeature(Feature):
         return self.feature.size()
 
 
-class CacheFeature(Feature):
-    """Cache the results of a feature from a previous run. This can speed up the learning process a lot, but
+class CacheFeature(Feature[Event]):
+    """Cache the results of an event feature from a previous run. This can speed up the learning process a lot, but
     this requires that:
 
     - the feed to have always an increasing time value (monotonic)
-    - the feature to produce the same output at a given time. Typically, this doesn't hold true for features that
-    are based on account values.
+    - the feature to produce the same output at a given time.
     """
 
-    def __init__(self, feature: Feature, validate=False) -> None:
+    def __init__(self, feature: Feature[Event], validate=False) -> None:
         super().__init__()
         self.feature: Feature = feature
-        self._cache: dict[datetime, NDArray] = {}
+        self._cache: dict[datetime, FloatArray] = {}
         self.validate = validate
 
-    def calc(self, value):
+    def calc(self, value: Event) -> FloatArray:
         time = value.time
         if time in self._cache:
             values = self._cache[time]
@@ -362,17 +361,17 @@ class VolumeFeature(Feature[Event]):
         return len(self.assets)
 
 
-class ReturnFeature(Feature):
+class ReturnFeature(Feature[T]):
     """Calculate the return of another feature"""
 
-    def __init__(self, feature: Feature) -> None:
+    def __init__(self, feature: Feature[T]) -> None:
         super().__init__()
         self.feature: Feature = feature
         self.history = self._full_nan()
 
-    def calc(self, value):
+    def calc(self, value: T) -> FloatArray:
         values = self.feature.calc(value)
-        r = values / self.history - 1.0
+        r: FloatArray = values / self.history - np.float32(1.0)  # type: ignore
         self.history = values
         return r
 
@@ -391,7 +390,7 @@ class LongReturnsFeature(Feature):
         self.history = deque(maxlen=period)
         self.feature: Feature = feature
 
-    def calc(self, value):
+    def calc(self, value) -> FloatArray:
         values = self.feature.calc(value)
         h = self.history
 
@@ -411,18 +410,18 @@ class LongReturnsFeature(Feature):
         self.feature.reset()
 
 
-class MaxReturnFeature(Feature):
+class MaxReturnFeature(Feature[T]):
     """Calculate the maximum return over a certain period.
     This will only work on features that return a single value.
     """
 
-    def __init__(self, feature: Feature, period: int) -> None:
+    def __init__(self, feature: Feature[T], period: int) -> None:
         super().__init__()
         assert feature.size() == 1
         self.history = deque(maxlen=period)
         self.feature: Feature = feature
 
-    def calc(self, value):
+    def calc(self, value: T) -> FloatArray:
         values = self.feature.calc(value)
         h = self.history
         h.append(values)
@@ -510,7 +509,7 @@ class DayOfWeekFeature(Feature[Event]):
         super().__init__()
         self.tz = tz
 
-    def calc(self, value: Event):
+    def calc(self, value: Event) -> FloatArray:
         dt = datetime.astimezone(value.time, self.tz)
         weekday = dt.weekday()
         result = np.zeros(7, dtype=np.float32)
@@ -528,7 +527,7 @@ class TimeDifference(Feature[Event]):
         super().__init__()
         self._last_time: datetime | None = None
 
-    def calc(self, value: Event):
+    def calc(self, value: Event) -> FloatArray:
         if self._last_time:
             diff = value.time - self._last_time
             self._last_time = value.time
@@ -553,7 +552,7 @@ class TaFeature(Feature[Event]):
         self._size = history_size
         self.assets = list(assets)
 
-    def calc(self, value: Event):
+    def calc(self, value: Event) -> FloatArray:
         result = []
         nan = float("nan")
         for asset in self.assets:
