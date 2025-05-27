@@ -70,16 +70,16 @@ class EquityFeature(Feature[Account]):
         return 1
 
 
-class SlicedFeature(Feature):
+class SlicedFeature(Feature[T]):
     """Calculate a slice from another feature"""
 
-    def __init__(self, feature: Feature, args) -> None:
+    def __init__(self, feature: Feature[T], args) -> None:
         super().__init__()
         self.args = args
         self.feature = feature
         self._size = len(feature._zeros()[args])
 
-    def calc(self, value):
+    def calc(self, value: T) -> FloatArray:
         values = self.feature.calc(value)
         return values[self.args]
 
@@ -193,15 +193,15 @@ class QuoteFeature(Feature[Event]):
         return 4 * len(self.assets)
 
 
-class CombinedFeature(Feature):
+class CombinedFeature(Feature[T]):
     """Combine multiple features into one single feature by stacking them."""
 
-    def __init__(self, *features: Feature) -> None:
+    def __init__(self, *features: Feature[T]) -> None:
         super().__init__()
         self.features = features
         self._size = sum(feature.size() for feature in self.features)
 
-    def calc(self, value):
+    def calc(self, value: T) -> FloatArray:
         data = [feature.calc(value) for feature in self.features]
         return np.hstack(data, dtype=np.float32)
 
@@ -259,15 +259,15 @@ class NormalizeFeature(Feature[T]):
         self.feature.reset()
 
 
-class FillFeature(Feature):
+class FillFeature(Feature[T]):
     """If a feature contains a NaN value, use the last known value instead"""
 
-    def __init__(self, feature: Feature) -> None:
+    def __init__(self, feature: Feature[T]) -> None:
         super().__init__()
         self.feature: Feature = feature
         self.fill = self._full_nan()
 
-    def calc(self, value):
+    def calc(self, value: T) -> FloatArray:
         values = self.feature.calc(value)
         mask = np.isnan(values)
         values[mask] = self.fill[mask]
@@ -288,7 +288,6 @@ class FillWithConstantFeature(Feature[T]):
     def __init__(self, feature: Feature[T], constant: float = 0.0) -> None:
         super().__init__()
         self.feature: Feature = feature
-        self.fill = self._zeros()
         self.fill = np.full(self._shape(), constant, dtype=np.float32)
 
     def calc(self, value: T) -> FloatArray:
@@ -383,14 +382,14 @@ class ReturnFeature(Feature[T]):
         self.feature.reset()
 
 
-class LongReturnsFeature(Feature):
+class LongReturnsFeature(Feature[T]):
 
-    def __init__(self, feature: Feature, period: int) -> None:
+    def __init__(self, feature: Feature[T], period: int) -> None:
         super().__init__()
         self.history = deque(maxlen=period)
         self.feature: Feature = feature
 
-    def calc(self, value) -> FloatArray:
+    def calc(self, value: T) -> FloatArray:
         values = self.feature.calc(value)
         h = self.history
 
@@ -469,17 +468,17 @@ class MinReturnFeature(Feature):
         self.feature.reset()
 
 
-class SMAFeature(Feature):
+class SMAFeature(Feature[T]):
     """Calculate the simple moving average of another feature."""
 
-    def __init__(self, feature: Feature, period: int) -> None:
+    def __init__(self, feature: Feature[T], period: int) -> None:
         super().__init__()
         self.period = period
         self.feature: Feature = feature
         self.history = None
         self._cnt = 0
 
-    def calc(self, value):
+    def calc(self, value: T) -> FloatArray:
         values = self.feature.calc(value)
         if self.history is None:
             self.history = np.zeros((self.period, values.size))
