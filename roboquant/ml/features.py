@@ -15,12 +15,14 @@ T = TypeVar("T")
 FloatArray = NDArray[np.float32]
 
 class Feature(Generic[T]):
-    """Base class for all types of features"""
+    """Base class for different types of features.
+    The ones included are either based either on an `Event` or an `Account`. Typically Event features are used
+    for input and Account features are used for label/output."""
 
     @abstractmethod
     def calc(self, value: T) -> FloatArray:
         """
-        Perform the calculation and return the result as a 1-dimensional NDArray.
+        Perform the calculation and return the result as a 1-dimensional NDArray of type float32.
         The result should always be the same size. If a value cannot be calculated at a certain
         time, it should use a float NaN in the NDArray.
         """
@@ -45,19 +47,16 @@ class Feature(Generic[T]):
     def _full_nan(self) -> FloatArray:
         return np.full(self._shape(), float("nan"), dtype=np.float32)
 
-    def cache(self, validate=False) -> "Feature[T]":
-        return CacheFeature(self, validate)  # type: ignore
-
     def returns(self, period=1) -> "Feature[T]":
         if period == 1:
-            return ReturnFeature(self)  # type: ignore
-        return LongReturnsFeature(self, period)  # type: ignore
+            return ReturnFeature(self)
+        return LongReturnsFeature(self, period)
 
     def normalize(self, min_period=3) -> "Feature[T]":
-        return NormalizeFeature(self, min_period)  # type: ignore
+        return NormalizeFeature(self, min_period)
 
     def __getitem__(self, *args) -> "Feature[T]":
-        return SlicedFeature(self, args)  # type: ignore
+        return SlicedFeature(self, args)
 
 
 class EquityFeature(Feature[Account]):
@@ -131,7 +130,7 @@ class FixedValueFeature(Feature):
     def size(self) -> int:
         return len(self.value)
 
-    def calc(self, value):
+    def calc(self, value: Any) -> FloatArray:
         return self.value
 
 
