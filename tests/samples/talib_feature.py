@@ -8,7 +8,7 @@ from roboquant.strategies.buffer import OHLCVBuffer
 
 # %%
 class RSIFeature(TaFeature):
-    """Example using talib to create a RSI feature"""
+    """Example using TaLib to create a RSI feature"""
 
     def __init__(self, *assets: Asset, timeperiod:int) -> None:
         self.timeperiod = timeperiod

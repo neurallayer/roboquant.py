@@ -28,7 +28,14 @@ logger = logging.getLogger(__name__)
 
 
 class TradingEnv(gym.Env):
-    """A Gym environment for trading strategies"""
+    """A Gym environment for trading strategies.
+    This environment is designed to be used with reinforcement learning algorithms.
+    It simulates a trading environment where an agent can take actions based on observations
+    and receive rewards based on the performance of those actions.
+    The environment uses a feed of events (e.g., market data) and a broker to manage trades.
+    The agent can predict actions for multiple assets, and the environment will calculate
+    observations and rewards based on the agent's actions and the current state of the account.
+    """
     # pylint: disable=too-many-instance-attributes,unused-argument
 
     metadata = {"render_modes": ["human", "rgb_array"], "render_fps": 4}

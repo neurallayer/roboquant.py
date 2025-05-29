@@ -46,6 +46,8 @@ class FeatureStrategy(Strategy):
 
 class SequenceDataset(Dataset):
     """Dataset for creating input and output sequences for recurrent networks.
+    This dataset is designed to create sequences of input data and corresponding target data
+    for training recurrent neural networks (RNNs) or similar models.
 
     The output sequence follows the input sequence, with an optional gap in between.
 
@@ -100,8 +102,11 @@ class SequenceDataset(Dataset):
 
 class RNNStrategy(FeatureStrategy):
     """Strategy using a recurrent neural network to predict future time series values.
-
     The input and label features are calculated from events.
+    The model is expected to be a PyTorch module that takes the input features and outputs predictions.
+    The strategy can be used to generate buy/sell signals based on the model's predictions.
+    This strategy is suitable for time series forecasting tasks where the model learns from historical data
+    to predict future values. Right now it only supports a single asset, but this can be extended in the future.
     """
 
     def __init__(
