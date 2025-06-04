@@ -125,6 +125,18 @@ class SimBroker(Broker):
             return _Trx(order.asset, order.remaining, price)
         return None
 
+    @staticmethod
+    def _update_positions(account: Account, event: Event | None, price_type: str = "DEFAULT"):
+        """Update the open positions in the account with the latest market prices found in the event"""
+        if not event:
+            return
+
+        account.last_update = event.time
+
+        for asset, position in account.positions.items():
+            if price := event.get_price(asset, price_type):
+                position.mkt_price = price
+
     def __next_order_id(self):
         """Generate a new order id. The order id is a simple integer that is incremented for each new order."""
         result = str(self._order_id)
