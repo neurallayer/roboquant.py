@@ -172,13 +172,14 @@ class RNNStrategy(FeatureStrategy):
         x = []
         y = []
         for evt in feed.play(timeframe):
+            x_data = self.input_feature.calc(evt)
+            y_data = self.label_feature.calc(evt)
+
             if warmup:
-                self.label_feature.calc(evt)
-                self.input_feature.calc(evt)
                 warmup -= 1
             else:
-                x.append(self.input_feature.calc(evt))
-                y.append(self.label_feature.calc(evt))
+                x.append(x_data)
+                y.append(y_data)
 
         return np.asarray(x, dtype=self._dtype), np.asarray(y, dtype=self._dtype)
 

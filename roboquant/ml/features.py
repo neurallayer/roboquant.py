@@ -484,10 +484,7 @@ class TrueRangeFeature(Feature[Event]):
         if item is None or not isinstance(item, Bar):
             return np.array([float("nan")])
 
-        ohlcv = item.ohlcv
-        high = ohlcv[1]
-        low = ohlcv[2]
-        close = ohlcv[3]
+        high, low, close = item.ohlcv[1:4]
 
         prev_close = self.prev_close if self.prev_close is not None else low
         self.prev_close = close
