@@ -7,16 +7,16 @@ import roboquant as rq
 from roboquant.asset import Stock
 from roboquant.journals.basicjournal import BasicJournal
 from roboquant.ml.features import BarFeature, CombinedFeature, MaxReturnFeature, PriceFeature, SMAFeature
-from roboquant.ml.strategies import RNNStrategy, logger
+from roboquant.ml.strategies import TimeSeriesStrategy, logger
 
 
 # %%
 # Torch LSTM Model
-class MyModel(nn.Module):
+class TimeSeriesLSTM(nn.Module):
 
-    def __init__(self) -> None:
+    def __init__(self, feature_size) -> None:
         super().__init__()
-        self.lstm = nn.LSTM(15, 16, batch_first=True, num_layers=2, dropout=0.4)
+        self.lstm = nn.LSTM(feature_size, 16, batch_first=True, num_layers=2, dropout=0.4)
         self.flatten = nn.Flatten()
         self.linear = nn.Linear(16, 1)
 
@@ -31,12 +31,11 @@ class MyModel(nn.Module):
 # Config
 apple = Stock("AAPL")
 prediction = 5 # predict 5 steps in the future
-start_date = "2010-01-01"
+start_date = "2000-01-01"
 feed = rq.feeds.YahooFeed(apple.symbol, start_date=start_date)
 
 # %%
 # Define the strategy
-model = MyModel()
 
 # What are the input features
 input_feature = CombinedFeature(
@@ -45,6 +44,8 @@ input_feature = CombinedFeature(
     SMAFeature(BarFeature(apple), 20).returns(),
 ).normalize(20)
 
+model = TimeSeriesLSTM(input_feature.size())
+
 # What should it predict
 # In this case the max return over the prediction period
 label_feature = MaxReturnFeature(PriceFeature(apple, price_type="HIGH"), prediction)
@@ -52,7 +53,7 @@ label_feature = MaxReturnFeature(PriceFeature(apple, price_type="HIGH"), predict
 # Create the strategy
 logging.basicConfig()
 logger.setLevel("INFO")
-strategy = RNNStrategy(input_feature, label_feature, model, apple, sequences=20, buy_pct=0.02, sell_pct=0.02)
+strategy = TimeSeriesStrategy(input_feature, label_feature, model, apple, sequences=20, buy_pct=0.02, sell_pct=0.02)
 
 # %%
 # Train the model from 2010 to 20202

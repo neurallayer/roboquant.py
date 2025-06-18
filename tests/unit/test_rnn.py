@@ -7,7 +7,7 @@ import numpy as np
 import roboquant as rq
 from roboquant.asset import Stock
 from roboquant.ml.features import BarFeature, CombinedFeature, PriceFeature, SMAFeature
-from roboquant.ml.strategies import RNNStrategy, SequenceDataset
+from roboquant.ml.strategies import TimeSeriesStrategy, SequenceDataset
 from tests.common import get_feed
 
 
@@ -56,7 +56,7 @@ class TestRNN(unittest.TestCase):
 
         label_feature = PriceFeature(apple, price_type="CLOSE").returns(prediction)
 
-        strategy = RNNStrategy(input_feature, label_feature, model, apple, sequences=20, buy_pct=0.01)
+        strategy = TimeSeriesStrategy(input_feature, label_feature, model, apple, sequences=20, buy_pct=0.01)
 
         # Train the model with 10 years of data
         tf = rq.Timeframe.fromisoformat("2010-01-01", "2020-01-01")

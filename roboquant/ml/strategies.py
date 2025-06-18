@@ -100,8 +100,8 @@ class SequenceDataset(Dataset):
         return features, target
 
 
-class RNNStrategy(FeatureStrategy):
-    """Strategy using a recurrent neural network to predict future time series values.
+class TimeSeriesStrategy(FeatureStrategy):
+    """Strategy using a sequenced neural network to predict future time series values.
     The input and label features are calculated from events.
     The model is expected to be a PyTorch module that takes the input features and outputs predictions.
     The strategy can be used to generate buy/sell signals based on the model's predictions.
