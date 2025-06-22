@@ -390,25 +390,88 @@ class UnrealizedPNLFeature(Feature[Account]):
 
 
 class DayOfWeekFeature(Feature[Event]):
-    """Calculate a one-hot-encoded day of the week where Monday == 0 and Sunday == 6
-    So the result will be a 7-element array with a 1.0 at the index of the current day
-    and 0.0 at all other indices.
-    For example, if the event time is a Wednesday, the result will be [0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 0.0]
+    """Calculate a day of the week where Monday == 0 and Sunday == 6.
+    The result can be one-hot encoded or not, depending on the `one_hot_encoded` parameter.
+    If `one_hot_encoded` is True, the result will be a 7-element array
+    else the result will be a single value representing the day of the week (0-6).
+    For example, if the event time is a Monday, the result will be:
+    - one-hot encoded: [1.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0]
+    - not one-hot encoded: [0.0]
     """
 
-    def __init__(self, tz=timezone.utc) -> None:
+    def __init__(self, tz=timezone.utc, one_hot_encoded: bool = True) -> None:
         super().__init__()
         self.tz = tz
+        self.one_hot_encoded = one_hot_encoded
 
     def calc(self, value: Event) -> FloatArray:
         dt = datetime.astimezone(value.time, self.tz)
         weekday = dt.weekday()
+        if not self.one_hot_encoded:
+            return np.array([weekday], dtype=np.float32)
+
         result = np.zeros(7, dtype=np.float32)
         result[weekday] = 1.0
         return result
 
     def size(self) -> int:
-        return 7
+        return 7 if self.one_hot_encoded else 1
+
+
+class DayOfMonthFeature(Feature[Event]):
+    """Calculate a day of month where the first day of the month is 0 and the last day is 30.
+    Result can be one-hot encoded or not, depending on the `one_hot_encoded` parameter.
+    If `one_hot_encoded` is True, the result will be a 30-element array else the result will be a single value.
+    For example, if the event time is the 15th of the month, the result will be:
+    - one-hot encoded: [0.0, 0.0, ..., 1.0, 0.0, ..., 0.0] (1.0 at index 14)
+    - not one-hot encoded: [14.0]
+    """
+
+    def __init__(self, tz=timezone.utc, one_hot_encoded: bool = True) -> None:
+        super().__init__()
+        self.tz = tz
+        self.one_hot_encoded = one_hot_encoded
+
+    def calc(self, value: Event) -> FloatArray:
+        dt = datetime.astimezone(value.time, self.tz)
+        day = dt.day - 1  # day of month is 1-31, we want 0-30
+        if not self.one_hot_encoded:
+            return np.array([day], dtype=np.float32)
+
+        result = np.zeros(31, dtype=np.float32)
+        result[day] = 1.0
+        return result
+
+    def size(self) -> int:
+        return 31 if self.one_hot_encoded else 1
+
+
+class MonthOfYearFeature(Feature[Event]):
+    """Calculate a month of year where January == 0 and December == 11.
+    Result can be one-hot encoded or not, depending on the `one_hot_encoded` parameter.
+    If `one_hot_encoded` is True, the result will be a 12-element array else the result will be a single value.
+    For example, if the event time is in March, the result will be:
+    - one-hot encoded: [0.0, 0.0, 1.0, 0.0, ..., 0.0] (1.0 at index 2)
+    - not one-hot encoded: [2.0]
+    """
+
+    def __init__(self, tz=timezone.utc, one_hot_encoded: bool = True) -> None:
+        super().__init__()
+        self.tz = tz
+        self.one_hot_encoded = one_hot_encoded
+
+    def calc(self, value: Event) -> FloatArray:
+        dt = datetime.astimezone(value.time, self.tz)
+        month = dt.month - 1  # month is 1-12, we want 0-11
+        if not self.one_hot_encoded:
+            return np.array([month], dtype=np.float32)
+
+        result = np.zeros(12, dtype=np.float32)
+        result[month] = 1.0
+        return result
+
+    def size(self) -> int:
+        return 12 if self.one_hot_encoded else 1
 
 
 class TimeDifference(Feature[Event]):

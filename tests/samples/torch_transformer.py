@@ -6,7 +6,7 @@ from torch import nn
 import roboquant as rq
 from roboquant.asset import Stock
 from roboquant.journals.basicjournal import BasicJournal
-from roboquant.ml.features import BarFeature, CombinedFeature, MaxReturnFeature, PriceFeature, SMAFeature
+from roboquant.ml.features import BarFeature, CombinedFeature, MaxReturnFeature, PriceFeature, SMAFeature, DayOfMonthFeature
 from roboquant.ml.strategies import TimeSeriesStrategy, logger
 
 
@@ -14,7 +14,9 @@ from roboquant.ml.strategies import TimeSeriesStrategy, logger
 # Torch Transformer Model
 class TimeSeriesTransformer(nn.Module):
     """
-    A Transformer model for time series forecasting inspired by CodeTrading YouTube channel."""
+    A Transformer model for time series forecasting, inspired by CodeTrading YouTube channel.
+    https://www.youtube.com/watch?v=TT_D-4z-4zY
+    """
 
     def __init__(
         self,
@@ -25,7 +27,7 @@ class TimeSeriesTransformer(nn.Module):
         dim_feedforward=256,
         dropout=0.1,
         seq_length=30,
-        prediction_length=1
+        label_size=1
     ):
         super(TimeSeriesTransformer, self).__init__()
 
@@ -38,59 +40,52 @@ class TimeSeriesTransformer(nn.Module):
             nhead=nhead,
             dim_feedforward=dim_feedforward,
             dropout=dropout,
-            activation="relu",
-            batch_first=True  # Ensure batch is first dimension
+            batch_first=True
         )
         self.transformer_encoder = nn.TransformerEncoder(encoder_layer, num_layers=num_layers)
-
-        self.fc_out = nn.Linear(d_model, prediction_length)
+        self.fc_out = nn.Linear(d_model, label_size)
 
     def forward(self, src):
-
-        # src shape: [batch_size, seq_length, feature_size]
-        seq_len = src.shape[1]
-        src = self.input_fc(src)  # -> [batch_size, seq_length, d_model]
-        src = src + self.pos_embedding[:, :seq_len, :]
-
-        # Transformer expects shape: [sequence_length, batch_size, d_model]
-        src = src.permute(1, 0, 2)  # -> [seq_length, batch_size, d_model]
+        src = self.input_fc(src)
+        src = src + self.pos_embedding
 
         # Pass through the transformer
-        encoded = self.transformer_encoder(src)  # [seq_length, batch_size, d_model]
+        src = self.transformer_encoder(src)
 
         # We only want the output at the last time step for forecasting the future
-        last_step = encoded[-1, :, :]  # [batch_size, d_model]
+        src = src[:, -1, :]
 
-        out = self.fc_out(last_step)  # [batch_size, prediction_length]
-        return out
+        src = self.fc_out(src)  # [batch_size, prediction_length]
+        return src
 
 
 # %%
 # Config
-apple = Stock("AAPL")
+spy = Stock("SPY")
 prediction = 5 # predict 5 steps in the future
 start_date = "2000-01-01"
-feed = rq.feeds.YahooFeed(apple.symbol, start_date=start_date)
+feed = rq.feeds.YahooFeed(spy.symbol, start_date=start_date)
 
 # %%
 
 # What are the input features
-input_feature = CombinedFeature(
-    BarFeature(apple).returns(),
-    SMAFeature(BarFeature(apple), 10).returns(),
-    SMAFeature(BarFeature(apple), 20).returns(),
-).normalize(20)
-
-model = TimeSeriesTransformer(feature_size=input_feature.size(), seq_length=20)
+features = CombinedFeature(
+    BarFeature(spy).returns(),
+    SMAFeature(BarFeature(spy), 10).returns(),
+    SMAFeature(BarFeature(spy), 20).returns(),
+    DayOfMonthFeature(),
+).normalize(50)
 
 # What should it predict
 # In this case the max return over the prediction period
-label_feature = MaxReturnFeature(PriceFeature(apple, price_type="HIGH"), prediction)
+label = MaxReturnFeature(PriceFeature(spy, price_type="HIGH"), prediction)
+
+model = TimeSeriesTransformer(feature_size=features.size(), seq_length=20, label_size=label.size())
 
 # Create the strategy
 logging.basicConfig()
 logger.setLevel("INFO")
-strategy = TimeSeriesStrategy(input_feature, label_feature, model, apple, sequences=20, buy_pct=0.02, sell_pct=0.02)
+strategy = TimeSeriesStrategy(features, label, model, spy, sequences=20, buy_pct=0.02, sell_pct=0.02)
 
 # %%
 # Train the model from 2000 to 2020
