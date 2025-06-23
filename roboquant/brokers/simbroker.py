@@ -1,9 +1,8 @@
-from dataclasses import dataclass
 from datetime import date, datetime, timezone
 from decimal import Decimal
 import logging
 
-from roboquant.account import Account, Position
+from roboquant.account import Account, Position, Trade
 from roboquant.asset import Asset
 from roboquant.brokers.broker import Broker
 from roboquant.event import Event, Quote, PriceItem
@@ -11,20 +10,6 @@ from roboquant.order import Order
 from roboquant.monetary import Amount, Wallet, USD
 
 logger = logging.getLogger(__name__)
-
-
-@dataclass(slots=True, frozen=True)
-class _Trx:
-    """transaction for an executed trade, so the size is always non-zero"""
-
-    asset: Asset
-    """The asset that was traded"""
-
-    size: Decimal
-    """The size of the trade, positive for a BUY and negative for a SELL"""
-
-    price: float
-    """The price of the trade denoted in the currency of the asset"""
 
 
 class SimBroker(Broker):
@@ -74,35 +59,51 @@ class SimBroker(Broker):
         self._order_id = 0
         self._order_entry: dict[str, date] = {}
 
-    def _fee(self, trx: _Trx) -> Amount:
+    def _fee(self, trade: Trade) -> Amount:
         """Calculate any additional transaction fee, default is zero"""
-        return Amount(trx.asset.currency, 0.0)
+        return Amount(trade.asset.currency, 0.0)
 
-    def _update_account(self, trx: _Trx):
-        """Update a position and cash based on a new transaction"""
+    def _pnl(self, asset: Asset, size: Decimal, price: float) -> float:
+        """
+        Calculate the profit and loss for a given asset, size, and price. It takes into account the average price
+        of the position if it exists, otherwise it returns 0.0
+        Args:
+            asset (Asset): The asset for which to calculate the profit and loss.
+            size (Decimal): The size of the position.
+            price (float): The current price of the asset.
+        """
+        pos = self._account.positions.get(asset)
+        if not pos:
+            return 0.0
+        return asset.contract_value(size, price - pos.avg_price)
+
+
+    def _update_account(self, trade: Trade):
+        """Update a position, trades and cash based on a new trade"""
         acc = self._account
-        asset = trx.asset
-        acc.cash -= asset.contract_amount(trx.size, trx.price)
-        acc.cash -= self._fee(trx)
+        acc.trades.append(trade)
+        asset = trade.asset
+        acc.cash -= asset.contract_amount(trade.size, trade.price)
+        acc.cash -= self._fee(trade)
 
         size = acc.get_position_size(asset)
 
         if size.is_zero():
             # opening of position
-            acc.positions[asset] = Position(trx.size, trx.price, trx.price)
+            acc.positions[asset] = Position(trade.size, trade.price, trade.price)
         else:
-            new_size: Decimal = size + trx.size
+            new_size: Decimal = size + trade.size
             if new_size.is_zero():
                 # closing of position
                 del acc.positions[asset]
             elif new_size.is_signed() != size.is_signed():
                 # reverse of position
-                acc.positions[asset] = Position(new_size, trx.price, trx.price)
+                acc.positions[asset] = Position(new_size, trade.price, trade.price)
             else:
                 # increase of position size
                 old_price = acc.positions[asset].avg_price
-                avg_price = (old_price * float(size) + trx.price * float(trx.size)) / (float(size + trx.size))
-                acc.positions[asset] = Position(new_size, avg_price, trx.price)
+                avg_price = (old_price * float(size) + trade.price * float(trade.size)) / (float(size + trade.size))
+                acc.positions[asset] = Position(new_size, avg_price, trade.price)
 
     def _get_execution_price(self, order: Order, item: PriceItem) -> float:
         """Return the execution price to use for an order based on the price item.
@@ -116,13 +117,14 @@ class SimBroker(Broker):
         correction = self.slippage if order.is_buy else -self.slippage
         return price * (1.0 + correction)
 
-    def _execute(self, order: Order, item: PriceItem) -> _Trx | None:
-        """Simulate a market execution and return a transaction object if the order has (partially) executed."""
+    def _execute(self, order: Order, item: PriceItem, time: datetime) -> Trade | None:
+        """Simulate a market execution and return a Trade object if the order has (partially) been executed."""
 
         price = self._get_execution_price(order, item)
         executable = price <= order.limit if order.is_buy else price >= order.limit
         if executable:
-            return _Trx(order.asset, order.remaining, price)
+            pnl = self._pnl(order.asset, order.remaining, price)
+            return Trade(order.asset, time, order.remaining, price, pnl)
         return None
 
     @staticmethod
@@ -206,11 +208,11 @@ class SimBroker(Broker):
                 logger.info("expired order %s", order)
                 self._remove_order(order)
             elif item := prices.get(order.asset):
-                trx = self._execute(order, item)
-                if trx is not None:
-                    logger.info("executed order=%s trx=%s", order, trx)
-                    self._update_account(trx)
-                    order.fill += trx.size
+                trade = self._execute(order, item, event.time)
+                if trade is not None:
+                    logger.info("executed order=%s trx=%s", order, trade)
+                    self._update_account(trade)
+                    order.fill += trade.size
                     if not order.remaining:
                         logger.info("completed order %s", order)
                         self._remove_order(order)

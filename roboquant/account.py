@@ -8,6 +8,25 @@ from roboquant.order import Order
 from roboquant.monetary import Amount, Wallet, USD, Currency
 
 
+@dataclass(slots=True, frozen=True)
+class Trade:
+    """
+    A trade represents a completed order with its filled size and price.
+    It is immutable and can be used to track the execution of an order.
+
+    Attributes:
+        asset (Asset): The asset that was traded.
+        size (Decimal): The size of the trade, positive for buy trades, negative for sell trades.
+        price (float): The price at which the trade was executed, in the currency of the asset.
+        pnl (float): The profit and loss of the trade, calculated as the difference between the trade price and the paid price.
+    """
+    asset: Asset
+    time: datetime
+    size: Decimal
+    price: float
+    pnl: float
+
+
 @dataclass(slots=True)
 class Position:
     """The position of an asset in the account. The position prices are denoted in the currency of the asset that
@@ -46,13 +65,14 @@ class Account:
     - Cash available in the account.
     - The open positions, each denoted in the currency of the asset.
     - The open orders, each denoted in the currency of the asset.
+    - The trades that have been executed, each denoted in the currency of the asset.
     - Calculated derived equity value of the account in the base currency of the account.
     - The last time the account was updated.
 
     Only the `broker` updates the account and does this only during its `sync` method.
     """
 
-    __slots__ = "buying_power", "positions", "orders", "last_update", "cash"
+    __slots__ = "buying_power", "positions", "orders", "last_update", "cash", "trades"
 
     def __init__(self, base_currency: Currency = USD):
         """
@@ -66,6 +86,7 @@ class Account:
         self.orders: list[Order] = []
         self.last_update: datetime = datetime.fromisoformat("1900-01-01T00:00:00+00:00")
         self.cash: Wallet = Wallet()
+        self.trades: list[Trade] = []
 
     @property
     def base_currency(self) -> Currency:
@@ -173,6 +194,7 @@ class Account:
         for asset, position in self.positions.items():
             result += asset.contract_amount(position.size, position.mkt_price - position.avg_price)
         return result
+
 
     def required_buying_power(self, order: Order) -> Amount:
         """

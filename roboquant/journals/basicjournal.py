@@ -17,6 +17,7 @@ class BasicJournal(Journal):
     - total number of events, and items
     - the total number of signals and orders
     - the maximum open positions
+    - the total number of trades
     - the total number of unique assets
 
     It will also log these values at each step in the run at `info` level.
@@ -31,6 +32,7 @@ class BasicJournal(Journal):
     signals: int = 0
     assets: int = 0
     max_positions: int = 0
+    trades: int = 0
 
     def __init__(self, log_level=logging.INFO):
         self.__log_level = log_level
@@ -41,6 +43,7 @@ class BasicJournal(Journal):
         self._assets = self._assets.union(event.price_items.keys())
         self.assets = len(self._assets)
         self.events += 1
+        self.trades = len(account.trades)
         self.signals += len(signals)
         self.orders += len(orders)
         self.max_positions = max(self.max_positions, len(account.positions))
