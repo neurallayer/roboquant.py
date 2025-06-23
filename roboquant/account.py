@@ -195,6 +195,27 @@ class Account:
             result += asset.contract_amount(position.size, position.mkt_price - position.avg_price)
         return result
 
+    def realized_pnl(self) -> Wallet:
+        """
+        Return the sum of the realized profit and loss for trades executed in the account.
+
+        Returns:
+            Wallet: The realized profit and loss.
+        """
+        result = Wallet()
+        for trade in self.trades:
+            result += Amount(trade.asset.currency, trade.pnl)
+        return result
+
+    def pnl(self) -> Wallet:
+        """
+        Return the total profit and loss of the account, which is the sum of realized and unrealized PnL.
+
+        Returns:
+            Wallet: The total profit and loss.
+        """
+        return self.realized_pnl() + self.unrealized_pnl()
+
 
     def required_buying_power(self, order: Order) -> Amount:
         """
@@ -292,6 +313,7 @@ class Account:
             f"cash         : {self.cash}\n"
             f"equity       : {self.equity()}\n"
             f"positions    : {p_str}\n"
+            f"trades       : {len(self.trades)}\n"
             f"mkt value    : {mkt}\n"
             f"orders       : {o_str}\n"
             f"last update  : {self.last_update}"
