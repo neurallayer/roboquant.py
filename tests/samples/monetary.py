@@ -22,7 +22,7 @@ assert wallet[EUR] == 40.0
 print("The wallet contains", wallet)
 
 # %%
-# Install the ECB currency converter so we cans
+# Install the ECB currency converter so we can
 # convert between different currencies
 ECBConversion().register()
 

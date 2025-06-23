@@ -28,7 +28,7 @@ logger = logging.getLogger(__name__)
 
 
 class TradingEnv(gym.Env):
-    """A Gym environment for trading strategies.
+    """A Gym environment for roboquant trading strategies.
     This environment is designed to be used with reinforcement learning algorithms.
     It simulates a trading environment where an agent can take actions based on observations
     and receive rewards based on the performance of those actions.

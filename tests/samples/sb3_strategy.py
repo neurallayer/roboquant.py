@@ -11,13 +11,13 @@ symbols = ["IBM", "JPM", "MSFT", "BA"]
 path = "/tmp/trained_recurrent_policy.zip"
 
 # %%
-yahoo = YahooFeed(*symbols, start_date="2000-01-01", end_date="2020-12-31")
-assets = yahoo.assets()
+feed = YahooFeed(*symbols, start_date="2000-01-01", end_date="2020-12-31")
+assets = feed.assets()
 
 obs_feature = BarFeature(*assets).returns().normalize(20)
 reward_feature = EquityFeature().returns().normalize(20)
 
-env = TradingEnv(yahoo, obs_feature, reward_feature, assets)
+env = TradingEnv(feed, obs_feature, reward_feature, assets)
 model = RecurrentPPO("MlpLstmPolicy", env)
 
 # %%

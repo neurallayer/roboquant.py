@@ -18,9 +18,12 @@ class TestAccount(unittest.TestCase):
         self.assertEqual(acc.buying_power.currency, USD)
         self.assertEqual(acc.base_currency, USD)
         self.assertEqual(acc.unrealized_pnl().convert_to(USD, now), 0.0)
+        self.assertEqual(acc.realized_pnl().convert_to(USD, now), 0.0)
         self.assertEqual(acc.mkt_value().convert_to(USD, now), 0.0)
         self.assertEqual(acc.equity_value(), 1_000.0)
         self.assertEqual(acc.last_update, now)
+        self.assertEqual(len(acc.positions), 0)
+        self.assertEqual(len(acc.trades), 0)
 
     def test_account_with_positions(self):
         acc = Account()
