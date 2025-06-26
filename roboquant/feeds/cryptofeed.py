@@ -21,6 +21,7 @@ class CryptoFeed(HistoricFeed):
         start_date: str | date | datetime = "2020-01-01T00:00:00",
         end_date: str | date | datetime | None = None,
         interval="1d",
+        separator: str = "/",
     ):
         """
         Create a new CryptoFeed instance
@@ -29,9 +30,13 @@ class CryptoFeed(HistoricFeed):
         - start_date: the start date of the data to retrieve, default in `2020-01-01`
         - end_date: the end date of the data to retrieve, default is `None` (today)
         - interval: the interval of the data to retrieve, default is `1d` (daily)
+        - separator: the separator to use for the symbol, default is `/`. This is used to split the symbol into base
+        and quote currency.
         """
 
         super().__init__()
+
+        self._separator = separator
 
         if not exchange.has["fetchOHLCV"]:
             raise ValueError(f"Exchange {exchange} does not support fetching OHLCV data")
@@ -80,9 +85,9 @@ class CryptoFeed(HistoricFeed):
         self._update()
 
     def _get_asset(self, symbol: str) -> Asset:
-        """Get the asset for the given symbol. The default implementation will return a Stock denoted in USD.
+        """Get the asset for the given symbol. The default implementation will return a Crypto.
         Subclasses can override this method to provide a different asset type."""
-        return Crypto.from_symbol(symbol)
+        return Crypto.from_symbol(symbol, self._separator)
 
 
 

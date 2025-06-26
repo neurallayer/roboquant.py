@@ -20,15 +20,15 @@ class SimBroker(Broker):
 
     def __init__(
         self,
-        initial_deposit: Amount = Amount(USD, 1_000_000.0),
+        deposit: Amount = Amount(USD, 1_000_000.0),
         price_type: str = "OPEN",
         slippage: float = 0.0,
         timezone: timezone = timezone.utc,
     ):
         """Create a new SimBroker instance.
         params:
-        - initial_deposit: The initial deposit of cash in the account. The currency of the deposit is also as the base currency
-        for the account.
+        - deposit: The initial deposit of cash in the account. The currency of the deposit is also as the base currency
+        for the account. The default is 1,000,000 USD.
         - price_type: The price type to use for the execution, like OPEN, CLOSE, HIGH or LOW. Default is OPEN.
         - slippage: The slippage to use for the execution, a percentage value. Default is 0% (0.0)
         - timezone: The timezone to use for to determine order expiration when the order time in force is set to `DAY`.
@@ -36,26 +36,26 @@ class SimBroker(Broker):
         """
 
         super().__init__()
-        self._account = Account(initial_deposit.currency)
+        self._account = Account(deposit.currency)
         self._modify_orders: list[Order] = []
         self._create_orders: list[Order] = []
-        self._account.cash = Wallet(initial_deposit)
-        self._account.buying_power = initial_deposit
+        self._account.cash = Wallet(deposit)
+        self._account.buying_power = deposit
         self._order_id = 0
 
         self.slippage = slippage
         self.price_type = price_type
-        self.initial_deposit = initial_deposit
+        self.deposit = deposit
         self._order_entry: dict[str, date] = {}
         self.timezone = timezone
 
     def reset(self):
         """Reset the broker with the cash and buying power set to the initial deposit."""
-        self._account = Account(self.initial_deposit.currency)
+        self._account = Account(self.deposit.currency)
         self._modify_orders: list[Order] = []
         self._create_orders: list[Order] = []
-        self._account.cash = Wallet(self.initial_deposit)
-        self._account.buying_power = self.initial_deposit
+        self._account.cash = Wallet(self.deposit)
+        self._account.buying_power = self.deposit
         self._order_id = 0
         self._order_entry: dict[str, date] = {}
 

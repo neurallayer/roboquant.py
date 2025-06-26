@@ -7,8 +7,9 @@ import roboquant as rq
 from roboquant.feeds.cryptofeed import CryptoFeed
 
 # %%
-binance = ccxt.binance()
-feed = CryptoFeed(binance, "BTC/USDT", "ETH/USDT", start_date="2020-01-01 00:00:00", interval="1d")
+exchange = ccxt.binance()
+# exchange = ccxt.kraken()  # or any other exchange supported by ccxt
+feed = CryptoFeed(exchange, "BTC/USDT", "ETH/USDT", start_date="2020-01-01 00:00:00", interval="1d")
 
 # %%
 for asset in feed.assets():
@@ -17,7 +18,7 @@ for asset in feed.assets():
 # %%
 strategy = rq.strategies.EMACrossover()
 trader = rq.traders.FlexTrader(size_fractions=4, max_order_perc=0.2, max_position_perc=0.5, shorting=True)
-broker = rq.brokers.SimBroker(initial_deposit=10_000@rq.monetary.USDT, slippage=0.0)
+broker = rq.brokers.SimBroker(deposit=10_000@rq.monetary.USDT)
 account = rq.run(feed, strategy, trader=trader, broker=broker)
 print(account)
 
