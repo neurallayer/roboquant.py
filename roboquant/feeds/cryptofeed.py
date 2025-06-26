@@ -11,7 +11,7 @@ logger = logging.getLogger(__name__)
 
 
 class CryptoFeed(HistoricFeed):
-    """A feed using the Yahoo Finance to retrieve historic market data. By default, it will retrieve daily data, but
+    """A feed using the CCXT library to retrieve historic market data. By default, it will retrieve daily data, but
     you can specify a different interval."""
 
     def __init__(
