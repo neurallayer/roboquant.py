@@ -28,10 +28,11 @@ class SimBroker(Broker):
         """Create a new SimBroker instance.
         params:
         - deposit: The initial deposit of cash in the account. The currency of the deposit is also as the base currency
-        for the account. The default is 1,000,000 USD.
+        for the account. The default is 1,000,000 USD. If there are assets denoted in a different
+        currency, a currency converter needs to be configured.
         - price_type: The price type to use for the execution, like OPEN, CLOSE, HIGH or LOW. Default is OPEN.
         - slippage: The slippage to use for the execution, a percentage value. Default is 0% (0.0)
-        - timezone: The timezone to use for to determine order expiration when the order time in force is set to `DAY`.
+        - timezone: The timezone to use for to determine order expiration when the time in force for an order is set to `DAY`.
             Default is UTC.
         """
 
@@ -125,6 +126,9 @@ class SimBroker(Broker):
         if executable:
             pnl = self._pnl(order.asset, order.remaining, price)
             return Trade(order.asset, time, order.remaining, price, pnl)
+
+        # If the order is not executable, we return None
+        logger.info("order not executable order=%s market-price=%s", order, price)
         return None
 
     @staticmethod

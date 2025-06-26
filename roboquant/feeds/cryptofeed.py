@@ -43,7 +43,7 @@ class CryptoFeed(HistoricFeed):
 
 
         start_date = str(start_date)
-        end_date = datetime.fromisoformat(str(end_date)) if end_date else None
+        end_date = datetime.fromisoformat(str(end_date)).astimezone(timezone.utc) if end_date else None
 
         for symbol in symbols:
 
