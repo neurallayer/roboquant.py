@@ -17,8 +17,8 @@ FloatArray = NDArray[np.float32]
 
 class Feature(Generic[T]):
     """Base class for different types of features.
-    The ones included are either based either an `Event` or an `Account`. Typically Event features are used
-    for input and Account features are used for label/output."""
+    The ones included by default are either based either an `Event` or an `Account`.
+    Typically Event features are used for input and Account features are used for label/output."""
 
     @abstractmethod
     def calc(self, value: T) -> FloatArray:
@@ -30,7 +30,7 @@ class Feature(Generic[T]):
 
     @abstractmethod
     def size(self) -> int:
-        """return the size of this feature"""
+        """Return the size of this feature"""
 
     def reset(self):
         """Reset the state of the feature"""
@@ -40,12 +40,15 @@ class Feature(Generic[T]):
         return (self.size(),)
 
     def _zeros(self):
+        """Return a zero array of the correct shape"""
         return np.zeros(self._shape(), dtype=np.float32)
 
     def _ones(self):
+        """Return an array of ones of the correct shape"""
         return np.ones(self._shape(), dtype=np.float32)
 
     def _full_nan(self) -> FloatArray:
+        """Return a full NaN array of the correct shape"""
         return np.full(self._shape(), float("nan"), dtype=np.float32)
 
     def returns(self, period=1) -> "Feature[T]":
@@ -54,9 +57,14 @@ class Feature(Generic[T]):
         return LongReturnsFeature(self, period)
 
     def normalize(self, min_period=3) -> "Feature[T]":
+        """Normalize the feature values by calculating the mean and standard deviation."""
         return NormalizeFeature(self, min_period)
 
     def __getitem__(self, *args) -> "Feature[T]":
+        """Return a slice of the feature.
+        For example, if the feature has size 10 and you call `feature[2:5]`, it will return a new feature
+        that contains the values for indices 2, 3, and 4 of the original feature.
+        """
         return SlicedFeature(self, args)
 
 
@@ -98,7 +106,7 @@ class FixedValueFeature(Feature):
 
 
 class CombinedFeature(Feature[T]):
-    """Combine multiple features into one single feature by stacking them.
+    """Combine multiple features into one single feature by horizontal stacking them.
     So if feature1 has size 3 and feature2 has size 5, the combined feature will have size 8.
     """
 
@@ -323,14 +331,11 @@ class SMAFeature(Feature[T]):
         super().__init__()
         self.period = period
         self.feature: Feature = feature
-        self.history = None
+        self.history = np.zeros((self.period, feature.size()), dtype=np.float32)
         self._cnt = 0
 
     def calc(self, value: T) -> FloatArray:
         values = self.feature.calc(value)
-        if self.history is None:
-            self.history = np.zeros((self.period, values.size))
-
         idx = self._cnt % self.period
         self.history[idx] = values
         self._cnt += 1
@@ -344,7 +349,7 @@ class SMAFeature(Feature[T]):
         return self.feature.size()
 
     def reset(self):
-        self.history = None
+        self.history = np.zeros((self.period, self.feature.size()), dtype=np.float32)
         self.feature.reset()
         self._cnt = 0
 
@@ -498,7 +503,9 @@ class TimeDifference(Feature[Event]):
 
 
 class TaFeature(Feature[Event]):
-    """Base class for technical analysis features"""
+    """Base class for technical analysis features.
+    You can for example use TaLib to implement your own technical analysis features.
+    """
 
     def __init__(self, *assets: Asset, history_size: int) -> None:
         super().__init__()

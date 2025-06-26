@@ -103,6 +103,12 @@ BTC = Currency("BTC")
 ETH = Currency("ETH")
 """Ethereum"""
 
+USDT = Currency("USDT")
+"""Tether USD"""
+
+USDC = Currency("USDC")
+"""USD Coin"""
+
 
 class CurrencyConverter(ABC):
     """Abstract base class for currency converters. They are used to convert monetary amounts from one currency to another."""

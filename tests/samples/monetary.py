@@ -1,3 +1,8 @@
+# %% [markdown]
+# This example shows how to use the `roboquant` library to handle monetary amounts and wallets.
+# It demonstrates how to create amounts in different currencies, manage wallets, and convert between currencies using
+# the European Central Bank (ECB) conversion rates.
+
 # %%
 from datetime import datetime, timedelta
 from roboquant import utcnow

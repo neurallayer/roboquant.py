@@ -22,7 +22,7 @@ class SimBroker(Broker):
         self,
         initial_deposit: Amount = Amount(USD, 1_000_000.0),
         price_type: str = "OPEN",
-        slippage: float = 0.001,
+        slippage: float = 0.0,
         timezone: timezone = timezone.utc,
     ):
         """Create a new SimBroker instance.
@@ -30,7 +30,7 @@ class SimBroker(Broker):
         - initial_deposit: The initial deposit of cash in the account. The currency of the deposit is also as the base currency
         for the account.
         - price_type: The price type to use for the execution, like OPEN, CLOSE, HIGH or LOW. Default is OPEN.
-        - slippage: The slippage to use for the execution, a percentage value. Default is 0.1% (0.001)
+        - slippage: The slippage to use for the execution, a percentage value. Default is 0% (0.0)
         - timezone: The timezone to use for to determine order expiration when the order time in force is set to `DAY`.
             Default is UTC.
         """
