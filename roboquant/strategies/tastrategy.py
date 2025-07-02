@@ -15,10 +15,10 @@ class TaStrategy(Strategy):
     there is at least the `size` history for an individual asset available.
     """
 
-    def __init__(self, size: int) -> None:
+    def __init__(self, period: int) -> None:
         super().__init__()
-        self._data = OHLCVBuffers(size)
-        self.size = size
+        self._data = OHLCVBuffers(period)
+        self.period = period
 
     def create_signals(self, event: Event) -> list[Signal]:
         result: list[Signal] = []
@@ -33,7 +33,8 @@ class TaStrategy(Strategy):
     def process_asset(self, asset: Asset, ohlcv: OHLCVBuffer) -> Signal | None:
         """
         Create a signal for the provided asset or return None if no signal should be created.
-        Subclasses should implement this method.
+        Subclasses should implement this method. This method is only invoked if enough data
+        is available for the asset, i.e. the size of the OHLCVBuffer is at least `self.period`.
 
         Sample:
         ```
@@ -56,10 +57,10 @@ class TaMultiAssetStrategy(Strategy):
     there is at least one asset that has `size` data available.
     """
 
-    def __init__(self, size: int) -> None:
+    def __init__(self, period: int) -> None:
         super().__init__()
-        self._data = OHLCVBuffers(size)
-        self.size = size
+        self._data = OHLCVBuffers(period)
+        self.period = period
 
     def create_signals(self, event: Event) -> list[Signal]:
         assets = self._data.add_event(event)

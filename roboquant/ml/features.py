@@ -507,10 +507,10 @@ class TaFeature(Feature[Event]):
     You can for example use TaLib to implement your own technical analysis features.
     """
 
-    def __init__(self, *assets: Asset, history_size: int) -> None:
+    def __init__(self, *assets: Asset, period: int) -> None:
         super().__init__()
         self._data: dict[Asset, OHLCVBuffer] = {}
-        self._size = history_size
+        self.period = period
         self.assets = list(assets)
 
     def calc(self, value: Event) -> FloatArray:
@@ -521,7 +521,7 @@ class TaFeature(Feature[Event]):
             item = value.price_items.get(asset)
             if isinstance(item, Bar):
                 if asset not in self._data:
-                    self._data[asset] = OHLCVBuffer(self._size)
+                    self._data[asset] = OHLCVBuffer(self.period)
                 ohlcv = self._data[asset]
                 if ohlcv.append(item.ohlcv):
                     v = self._calc(asset, ohlcv)

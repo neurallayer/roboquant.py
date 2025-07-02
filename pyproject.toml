@@ -80,5 +80,6 @@ dev = [
   "pyright>=1.1.399",
   "ipykernel>=6.29.5",
   "ipywidgets>=8.1.6",
+  "chronos-forecasting>=1.5.2"
 ]
-talib = ["ta-lib==0.6.3"]
+talib = ["ta-lib==0.6.4"]

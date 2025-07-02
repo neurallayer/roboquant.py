@@ -1,7 +1,7 @@
 import logging
 import ccxt
 from array import array
-from datetime import date, datetime, timezone, timedelta
+from datetime import date, datetime, timezone
 
 from roboquant.asset import Asset, Crypto
 from roboquant.event import Bar
@@ -11,7 +11,7 @@ logger = logging.getLogger(__name__)
 
 
 class CryptoFeed(HistoricFeed):
-    """A feed using the CCXT library to retrieve historic market data. By default, it will retrieve daily data, but
+    """A feed using the CCXT library to retrieve historic crypto market data. By default, it will retrieve daily data, but
     you can specify a different interval."""
 
     def __init__(
@@ -41,27 +41,24 @@ class CryptoFeed(HistoricFeed):
         if not exchange.has["fetchOHLCV"]:
             raise ValueError(f"Exchange {exchange} does not support fetching OHLCV data")
 
-
         start_date = str(start_date)
         end_date = datetime.fromisoformat(str(end_date)).astimezone(timezone.utc) if end_date else None
 
         for symbol in symbols:
-
             try:
                 asset = self._get_asset(symbol)
                 logger.debug("requesting symbol=%s", symbol)
                 done = False
-                since = str(start_date)
+                since = exchange.parse8601(start_date)
 
                 while not done:
-
                     # fetch_ohlcv returns a list of lists, each containing [timestamp, open, high, low, close, volume]
                     rows: list[list[float]] = exchange.fetch_ohlcv(
                         symbol=symbol,
                         timeframe=interval,
-                        since=exchange.parse8601(since),
+                        since=since,
                         limit=None,
-                    ) # type: ignore
+                    )  # type: ignore
 
                     if not rows:
                         break
@@ -75,12 +72,11 @@ class CryptoFeed(HistoricFeed):
                         b = Bar(asset, array("f", prices), interval)
                         self._add_item(dt, b)
 
-                    since = str(dt + timedelta(milliseconds=1))  # move to next second
+                    since = row[0] + 1
 
-                    logger.info("retrieved symbol=%s items=%s", symbol, len(rows))
-            except Exception as e:  # noqa: E722
-                print(e)
-                logger.error("Error retrieving symbol=%s", symbol)
+                    logger.info("retrieved symbol=%s items=%s last=%s", symbol, len(rows), dt)
+            except Exception:
+                logger.exception("Error retrieving symbol=%s", symbol, exc_info=True)
 
         self._update()
 
@@ -90,12 +86,12 @@ class CryptoFeed(HistoricFeed):
         return Crypto.from_symbol(symbol, self._separator)
 
 
-
 if __name__ == "__main__":
-    # Example usage
+    # Set logging at higher level
+    logging.basicConfig()
+    logger.setLevel(logging.INFO)
     exchange = ccxt.binance()  # or any other exchange supported by ccxt
-    feed = CryptoFeed(exchange, "BTC/USDT", "ETH/USDT", start_date="2024-01-01T00:00:00", interval="1d")
+    feed = CryptoFeed(exchange, "BTC/USDT", "ETH/USDT", start_date="2025-01-01T00:00:00", interval="5m")
     print(feed.assets())
     print("Feed initialized with", len(feed.timeline()), "events")
     print(feed.timeframe())
-

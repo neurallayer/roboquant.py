@@ -3,7 +3,7 @@
 # from the TaLib library. The strategy combines the Relative Strength Index (RSI) and Bollinger Bands
 
 # %%
-# Make sure ta-lib 0.6.3 or higher is installed before running this sample
+# Make sure ta-lib 0.6.4 or higher is installed before running this sample
 import roboquant.ta as ta
 import roboquant as rq
 from roboquant.strategies import OHLCVBuffer, TaStrategy
@@ -18,7 +18,7 @@ class MyStrategy(TaStrategy):
 
     def process_asset(self, asset: rq.Asset, ohlcv: OHLCVBuffer):
 
-        period = self.size - 1
+        period = self.period - 1
         close_prices = ohlcv.close()
         rsi = ta.RSI(close_prices, timeperiod=period)
 

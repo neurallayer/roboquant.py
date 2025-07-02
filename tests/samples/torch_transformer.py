@@ -71,9 +71,9 @@ feed = rq.feeds.YahooFeed(spy.symbol, start_date=start_date)
 # What are the input features
 features = CombinedFeature(
     BarFeature(spy).returns(),
-    SMAFeature(BarFeature(spy), 10).returns(),
-    SMAFeature(BarFeature(spy), 20).returns(),
-    DayOfMonthFeature(),
+    SMAFeature(PriceFeature(spy), 10).returns(),
+    SMAFeature(PriceFeature(spy), 20).returns(),
+    DayOfMonthFeature()
 ).normalize(50)
 
 # What should it predict
@@ -90,7 +90,7 @@ strategy = TimeSeriesStrategy(features, label, model, spy, sequences=20, buy_pct
 # %%
 # Train the model from 2000 to 2020
 tf = rq.Timeframe.fromisoformat(start_date, "2020-01-01")
-strategy.fit(feed, timeframe=tf, epochs=20, validation_split=0.25, prediction=prediction)
+strategy.fit(feed, timeframe=tf, epochs=20, validation_split=0.25, prediction=prediction, warmup=100)
 
 # %%
 # Run the trained model with the last years of data

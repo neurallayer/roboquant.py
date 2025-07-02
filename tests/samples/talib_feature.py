@@ -12,7 +12,7 @@ class RSIFeature(TaFeature):
 
     def __init__(self, *assets: Asset, timeperiod:int) -> None:
         self.timeperiod = timeperiod
-        super().__init__(*assets, history_size=timeperiod + 1)
+        super().__init__(*assets, period=timeperiod + 1)
 
     def _calc(self, asset: Asset, ohlcv: OHLCVBuffer) -> float:
         close = ohlcv.close()
