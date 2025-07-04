@@ -5,12 +5,13 @@
 # It uses the `ChronosBoltPipeline` to load the
 # pre-trained model and then makes predictions based on historical data.
 #
-# The predictions are then used in a simple strategy to buy or sell the asset.
+# The predictions are then used in a simple strategy to buy or sell the SPY.
 
 # %%
 import torch
 from matplotlib import pyplot as plt
 import roboquant as rq
+import numpy as np
 from chronos import BaseChronosPipeline, ChronosBoltPipeline
 
 from roboquant.strategies.buffer import OHLCVBuffer
@@ -23,11 +24,17 @@ pipeline = ChronosBoltPipeline.from_pretrained(
 )
 
 # %%
+def perc_change(arr):
+    """Calculate the percentage change of a numpy array to make the data stationary."""
+    return np.diff(arr) / arr[:-1]
+
+
+# %%
 feed = rq.feeds.YahooFeed("SPY", start_date="2020-01-01")
 df = feed.to_dataframe(feed.assets()[0])
-close = df["Close"].values
-prediction = 10  # predict 10 steps in the future
-context_window = 250  # use the previous 250 days as context
+close = perc_change(df["Close"].values)
+prediction = 10  # predict 10 trading days in the future
+context_window = 250  # use the previous 250 trading days as context
 
 # %%
 # Get the predictions for different quantiles
@@ -53,23 +60,22 @@ class ChronosPredictionStrategy(rq.strategies.TaStrategy):
     based on historical data. Naive approach that just serves as an example."""
 
     def __init__(self, pipeline: BaseChronosPipeline, prediction_length: int):
-        super().__init__(period=context_window)
+        super().__init__(period=context_window + 1)
         self.pipeline = pipeline
         self.prediction_length = prediction_length
 
     def process_asset(self, asset: rq.Asset, ohlcv: OHLCVBuffer) -> rq.Signal | None:
-        close = ohlcv.close()
+        close = perc_change(ohlcv.close())
         result = self.pipeline.predict(
             context=torch.tensor(close),
             prediction_length=self.prediction_length,
         )
-        last_close = close[-1]
-        high_estimate = result[0, 6]  # Get the high estimation using the 0.7 quantile
-        low_estimate = result[0, 2]  # Get the low estimation usinf the 0.3 quantile
 
-        if low_estimate.max().item() > last_close:
+        estimate = result[0, 4].mean().item()  # Get the estimation using the 0.5 quantile
+
+        if estimate > 0.001:
             return rq.Signal.buy(asset)
-        elif high_estimate.min().item() < last_close:
+        elif estimate < -0.001:
             return rq.Signal.sell(asset)
 
 
