@@ -12,7 +12,7 @@ import torch
 from matplotlib import pyplot as plt
 import roboquant as rq
 import numpy as np
-from chronos import BaseChronosPipeline, ChronosBoltPipeline
+from chronos import ChronosBoltPipeline
 
 from roboquant.strategies.buffer import OHLCVBuffer
 
@@ -45,7 +45,6 @@ result = pipeline.predict(
 
 # %%
 # Plot the predictions for each quantile and the actual values
-
 for data in result[0]:
     plt.plot(data.numpy(), color="grey", alpha=0.2)
 
@@ -55,11 +54,11 @@ plt.show()
 
 # %%
 # Make a strategy that uses the predictions to buy or sell the asset
-class ChronosPredictionStrategy(rq.strategies.TaStrategy):
+class ChronosStrategy(rq.strategies.TaStrategy):
     """A strategy that uses the Chronos pipeline to predict future prices
     based on historical data. Naive approach that just serves as an example."""
 
-    def __init__(self, pipeline: BaseChronosPipeline, prediction_length: int):
+    def __init__(self, pipeline: ChronosBoltPipeline, prediction_length: int):
         super().__init__(period=context_window + 1)
         self.pipeline = pipeline
         self.prediction_length = prediction_length
@@ -81,7 +80,7 @@ class ChronosPredictionStrategy(rq.strategies.TaStrategy):
 
 # %%
 # Perform a backtest using the strategy
-strategy = ChronosPredictionStrategy(pipeline, prediction_length=prediction)
+strategy = ChronosStrategy(pipeline, prediction_length=prediction)
 trader = rq.traders.FlexTrader(max_order_perc=0.1, max_position_perc=0.8)
 account = rq.run(feed, strategy, trader=trader)
 print(account)
