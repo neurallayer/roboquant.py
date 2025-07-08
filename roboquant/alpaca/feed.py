@@ -35,6 +35,10 @@ logger = logging.getLogger(__name__)
 
 
 def _get_asset(symbol: str, asset_class: AssetClass) -> Asset:
+    """Convert an Alapca asset to a roboquant asset based on
+    its sybbol name and asset class.
+    """
+
     match asset_class:
         case AssetClass.US_EQUITY:
             return Stock(symbol)
