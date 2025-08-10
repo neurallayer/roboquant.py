@@ -19,6 +19,8 @@ logger = logging.getLogger(__name__)
 
 
 class CryptoBroker(LiveBroker):
+    """Broker that supports cryptocurrency exchanges using the ccxt library.
+    """
 
     def __init__(self, exchange: ccxt.Exchange, *args, **kwargs):
         super().__init__(*args, **kwargs)
@@ -26,11 +28,11 @@ class CryptoBroker(LiveBroker):
 
     def connect(self):
         # Default implementation for connecting to the crypto exchange
-        print("Connecting to crypto exchange...")
+        logger.info("Connecting to crypto exchange...")
 
     def disconnect(self):
         # Default implementation for disconnecting from the crypto exchange
-        print("Disconnecting from crypto exchange...")
+        logger.info("Disconnecting from crypto exchange...")
 
     def _place_order(self, order: Order):
         # Default implementation for placing an order
@@ -43,7 +45,7 @@ class CryptoBroker(LiveBroker):
             price = order.limit,
         )
 
-        logger.info("result place order oder=%s result=%s", order, result)
+        logger.info("result place order order=%s result=%s", order, result)
 
 
     def _get_account(self, event: Event | None = None) -> Account:
@@ -68,7 +70,7 @@ class CryptoBroker(LiveBroker):
     def _get_balance(self) -> Wallet:
         # Default implementation for retrieving account balance
         result = self.__client.fetch_balance()
-        print(result)
+        logger.info("Fetched balance: %s", result)
         return Wallet()
 
     def _get_buying_power(self) -> Amount:
@@ -97,6 +99,7 @@ if __name__ == "__main__":
         "apiKey" : key,
         "secret": secret
     })
+    exchange.set_sandbox_mode(True)
     # exchange = ccxt.kraken()  # or any other exchange supported by ccxt
     broker = CryptoBroker(exchange)
     acc = broker.sync()
