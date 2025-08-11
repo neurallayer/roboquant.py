@@ -61,7 +61,11 @@ class SimBroker(Broker):
         self._order_entry: dict[str, date] = {}
 
     def _fee(self, trade: Trade) -> Amount:
-        """Calculate any additional transaction fee, default is zero"""
+        """Calculate any additional transaction fee, default is zero.
+        This is additional to any configured slippage. The slippage
+        changes the execution price of the order while the fee only
+        affects the cash balance.
+        """
         return Amount(trade.asset.currency, 0.0)
 
     def _pnl(self, asset: Asset, size: Decimal, price: float) -> float:

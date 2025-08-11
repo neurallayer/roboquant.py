@@ -81,7 +81,8 @@ class CryptoFeed(HistoricFeed):
         self._update()
 
     def _get_asset(self, symbol: str) -> Asset:
-        """Get the asset for the given symbol. The default implementation will return a Crypto.
+        """Get the asset for the given symbol. The default implementation will return an
+        asset of the type Crypto.
         Subclasses can override this method to provide a different asset type."""
         return Crypto.from_symbol(symbol, self._separator)
 

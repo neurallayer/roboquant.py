@@ -19,13 +19,11 @@ class TestOrder(unittest.TestCase):
 
     def test_order_info(self):
         order = Order(apple, 100, 120.0, extra="ABC")
-        info = order.info
-        self.assertIn("extra", info)
+        self.assertIn("extra", order.info)
 
         order.id = "test"
         update = order.modify(size=50)
-        info = update.info
-        self.assertIn("extra", info)
+        self.assertIn("extra", update.info)
 
     def test_order_update(self):
         order = Order(apple, 100, 120.0)

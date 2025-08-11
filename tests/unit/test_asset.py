@@ -1,7 +1,7 @@
 from decimal import Decimal
 import unittest
 
-from roboquant.asset import Crypto, Stock, Option, Forex
+from roboquant.asset import Crypto, Stock, Option, Forex, Asset
 from roboquant.monetary import USD, Currency
 
 
@@ -48,6 +48,26 @@ class TestAsset(unittest.TestCase):
 
         cv = tesla.contract_value(Decimal(100), 150.0)
         self.assertEqual(cv, 100*150.0*100)
+
+    def test_custom_asset(self):
+        class CustomAsset(Asset):
+
+            def contract_value(self, size: Decimal, price: float) -> float:
+                return super().contract_value(size, price) * 1.5
+
+            def serialize(self) -> str:
+                return f"CustomAsset:{self.symbol}:{self.currency}"
+
+            @staticmethod
+            def deserialize(value: str) -> "CustomAsset":
+                _, symbol, currency = value.split(":")
+                return CustomAsset(symbol, Currency(currency))
+
+        a = CustomAsset("TEST/XYZ", Currency("XYZ"))
+        v = a.contract_value(Decimal(100), 150.0)
+        self.assertEqual(v, 100 * 150.0 * 1.5)
+        serialized = a.serialize()
+        self.assertEqual(a, CustomAsset.deserialize(serialized))
 
 
 if __name__ == "__main__":
