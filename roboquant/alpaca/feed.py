@@ -193,7 +193,7 @@ class AlpacaHistoricStockFeed(_AlpacaHistoricFeed):
             resolution (TimeFrame, optional): The resolution of the data. Defaults to None.
             adjustment (Adjustment, optional): The adjustment type. Defaults to Adjustment.ALL.
         """
-        resolution = resolution or TimeFrame(amount=1, unit=TimeFrameUnit.Day)
+        resolution = resolution or TimeFrame(amount=1, unit=TimeFrameUnit.Day)  # type: ignore
         req = StockBarsRequest(
             symbol_or_symbols=list(symbols), timeframe=resolution, start=start, end=end, adjustment=adjustment, feed=self.feed
         )
@@ -253,7 +253,7 @@ class AlpacaHistoricCryptoFeed(_AlpacaHistoricFeed):
             end (datetime, optional): The end time for the data. Defaults to None.
             resolution (TimeFrame, optional): The resolution of the data. Defaults to None.
         """
-        resolution = resolution or TimeFrame(amount=1, unit=TimeFrameUnit.Day)
+        resolution = resolution or TimeFrame(amount=1, unit=TimeFrameUnit.Day)  # type: ignore
         req = CryptoBarsRequest(symbol_or_symbols=list(symbols), timeframe=resolution, start=start, end=end)
         res = self.client.get_crypto_bars(req)
         assert isinstance(res, BarSet)

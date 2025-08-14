@@ -58,7 +58,7 @@ class CSVFeed(HistoricFeed):
     - time_fmt: the time format to use, or None if the time is in ISO format
     - endswith: the file extension to use to select the files
     - frequency: the frequency of the data, use as part of the `Bar` object but no functional impact
-    - asset_filter: optionally disaalow certain assets from being used.
+    - asset_filter: optionally, filter a subset of the assets to use.
     """
 
     def __init__(
