@@ -2,7 +2,7 @@ import unittest
 from datetime import datetime, timezone
 from decimal import Decimal
 
-from roboquant.event import Event, Trade
+from roboquant.event import Event, TradePrice
 from roboquant.order import Order
 from roboquant.account import Account
 from roboquant.asset import Stock
@@ -15,7 +15,7 @@ class TestSimbroker(unittest.TestCase):
 
     @staticmethod
     def _create_event(price=100.0):
-        item = Trade(TestSimbroker.apple, price, 1000)
+        item = TradePrice(TestSimbroker.apple, price, 1000)
         event = Event(datetime.now(timezone.utc), [item])
         return event
 

@@ -3,7 +3,7 @@ from datetime import timedelta
 from typing import Literal
 
 from roboquant.asset import Asset
-from roboquant.event import Event, Bar, Trade, Quote
+from roboquant.event import Event, Bar, TradePrice, Quote
 from roboquant.timeframe import Timeframe
 from .feed import Feed
 
@@ -32,7 +32,7 @@ class BarAggregatorFeed(Feed):
 
     def __aggr_trade2bar(self, evt: Event, bars: dict[Asset, Bar], freq: str):
         for item in evt.items:
-            if self.price_type == "trade" and isinstance(item, Trade):
+            if self.price_type == "trade" and isinstance(item, TradePrice):
                 price = item.trade_price
                 volume = item.trade_volume
             elif self.price_type == "quote" and isinstance(item, Quote):

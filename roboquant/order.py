@@ -144,7 +144,7 @@ class Order:
 
     def remaining_value(self) -> float:
         """
-        Return the remaining contract value of this order.
+        Return the remaining contract value of this order denoted in the currency of the asset.
 
         Returns:
             float: The remaining contract value of the order.

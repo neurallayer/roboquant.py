@@ -46,7 +46,7 @@ class Currency(str):
         assert isinstance(other, (float, int))
         return Amount(self, other)
 
-    def __call__(self, other: float | int):
+    def __call__(self, other: float | int) -> "Amount":
         """Create a new `Amount` using this currency and the provided value.
 
         Args:

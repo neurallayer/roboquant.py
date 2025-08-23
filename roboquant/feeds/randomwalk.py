@@ -7,7 +7,7 @@ from typing import Literal
 import numpy as np
 
 from roboquant.asset import Asset, Stock
-from roboquant.event import Bar, Trade, Quote
+from roboquant.event import Bar, TradePrice, Quote
 from .historic import HistoricFeed
 
 
@@ -58,11 +58,11 @@ class RandomWalk(HistoricFeed):
         self._update()
 
     @staticmethod
-    def __get_trade(symbol, price, volume, _):
-        return Trade(symbol, price, volume)
+    def __get_trade(asset: Asset, price: float, volume: float, _):
+        return TradePrice(asset, price, volume)
 
     @staticmethod
-    def __get_bar(asset, price, volume, spread_dev):
+    def __get_bar(asset: Asset, price: float, volume: float, spread_dev: float):
         high = price * (1.0 + abs(random.gauss(mu=0.0, sigma=spread_dev)))
         low = price * (1.0 - abs(random.gauss(mu=0.0, sigma=spread_dev)))
         close = random.uniform(low, high)
@@ -70,11 +70,11 @@ class RandomWalk(HistoricFeed):
         return Bar(asset, prices)
 
     @staticmethod
-    def __get_quote(symbol, price, volume, spread_dev):
+    def __get_quote(asset: Asset, price: float, volume: float, spread_dev: float):
         spread = abs(random.gauss(mu=0.0, sigma=spread_dev)) * price / 2.0
         ask = price + spread
         bid = price - spread
-        return Quote(symbol, array("f", [price, ask, volume, bid, volume]))
+        return Quote(asset, array("f", [price, ask, volume, bid, volume]))
 
     @staticmethod
     def __get_assets(
@@ -91,7 +91,7 @@ class RandomWalk(HistoricFeed):
         return list(assets)
 
     @staticmethod
-    def __price_path(rnd, n, scale, min_price, max_price):
+    def __price_path(rnd, n, scale, min_price: float, max_price: float):
         change = rnd.normal(loc=1.0, scale=scale, size=(n,))
         change[0] = rnd.uniform(min_price, max_price)
         price = change.cumprod()

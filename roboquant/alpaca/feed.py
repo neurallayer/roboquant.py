@@ -26,7 +26,7 @@ from alpaca.data.timeframe import TimeFrame, TimeFrameUnit
 from alpaca.trading.enums import AssetClass
 
 from roboquant.asset import Asset, Crypto, Option, Stock
-from roboquant.event import Bar, Event, PriceItem, Quote, Trade
+from roboquant.event import Bar, Event, PriceItem, Quote, TradePrice
 from roboquant.feeds.historic import HistoricFeed
 from roboquant.feeds.live import LiveFeed
 
@@ -91,7 +91,7 @@ class AlpacaLiveFeed(LiveFeed):
 
     async def __handle_trades(self, data):
         asset = _get_asset(data.symbol, self.asset_class)
-        item = Trade(asset, data.price, data.size)
+        item = TradePrice(asset, data.price, data.size)
         self.__put_item(data.timestamp, item)
 
     async def __handle_bars(self, data):
@@ -150,7 +150,7 @@ class _AlpacaHistoricFeed(HistoricFeed):
             asset = _get_asset(symbol, asset_class)
             for d in data:
                 time = d.timestamp
-                item = Trade(asset, d.price, d.size)
+                item = TradePrice(asset, d.price, d.size)
                 super()._add_item(time, item)
 
     def _process_quotes(self, quote_set, asset_class):

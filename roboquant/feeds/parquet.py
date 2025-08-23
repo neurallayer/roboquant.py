@@ -6,7 +6,7 @@ from typing import Any, Iterable
 import pyarrow as pa
 import pyarrow.parquet as pq
 
-from roboquant.event import Quote, Bar, Trade
+from roboquant.event import Quote, Bar, TradePrice
 from roboquant.event import Event
 from roboquant.feeds.feed import Feed
 from roboquant.asset import deserialize_to_asset, Asset
@@ -83,7 +83,7 @@ class ParquetFeed(Feed):
                             items.append(item)
                         case 3:
                             price, volume = p.as_py()
-                            item = Trade(asset, price, volume)
+                            item = TradePrice(asset, price, volume)
                             items.append(item)
                         case _:
                             logger.warning("Unknown type %s", t.as_py())
@@ -181,7 +181,7 @@ class ParquetFeed(Feed):
                 t = event.time
 
                 for item in event.items:
-                    if not isinstance(item, (Quote, Bar, Trade)):
+                    if not isinstance(item, (Quote, Bar, TradePrice)):
                         continue
                     if priceitem_filter and not priceitem_filter(item):
                         continue
@@ -199,7 +199,7 @@ class ParquetFeed(Feed):
                                     "freq": item.frequency,
                                 }
                             )
-                        case Trade():
+                        case TradePrice():
                             items.append(
                                 {"time": t, "type": 3, "asset": asset_str, "prices": [item.trade_price, item.trade_volume]}
                             )

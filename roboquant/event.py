@@ -147,7 +147,7 @@ class Quote(PriceItem):
 
 
 @dataclass(slots=True)
-class Trade(PriceItem):
+class TradePrice(PriceItem):
     """Holds a single price and optional the volume.
     Often this reflects an actual trade, but it can also be used in different scenarios.
 

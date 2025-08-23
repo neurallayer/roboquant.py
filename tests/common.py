@@ -4,7 +4,7 @@ from datetime import date, datetime, timedelta
 from typing import Iterable
 from unittest import TestCase
 
-from roboquant import PriceItem, Bar, Quote, Trade, Timeframe
+from roboquant import PriceItem, Bar, Quote, TradePrice, Timeframe
 from roboquant.asset import Asset
 from roboquant.feeds import CSVFeed
 from roboquant.feeds.feed import Feed
@@ -52,7 +52,7 @@ def run_price_item_feed(
                         test_case.assertGreaterEqual(ohlcv[1], ohlcv[i])  # High >= OHLC
                         test_case.assertGreaterEqual(ohlcv[i], ohlcv[2])
                         test_case.assertGreaterEqual(ohlcv[i], 0.0)
-                case Trade():
+                case TradePrice():
                     test_case.assertTrue(math.isfinite(item.trade_price))
                     test_case.assertTrue(math.isfinite(item.trade_volume))
                 case Quote():
