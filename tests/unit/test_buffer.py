@@ -12,6 +12,8 @@ class TestBuffer(unittest.TestCase):
         for row in x:
             b.append(row)
 
+        self.assertRaises(ValueError, b.append, np.arange(6))
+
         c = np.asarray(b)
         e = c == np.arange(50, 100).reshape(10, 5)
         self.assertTrue(e.all())

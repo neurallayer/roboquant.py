@@ -85,14 +85,3 @@ class CryptoFeed(HistoricFeed):
         asset of the type Crypto.
         Subclasses can override this method to provide a different asset type."""
         return Crypto.from_symbol(symbol, self._separator)
-
-
-if __name__ == "__main__":
-    # Set logging at higher level
-    logging.basicConfig()
-    logger.setLevel(logging.INFO)
-    exchange = ccxt.binance()  # or any other exchange supported by ccxt
-    feed = CryptoFeed(exchange, "BTC/USDT", "ETH/USDT", start_date="2025-01-01T00:00:00", interval="5m")
-    print(feed.assets())
-    print("Feed initialized with", len(feed.timeline()), "events")
-    print(feed.timeframe())

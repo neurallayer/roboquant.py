@@ -9,7 +9,7 @@ from tests.common import run_price_item_feed
 
 class TestCCXT(unittest.TestCase):
 
-    def test_yahoo_feed(self):
+    def test_binance_feed(self):
         symbols = {"BTC/USDT", "ETH/USDT"}
         binance = ccxt.binance()
         feed = CryptoFeed(binance, *symbols, start_date="2024-01-01T00:00:00", end_date="2025-01-01T00:00:00")
