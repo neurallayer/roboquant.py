@@ -11,14 +11,15 @@ from roboquant.monetary import Amount, Wallet, USD, Currency
 @dataclass(slots=True, frozen=True)
 class Trade:
     """
-    A trade represents a completed order with its filled size and price.
+    A trade represents a (partially) executed order with its filled size and price.
     It is immutable and can be used to track the execution of an order.
 
     Attributes:
         asset (Asset): The asset that was traded.
         size (Decimal): The size of the trade, positive for buy trades, negative for sell trades.
         price (float): The price at which the trade was executed, in the currency of the asset.
-        pnl (float): The profit and loss of the trade, calculated as the difference between the trade price and the paid price.
+        pnl (float): The profit and loss of the trade, calculated as the difference between the trade price and the average
+        paid price.
     """
     asset: Asset
     time: datetime
@@ -300,6 +301,7 @@ class Account:
                 return order
 
     def __repr__(self) -> str:
+        """Condensed representation of this account."""
         p = [f"{v.size}@{k.symbol}" for k, v in self.positions.items()]
         p_str = ", ".join(p) or "none"
 

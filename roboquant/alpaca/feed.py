@@ -2,7 +2,7 @@ import logging
 import threading
 from array import array
 from datetime import datetime, timedelta
-from typing import Literal
+from typing import Any, Literal
 
 import numpy as np
 from alpaca.data import DataFeed
@@ -59,7 +59,7 @@ class AlpacaLiveFeed(LiveFeed):
 
     __one_minute = str(timedelta(minutes=1))
 
-    def __init__(self, api_key:str, secret_key: str, market: Literal["iex", "sip", "crypto", "option"] = "iex") -> None:
+    def __init__(self, api_key: str, secret_key: str, market: Literal["iex", "sip", "crypto", "option"] = "iex") -> None:
         super().__init__()
 
         assert market in ["iex", "sip", "crypto", "option"], "invalid market"
@@ -178,12 +178,19 @@ class AlpacaHistoricStockFeed(_AlpacaHistoricFeed):
         **kwargs: Additional keyword arguments.
     """
 
-    def __init__(self, api_key:str, secret_key:str, feed: DataFeed = DataFeed.IEX, **kwargs):
+    def __init__(self, api_key: str, secret_key: str, feed: DataFeed = DataFeed.IEX, **kwargs: Any):
         super().__init__()
         self.client = StockHistoricalDataClient(api_key, secret_key, **kwargs)
         self.feed = feed
 
-    def retrieve_bars(self, *symbols, start=None, end=None, resolution: TimeFrame | None = None, adjustment=Adjustment.ALL):
+    def retrieve_bars(
+        self,
+        *symbols: str,
+        start: datetime | str | None = None,
+        end: datetime | str | None = None,
+        resolution: TimeFrame | None = None,
+        adjustment: Adjustment = Adjustment.ALL,
+    ):
         """Retrieve bar data for the given symbols.
 
         Args:
@@ -202,7 +209,7 @@ class AlpacaHistoricStockFeed(_AlpacaHistoricFeed):
         freq = str(resolution)
         self._process_bars(res.data, freq, AssetClass.US_EQUITY)
 
-    def retrieve_trades(self, *symbols, start=None, end=None):
+    def retrieve_trades(self, *symbols: str, start: datetime | str | None = None, end: datetime | str | None = None):
         """Retrieve trade data for the given symbols.
 
         Args:
@@ -215,7 +222,7 @@ class AlpacaHistoricStockFeed(_AlpacaHistoricFeed):
         assert isinstance(res, TradeSet)
         self._process_trades(res.data, AssetClass.US_EQUITY)
 
-    def retrieve_quotes(self, *symbols: str, start=None, end=None):
+    def retrieve_quotes(self, *symbols: str, start: datetime | str | None = None, end: datetime | str | None = None):
         """Retrieve quote data for the given symbols.
 
         Args:
@@ -240,11 +247,17 @@ class AlpacaHistoricCryptoFeed(_AlpacaHistoricFeed):
         **kwargs: Additional keyword arguments.
     """
 
-    def __init__(self, api_key:str, secret_key:str, **kwargs):
+    def __init__(self, api_key: str, secret_key: str, **kwargs: Any):
         super().__init__()
         self.client = CryptoHistoricalDataClient(api_key, secret_key, **kwargs)
 
-    def retrieve_bars(self, *symbols, start=None, end=None, resolution: TimeFrame | None = None):
+    def retrieve_bars(
+        self,
+        *symbols: str,
+        start: datetime | str | None = None,
+        end: datetime | str | None = None,
+        resolution: TimeFrame | None = None,
+    ):
         """Retrieve bar data for the given symbols.
 
         Args:
@@ -260,7 +273,7 @@ class AlpacaHistoricCryptoFeed(_AlpacaHistoricFeed):
         freq = str(resolution)
         self._process_bars(res.data, freq, AssetClass.CRYPTO)
 
-    def retrieve_trades(self, *symbols, start=None, end=None):
+    def retrieve_trades(self, *symbols: str, start: datetime | str | None = None, end: datetime | str | None = None):
         """Retrieve trade data for the given symbols.
 
         Args:

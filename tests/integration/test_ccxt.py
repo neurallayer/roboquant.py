@@ -13,8 +13,8 @@ class TestCCXT(unittest.TestCase):
         symbols = {"BTC/USDT", "ETH/USDT"}
         binance = ccxt.binance()
         feed = CryptoFeed(binance, *symbols, start_date="2024-01-01T00:00:00", end_date="2025-01-01T00:00:00")
-        print(feed)
         self.assertEqual(2, len(feed.assets()))
+        self.assertEqual(symbols, {a.symbol for a in feed.assets()})
 
         assets = {Crypto.from_symbol(symbol) for symbol in symbols}
         self.assertEqual(assets, set(feed.assets()))

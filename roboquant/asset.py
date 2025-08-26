@@ -143,7 +143,8 @@ class Crypto(Asset):
 
     @staticmethod
     def from_symbol(symbol: str, sep: str = "/"):
-        """Create a Crypto asset from a symbol string.
+        """Create a Crypto asset from a symbol string. Based on the separator it will
+        try to determine the currency.
 
         Args:
             symbol (str): The symbol string of the crypto asset.
