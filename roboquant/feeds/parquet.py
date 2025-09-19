@@ -188,14 +188,14 @@ class ParquetFeed(Feed):
                     asset_str = item.asset.serialize()
                     match item:
                         case Quote():
-                            items.append({"time": t, "type": 1, "asset": asset_str, "prices": item.data.tolist()})
+                            items.append({"time": t, "type": 1, "asset": asset_str, "prices": item.data.tolist()})  # type: ignore
                         case Bar():
                             items.append(
                                 {
                                     "time": t,
                                     "type": 2,
                                     "asset": asset_str,
-                                    "prices": item.ohlcv.tolist(),
+                                    "prices": item.ohlcv.tolist(),   # type: ignore
                                     "freq": item.frequency,
                                 }
                             )

@@ -100,7 +100,7 @@ class OHLCVBuffers(UserDict[Asset, OHLCVBuffer]):
                 if asset not in self:
                     self[asset] = OHLCVBuffer(self.size)
                 ohlcv = self[asset]
-                if ohlcv.append(item.ohlcv):
+                if ohlcv.append(item.ohlcv):  # type: ignore
                     assets.add(asset)
         return assets
 

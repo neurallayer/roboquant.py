@@ -98,7 +98,7 @@ if __name__ == "__main__":
     exchange = ccxt.alpaca({
         "apiKey" : key,
         "secret": secret
-    })
+    })  # type: ignore
     exchange.set_sandbox_mode(True)
     # exchange = ccxt.kraken()  # or any other exchange supported by ccxt
     broker = CryptoBroker(exchange)

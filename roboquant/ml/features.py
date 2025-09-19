@@ -523,7 +523,7 @@ class TaFeature(Feature[Event]):
                 if asset not in self._data:
                     self._data[asset] = OHLCVBuffer(self.period)
                 ohlcv = self._data[asset]
-                if ohlcv.append(item.ohlcv):
+                if ohlcv.append(item.ohlcv):  # type: ignore
                     v = self._calc(asset, ohlcv)
 
             result.append(v)
