@@ -2,9 +2,12 @@ from typing import Tuple
 
 import numpy as np
 
+from roboquant.account import Account
 from roboquant.asset import Asset
-
+from roboquant.event import Event
 from roboquant.journals.metric import Metric
+from roboquant.order import Order
+from roboquant.signal import Signal
 
 
 class AlphaBeta(Metric):
@@ -23,12 +26,12 @@ class AlphaBeta(Metric):
         super().__init__()
         self._data = np.ones((2, window_size))
         self.__cnt = 0
-        self.__last_prices = {}
+        self.__last_prices: dict[Asset, float] = {}
         self.__last_equity: float | None = None
         self.risk_free_return = risk_free_return
         self.price_type = price_type
 
-    def __get_market_value(self, prices: dict[Asset, float]):
+    def __get_market_value(self, prices: dict[Asset, float]) -> float:
         cnt = 0
         result = 0.0
         for asset in prices.keys():
@@ -37,11 +40,11 @@ class AlphaBeta(Metric):
                 result += prices[asset] / self.__last_prices[asset]
         return 1.0 if cnt == 0 else result / cnt
 
-    def __update(self, equity, prices):
+    def __update(self, equity: float, prices: dict[Asset, float]):
         self.__last_equity = equity
         self.__last_prices.update(prices)
 
-    def calc(self, event, account, signals, orders):
+    def calc(self, event: Event, account: Account, signals: list[Signal], orders: list[Order]) -> dict[str, float]:
         prices = event.get_prices(self.price_type)
         equity = account.equity_value()
         if self.__last_equity is None:

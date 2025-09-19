@@ -200,10 +200,9 @@ class SimBroker(Broker):
         # We are now in the DAY tif branch
         if entry_time := self._order_entry.get(order.id):
             return time.astimezone(self.timezone).date() > entry_time
-        else:
-            # The first time we see this order
-            self._order_entry[order.id] = time.astimezone(self.timezone).date()
 
+        # The first time we see this order
+        self._order_entry[order.id] = time.astimezone(self.timezone).date()
         return False
 
     def _process_open_orders(self, event: Event | None):
