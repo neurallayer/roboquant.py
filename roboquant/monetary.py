@@ -302,7 +302,7 @@ class Amount:
     @staticmethod
     def register_converter(converter: CurrencyConverter):
         """Register a new currency converter to handle conversions between different currencies.
-        It will replace the current registered converter.
+        It will replace the current registered converter. There can only be one converter at a time.
 
         Args:
             converter (CurrencyConverter): The new currency converter.

@@ -74,5 +74,8 @@ class TaMultiAssetStrategy(Strategy):
         """
         Create zero or more signals for the provided assets or return an empty list if no signal is created.
         Subclasses should implement this method.
+
+        This method is only invoked with the assets that have already enough data available, i.e. the size
+        of the OHLCVBuffer is at least `self.period`.
         """
         ...

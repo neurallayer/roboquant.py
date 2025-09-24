@@ -10,7 +10,8 @@ from roboquant.event import Bar, Event
 
 class NumpyBuffer:
     """A FIFO (first-in-first-out) buffer of a fixed capacity.
-    It uses a single Numpy array to store its data.
+    It uses a single Numpy array to store its data in order to optimize
+    memory usage and performance.
     """
 
     __slots__ = "__data", "__idx", "rows"
@@ -54,7 +55,7 @@ class NumpyBuffer:
 
 class OHLCVBuffer(NumpyBuffer):
     """A OHLCV buffer (first-in-first-out) of a fixed capacity.
-    It stores the data in a `NumpyBuffer`.
+    It stores the data in a `NumpyBuffer` with 5 columns (open, high, low, close, volume).
     """
 
     def __init__(self, capacity: int) -> None:

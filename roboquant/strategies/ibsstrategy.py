@@ -12,6 +12,12 @@ class IBSStrategy(Strategy):
     """
 
     def __init__(self, buy_threshold: float = 0.2, sell_threshold: float = 0.8):
+        """Create a new instance of the IBSStrategy
+
+        Args:
+            buy_threshold: below this threshold a buy signal is generated (default: 0.2)
+            sell_threshold: above this threshold a sell signal is generated (default: 0.8)
+        """
         super().__init__()
         self.__buy = buy_threshold
         self.__sell = sell_threshold
