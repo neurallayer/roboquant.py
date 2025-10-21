@@ -29,6 +29,7 @@ class IBSStrategy(Strategy):
                 _, H, L, C, _ = item.ohlcv
                 if H != L:
                     ibs = (C - L) / (H - L)
+                    assert 0.0 <= ibs <= 1.0, "IBS should be between 0 and 1"
                     if ibs < self.__buy:
                         result.append(Signal(asset, 1.0 - ibs))
                     elif ibs > self.__sell:

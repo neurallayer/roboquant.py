@@ -17,5 +17,6 @@ class Strategy(ABC):
             event: The event containing items to be processed.
         returns:
             A list of signals generated based on the event.
+            Returns an empty list if no signals are created.
         """
         ...

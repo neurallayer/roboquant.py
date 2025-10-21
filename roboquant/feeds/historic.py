@@ -10,7 +10,7 @@ from .feed import Feed
 
 class HistoricFeed(Feed, ABC):
     """
-    Abstract base class for feeds that produce historic price-items.
+    Utility base class for feeds that produce historic price-items.
     Internally, it uses a sorted-by-datetime dictionary to store the data. So all data
     is kept in memory.
     """
