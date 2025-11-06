@@ -67,14 +67,11 @@ uv pip install .
 Some other useful commands:
 
 ```shell
-# run the unit tests
-uv run python -m unittest discover -s tests/unit 
-
-# validate the code
-uvx ruff check
+# build & validate the code
+./bin/verify.sh
 
 # publish, only works if UV_PUBLISH_TOKEN is set
-uv publish 
+./bin/publish.sh
 ```
 
 ## License
