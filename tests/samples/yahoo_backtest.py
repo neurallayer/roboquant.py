@@ -1,5 +1,6 @@
 # %% [markdown]
-# This example shows how to use the Yahoo feed with a simple EMA Crossover strategy.
+# This example shows how to use the Yahoo feed with a simple EMA Crossover strategy
+# to run a backtest in roboquant.
 
 # %%
 import roboquant as rq
