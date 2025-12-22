@@ -84,7 +84,7 @@ class SimBroker(Broker):
 
 
     def _update_account(self, trade: Trade):
-        """Update a position, trades and cash based on a new trade"""
+        """Update the account positions, trades and cash based on a new trade"""
         acc = self._account
         acc.trades.append(trade)
         asset = trade.asset
@@ -122,13 +122,30 @@ class SimBroker(Broker):
         correction = self.slippage if order.is_buy else -self.slippage
         return price * (1.0 + correction)
 
+    def _get_fee(self, trade: Trade) -> float:
+        """Calculate any additional transaction fee, default is zero.
+        This is additional to any configured slippage. The slippage
+        changes the execution price of the order while the fee only
+        affects the cost.
+        """
+        return 0.0
+
+    def _get_fill(self, order: Order, price: float) -> Decimal:
+        """Calculate the fill size for the order based on the price.
+        The default implementation fills the entire remaining size of the order, 
+        so no partial fills are simulated.
+        """
+        return order.remaining
+
     def _execute(self, order: Order, item: PriceItem, time: datetime) -> Trade | None:
         """Simulate a market execution and return a Trade object if the order has (partially) been executed."""
 
         price = self._get_execution_price(order, item)
         executable = price <= order.limit if order.is_buy else price >= order.limit
         if executable:
-            pnl = self._pnl(order.asset, order.remaining, price)
+            fill = self._get_fill(order, price)
+            fee = self._get_fee(Trade(order.asset, time, fill, price, 0.0))
+            pnl = self._pnl(order.asset, order.remaining, price) - fee
             return Trade(order.asset, time, order.remaining, price, pnl)
 
         # If the order is not executable, we return None
@@ -136,10 +153,8 @@ class SimBroker(Broker):
         return None
 
     @staticmethod
-    def _update_positions(account: Account, event: Event | None, price_type: str = "DEFAULT"):
+    def _update_positions(account: Account, event: Event, price_type: str = "DEFAULT"):
         """Update the open positions in the account with the latest market prices found in the event"""
-        if not event:
-            return
 
         account.last_update = event.time
 
@@ -205,8 +220,8 @@ class SimBroker(Broker):
         self._order_entry[order.id] = time.astimezone(self.timezone).date()
         return False
 
-    def _process_open_orders(self, event: Event | None):
-        if not event or not self._account.orders:
+    def _process_open_orders(self, event: Event):
+        if not self._account.orders:
             return
         prices = event.price_items
 
@@ -262,8 +277,11 @@ class SimBroker(Broker):
         self._create_orders = []
 
         self._process_modify_orders()
-        self._process_open_orders(event)
-        self._update_positions(acc, event, self.price_type)
+
+        if event:
+            self._process_open_orders(event)
+            self._update_positions(acc, event, self.price_type)
+
         acc.buying_power = self._calculate_buyingpower()
         return acc
 

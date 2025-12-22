@@ -94,6 +94,8 @@ class SlicedFeature(Feature[T]):
 
 
 class FixedValueFeature(Feature):
+    """Feature that always returns a fixed value"""
+
     def __init__(self, value: ArrayLike) -> None:
         super().__init__()
         self.value = np.array(value, dtype="float32")
@@ -197,7 +199,7 @@ class FillFeature(Feature[T]):
 
 
 class FillWithConstantFeature(Feature[T]):
-    """If a feature contains a NaN value, fill with a constant value"""
+    """If a feature contains a NaN value, fill it with a constant value"""
 
     def __init__(self, feature: Feature[T], constant: float = 0.0) -> None:
         super().__init__()
