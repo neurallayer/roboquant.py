@@ -12,7 +12,7 @@ from roboquant.timeframe import Timeframe, utcnow
 
 
 class Broker(ABC):
-    """A broker accepts orders and communicates its latest state through the account object when
+    """A broker accepts orders and communicates its latest state through returning the `Account` object when
     the `sync` method is invoked.
     """
 
@@ -35,7 +35,7 @@ class Broker(ABC):
     @abstractmethod
     def sync(self, event: Event | None = None) -> Account:
         """Sync the state and return an updated account to reflect the latest state. So all brokers
-        return the same account object, making it easier to switch from back-testing to live-trading.
+        return the same account object, making it easy to switch from back-testing to live-trading.
 
         Args:
             event: optional the latest event.
@@ -56,9 +56,9 @@ class LiveBroker(Broker):
     account state and managing orders.
 
     Attributes:
-        max_delay_event (timedelta): Maximum allowable delay for processing an event.
-        max_delay_sync (timedelta): Maximum allowable delay for synchronizing account state.
-        sleep_after_cancel (float): Time to sleep (in seconds) after canceling an order.
+        max_delay_event (timedelta): Maximum allowable delay for processing an event, default is 20 minutes.
+        max_delay_sync (timedelta): Maximum allowable delay for synchronizing account state, default is 5 seconds.
+        sleep_after_cancel (float): Time to sleep (in seconds) after canceling an order, default is 0.0 seconds.
         metrics (dict): A dictionary tracking the number of new, updated, canceled,
             and synchronized orders.
     Methods:
@@ -166,7 +166,8 @@ class LiveBroker(Broker):
         tif: Literal['GTC', 'DAY'] = "DAY",
         ):
         """
-        Create a new buy order for the given asset.
+        Create a buy order for the given asset. Typically used to create an order based on the state of an existing order at
+        the broker.
         """
         order = Order(
             asset=asset,

@@ -1,6 +1,5 @@
 import logging
 import ccxt
-import os
 from roboquant.account import Account, Position
 from roboquant.asset import Asset
 from roboquant.brokers.broker import LiveBroker, Order
@@ -11,9 +10,6 @@ from dotenv import load_dotenv
 
 load_dotenv()
 
-
-def _get_credentials():
-    return os.environ["ALPACA_API_KEY"], os.environ["ALPACA_SECRET"]
 
 logger = logging.getLogger(__name__)
 
@@ -89,18 +85,3 @@ class CryptoBroker(LiveBroker):
     def _update_order(self, order: Order):
         raise NotImplementedError
 
-
-if __name__ == "__main__":
-    # Set logging at higher level
-    logging.basicConfig()
-    logger.setLevel(logging.INFO)
-    key, secret = _get_credentials()
-    exchange = ccxt.alpaca({
-        "apiKey" : key,
-        "secret": secret
-    })  # type: ignore
-    exchange.set_sandbox_mode(True)
-    # exchange = ccxt.kraken()  # or any other exchange supported by ccxt
-    broker = CryptoBroker(exchange)
-    acc = broker.sync()
-    print(acc)
