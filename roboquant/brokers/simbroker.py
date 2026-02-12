@@ -132,7 +132,7 @@ class SimBroker(Broker):
 
     def _get_fill(self, order: Order, price: float) -> Decimal:
         """Calculate the fill size for the order based on the price.
-        The default implementation fills the entire remaining size of the order, 
+        The default implementation fills the entire remaining size of the order,
         so no partial fills are simulated.
         """
         return order.remaining

@@ -51,11 +51,11 @@ keywords = [
   "forex",
 ]
 dependencies = [
-  "numpy>=2.3.0",
-  "requests>=2.32.4",
-  "yfinance~=0.2.65",
-  "pyarrow>=21.0.0",
-  "ccxt>=4.4.100",
+  "numpy>=2.4.2",
+  "requests>=2.32.5",
+  "yfinance~=1.1.0",
+  "pyarrow>=23.0.0",
+  "ccxt>=4.5.37",
 ]
 
 [project.optional-dependencies]
