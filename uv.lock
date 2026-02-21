@@ -162,7 +162,7 @@ wheels = [
 
 [[package]]
 name = "alpaca-py"
-version = "0.42.0"
+version = "0.43.2"
 source = { registry = "https://pypi.org/simple" }
 dependencies = [
     { name = "msgpack" },
@@ -172,9 +172,9 @@ dependencies = [
     { name = "sseclient-py" },
     { name = "websockets" },
 ]
-sdist = { url = "https://files.pythonhosted.org/packages/2d/bf/3c2712ec8b9c4a36d5a7a2b58217512e4e26b3ffa02db554b33f9c9a5ba2/alpaca_py-0.42.0.tar.gz", hash = "sha256:3ac4fd3439b8701d678db38bbc797b12bc003190996b19b0aa5f0d22aea65be7", size = 97534 }
+sdist = { url = "https://files.pythonhosted.org/packages/b1/9e/b49e3a74a9a3c745438a30a324d430ab91fad20a5aa8a59a27e88ff65c0b/alpaca_py-0.43.2.tar.gz", hash = "sha256:e03c7845a9ac6b5581c31f007fe0671f0c536538f130eb8407890a4ba37ee866", size = 97963 }
 wheels = [
-    { url = "https://files.pythonhosted.org/packages/e8/6f/669d3aba1d010be97169bfa25b55eba561545335ae97f9efce86954b20da/alpaca_py-0.42.0-py3-none-any.whl", hash = "sha256:e7e874fc9090c07a7b1698603e34f2e48be4f27beab47d7fc3d38d6f6855513a", size = 121974 },
+    { url = "https://files.pythonhosted.org/packages/25/ea/dac50720ee46f63b0c6339014b28a3dc976b87e314c2418f3ae5ee7e13f0/alpaca_py-0.43.2-py3-none-any.whl", hash = "sha256:ee608d9744b57766dcce60ff88523073fad798a7361c9bf1ec7a499eec5f19e5", size = 122502 },
 ]
 
 [[package]]
@@ -824,13 +824,13 @@ wheels = [
 
 [[package]]
 name = "ibind"
-version = "0.1.15"
+version = "0.1.22"
 source = { registry = "https://pypi.org/simple" }
 dependencies = [
     { name = "requests" },
     { name = "websocket-client" },
 ]
-sdist = { url = "https://files.pythonhosted.org/packages/9c/0c/72937082e46800691412c81d85424a469b3b0f4351aa444f3ad272ba80ec/ibind-0.1.15.tar.gz", hash = "sha256:cc1a02a9d80adf76565ee956357487885eefbe2708bb1fe7311459ed841cc5cf", size = 100533 }
+sdist = { url = "https://files.pythonhosted.org/packages/61/52/67447b78dde14c5fe1da2e886d1c35def8e75979e5d7e827a2a62734303b/ibind-0.1.22.tar.gz", hash = "sha256:7f95b5dfb63af9a4cb615721f7e1fc94b6e70853d8375dddaa2b62decfd722b9", size = 104364 }
 
 [package.optional-dependencies]
 oauth = [
@@ -2314,16 +2314,16 @@ talib = [
 
 [package.metadata]
 requires-dist = [
-    { name = "alpaca-py", marker = "extra == 'alpaca'", specifier = ">=0.42.0" },
+    { name = "alpaca-py", marker = "extra == 'alpaca'", specifier = ">=0.43.2" },
     { name = "ccxt", specifier = ">=4.5.37" },
-    { name = "ibind", extras = ["oauth"], marker = "extra == 'ibkr'", specifier = ">=0.1.15" },
+    { name = "ibind", extras = ["oauth"], marker = "extra == 'ibkr'", specifier = ">=0.1.22" },
     { name = "numpy", specifier = ">=2.4.2" },
     { name = "pyarrow", specifier = ">=23.0.0" },
     { name = "requests", specifier = ">=2.32.5" },
-    { name = "sb3-contrib", marker = "extra == 'torch'", specifier = ">=2.7.0" },
-    { name = "stable-baselines3", extras = ["extra"], marker = "extra == 'torch'", specifier = ">=2.7.0" },
+    { name = "sb3-contrib", marker = "extra == 'torch'", specifier = ">=2.7.1" },
+    { name = "stable-baselines3", extras = ["extra"], marker = "extra == 'torch'", specifier = ">=2.7.1" },
     { name = "tensorboard", marker = "extra == 'torch'", specifier = ">=2.20.0" },
-    { name = "torch", marker = "extra == 'torch'", specifier = ">=2.7.0" },
+    { name = "torch", marker = "extra == 'torch'", specifier = ">=2.7.1" },
     { name = "yfinance", specifier = "~=1.1.0" },
 ]
 provides-extras = ["alpaca", "ibkr", "torch"]
@@ -2363,14 +2363,14 @@ wheels = [
 
 [[package]]
 name = "sb3-contrib"
-version = "2.7.0"
+version = "2.7.1"
 source = { registry = "https://pypi.org/simple" }
 dependencies = [
     { name = "stable-baselines3" },
 ]
-sdist = { url = "https://files.pythonhosted.org/packages/7e/23/2831ccecc8fc2fcda401804f3ed1dc3b81f7c4ad3cb32dc6b1cd79f91c49/sb3_contrib-2.7.0.tar.gz", hash = "sha256:87281ae64e6965e46ac24b58778241d2b07b29996044491267ed844c1a75acfe", size = 90289 }
+sdist = { url = "https://files.pythonhosted.org/packages/1d/ee/0d0a0a964e4dc290784b8dc7d540e6a2a4e688efdbda5e4c397d27e9d085/sb3_contrib-2.7.1.tar.gz", hash = "sha256:491070fb14c6a59757cbcc1aea5c62c894c2312f3f8a1ccf8f363a48eb3126ad", size = 89982 }
 wheels = [
-    { url = "https://files.pythonhosted.org/packages/b5/25/df1f407742dca9a649bedcf6f06e74f2306c7854c5ad730497b79e332b99/sb3_contrib-2.7.0-py3-none-any.whl", hash = "sha256:fc5b5cffc7908c7961a73daea8496f5bf2fe69301bc3e7ca71522549eb7feb77", size = 93173 },
+    { url = "https://files.pythonhosted.org/packages/40/4d/6737dc879ba484419fc6db2bdfbd13aa6b1a3b516368ad0370546693ae82/sb3_contrib-2.7.1-py3-none-any.whl", hash = "sha256:27dd9db11e4f0b5e172bc73eef32c6342e7de8d6b4b833a8a28933e1679e907f", size = 93189 },
 ]
 
 [[package]]
@@ -2411,7 +2411,7 @@ wheels = [
 
 [[package]]
 name = "stable-baselines3"
-version = "2.7.0"
+version = "2.7.1"
 source = { registry = "https://pypi.org/simple" }
 dependencies = [
     { name = "cloudpickle" },
@@ -2421,9 +2421,9 @@ dependencies = [
     { name = "pandas" },
     { name = "torch" },
 ]
-sdist = { url = "https://files.pythonhosted.org/packages/56/cc/9a334071fae143bc7177e17a3191db83c1a4bf9038b09c4c5a34e427ca33/stable_baselines3-2.7.0.tar.gz", hash = "sha256:5258561e5becd15234274262cf09fcb9a082a73c2c67a85322f5652a05195ec4", size = 219012 }
+sdist = { url = "https://files.pythonhosted.org/packages/c9/42/f284c28272422262a99cdf35ecd2e283fded2f75327e6d5e82a9f6d6fe62/stable_baselines3-2.7.1.tar.gz", hash = "sha256:cd90d12d9ee0d9584053f12215c1682b313be4e3a8d8007739319799c3d2c071", size = 220719 }
 wheels = [
-    { url = "https://files.pythonhosted.org/packages/89/df/6b074e5b8e8437aac0b05e12749565f4613152016daddd45d414269b09d6/stable_baselines3-2.7.0-py3-none-any.whl", hash = "sha256:3de94fab840b3eb379a352c8d9b390998686d2fcb41de36298066935eef94bea", size = 187216 },
+    { url = "https://files.pythonhosted.org/packages/df/cc/a3038d3833f329dcd03b2dce8b778e4b41044caff88b48429473b8629623/stable_baselines3-2.7.1-py3-none-any.whl", hash = "sha256:b017e76dfe5ca0ce6eabb29e79c42e8c7e125d5862bfcd43ce04ec19732348d0", size = 188039 },
 ]
 
 [package.optional-dependencies]

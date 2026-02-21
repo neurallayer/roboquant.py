@@ -46,6 +46,8 @@ def _get_asset(symbol: str, asset_class: AssetClass) -> Asset:
             return Crypto.from_symbol(symbol)
         case AssetClass.US_OPTION:
             return Option(symbol)
+        case AssetClass.CRYPTO_PERP:
+            return Crypto.from_symbol(symbol)
 
 
 class AlpacaLiveFeed(LiveFeed):
