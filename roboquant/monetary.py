@@ -128,7 +128,9 @@ class CurrencyConverter(ABC):
         ...
 
     def register(self):
-        """Register this converter to be used for all conversions between amounts."""
+        """Register this converter to be used for all conversions between amounts.
+        At any time, there can only be one registered converter, so this will replace the currently registered converter.
+        """
         Amount.register_converter(self)
 
 

@@ -4,8 +4,7 @@ from dataclasses import dataclass
 from decimal import Decimal
 from typing import Type
 
-from roboquant.monetary import Amount, Currency, USD
-
+from roboquant.monetary import USD, Amount, Currency
 
 logger = logging.getLogger(__name__)
 
@@ -28,6 +27,8 @@ class Asset(ABC):
 
     def contract_value(self, size: Decimal, price: float) -> float:
         """Return the total contract value given the provided size and price.
+        The default implementation simply multiplies the size with the price, but for some asset types, like options,
+        this can be overridden to include a contract size multiplier.
 
         Args:
             size (Decimal): The size of the contract.
@@ -85,7 +86,6 @@ class Asset(ABC):
         """
         return self.__class__.__name__
 
-
     @abstractmethod
     def serialize(self) -> str:
         """Serialize the asset to a string representation that can be used to reconstruct the asset later on.
@@ -112,7 +112,14 @@ class Asset(ABC):
 
 @dataclass(frozen=True, slots=True)
 class Stock(Asset):
-    """Stock (or equity) asset"""
+    """Tradable stock or equity asset.
+
+    A stock represents ownership in a publicly traded company. The `symbol`
+    should identify the listing unambiguously within the feed or broker
+    being used, for example `AAPL` or `NASDAQ:AAPL` when an exchange qualifier
+    is needed. Stocks default to being denominated in `USD`, but a different
+    `Currency` can be provided for non-US listings.
+    """
 
     def serialize(self):
         """Serialize the stock asset to a string representation.
@@ -139,7 +146,13 @@ class Stock(Asset):
 
 @dataclass(frozen=True, slots=True)
 class Crypto(Asset):
-    """Crypto-currency asset, like BTC/USDT"""
+    """Tradable cryptocurrency asset or crypto pair.
+
+    A crypto asset is typically expressed as a base/quote pair, such as
+    `BTC/USDT` or `ETH/EUR`. The full pair is kept as the `symbol`, while the
+    quote part identifies the asset currency. Use `from_symbol` for common pair
+    formats so the currency can be derived from the symbol automatically.
+    """
 
     @staticmethod
     def from_symbol(symbol: str, sep: str = "/"):
@@ -181,7 +194,14 @@ class Crypto(Asset):
 
 @dataclass(frozen=True, slots=True)
 class Forex(Asset):
-    """Forex asset, so a currency pair like EUR/USD"""
+    """Foreign exchange currency-pair asset.
+
+    A forex asset represents one currency traded against another, usually
+    written as a base/quote pair such as `EUR/USD` or `GBP/JPY`. The complete
+    pair is stored as the `symbol`, and the quote currency is used as the
+    asset currency. Use `from_symbol` for standard pair notation so the quote
+    currency can be inferred automatically.
+    """
 
     @staticmethod
     def from_symbol(symbol: str, sep: str = "/"):
@@ -223,7 +243,14 @@ class Forex(Asset):
 
 @dataclass(frozen=True, slots=True)
 class Option(Asset):
-    """Option contract asset that uses a contract size of 100 to calculate the contract value"""
+    """Option contract asset with a standard contract multiplier.
+
+    An option represents the right to buy or sell an underlying asset at a
+    specified strike and expiry. The `symbol` should identify the contract
+    unambiguously, for example using an OCC-style option symbol. Option prices
+    are quoted per underlying unit, so this class multiplies contract value by
+    `100` to model the standard US equity option contract size.
+    """
 
     def contract_value(self, size: Decimal, price: float) -> float:
         """Contract value for this option type is the `size` times the `price` times `100`.

@@ -4,14 +4,14 @@ from decimal import Decimal
 from typing import Any
 
 from roboquant.asset import Asset
+from roboquant.monetary import USD, Amount, Currency, Wallet
 from roboquant.order import Order
-from roboquant.monetary import Amount, Wallet, USD, Currency
 
 
 @dataclass(slots=True, frozen=True)
 class Trade:
     """
-    A trade represents a (partially) executed order with its filled size and price.
+    A trade represents a (partially) executed order with its filled size and execution price.
     It is immutable and can be used to track the execution of an order.
 
     Attributes:
@@ -21,6 +21,7 @@ class Trade:
         pnl (float): The profit and loss of the trade, calculated as the difference between the trade price and the average
         paid price.
     """
+
     asset: Asset
     time: datetime
     size: Decimal
@@ -96,7 +97,8 @@ class Account:
 
     def mkt_value(self) -> Wallet:
         """
-        Return the sum of the market values of the open positions in the account.
+        Return the sum of the market values of the open positions in the account. Short
+        positions have a negative market value.
 
         Returns:
             Wallet: The total market value of all open positions.
@@ -177,7 +179,7 @@ class Account:
 
     def equity_value(self) -> float:
         """
-        Return the equity value denoted in the base currency of the account.
+        Return the equity value denoted in the base currency of the account.x
 
         Returns:
             float: The equity value in the base currency.
@@ -216,7 +218,6 @@ class Account:
             Wallet: The total profit and loss.
         """
         return self.realized_pnl() + self.unrealized_pnl()
-
 
     def required_buying_power(self, order: Order) -> Amount:
         """
@@ -263,35 +264,39 @@ class Account:
         """Return all open positions including their pnl as a list of dicts"""
         result: list[dict[str, Any]] = []
         for asset, pos in self.positions.items():
-            result.append({
-                "asset class" : asset.asset_class(),
-                "symbol" : asset.symbol,
-                "currency" : asset.currency,
-                "size" : pos.size,
-                "type" : "LONG" if pos.is_long else "SHORT",
-                "avg price": pos.avg_price,
-                "mkt price" : pos.mkt_price,
-                "value" : asset.contract_value(pos.size, pos.mkt_price),
-                "pnl" : asset.contract_value(pos.size, pos.mkt_price - pos.avg_price)
-            })
+            result.append(
+                {
+                    "asset class": asset.asset_class(),
+                    "symbol": asset.symbol,
+                    "currency": asset.currency,
+                    "size": pos.size,
+                    "type": "LONG" if pos.is_long else "SHORT",
+                    "avg price": pos.avg_price,
+                    "mkt price": pos.mkt_price,
+                    "value": asset.contract_value(pos.size, pos.mkt_price),
+                    "pnl": asset.contract_value(pos.size, pos.mkt_price - pos.avg_price),
+                }
+            )
         return result
 
     def get_order_list(self) -> list[dict[str, Any]]:
         """Return all open orders as a list of dicts"""
         result: list[dict[str, Any]] = []
         for order in self.orders:
-            result.append({
-                "id" : order.id,
-                "asset class" : order.asset.asset_class(),
-                "symbol" : order.asset.symbol,
-                "currency" : order.asset.currency,
-                "size" : order.size,
-                "type" : "BUY" if order.is_buy else "SELL",
-                "value": order.value(),
-                "fill" : order.fill,
-                "tif" : order.tif,
-                "info" : str(order.info) if order.info else "-"
-            })
+            result.append(
+                {
+                    "id": order.id,
+                    "asset class": order.asset.asset_class(),
+                    "symbol": order.asset.symbol,
+                    "currency": order.asset.currency,
+                    "size": order.size,
+                    "type": "BUY" if order.is_buy else "SELL",
+                    "value": order.value(),
+                    "fill": order.fill,
+                    "tif": order.tif,
+                    "info": str(order.info) if order.info else "-",
+                }
+            )
         return result
 
     def get_order(self, order_id: str) -> Order | None:

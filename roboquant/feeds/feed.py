@@ -11,6 +11,10 @@ class Feed(ABC):
     """
     A Feed represents a source of (financial) events that can be (re-)played to feed a run.
     It provides methods for playing the events and some smaller utility methods, like plotting prices.
+
+    Although the most common type of events are those containing market data, other types of
+    events are also possible. For example, events containing news items or social media sentiment could
+    also be represented as a feed.
     """
 
     @abstractmethod

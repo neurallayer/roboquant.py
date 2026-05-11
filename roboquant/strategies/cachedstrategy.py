@@ -9,7 +9,7 @@ from roboquant.timeframe import Timeframe
 logger = logging.getLogger(__name__)
 
 class CachedStrategy(Strategy):
-    """Cache the signal results of another strategy, usefull for shorter back tests.
+    """Cache the signal results of another strategy, usefull for faster back tests.
     Rather than re-calculating the signals at a certain time, they will be cached and
     replayed once that same time appears again.
     """

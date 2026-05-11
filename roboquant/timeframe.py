@@ -9,9 +9,9 @@ def utcnow() -> datetime:
 
 
 class Timeframe:
-    """A timeframe represents a period in time with a specific start- and end-datetime. Timeframes should not be mutated.
+    """A timeframe represents a period in time with a specific start- and end-datetime. Timeframes are immutable.
 
-    Internally it stores the start and end times as Python datetime objects with the timezone set to `UTC`.
+    Internally it stores the start and end times as Python datetime objects with the timezone always set to `UTC`.
     """
 
     __slots__ = "start", "end", "inclusive"
