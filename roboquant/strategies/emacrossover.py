@@ -7,7 +7,14 @@ from roboquant.strategies.strategy import Strategy
 
 
 class EMACrossover(Strategy):
-    """EMA Crossover Strategy implementation."""
+    """Trading strategy based on a fast and slow exponential moving average.
+
+    The strategy tracks each asset independently and emits a buy signal when
+    the fast EMA crosses above the slow EMA, and a sell signal when it crosses
+    below. Signals are only generated after enough prices have been observed to
+    cover the longer EMA period. The constructor controls the fast and slow
+    periods, smoothing factor, and the event price type used as input.
+    """
 
     def __init__(self, fast_period: int = 13, slow_period: int = 26, smoothing: float = 2.0, price_type: str = "DEFAULT"):
         super().__init__()

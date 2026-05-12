@@ -295,7 +295,14 @@ class One2OneConversion(CurrencyConverter):
 
 @dataclass(frozen=True, slots=True)
 class Amount:
-    """A monetary value denoted in a single `Currency`. Amounts are immutable."""
+    """Immutable monetary value in a single `Currency`.
+
+    An amount combines a numeric value with the currency it is denominated in,
+    for example `Amount(USD, 100)`, `USD(100)`, or `100 @ USD`. Arithmetic with
+    another `Amount` keeps each currency separate and returns a `Wallet`; no
+    implicit currency conversion is performed. Use `convert_to` or the `@`
+    operator to convert through the registered `CurrencyConverter`.
+    """
 
     currency: Currency
     value: float
