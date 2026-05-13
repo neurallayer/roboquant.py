@@ -1,0 +1,21 @@
+{
+  "languages": {
+    "Python": {
+      "language_servers": ["pyright"],
+      "tasks": {
+        "variables": {
+          "TEST_RUNNER": "unittest",
+        },
+      },
+    },
+  },
+  "lsp": {
+    "pyright": {
+      "settings": {
+        "python": {
+          "pythonPath": ".venv/bin/python",
+        },
+      },
+    },
+  },
+}

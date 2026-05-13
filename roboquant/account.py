@@ -36,7 +36,7 @@ class Position:
     """
 
     size: Decimal
-    """Position size as a Decimal"""
+    """Position size as a Decimal with a negative size indicating a short position"""
 
     avg_price: float
     """Average price paid denoted in the currency of the asset"""
