@@ -1,0 +1,30 @@
+// Project tasks configuration. See https://zed.dev/docs/tasks for documentation.
+//
+// Example:
+[
+  {
+    "label": "run unit test",
+    "command": "uv run python -m unittest discover -s tests/unit",
+    "show_command": false,
+  },
+  {
+    "label": "run pyright",
+    "command": "uv run pyright tests roboquant",
+    "show_command": false,
+  },
+  {
+    "label": "uv sync",
+    "command": "uv sync --all-extras --dev",
+    "show_command": false,
+  },
+  {
+    "label": "uv ruff",
+    "command": "uvx ruff check",
+    "show_command": false,
+  },
+  {
+    "label": "run pyright",
+    "command": "uv run pyright tests roboquant",
+    "show_command": false,
+  },
+]
