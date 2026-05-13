@@ -17,7 +17,9 @@ logger = logging.getLogger(__name__)
 
 
 class _PositionChange(Flag):
-    """representing the four types of changes to a portfolio"""
+    """representing the four types of changes to the positions in the account.
+    This class is used to make the logic in `FlexTrader` easier to understand.
+    """
 
     ENTRY_LONG = auto()
     ENTRY_SHORT = auto()
