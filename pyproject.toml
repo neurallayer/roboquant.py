@@ -62,10 +62,10 @@ dependencies = [
 
 [project.optional-dependencies]
 torch = [
-  "torch>=2.8.0",
+  "torch>=2.9.0",
   "tensorboard>=2.20.0",
-  "stable-baselines3[extra]>=2.8.0",
-  "sb3-contrib>=2.8.0",
+  "stable-baselines3[extra]>=2.9.0",
+  "sb3-contrib>=2.9.0",
 ]
 ibkr = ["ibind[oauth]>=0.1.22"]
 alpaca = ["alpaca-py>=0.43.2"]
@@ -80,8 +80,8 @@ dev = [
   "matplotlib>=3.10.1",
   "python-dotenv>=1.1.0",
   "pyright>=1.1.409",
-  "ipykernel>=6.29.5",
+  "ipykernel>=7.3.0",
   "ipywidgets>=8.1.6",
-  "chronos-forecasting>=1.5.2"
+  "chronos-forecasting>=1.5.2",
 ]
 talib = ["ta-lib==0.6.4"]
