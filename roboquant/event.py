@@ -54,10 +54,11 @@ class Quote(PriceItem):
     data: MutableSequence[float]  # [ask-price, ask-volume, bid-price, bid-volume]
 
     def price(self, price_type: str = "MID") -> float:
-        """Return the price, the default being the mid-point price.
+        """Return the price, the default being the mid-point price. The default is the mid-point price,
+        which is the average of the ask and bid price.
 
         Args:
-            price_type (str): The type of price to return. For example, `ASK` or `BID`.
+            price_type (str): The type of price to return. For example, `ASK` or `BID`. Default is `MID`.
 
         Returns:
             float: The price for the provided price_type. If the type is unknown, returns the mid-point price.

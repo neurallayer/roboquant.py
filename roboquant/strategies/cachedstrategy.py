@@ -24,6 +24,8 @@ class CachedStrategy(Strategy):
         self.__cache = cache
 
     def timeframe(self):
+        """Return the timeframe for which this strategy has cached signals.
+        This is determined by the timestamps of the events"""
         if self.__cache:
             timeline = list(self.__cache.keys())
             return Timeframe(timeline[0], timeline[-1], True)

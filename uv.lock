@@ -227,7 +227,7 @@ wheels = [
 
 [[package]]
 name = "ccxt"
-version = "4.5.53"
+version = "4.5.59"
 source = { registry = "https://pypi.org/simple" }
 dependencies = [
     { name = "aiodns" },
@@ -240,9 +240,9 @@ dependencies = [
     { name = "typing-extensions" },
     { name = "yarl" },
 ]
-sdist = { url = "https://files.pythonhosted.org/packages/fe/f6/4bf2ca5205d70d881740d0e2c4eb08cf0217e60129209332de3afaa05728/ccxt-4.5.53.tar.gz", hash = "sha256:675e5aa78feba40ab69b276a7e9d2f3582637398e7a496424f5787dffcd6fd6e", size = 6114902 }
+sdist = { url = "https://files.pythonhosted.org/packages/2c/5a/0bf8011c3d85023bba487d5262a5360dd0000ee57b98efbf7e8a080085ff/ccxt-4.5.59.tar.gz", hash = "sha256:a05da4df5d2e2fbc8435594d1e07d62da9096eedf1da90fef6c3f97815fc4040", size = 5996081 }
 wheels = [
-    { url = "https://files.pythonhosted.org/packages/8f/00/03d121f3122a9633be7fb64e7dd90daf422415704157d10c2f8f7f4c7845/ccxt-4.5.53-py2.py3-none-any.whl", hash = "sha256:5730fd567d36a95625fdfd9156bb4bcf296de4dc44a128ecd8d6462f0da65a6e", size = 6612255 },
+    { url = "https://files.pythonhosted.org/packages/30/97/0e9d0584672eb4ea914f2be109e36bbc7005b1318015738b1bda30f63672/ccxt-4.5.59-py2.py3-none-any.whl", hash = "sha256:069ca2a01ee64443727f26a17c1dc2fbcdf122c34afb7819d433efcdcae09723", size = 6479106 },
 ]
 
 [[package]]
@@ -2419,7 +2419,7 @@ talib = [
 [package.metadata]
 requires-dist = [
     { name = "alpaca-py", marker = "extra == 'alpaca'", specifier = ">=0.43.2" },
-    { name = "ccxt", specifier = ">=4.5.53" },
+    { name = "ccxt", specifier = ">=4.5.59" },
     { name = "ibind", extras = ["oauth"], marker = "extra == 'ibkr'", specifier = ">=0.1.22" },
     { name = "numpy", specifier = ">=2.4.4" },
     { name = "pyarrow", specifier = ">=24.0.0" },
