@@ -39,7 +39,7 @@ context_window = 250  # use the previous 250 trading days as context
 # %%
 # Get the predictions for different quantiles
 result = pipeline.predict(
-    context=torch.tensor(close[-context_window - prediction:-prediction]),
+    inputs=torch.tensor(close[-context_window - prediction:-prediction]),
     prediction_length=prediction,
 )
 
@@ -66,7 +66,7 @@ class ChronosStrategy(rq.strategies.TaStrategy):
     def process_asset(self, asset: rq.Asset, ohlcv: OHLCVBuffer) -> rq.Signal | None:
         close = perc_change(ohlcv.close())
         result = self.pipeline.predict(
-            context=torch.tensor(close),
+            inputs=torch.tensor(close),
             prediction_length=self.prediction_length,
         )
 

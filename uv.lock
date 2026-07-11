@@ -352,16 +352,19 @@ wheels = [
 
 [[package]]
 name = "chronos-forecasting"
-version = "1.5.2"
+version = "2.3.1"
 source = { registry = "https://pypi.org/simple" }
 dependencies = [
     { name = "accelerate" },
+    { name = "einops" },
+    { name = "numpy" },
+    { name = "pandas" },
     { name = "torch" },
     { name = "transformers" },
 ]
-sdist = { url = "https://files.pythonhosted.org/packages/80/ab/3525b7b9b9a8347e0a87619378a7601ce4b88d2083b0e213335f5c75a354/chronos_forecasting-1.5.2.tar.gz", hash = "sha256:4590b87104a1b9232d078a1b4751d694dadea22c0f61f525b92e8e4f12864442", size = 531269 }
+sdist = { url = "https://files.pythonhosted.org/packages/a6/71/609ff332069de0580a8a1fa357558975a91be786d612ce179c2797a00a52/chronos_forecasting-2.3.1.tar.gz", hash = "sha256:785116f3f10aaac44a315700c5e4de71a5fe6385c9c771722d688f402fe75083", size = 726426 }
 wheels = [
-    { url = "https://files.pythonhosted.org/packages/f5/d8/48627ecc65e3b0bc4617d3bbc4652afd70464cc273ac8ea88a641140ab3d/chronos_forecasting-1.5.2-py3-none-any.whl", hash = "sha256:5d711f7e44ac95f24e52eb3c1e6d61ef4bee4d090e2a872db1e3139216d60301", size = 29429 },
+    { url = "https://files.pythonhosted.org/packages/79/50/41e712bb9fa93a2d4cb18e68f2667e544d46750756c808fe754180e8aba2/chronos_forecasting-2.3.1-py3-none-any.whl", hash = "sha256:d9d00ec9b1621235bfb26685638bf054885f4c000863678f1c775dfab2697496", size = 80559 },
 ]
 
 [[package]]
@@ -650,6 +653,15 @@ source = { registry = "https://pypi.org/simple" }
 sdist = { url = "https://files.pythonhosted.org/packages/43/fa/6d96a0978d19e17b68d634497769987b16c8f4cd0a7a05048bec693caa6b/decorator-5.2.1.tar.gz", hash = "sha256:65f266143752f734b0a7cc83c46f4618af75b8c5911b00ccb61d0ac9b6da0360", size = 56711 }
 wheels = [
     { url = "https://files.pythonhosted.org/packages/4e/8c/f3147f5c4b73e7550fe5f9352eaa956ae838d5c51eb58e7a25b9f3e2643b/decorator-5.2.1-py3-none-any.whl", hash = "sha256:d316bb415a2d9e2d2b3abcc4084c6502fc09240e292cd76a76afc106a1c8e04a", size = 9190 },
+]
+
+[[package]]
+name = "einops"
+version = "0.8.2"
+source = { registry = "https://pypi.org/simple" }
+sdist = { url = "https://files.pythonhosted.org/packages/2c/77/850bef8d72ffb9219f0b1aac23fbc1bf7d038ee6ea666f331fa273031aa2/einops-0.8.2.tar.gz", hash = "sha256:609da665570e5e265e27283aab09e7f279ade90c4f01bcfca111f3d3e13f2827", size = 56261 }
+wheels = [
+    { url = "https://files.pythonhosted.org/packages/2a/09/f8d8f8f31e4483c10a906437b4ce31bdf3d6d417b73fe33f1a8b59e34228/einops-0.8.2-py3-none-any.whl", hash = "sha256:54058201ac7087911181bfec4af6091bb59380360f069276601256a76af08193", size = 65638 },
 ]
 
 [[package]]
@@ -2435,7 +2447,7 @@ provides-extras = ["alpaca", "ibkr", "torch"]
 
 [package.metadata.requires-dev]
 dev = [
-    { name = "chronos-forecasting", specifier = ">=1.5.2" },
+    { name = "chronos-forecasting", specifier = ">=2.3.1" },
     { name = "ipykernel", specifier = ">=7.3.0" },
     { name = "ipywidgets", specifier = ">=8.1.6" },
     { name = "matplotlib", specifier = ">=3.10.1" },
