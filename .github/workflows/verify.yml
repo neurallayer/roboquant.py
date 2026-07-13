@@ -1,6 +1,6 @@
 # This workflow will install Python dependencies, run tests and lint with a variety of Python versions
 
-name: Python package
+name: Verify roboquant 
 
 on:
   push:
@@ -16,14 +16,14 @@ jobs:
       fail-fast: false
       matrix:
         os: [ubuntu-24.04, windows-latest, macos-latest]
-        python-version: ["3.11", "3.12", "3.13"]
+        python-version: ["3.12", "3.13", "3.14"]
  
     steps:
-    - name: checkout
-      uses: actions/checkout@v4
+    - name: Checkout
+      uses: actions/checkout@v7
 
     - name: Install uv
-      uses: astral-sh/setup-uv@v5
+      uses: astral-sh/setup-uv@v7
       with:
           ignore-nothing-to-cache: true
           python-version: ${{ matrix.python-version }}
