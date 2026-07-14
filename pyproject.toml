@@ -52,12 +52,10 @@ keywords = [
   "forex",
 ]
 dependencies = [
-  "numpy>=2.5.1",
-  "requests>=2.34.2",
-  "yfinance~=1.5.1",
-  "pyarrow>=25.0.0",
-  "ccxt>=4.5.65",
-  "urllib3>=2.7.0"
+  "numpy>2.0.0",
+  "requests>2.30.0",
+  "yfinance>1.5.0",
+  "pyarrow>24.0.0",
 ]
 
 [project.optional-dependencies]
@@ -69,6 +67,7 @@ torch = [
 ]
 ibkr = ["ibind[oauth]>=0.1.22"]
 alpaca = ["alpaca-py>=0.43.5"]
+crypto = ["ccxt>=4.5.65"]
 
 [project.urls]
 Homepage = "https://roboquant.org"

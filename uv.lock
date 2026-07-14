@@ -2420,17 +2420,18 @@ wheels = [
 name = "roboquant"
 source = { editable = "." }
 dependencies = [
-    { name = "ccxt" },
     { name = "numpy" },
     { name = "pyarrow" },
     { name = "requests" },
-    { name = "urllib3" },
     { name = "yfinance" },
 ]
 
 [package.optional-dependencies]
 alpaca = [
     { name = "alpaca-py" },
+]
+crypto = [
+    { name = "ccxt" },
 ]
 ibkr = [
     { name = "ibind", extra = ["oauth"] },
@@ -2458,19 +2459,18 @@ talib = [
 [package.metadata]
 requires-dist = [
     { name = "alpaca-py", marker = "extra == 'alpaca'", specifier = ">=0.43.5" },
-    { name = "ccxt", specifier = ">=4.5.65" },
+    { name = "ccxt", marker = "extra == 'crypto'", specifier = ">=4.5.65" },
     { name = "ibind", extras = ["oauth"], marker = "extra == 'ibkr'", specifier = ">=0.1.22" },
-    { name = "numpy", specifier = ">=2.5.1" },
-    { name = "pyarrow", specifier = ">=25.0.0" },
-    { name = "requests", specifier = ">=2.34.2" },
+    { name = "numpy", specifier = ">2.0.0" },
+    { name = "pyarrow", specifier = ">24.0.0" },
+    { name = "requests", specifier = ">2.30.0" },
     { name = "sb3-contrib", marker = "extra == 'torch'", specifier = ">=2.9.0" },
     { name = "stable-baselines3", marker = "extra == 'torch'", specifier = ">=2.9.0" },
     { name = "tensorboard", marker = "extra == 'torch'", specifier = ">=2.21.0" },
     { name = "torch", marker = "extra == 'torch'", specifier = ">=2.9.0" },
-    { name = "urllib3", specifier = ">=2.7.0" },
-    { name = "yfinance", specifier = "~=1.5.1" },
+    { name = "yfinance", specifier = ">1.5.0" },
 ]
-provides-extras = ["alpaca", "ibkr", "torch"]
+provides-extras = ["alpaca", "crypto", "ibkr", "torch"]
 
 [package.metadata.requires-dev]
 dev = [
