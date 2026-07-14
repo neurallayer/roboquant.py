@@ -18,7 +18,7 @@ FloatArray = NDArray[np.float32]
 class Feature(Generic[T]):
     """Base class for different types of features.
     The ones included by default are either based either an `Event` or an `Account`.
-    Typically Event features are used for input and Account features are used for label/output."""
+    Typically Event features are used for input and Account features are used for reward/label/output."""
 
     @abstractmethod
     def calc(self, value: T) -> FloatArray:
