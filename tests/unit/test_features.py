@@ -4,7 +4,7 @@ import unittest
 import numpy as np
 from roboquant.event import Event
 
-from roboquant.ml.features import (
+from roboquant.ai.features import (
     CacheFeature,
     CombinedFeature,
     NormalizeFeature,

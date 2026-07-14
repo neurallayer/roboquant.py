@@ -6,8 +6,8 @@ from torch import nn
 import roboquant as rq
 from roboquant.asset import Stock
 from roboquant.journals.basicjournal import BasicJournal
-from roboquant.ml.features import BarFeature, CombinedFeature, MaxReturnFeature, PriceFeature, SMAFeature, DayOfMonthFeature
-from roboquant.ml.strategies import TimeSeriesStrategy, logger
+from roboquant.ai.features import BarFeature, CombinedFeature, MaxReturnFeature, PriceFeature, SMAFeature, DayOfMonthFeature
+from roboquant.ai.strategies import TimeSeriesStrategy, logger
 
 
 # %%

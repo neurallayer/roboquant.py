@@ -15,7 +15,7 @@ from roboquant.brokers.simbroker import SimBroker
 from roboquant.event import Event
 from roboquant.feeds.feed import Feed
 from roboquant.journals.journal import Journal
-from roboquant.ml.features import Feature
+from roboquant.ai.features import Feature
 from roboquant.signal import Signal
 from roboquant.strategies.strategy import Strategy
 from roboquant.timeframe import Timeframe
@@ -23,7 +23,7 @@ from roboquant.traders.flextrader import FlexTrader
 from roboquant.traders.trader import Trader
 
 
-register(id="roboquant/StrategyEnv-v0", entry_point="roboquant.ml.envs:StrategyEnv")
+register(id="roboquant/StrategyEnv-v0", entry_point="roboquant.ai.envs:StrategyEnv")
 logger = logging.getLogger(__name__)
 
 

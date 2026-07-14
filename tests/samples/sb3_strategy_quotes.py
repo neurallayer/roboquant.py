@@ -4,8 +4,8 @@ from sb3_contrib import RecurrentPPO
 from roboquant import run
 from roboquant.alpaca.feed import AlpacaHistoricStockFeed
 from roboquant.asset import Stock
-from roboquant.ml.features import EquityFeature, QuoteFeature
-from roboquant.ml.rl import TradingEnv, SB3PolicyStrategy
+from roboquant.ai.features import EquityFeature, QuoteFeature
+from roboquant.ai.rl import TradingEnv, SB3PolicyStrategy
 from roboquant.timeframe import Timeframe
 from dotenv import load_dotenv
 

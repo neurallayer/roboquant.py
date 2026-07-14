@@ -4,7 +4,7 @@
 # %%
 import ccxt
 import roboquant as rq
-from roboquant.feeds.cryptofeed import CryptoFeed
+from roboquant.crypto.cryptofeed import CryptoFeed
 
 # %%
 exchange = ccxt.binance()

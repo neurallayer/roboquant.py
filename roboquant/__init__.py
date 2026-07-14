@@ -12,7 +12,7 @@ from roboquant import feeds
 from roboquant import journals
 from roboquant import strategies
 from roboquant import traders
-from roboquant import ml
+
 from .account import Account, Position
 from .event import Event, PriceItem, Bar, TradePrice, Quote
 from .signal import Signal, SignalType
@@ -31,7 +31,6 @@ __all__ = [
     "journals",
     "strategies",
     "traders",
-    "ml",
     "Account",
     "Position",
     "Event",

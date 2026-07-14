@@ -11,7 +11,7 @@ from torch.utils.data import DataLoader, Dataset
 
 from roboquant.asset import Asset
 from roboquant.event import Event
-from roboquant.ml.features import Feature, NormalizeFeature
+from roboquant.ai.features import Feature, NormalizeFeature
 from roboquant.signal import Signal
 from roboquant.strategies.strategy import Strategy
 

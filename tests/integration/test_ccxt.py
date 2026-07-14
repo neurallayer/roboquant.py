@@ -3,7 +3,7 @@ import ccxt
 from datetime import datetime
 
 from roboquant.asset import Crypto
-from roboquant.feeds.cryptofeed import CryptoFeed
+from roboquant.crypto.cryptofeed import CryptoFeed
 from tests.common import run_price_item_feed
 
 
