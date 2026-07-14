@@ -19,3 +19,11 @@ strategy = rq.strategies.EMACrossover()
 account = rq.run(feed, strategy)
 df = pd.DataFrame(account.get_position_list())
 print("Open positions", df, sep="\n")
+
+# %%
+strategy = rq.strategies.EMACrossover()
+journal = rq.journals.MetricsJournal.pnl()
+account = rq.run(feed, strategy, journal=journal)
+equity = journal.get_metric("pnl/equity")
+df = equity.to_dataframe(time_index=True)
+print("Equity", df, sep="\n")

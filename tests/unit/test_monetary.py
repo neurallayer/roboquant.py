@@ -17,10 +17,6 @@ from roboquant.monetary import (
 
 class TestMonetary(unittest.TestCase):
 
-    def _update(self):
-        a = Amount(USD, 10)
-        a.value = 100  # type: ignore
-
     def test_amount(self):
         amt1 = 100@USD
         self.assertEqual(amt1.value, 100)
@@ -54,7 +50,11 @@ class TestMonetary(unittest.TestCase):
         z = v + v - v
         self.assertDictEqual(z, v)
 
-        self.assertRaises(Exception, self._update)
+        def _update(self):
+            a = Amount(USD, 10)
+            a.value = 100  # type: ignore
+
+        self.assertRaises(Exception, _update)
 
     def test_conversion(self):
         now = datetime.now()

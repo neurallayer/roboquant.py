@@ -27,7 +27,7 @@ equity = journal.get_metric("pnl/equity")
 _ = equity.plot(color="green", linewidth=0.5)
 
 # %%
-# Perform a walk forward over 4 equal timeframes and plot each run.
+# Perform a walk forward over 4 equal timeframes and plot each run on the same chart.
 
 timeframes = feed.timeframe().split(4)
 _, ax = plt.subplots()
@@ -40,7 +40,7 @@ for timeframe in timeframes:
     equity.plot(ax=ax, linewidth=0.5)
 
 # %%
-# Run 50 1-year back tests and plot the equity curve for each run.
+# Run 50 1-year back tests and plot the equity curve for each run on the same chart.
 # This provides insights how the results are distrubuted and what to expect.
 
 one_year = timedelta(days=365)
@@ -56,9 +56,9 @@ for timeframe in timeframes:
 
 
 # %%
-# Using the plot journal
+# Using the scorecard journal
 strategy = rq.strategies.EMACrossover()
 asset = feed.assets()[0]
-journal = rq.journals.ScoreCard(rq.journals.PNLMetric(), include_prices=True)
-rq.run(feed, strategy, journal=journal)
-journal.plot(size=(8.27, 30), linewidth=0.5)
+scorecard = rq.journals.ScoreCard(rq.journals.PNLMetric(), include_prices=True)
+rq.run(feed, strategy, journal=scorecard)
+scorecard.plot(size=(8.27, 30), linewidth=0.5)
