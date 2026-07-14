@@ -148,11 +148,11 @@ class LiveBroker(Broker):
         """
         order = Order(
             asset=asset,
-            size=-Decimal(size),  # Negative size for sell orders
+            size=-Decimal(size), # Negative size for sell orders
             limit=float(limit),
             tif=tif,
         )
-        order.fill = - Decimal(fill)
+        order.fill = - Decimal(fill) # Negative fill for sell orders
         order.id = str(id)
         return order
 
