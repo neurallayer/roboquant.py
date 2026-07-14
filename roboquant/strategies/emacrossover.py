@@ -1,5 +1,3 @@
-from datetime import timedelta
-
 from roboquant.signal import Signal
 from roboquant.asset import Asset
 from roboquant.event import Event
@@ -7,13 +5,15 @@ from roboquant.strategies.strategy import Strategy
 
 
 class EMACrossover(Strategy):
-    """Trading strategy based on a fast and slow exponential moving average.
+    """Trading strategy based on a fast and slow Exponential Moving Average.
 
-    The strategy tracks each asset independently and emits a buy signal when
+    This strategy tracks each asset independently and emits a buy signal when
     the fast EMA crosses above the slow EMA, and a sell signal when it crosses
     below. Signals are only generated after enough prices have been observed to
-    cover the longer EMA period. The constructor controls the fast and slow
-    periods, smoothing factor, and the event price type used as input.
+    cover the longer EMA period.
+
+    The constructor controls the fast and slow periods, smoothing factor,
+    and the event price type used as input.
     """
 
     def __init__(self, fast_period: int = 13, slow_period: int = 26, smoothing: float = 2.0, price_type: str = "DEFAULT"):
@@ -23,7 +23,6 @@ class EMACrossover(Strategy):
         self.slow = 1.0 - (smoothing / (slow_period + 1))
         self.price_type = price_type
         self.min_steps = max(fast_period, slow_period)
-        self.cancel_orders_older_than = timedelta(days=5)
 
     def create_signals(self, event: Event) -> list[Signal]:
         result : list[Signal] = []
