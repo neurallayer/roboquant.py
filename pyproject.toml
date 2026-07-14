@@ -19,7 +19,7 @@ module-name = "roboquant"
 
 [project]
 name = "roboquant"
-version = "2.3.2"
+version = "2.3.3"
 authors = [{ name = "roboquant team", email = "info@roboquant.org" }]
 description = "A fast algorithmic trading platform with support for AI based strategies"
 readme = "README.md"
