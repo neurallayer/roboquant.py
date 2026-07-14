@@ -23,9 +23,11 @@ class _Timeseries:
 class ScoreCard(Journal):
     """Tracks progress of a run so it can be plotted using matplotlib charts afterwards.
     It will track the following aspects:
-    - the price of a single asset
-    - the orders for that asset
-    - any metric that is provided
+    - the price of the assets
+    - the orders for that asset as markers on the price chart
+    - any additional metric that has been provided
+
+    This works best on smaller runs with a limited number of assets and orders.
     """
 
     def __init__(self, *metrics: Metric, include_prices: bool = True, price_type: str = "DEFAULT"):
@@ -56,7 +58,7 @@ class ScoreCard(Journal):
             for name, value in result.items():
                 self._metric_results[name].add(time, value)
 
-    def plot(self, **kwargs):
+    def plot(self, size: tuple[float, float] = (8.27, 11.69), **kwargs):
         """Plot a chart with the following sub-charts:
         - prices of the configured asset. Orders als small green up (BUY) and red down (SELL) triangles.
         - metrics that have been configured, each in their own chart.
@@ -71,7 +73,7 @@ class ScoreCard(Journal):
         if not hasattr(axes, "__getitem__"):
             axes = [axes]
 
-        fig.set_size_inches(8.27, 11.69)  # A4
+        fig.set_size_inches(size)
         fig.tight_layout()
 
         plot_nr = 0

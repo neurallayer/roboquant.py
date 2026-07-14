@@ -16,16 +16,17 @@ class TestJournal(unittest.TestCase):
         run(feed, strategy, journal=journal)
         journal.plot()
 
-    def test_metrics(self):
+    def test_metrics_journal(self):
         feed = get_feed()
         strategy = EMACrossover()
         journal = MetricsJournal(RunMetric(), FeedMetric(), MarketMetric(), PNLMetric())
         run(feed, strategy, journal=journal)
         self.assertTrue(journal.get_metric_names())
-        self.assertEqual(1218, len(journal.get_metric("pnl/equity")[0]))
-
-        df = journal.to_dataframe("pnl/equity")
+        equity = journal.get_metric("pnl/equity")
+        self.assertEqual(1218, len(equity))
+        df = equity.to_dataframe()
         self.assertEqual(1218, len(df))
+        self.assertEqual("pnl/equity", df.Name)
 
 
 if __name__ == "__main__":

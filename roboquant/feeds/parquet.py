@@ -213,3 +213,4 @@ class ParquetFeed(Feed):
             if items:
                 batch = pa.RecordBatch.from_pylist(items, schema=ParquetFeed.__schema)
                 writer.write_batch(batch)
+

@@ -15,7 +15,7 @@ mpl.rcParams['figure.facecolor'] = '#202020'
 feed = rq.feeds.YahooFeed("JPM", "IBM", "F", start_date="2010-01-01")
 
 for asset in feed.assets():
-    feed.plot(asset)
+    feed.plot(asset, linewidth=0.5)
 
 # %%
 strategy = rq.strategies.EMACrossover()
@@ -23,7 +23,8 @@ journal = rq.journals.MetricsJournal.pnl()
 rq.run(feed, strategy, journal=journal)
 
 # %%
-journal.plot("pnl/equity", color="green", linewidth=0.5)
+equity = journal.get_metric("pnl/equity")
+_ = equity.plot(color="green", linewidth=0.5)
 
 # %%
 # Perform a walk forward over 4 equal timeframes and plot each run.
@@ -35,7 +36,8 @@ for timeframe in timeframes:
     strategy = rq.strategies.EMACrossover()
     journal = rq.journals.MetricsJournal.pnl()
     rq.run(feed, strategy, journal=journal, timeframe=timeframe)
-    journal.plot("pnl/equity", ax=ax, linewidth=0.5)
+    equity = journal.get_metric("pnl/equity")
+    equity.plot(ax=ax, linewidth=0.5)
 
 # %%
 # Run 50 1-year back tests and plot the equity curve for each run.
@@ -49,7 +51,8 @@ for timeframe in timeframes:
     strategy = rq.strategies.EMACrossover()
     journal = rq.journals.MetricsJournal.pnl()
     rq.run(feed, strategy, journal=journal, timeframe=timeframe)
-    journal.plot("pnl/equity", plot_x=False, ax=ax, linewidth=0.5, color="grey")
+    equity = journal.get_metric("pnl/equity")
+    equity.plot(plot_x=False, ax=ax, linewidth=0.5, color="grey")
 
 
 # %%
@@ -58,4 +61,4 @@ strategy = rq.strategies.EMACrossover()
 asset = feed.assets()[0]
 journal = rq.journals.ScoreCard(rq.journals.PNLMetric(), include_prices=True)
 rq.run(feed, strategy, journal=journal)
-journal.plot()
+journal.plot(size=(8.27, 30), linewidth=0.5)

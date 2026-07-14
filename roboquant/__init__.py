@@ -3,10 +3,6 @@ The `roboquant` package contains the `run` method and a number of shared classes
 like `Account`, `Asset` and `Event`.
 """
 
-__version__ = "2.2.0"
-
-import logging
-
 from roboquant import brokers
 from roboquant import feeds
 from roboquant import journals
@@ -21,9 +17,6 @@ from .monetary import Amount, Wallet
 from .asset import Asset, Stock, Crypto, Forex, Option
 from .run import run
 from .timeframe import Timeframe, utcnow
-
-logger = logging.getLogger(__name__)
-logger.info("roboquant version=%s", __version__)
 
 __all__ = [
     "brokers",

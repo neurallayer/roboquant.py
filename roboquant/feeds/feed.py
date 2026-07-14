@@ -13,7 +13,7 @@ class Feed(ABC):
     It provides methods for playing the events and some smaller utility methods, like plotting prices.
 
     Although the most common type of events are those containing market data, other types of
-    events are also possible. For example, events containing news items or social media sentiment could
+    events are also possible. For example, events containing news items or social media posts could
     also be represented as a feed.
     """
 
