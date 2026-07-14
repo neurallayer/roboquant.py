@@ -35,7 +35,7 @@ python3 -m pip install --upgrade roboquant
 The core of roboquant limits the number of dependencies. But you can install roboquant including one or more of the optional dependencies if you require certain additional functionality:
 
 ```shell
-# AI based strategies using Torch and SB3
+# AI based strategies using PyTorch and SB3
 python3 -m pip install --upgrade "roboquant[ai]"
 
 # Integration with Interactive Brokers
