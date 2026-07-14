@@ -22,8 +22,7 @@ class SignalType(Flag):
     """Indicates that this signal can be used for both entering and exiting a position size"""
 
     def __repr__(self):
-        return self.name.split(".")[-1]  # type: ignore
-
+        return self.name.split(".")[-1] if self.name else super().__repr__()
 
 @dataclass(slots=True, frozen=True)
 class Signal:

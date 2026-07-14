@@ -244,7 +244,7 @@ class ReturnFeature(Feature[T]):
 class LongReturnsFeature(Feature[T]):
     def __init__(self, feature: Feature[T], period: int) -> None:
         super().__init__()
-        self.history = deque(maxlen=period)
+        self.history: deque[FloatArray] = deque(maxlen=period)
         self.feature: Feature = feature
 
     def calc(self, value: T) -> FloatArray:
@@ -275,7 +275,7 @@ class MaxReturnFeature(Feature[T]):
     def __init__(self, feature: Feature[T], period: int) -> None:
         super().__init__()
         assert feature.size() == 1
-        self.history = deque(maxlen=period)
+        self.history: deque[FloatArray] = deque(maxlen=period)
         self.feature: Feature = feature
 
     def calc(self, value: T) -> FloatArray:
@@ -304,7 +304,7 @@ class MinReturnFeature(Feature[T]):
 
     def __init__(self, feature: Feature[T], period: int) -> None:
         super().__init__()
-        self.history = deque(maxlen=period)
+        self.history: deque[FloatArray] = deque(maxlen=period)
         self.feature: Feature = feature
 
     def calc(self, value: T) -> FloatArray:

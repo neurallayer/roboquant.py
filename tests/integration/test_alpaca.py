@@ -38,7 +38,7 @@ class TestAlpaca(unittest.TestCase):
 
     def test_alpaca_crypto_feed_bars(self):
         feed = AlpacaHistoricCryptoFeed(*_get_credentials())
-        feed.retrieve_bars("BTC/USDT", start="2024-03-01", end="2024-03-02", resolution=TimeFrame.Hour)  # type: ignore
+        feed.retrieve_bars("BTC/USDT", start="2024-03-01", end="2024-03-02", resolution=TimeFrame.Hour) #type: ignore
         run_price_item_feed(feed, self.cryptos, self)
 
     def test_alpaca_crypto_feed_trades(self):
