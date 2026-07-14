@@ -26,28 +26,27 @@ print(account)
 
 ## Install
 Roboquant can be installed like most other Python packages, using tools like `uv`, `pip` or `conda`.
-Make sure you have Python version 3.11 or higher installed.
+Make sure you have Python version 3.12 or higher installed.
 
 ```shell
 python3 -m pip install --upgrade roboquant
 ```
 
-The core of roboquant limits the number of dependencies. 
-But you can install roboquant including one or more of the optional dependencies if you require certain functionality:
+The core of roboquant limits the number of dependencies. But you can install roboquant including one or more of the optional dependencies if you require certain additional functionality:
 
 ```shell
-# PyTorch based strategies using RNNStrategy
-python3 -m pip install --upgrade "roboquant[torch]"
+# AI based strategies using Torch and SB3
+python3 -m pip install --upgrade "roboquant[ai]"
 
-# Integration with Interactive Brokers using IBKRBroker
+# Integration with Interactive Brokers
 python3 -m pip install --upgrade "roboquant[ibkr]"
 
-# Integration with Alpaca
+# Integration with Alpaca broker
 python3 -m pip install --upgrade "roboquant[alpaca]"
+
+# Integration many crypto exchanges via CCXT package
+python3 -m pip install --upgrade "roboquant[crypto]"
 ```
-
-Additionally, if you want to use the any of TA-Lib techncial indicators, you'll need to install it first. You can read a more about that on [ta-lib-python GitHub](https://github.com/ta-lib/ta-lib-python)
-
 
 ## Building from source
 Roboquant.py uses `uv` as the main tool for handling package dependencies. 

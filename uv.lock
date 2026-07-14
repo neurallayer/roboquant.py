@@ -250,6 +250,20 @@ wheels = [
 ]
 
 [[package]]
+name = "build"
+version = "1.5.1"
+source = { registry = "https://pypi.org/simple" }
+dependencies = [
+    { name = "colorama", marker = "(os_name == 'nt' and platform_machine != 'aarch64' and sys_platform == 'linux') or (os_name == 'nt' and sys_platform != 'darwin' and sys_platform != 'linux')" },
+    { name = "packaging" },
+    { name = "pyproject-hooks" },
+]
+sdist = { url = "https://files.pythonhosted.org/packages/2d/21/6ec54248b4d0d51f12f3ca4aa77a128077d747a5db86cb5a2fcd9aedecbd/build-1.5.1.tar.gz", hash = "sha256:94e17f1db803ab22f46049376c44c8437c52090f0dfdf1adc43df56542d644fb", size = 112439 }
+wheels = [
+    { url = "https://files.pythonhosted.org/packages/c7/f7/2c3f99ff9282f1c1ec9f6298f2c03034658a0901eeacb3b3501cb488574c/build-1.5.1-py3-none-any.whl", hash = "sha256:f1a58fe2e5af5b0238a07b9e70207492c79ddebbdb1ad954fc86d62a56be3e0d", size = 31195 },
+]
+
+[[package]]
 name = "ccxt"
 version = "4.5.65"
 source = { registry = "https://pypi.org/simple" }
@@ -1869,6 +1883,15 @@ wheels = [
 ]
 
 [[package]]
+name = "pip"
+version = "26.1.2"
+source = { registry = "https://pypi.org/simple" }
+sdist = { url = "https://files.pythonhosted.org/packages/01/91/47e7d486260f618783899587af63ccf7980fb60245c3e63dd4571c6b57ad/pip-26.1.2.tar.gz", hash = "sha256:f49cd134c61cf2fd75e0ce2676db03e4054504a5a4986d00f8299ae632dc4605", size = 1840799 }
+wheels = [
+    { url = "https://files.pythonhosted.org/packages/5d/95/6b5cb3461ea5673ba0995989746db58eb18b91b54dbf331e72f569540946/pip-26.1.2-py3-none-any.whl", hash = "sha256:382ff9f685ee3bc25864f820aa50505825f10f5458ffff07e30a6d96e5715cab", size = 1813144 },
+]
+
+[[package]]
 name = "platformdirs"
 version = "4.3.6"
 source = { registry = "https://pypi.org/simple" }
@@ -2225,6 +2248,15 @@ wheels = [
 ]
 
 [[package]]
+name = "pyproject-hooks"
+version = "1.2.0"
+source = { registry = "https://pypi.org/simple" }
+sdist = { url = "https://files.pythonhosted.org/packages/e7/82/28175b2414effca1cdac8dc99f76d660e7a4fb0ceefa4b4ab8f5f6742925/pyproject_hooks-1.2.0.tar.gz", hash = "sha256:1e859bd5c40fae9448642dd871adf459e5e2084186e8d2c2a79a824c970da1f8", size = 19228 }
+wheels = [
+    { url = "https://files.pythonhosted.org/packages/bd/24/12818598c362d7f300f18e74db45963dbcb85150324092410c8b49405e42/pyproject_hooks-1.2.0-py3-none-any.whl", hash = "sha256:9e5c6bfa8dcc30091c74b0cf803c81fdd29d94f01992a7707bc97babb1141913", size = 10216 },
+]
+
+[[package]]
 name = "pyright"
 version = "1.1.411"
 source = { registry = "https://pypi.org/simple" }
@@ -2423,10 +2455,17 @@ dependencies = [
     { name = "numpy" },
     { name = "pyarrow" },
     { name = "requests" },
+    { name = "ta-lib" },
     { name = "yfinance" },
 ]
 
 [package.optional-dependencies]
+ai = [
+    { name = "sb3-contrib" },
+    { name = "stable-baselines3" },
+    { name = "tensorboard" },
+    { name = "torch" },
+]
 alpaca = [
     { name = "alpaca-py" },
 ]
@@ -2435,12 +2474,6 @@ crypto = [
 ]
 ibkr = [
     { name = "ibind", extra = ["oauth"] },
-]
-torch = [
-    { name = "sb3-contrib" },
-    { name = "stable-baselines3" },
-    { name = "tensorboard" },
-    { name = "torch" },
 ]
 
 [package.dev-dependencies]
@@ -2464,13 +2497,14 @@ requires-dist = [
     { name = "numpy", specifier = ">2.0.0" },
     { name = "pyarrow", specifier = ">24.0.0" },
     { name = "requests", specifier = ">2.30.0" },
-    { name = "sb3-contrib", marker = "extra == 'torch'", specifier = ">=2.9.0" },
-    { name = "stable-baselines3", marker = "extra == 'torch'", specifier = ">=2.9.0" },
-    { name = "tensorboard", marker = "extra == 'torch'", specifier = ">=2.21.0" },
-    { name = "torch", marker = "extra == 'torch'", specifier = ">=2.9.0" },
+    { name = "sb3-contrib", marker = "extra == 'ai'", specifier = ">=2.9.0" },
+    { name = "stable-baselines3", marker = "extra == 'ai'", specifier = ">=2.9.0" },
+    { name = "ta-lib", specifier = "==0.6.5" },
+    { name = "tensorboard", marker = "extra == 'ai'", specifier = ">=2.21.0" },
+    { name = "torch", marker = "extra == 'ai'", specifier = ">=2.9.0" },
     { name = "yfinance", specifier = ">1.5.0" },
 ]
-provides-extras = ["alpaca", "crypto", "ibkr", "torch"]
+provides-extras = ["ai", "alpaca", "crypto", "ibkr"]
 
 [package.metadata.requires-dev]
 dev = [
@@ -2481,7 +2515,7 @@ dev = [
     { name = "pyright", specifier = ">=1.1.411" },
     { name = "python-dotenv", specifier = ">=1.1.0" },
 ]
-talib = [{ name = "ta-lib", specifier = "==0.6.4" }]
+talib = [{ name = "ta-lib", specifier = "==0.6.5" }]
 
 [[package]]
 name = "safetensors"
@@ -2596,13 +2630,34 @@ wheels = [
 
 [[package]]
 name = "ta-lib"
-version = "0.6.4"
+version = "0.6.5"
 source = { registry = "https://pypi.org/simple" }
 dependencies = [
+    { name = "build" },
     { name = "numpy" },
-    { name = "setuptools" },
+    { name = "pip" },
 ]
-sdist = { url = "https://files.pythonhosted.org/packages/ba/97/a49816dd468a18ee080cf3a04640772a9f6321790d4049cece2490c4b7ad/ta_lib-0.6.4.tar.gz", hash = "sha256:08f55bc5771a6d1ceb1a2b713aad7b05f04eb0061e980c9113571c532d32e9cb", size = 381774 }
+sdist = { url = "https://files.pythonhosted.org/packages/b6/38/6ab9976d72eb8c7142a153f922b2addb6eb5f136b825298049743a60cd5a/ta_lib-0.6.5.tar.gz", hash = "sha256:bc3100799b51318c1054f5f5b76f4b0a2f1a6d12625200880e81ea8a8773ff75", size = 379185 }
+wheels = [
+    { url = "https://files.pythonhosted.org/packages/05/8e/e69a0eb3286b05979feed3a4dbd2cf55d2a173cda5674f1982ea883a1c5f/ta_lib-0.6.5-cp312-cp312-macosx_13_0_x86_64.whl", hash = "sha256:fe6f65cc2f013765d287d9059c50c52edf0f117305082981e6ac80de11a19aa2", size = 1066189 },
+    { url = "https://files.pythonhosted.org/packages/01/59/735f6e0b34ad97b9d0fa8ff5a35e6cee4e3776bf68818ee7d7ab90d1c541/ta_lib-0.6.5-cp312-cp312-macosx_14_0_arm64.whl", hash = "sha256:cf65438c7c4869bfcef6be1a95e1ff212a432201dd4faa0b35a47f2156db8454", size = 979676 },
+    { url = "https://files.pythonhosted.org/packages/b2/6e/9e844e26dfe5569ec81dce948b13377ce1871073b9fcb811294d6b5177c1/ta_lib-0.6.5-cp312-cp312-manylinux_2_28_aarch64.whl", hash = "sha256:0d04ec78a33c3d35a32f3aed8d320be404eda2a95ec3d17d3aa8dbf96e311a9f", size = 3936782 },
+    { url = "https://files.pythonhosted.org/packages/06/c3/325be4e35ac718f2149ff1670f903950bd4fffc273557a6d59c7376a95f3/ta_lib-0.6.5-cp312-cp312-manylinux_2_28_x86_64.whl", hash = "sha256:585a84b9fb0415dc88abbc09afb4b285d27137f7dab4b6a5c1e255afc1ea5ed0", size = 4058477 },
+    { url = "https://files.pythonhosted.org/packages/8e/8f/feee96b0ecdd4debfe4f0182ed0f3575248297de3f3b34c9335fa46e1714/ta_lib-0.6.5-cp312-cp312-musllinux_1_2_aarch64.whl", hash = "sha256:9588a6f05291a14de8f2167018a1150a05fd26f4a298484b0e8476421c156bd0", size = 3556370 },
+    { url = "https://files.pythonhosted.org/packages/2f/b5/9682bc2e79eded4a4c293b66a459e223e70d298fb088aa6378464f21f99e/ta_lib-0.6.5-cp312-cp312-musllinux_1_2_x86_64.whl", hash = "sha256:393583526a37d55c2557688bd9f6cf66c95eee87f24ca58cc1136ef42266e2f8", size = 3681265 },
+    { url = "https://files.pythonhosted.org/packages/75/fe/8d9a555a286cba0c9d0cbb49ce20af2cf64a1eb34b8e5d549bd2d253b1f6/ta_lib-0.6.5-cp312-cp312-win32.whl", hash = "sha256:feb356b6be4fbbebc11eb6b636b41d783575ab8e6c8762963d6c5d5f348b1634", size = 766831 },
+    { url = "https://files.pythonhosted.org/packages/ce/20/e349b435276554bd4facff10a05eb0584d5e6714aadfd1b0b7777d662525/ta_lib-0.6.5-cp312-cp312-win_amd64.whl", hash = "sha256:666c4043511dfa26748215aadba4f297589a87387f56276d35e555a6f74dc802", size = 883440 },
+    { url = "https://files.pythonhosted.org/packages/eb/77/02feec8a83dd12488cb68c42494fcbbbac39f745b0501f8071ef38baacfe/ta_lib-0.6.5-cp312-cp312-win_arm64.whl", hash = "sha256:461a7cbe14f42c2637d94667f4bf55bb55ef92dd1504a2286670769947e28c52", size = 749131 },
+    { url = "https://files.pythonhosted.org/packages/71/d5/1fad28aff4de0ecea599e97fdc91fdfc0f397fabde1b41a6e54cd64ea710/ta_lib-0.6.5-cp313-cp313-macosx_13_0_x86_64.whl", hash = "sha256:b1572653d0ea27d9961f579e929bdcedde928a4c3db44c25f1387e93440b34c2", size = 1065359 },
+    { url = "https://files.pythonhosted.org/packages/7c/d0/85022658ead1458203deb196e3312046646fa7bfa404bbfc19456080f046/ta_lib-0.6.5-cp313-cp313-macosx_14_0_arm64.whl", hash = "sha256:60ead0fdd7547e0e6cf6db87190bef34e3a039106a9135fea3f3ccb9056e68b1", size = 979947 },
+    { url = "https://files.pythonhosted.org/packages/d4/0f/e8250c1a1ca6fca049297a48d654449e4d85e3198cd664a23711168c03f3/ta_lib-0.6.5-cp313-cp313-manylinux_2_28_aarch64.whl", hash = "sha256:40d31e6c1ff9646870affc59d077dd340f4ccef6ae79de4e98625c06fbc702f2", size = 3943714 },
+    { url = "https://files.pythonhosted.org/packages/82/63/476c38b32bf6527d05ca2dfd0922b01b66373cf6f6bbd7a539ba6a0ffd9b/ta_lib-0.6.5-cp313-cp313-manylinux_2_28_x86_64.whl", hash = "sha256:ce4b4277448e0622b6a2d0f3b9833eddc5d9ca5eafb026d528ba6dadaea0c8a4", size = 4022662 },
+    { url = "https://files.pythonhosted.org/packages/5e/87/61aa73b65a2d421b197921db0c9a14ba8cb2f4d8645847df7957e5cbe2d9/ta_lib-0.6.5-cp313-cp313-musllinux_1_2_aarch64.whl", hash = "sha256:3f4aff21bafafcf49192d30a8d6c2db6fd1b569065a47577cf42f227cd8dfccb", size = 3544944 },
+    { url = "https://files.pythonhosted.org/packages/1d/ca/6e0459b0356af41c11e1cc133cc526ba01ac43c83446f729d544ae969215/ta_lib-0.6.5-cp313-cp313-musllinux_1_2_x86_64.whl", hash = "sha256:fe1159baf26129d7dbb9013e4ff71a73c40b4e089d0db9105011da65e5f52946", size = 3638748 },
+    { url = "https://files.pythonhosted.org/packages/08/fe/4df00c95b7a7c11abebaf79a85540ecdc1f659e4b88cc7238e63222e4f86/ta_lib-0.6.5-cp313-cp313-win32.whl", hash = "sha256:5a40df4f0af832dc41353af9459df90fcada959e229a0509b28f9871de4d887b", size = 766798 },
+    { url = "https://files.pythonhosted.org/packages/3c/a6/851c73dc796426c501371283f63b8a723ee9ce62dedb7281e7efcf9c7f58/ta_lib-0.6.5-cp313-cp313-win_amd64.whl", hash = "sha256:393339212cdc07779d68ad7868a2f380dfbea8e42b3fc77cbfce775142688404", size = 882811 },
+    { url = "https://files.pythonhosted.org/packages/c8/8c/d79a402c06280a67d24672b8ac54daa7ac926a07fe540b344393fc036e9d/ta_lib-0.6.5-cp313-cp313-win_arm64.whl", hash = "sha256:c5b55a1bc8ba8b5e7c6a810ce09f8e5e1011085740b244b6b203e47907f7a1e2", size = 749270 },
+]
 
 [[package]]
 name = "tensorboard"

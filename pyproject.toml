@@ -56,10 +56,11 @@ dependencies = [
   "requests>2.30.0",
   "yfinance>1.5.0",
   "pyarrow>24.0.0",
+  "ta-lib==0.6.5"
 ]
 
 [project.optional-dependencies]
-torch = [
+ai = [
   "torch>=2.9.0",
   "tensorboard>=2.21.0",
   "stable-baselines3>=2.9.0",
@@ -83,4 +84,4 @@ dev = [
   "ipywidgets>=8.1.6",
   "chronos-forecasting>=2.3.1",
 ]
-talib = ["ta-lib==0.6.4"]
+talib = ["ta-lib==0.6.5"]
