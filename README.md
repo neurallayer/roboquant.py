@@ -1,10 +1,10 @@
 
 # ![roboquant logo](https://github.com/neurallayer/roboquant.py/raw/main/docs/roboquant_header.png)
 
-![PyPI - Version](https://img.shields.io/pypi/v/roboquant)
-![PyPI - License](https://img.shields.io/pypi/l/roboquant)
-![PyPI - Python Version](https://img.shields.io/pypi/pyversions/roboquant)
-![PyPI - Status](https://img.shields.io/pypi/status/roboquant)
+![PyPI - Version](https://img.shields.io/pypi/v/roboquant?)
+![PyPI - License](https://img.shields.io/pypi/l/roboquant?)
+![PyPI - Python Version](https://img.shields.io/pypi/pyversions/roboquant?)
+![PyPI - Status](https://img.shields.io/pypi/status/roboquant?)
 ![GitHub Actions Workflow Status](https://img.shields.io/github/actions/workflow/status/neurallayer/roboquant.py/verify.yml)
 [![discord](https://img.shields.io/discord/954650958300856340?label=discord)](https://discord.com/channels/954650958300856340/954650958300856343)
 

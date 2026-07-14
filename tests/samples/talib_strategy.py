@@ -3,7 +3,6 @@
 # from the TaLib library. The strategy combines the Relative Strength Index (RSI) and Bollinger Bands
 
 # %%
-# Make sure ta-lib 0.6.4 or higher is installed before running this sample
 import roboquant.ta as ta
 import roboquant as rq
 from roboquant.strategies import OHLCVBuffer, TaStrategy
