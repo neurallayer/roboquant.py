@@ -51,6 +51,7 @@ class TradingEnv(gym.Env):
         timeframe: Timeframe | None = None,
         journal_factory: Callable[[str], Journal] | None = None
     ):
+        assert(reward_feature.size() == 1), "Reward feature must return a single value"
         self.broker: SimBroker = broker or SimBroker()
         self.feed = feed
 
@@ -80,9 +81,9 @@ class TradingEnv(gym.Env):
         """Based on an event, calculate the observation features and return them as a Numpy array"""
         return self.obs_feature.calc(evt)
 
-    def get_reward(self, account: Account) -> NDArray[np.float32]:
+    def get_reward(self, account: Account) -> np.float32:
         """Based on the account, calculate the reward features and return them as a Numpy array"""
-        return self.reward_feature.calc(account)
+        return self.reward_feature.calc(account)[0]
 
     def step(self, action):
         """Take a step"""

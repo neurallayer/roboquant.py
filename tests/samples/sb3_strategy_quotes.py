@@ -7,6 +7,9 @@ from roboquant.asset import Stock
 from roboquant.ml.features import EquityFeature, QuoteFeature
 from roboquant.ml.rl import TradingEnv, SB3PolicyStrategy
 from roboquant.timeframe import Timeframe
+from dotenv import load_dotenv
+
+load_dotenv()
 
 # %%
 asset = Stock("JPM")
@@ -32,7 +35,7 @@ model = RecurrentPPO("MlpLstmPolicy", env)
 
 # %%
 steps = feed.count_events(timeframe=train_tf) * 5
-model.learn(total_timesteps=steps, progress_bar=True)
+model.learn(total_timesteps=steps, progress_bar=False)
 model.policy.save("/tmp/jpm_quotes.zip")
 
 # %%
