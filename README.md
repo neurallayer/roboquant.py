@@ -50,8 +50,7 @@ Additionally, if you want to use the any of TA-Lib techncial indicators, you'll 
 
 
 ## Building from source
-Roboquant.py uses `uv` as the main tool for handling package dependencies.
-
+Roboquant.py uses `uv` as the main tool for handling package dependencies. 
 
 ```shell
 uv sync --all-extras --dev
