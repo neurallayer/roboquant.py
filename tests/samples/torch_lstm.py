@@ -30,7 +30,7 @@ class TimeSeriesLSTM(nn.Module):
 # %%
 # Config
 apple = Stock("AAPL")
-prediction = 5 # predict 5 steps in the future
+prediction_steps = 5 # predict 5 steps in the future
 start_date = "2000-01-01"
 feed = rq.feeds.YahooFeed(apple.symbol, start_date=start_date)
 
@@ -48,7 +48,7 @@ model = TimeSeriesLSTM(input_feature.size())
 
 # What should it predict
 # In this case the max return over the prediction period
-label_feature = MaxReturnFeature(PriceFeature(apple, price_type="HIGH"), prediction)
+label_feature = MaxReturnFeature(PriceFeature(apple, price_type="HIGH"), prediction_steps)
 
 # Create the strategy
 logging.basicConfig()
@@ -58,11 +58,11 @@ strategy = TimeSeriesStrategy(input_feature, label_feature, model, apple, sequen
 # %%
 # Train the model from 2010 to 20202
 tf = rq.Timeframe.fromisoformat(start_date, "2020-01-01")
-strategy.fit(feed, timeframe=tf, epochs=20, validation_split=0.25, prediction=prediction)
+strategy.fit(feed, timeframe=tf, epochs=20, validation_split=0.25, prediction=prediction_steps)
 
 # %%
 # Run the trained model with the last years of data
-logger.setLevel("WARNING")
+# logger.setLevel("WARNING")
 tf = rq.Timeframe.fromisoformat("2020-01-01", "2025-01-01")
 journal = BasicJournal()
 account = rq.run(feed, strategy, timeframe=tf, journal=journal)

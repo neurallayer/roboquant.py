@@ -19,7 +19,10 @@ logger = logging.getLogger(__name__)
 
 
 class FeatureStrategy(Strategy):
-    """Abstract base class for strategies that use event features as input."""
+    """Abstract base class for strategies that use event features as input.
+    Typically these features are used to create input data for machine learning models,
+    which can then be used to generate signals.
+    """
 
     def __init__(self, input_feature: Feature[Event], history: int, dtype="float32"):
         super().__init__()
@@ -104,9 +107,13 @@ class TimeSeriesStrategy(FeatureStrategy):
     """Strategy using a sequenced neural network to predict future time series values.
     The input and label features are calculated from events.
     The model is expected to be a PyTorch module that takes the input features and outputs predictions.
+    An example of a model could be a recurrent neural network (RNN) or a long short-term memory (LSTM) network.
+
     The strategy can be used to generate buy/sell signals based on the model's predictions.
     This strategy is suitable for time series forecasting tasks where the model learns from historical data
-    to predict future values. Right now it only supports a single asset, but this can be extended in the future.
+    to predict future values.
+
+    Right now this class only supports a single asset, but this can be extended.
     """
 
     def __init__(
@@ -140,7 +147,7 @@ class TimeSeriesStrategy(FeatureStrategy):
             else:
                 p = output.item()
 
-            logger.info("Prediction p=%s time=%s", p, dt)
+            logger.info("Prediction asset=%s p=%s time=%s", self.asset.symbol, p, dt)
             if p >= self.buy_pct:
                 return [Signal.buy(self.asset)]
             if p <= self.sell_pct:

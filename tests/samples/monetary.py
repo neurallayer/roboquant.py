@@ -28,7 +28,7 @@ print("The wallet contains", wallet)
 
 # %%
 # Install the ECB currency converter so we can
-# convert between different currencies
+# convert between many different currencies
 ECBConversion().register()
 
 # %%

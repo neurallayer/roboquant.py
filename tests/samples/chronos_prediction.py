@@ -1,11 +1,11 @@
 # %% [markdown]
-# This example shows how to use the Chronos pipeline to predict future prices
-# using a pre-trained model.
+# Chronos is a time series forecasting library that can be used to predict future values
+# based on historical data. It is built on top of PyTorch and provides a simple interface
+# for training and using models for time series forecasting.
 #
-# It uses the `ChronosBoltPipeline` to load the
-# pre-trained model and then makes predictions based on historical data.
+# This example uses the `ChronosBoltPipeline` to load the pre-trained model and then makes
+# predictions based on historical data.
 #
-# The predictions are then used in a simple strategy to buy or sell the SPY.
 
 # %%
 import torch
@@ -30,26 +30,30 @@ def perc_change(arr):
 
 
 # %%
-feed = rq.feeds.YahooFeed("SPY", start_date="2020-01-01")
-df = feed.to_dataframe(feed.assets()[0])
-close = perc_change(df["Close"].values)
-prediction = 10  # predict 10 trading days in the future
+prediction_days = 10  # predict 10 trading days in the future
 context_window = 250  # use the previous 250 trading days as context
 
+feed = rq.feeds.YahooFeed("SPY", start_date="2015-01-01")
+df = feed.to_dataframe(feed.assets()[0])
+close = df["Close"].values
+close = perc_change(close)  # make the data stationary
+close = close[-context_window - prediction_days :-prediction_days]  # use the last 250 trading days as context
+
 # %%
-# Get the predictions for different quantiles
-result = pipeline.predict(
-    inputs=torch.tensor(close[-context_window - prediction:-prediction]),
-    prediction_length=prediction,
+# Get the predictions for different quantiles based on last 250 trading days of data
+quantiles = pipeline.predict(
+    inputs=torch.tensor(close),
+    prediction_length=prediction_days,
 )
 
 # %%
 # Plot the predictions for each quantile and the actual values
-for data in result[0]:
-    plt.plot(data.numpy(), color="grey", alpha=0.2)
+plt.title(f"Predictions for SPY changes in the next {prediction_days} trading days")
 
-plt.title("Predictions for SPY")
-plt.plot(close[-prediction:], linewidth=2, color="blue")  # type: ignore
+for quantile in quantiles[0]:
+    plt.plot(quantile.numpy(), color="grey", alpha=0.5)
+
+plt.plot(close[-prediction_days:], linewidth=1, color="blue")  # type: ignore
 plt.show()
 
 # %%
@@ -80,7 +84,7 @@ class ChronosStrategy(rq.strategies.TaStrategy):
 
 # %%
 # Perform a backtest using the strategy
-strategy = ChronosStrategy(pipeline, prediction_length=prediction)
+strategy = ChronosStrategy(pipeline, prediction_length=prediction_days)
 trader = rq.traders.FlexTrader(max_order_perc=0.1, max_position_perc=0.8)
 account = rq.run(feed, strategy, trader=trader)
 print(account)

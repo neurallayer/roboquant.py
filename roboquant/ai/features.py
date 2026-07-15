@@ -16,9 +16,16 @@ FloatArray = NDArray[np.float32]
 
 
 class Feature(Generic[T]):
-    """Base class for different types of features.
+    """Base class for different types of features. Features are the data building blocks for
+    roboquant machine learning models and can be used to extract relevant information.
+
     The ones included by default are either based either an `Event` or an `Account`.
-    Typically Event features are used for input and Account features are used for reward/label/output."""
+    Typically Event features are used for input data and Account features are used for
+    reward/label/output data.
+
+    Features can be combined, sliced, nested, normalized and cached to create more
+    complex features.
+    """
 
     @abstractmethod
     def calc(self, value: T) -> FloatArray:
@@ -33,7 +40,8 @@ class Feature(Generic[T]):
         """Return the size of this feature"""
 
     def reset(self):
-        """Reset the state of the feature"""
+        """Reset the state of the feature. This is called at the start of a new epoch.
+        If the feature has no state, this can be left empty."""
 
     def _shape(self):
         """return the shape of this feature as a tuple"""
@@ -429,6 +437,7 @@ class DayOfMonthFeature(Feature[Event]):
     """Calculate a day of month where the first day of the month is 0 and the last day is 30.
     Result can be one-hot encoded or not, depending on the `one_hot_encoded` parameter.
     If `one_hot_encoded` is True, the result will be a 30-element array else the result will be a single value.
+
     For example, if the event time is the 15th of the month, the result will be:
     - one-hot encoded: [0.0, 0.0, ..., 1.0, 0.0, ..., 0.0] (1.0 at index 14)
     - not one-hot encoded: [14.0]
@@ -637,11 +646,14 @@ class QuoteFeature(Feature[Event]):
 
 
 class CacheFeature(Feature[Event]):
-    """Cache the results of an event feature from a previous run. This can speed up the learning process considerable, but
-    this requires that:
+    """Cache the results of an event feature from a previous run. This can speed up the learning process
+    considerable, but this requires that:
 
     - the feed to have always an increasing time value (monotonic)
-    - the feature has to produce the same output at a given time.
+    - the underlying feature has to produce the same output at a given time (deterministic)
+
+    A reset doesn't clear the cache, but it will reset the underlying feature. If you want to clear
+    the cache, use the `clear()` method.
     """
 
     def __init__(self, feature: Feature[Event], validate=False) -> None:
@@ -678,7 +690,10 @@ class CacheFeature(Feature[Event]):
 
 
 class VolumeFeature(Feature[Event]):
-    """Extract the volume for one or more assets in the event"""
+    """Extract the trading volume for one or more assets in the event.
+    Make sure that the data avaialble in the event contains adjusted volume data (for example for stock splits),
+    otherwise the results will be incorrect.
+    """
 
     def __init__(self, *assets: Asset, volume_type: str = "DEFAULT") -> None:
         super().__init__()
