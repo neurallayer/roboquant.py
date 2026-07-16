@@ -101,8 +101,10 @@ class SlicedFeature(Feature[T]):
         return self.feature.reset()
 
 
-class FixedValueFeature(Feature):
-    """Feature that always returns a fixed value"""
+class FixedValueFeature(Feature[Any]):
+    """Feature that always returns a fixed value array.
+    This can be used for example to add a bias term to the input features.
+    """
 
     def __init__(self, value: ArrayLike) -> None:
         super().__init__()
@@ -184,7 +186,8 @@ class NormalizeFeature(Feature[T]):
 
 
 class FillFeature(Feature[T]):
-    """If a feature contains a NaN value, use the last known value instead"""
+    """If the underlying feature contains a NaN value,
+    replace it with the last known value instead"""
 
     def __init__(self, feature: Feature[T]) -> None:
         super().__init__()
@@ -207,7 +210,8 @@ class FillFeature(Feature[T]):
 
 
 class FillWithConstantFeature(Feature[T]):
-    """If a feature contains a NaN value, fill it with a constant value"""
+    """If the underlying feature contains a NaN value,
+    fill it with a constant value"""
 
     def __init__(self, feature: Feature[T], constant: float = 0.0) -> None:
         super().__init__()
