@@ -9,7 +9,7 @@ from roboquant.timeframe import utcnow
 
 class TestAccount(unittest.TestCase):
 
-    def test_account_without(self):
+    def test_initial_account(self):
         acc = Account()
         acc.cash = Wallet(Amount(USD, 1_000.0))
         now = utcnow()
