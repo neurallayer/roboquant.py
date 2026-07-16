@@ -1,5 +1,7 @@
-"""Set of stubs for the streaming version of the ta-lib indicators that makes them discoverable and typed."""
+"""Set of wrappers for the streaming version of the ta-lib indicators that makes them discoverable and typed.
+"""
 
+import talib._ta_lib as _ta_lib
 import numpy as np
 import logging
 from enum import Enum
@@ -7,11 +9,6 @@ from typing import Tuple
 from numpy.typing import NDArray
 
 logger = logging.getLogger(__name__)
-
-try:
-    import talib._ta_lib as _ta_lib  # type: ignore
-except ImportError:
-    logger.warning("TA-Lib is not installed, TA functions will raise an exception")
 
 
 class MA_Type(Enum):
@@ -24,7 +21,6 @@ class MA_Type(Enum):
     KAMA = 6
     MAMA = 7
     T3 = 8
-
 
 _exception = NotImplementedError("Not implemented, is TA-LIB installed?")
 
@@ -925,13 +921,12 @@ def AVGDEV(real: NDArray[np.float64], timeperiod: int = 14) -> float:
 def IMI(open: NDArray[np.float64], close: NDArray[np.float64], timeperiod: int = 14) -> float:
     raise _exception
 
-
 # for fn in dict(globals()):
-#    if fn not in __TA_FUNCTION_NAMES__:
-#       if not fn.startswith("__") and fn == fn.upper():
-#            print("not found ", fn)
+    # if fn not in _ta_lib.__TA_FUNCTION_NAMES__:
+    #   if not fn.startswith("__") and fn == fn.upper():
+    #        print("not found ", fn)
 if "_ta_lib" in globals():
     for func_name in _ta_lib.__TA_FUNCTION_NAMES__:  # type: ignore
-        #    if func_name not in globals():
+        # if func_name not in globals():
         #        print("new function", func_name)
         globals()[func_name] = getattr(_ta_lib, "stream_%s" % func_name)  # type: ignore
