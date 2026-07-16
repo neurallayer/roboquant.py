@@ -76,7 +76,6 @@ class CryptoBroker(LiveBroker):
     def _get_open_orders(self) -> list[Order]:
         # Default implementation for retrieving open orders
         orders = self.__client.fetch_open_orders() # type: ignore
-        orders = self.filter_by(orders, 'status', 'open')
         result = []
         for order in orders:
             asset = Asset(order['symbol'])
@@ -89,15 +88,19 @@ class CryptoBroker(LiveBroker):
         return result
 
     def _get_positions(self) -> dict[Asset, Position]:
-        positions = self.__client.fetch_positions() # type: ignore
-        result = []
-        for position in positions:
-            asset = Crypto.from_symbol(position['symbol'])
-            size = position['amount']
-            avg_entry_price = position['entry_price']
-            p = Position(asset, size, avg_entry_price)
-            result.append(p)
-        return result
+        result = {}
+        try:
+            positions = self.__client.fetch_positions() # type: ignore
+            for position in positions:
+                asset = Crypto.from_symbol(position['symbol'])
+                size = position['amount']
+                avg_entry_price = position['entry_price']
+                p = Position(asset, size, avg_entry_price)
+                result[asset] = p
+        except Exception as e:
+            logger.error("Failed to fetch positions: %s", e)
+        finally:
+            return result
 
     def _update_order(self, order: Order) -> None:
         raise NotImplementedError

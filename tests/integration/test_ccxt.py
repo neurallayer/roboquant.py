@@ -1,10 +1,16 @@
 import unittest
+import os
 import ccxt
 from datetime import datetime
 
 from roboquant.asset import Crypto
 from roboquant.crypto.cryptofeed import CryptoFeed
+from roboquant.crypto.cryptobroker import CryptoBroker
 from tests.common import run_price_item_feed
+
+from dotenv import load_dotenv
+
+load_dotenv()
 
 
 class TestCCXT(unittest.TestCase):
@@ -26,6 +32,18 @@ class TestCCXT(unittest.TestCase):
         self.assertEqual(366, len(feed.timeline()))
         run_price_item_feed(feed, assets, self)
 
+    def test_alpaca_broker(self):
+        key = os.getenv("ALPACA_API_KEY")
+        secret = os.getenv("ALPACA_SECRET")
+        assert(key is not None and secret is not None), "ALPACA_API_KEY and ALPACA_SECRET must be set"
+        alpaca = ccxt.alpaca({
+            "apiKey": key,
+            "secret": secret
+        })
+        alpaca.set_sandbox_mode(True)
+        broker = CryptoBroker(alpaca)
+        account = broker.sync()
+        print(account)
 
 if __name__ == "__main__":
     unittest.main()

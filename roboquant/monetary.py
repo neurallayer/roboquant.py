@@ -348,7 +348,7 @@ class Amount:
 
     def __matmul__(self, other: Currency) -> "Amount":
         """Convert this amount to another currency and return a new `Amount`.
-        The current time will be used for the conversion, so if you want to convert at a specific time, 
+        The current time will be used for the conversion, so if you want to convert at a specific time,
         use `convert_to` instead.
 
         Args:
