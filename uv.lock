@@ -2486,9 +2486,6 @@ dev = [
     { name = "pyright" },
     { name = "python-dotenv" },
 ]
-talib = [
-    { name = "ta-lib" },
-]
 
 [package.metadata]
 requires-dist = [
@@ -2516,7 +2513,6 @@ dev = [
     { name = "pyright", specifier = ">=1.1.411" },
     { name = "python-dotenv", specifier = ">=1.1.0" },
 ]
-talib = [{ name = "ta-lib", specifier = "==0.6.5" }]
 
 [[package]]
 name = "safetensors"
