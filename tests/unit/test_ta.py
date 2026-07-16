@@ -10,7 +10,7 @@ from tests.common import run_strategy
 
 class _MyStrategy(TaStrategy):
     """Example using TaStrategy as a baseclass to create a custom strategy
-    using talib as a backend for the technical indicators.
+    using talib for the technical indicators.
     """
 
     def process_asset(self, asset, ohlcv: OHLCVBuffer):

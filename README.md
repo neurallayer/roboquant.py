@@ -79,6 +79,3 @@ Roboquant is made available under the Apache 2.0 license. You can read more abou
 Absolutely no warranty is implied with this product. Use at your own risk. I provide no guarantee that it will be profitable, or that it won't lose all your money very quickly or does not contain bugs.
 
 All financial trading offers the possibility of loss. Leveraged trading, may result in you losing all your money, and still owing more. Back tested results are no guarantee of future performance. I can take no responsibility for any losses caused by live trading using roboquant. Use at your own risk. I am not registered or authorised by any financial regulator.
-
-## Kotlin version
-Next to this Python version of `roboquant`, there is also a Kotlin version available. Both share a similar API, just the used computer language is different. Which one to use depends very much on personal preferences, skills and usage.

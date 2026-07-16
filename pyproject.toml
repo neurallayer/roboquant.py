@@ -84,4 +84,7 @@ dev = [
   "ipywidgets>=8.1.6",
   "chronos-forecasting>=2.3.1",
 ]
-talib = ["ta-lib==0.6.5"]
+docs = [
+    "mkdocs-material>=9.0.0",
+    "mkdocstrings[python]>=0.20.0",
+]
