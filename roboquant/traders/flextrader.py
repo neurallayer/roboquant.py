@@ -91,7 +91,13 @@ class FlexTrader(Trader):
     """Implementation of a Trader that has configurable rules to determine which signals are converted into orders.
     This implementation will not generate orders if there is not a price in the event for the underlying asset.
 
-    The configurable parameters include:
+    It does support SignalType.ENTRY, SignalType.EXIT and SignalType.ENTRY_EXIT signals. Also the signal rating value
+    is used to determine the size of the order. A rating of 1.0 means a full BUY order, a rating of 0.5 means half a BUY order
+    and a rating of -1.0 means a full SELL order.
+
+    This implementation is designed to be flexible and can be configured to support different trading strategies. The
+    default configuration is designed to be safe and conservative, but it can be configured to be more aggressive by changing
+    the parameters. The configurable parameters include:
 
     - one_order_only: don't create new orders for an asset if there is already an open orders for that same asset
     - size_fractions: enable fractional order sizes (if size_fractions is larger than 0), default is 0

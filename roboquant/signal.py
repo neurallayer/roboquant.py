@@ -10,6 +10,9 @@ class SignalType(Flag):
     - ENTRY: enter or increase a position size
     - EXIT: close or reduce a position size
     - ENTRY_EXIT: can be used both to enter/increase or close/reduce position sizes.
+
+    It is up to the `Trader` to handle these types correctly. For example, a trader can choose to ignore these types all
+    together and treat them all as ENTRY_EXIT signals.
     """
 
     ENTRY = auto()

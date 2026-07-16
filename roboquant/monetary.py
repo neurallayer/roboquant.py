@@ -311,7 +311,7 @@ class Amount:
     @staticmethod
     def register_converter(converter: CurrencyConverter):
         """Register a new currency converter to handle conversions between different currencies.
-        It will replace the current registered converter. There can only be one converter at a time.
+        It will replace the current registered converter. There can only be one converter active at a time.
 
         Args:
             converter (CurrencyConverter): The new currency converter.
@@ -348,6 +348,8 @@ class Amount:
 
     def __matmul__(self, other: Currency) -> "Amount":
         """Convert this amount to another currency and return a new `Amount`.
+        The current time will be used for the conversion, so if you want to convert at a specific time, 
+        use `convert_to` instead.
 
         Args:
             other (Currency): The target currency.
@@ -382,7 +384,7 @@ class Amount:
         Returns:
             str: The string representation.
         """
-        return f"{self.value:,.2f}@{self.currency}"
+        return f"{self:,.2f}"
 
     def __format__(self, format_spec: str) -> str:
         """Return a formatted string representation of the amount.
