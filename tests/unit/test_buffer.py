@@ -2,7 +2,7 @@ from array import array
 import unittest
 import numpy as np
 
-from roboquant.strategies.buffer import NumpyBuffer
+from roboquant.strategies.buffer import NumpyBuffer, OHLCVBuffer
 
 
 class TestBuffer(unittest.TestCase):
@@ -25,6 +25,16 @@ class TestBuffer(unittest.TestCase):
         b.append((5, 6))
         a = np.asarray(b)
         self.assertEqual(3, len(a))
+
+    def test_ohlcv_buffer(self):
+        b = OHLCVBuffer(10)
+        for i in range(12):
+            b.append([100+i, 101+i, 99+i, 100+i, 5000])
+        self.assertTrue(b.is_full())
+        self.assertTrue(np.all(b.open() == b.close()))
+        c = b.close()
+        self.assertEqual(10, len(c))
+        self.assertEqual(111, c[-1])  # Check the last close price
 
 
 if __name__ == "__main__":
