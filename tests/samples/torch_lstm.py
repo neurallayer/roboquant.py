@@ -11,7 +11,7 @@ from roboquant.ai.strategies import TimeSeriesStrategy, logger
 
 
 # %%
-# Torch LSTM Model
+# PyTorch LSTM Model
 class TimeSeriesLSTM(nn.Module):
 
     def __init__(self, feature_size) -> None:

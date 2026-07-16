@@ -12,14 +12,15 @@ from roboquant.event import Event, Bar, Quote
 from roboquant.strategies.buffer import OHLCVBuffer
 
 T = TypeVar("T")
-FloatArray = NDArray[np.float32]
+NPFloatArray = NDArray[np.float32]
+NPIntArray = NDArray[np.int64]
 
 
 class Feature(Generic[T]):
     """Base class for different types of features. Features are the data building blocks for
     roboquant machine learning models and can be used to extract relevant information.
 
-    The ones included by default are either based either an `Event` or an `Account`.
+    The ones included by default are either based on an `Event` or an `Account`.
     Typically Event features are used for input data and Account features are used for
     reward/label/output data.
 
@@ -28,7 +29,7 @@ class Feature(Generic[T]):
     """
 
     @abstractmethod
-    def calc(self, value: T) -> FloatArray:
+    def calc(self, value: T) -> NPFloatArray:
         """
         Perform the calculation and return the result as a 1-dimensional NDArray of type float32.
         The result should always be the same size. If a value cannot be calculated at a certain
@@ -43,19 +44,19 @@ class Feature(Generic[T]):
         """Reset the state of the feature. This is called at the start of a new epoch.
         If the feature has no state, this can be left empty."""
 
-    def _shape(self):
-        """return the shape of this feature as a tuple"""
+    def _shape(self) -> tuple[int]:
+        """return the size of this feature as a shape tuple"""
         return (self.size(),)
 
-    def _zeros(self):
+    def _zeros(self) -> NPFloatArray:
         """Return a zero array of the correct shape"""
         return np.zeros(self._shape(), dtype=np.float32)
 
-    def _ones(self):
+    def _ones(self) -> NPFloatArray:
         """Return an array of ones of the correct shape"""
         return np.ones(self._shape(), dtype=np.float32)
 
-    def _full_nan(self) -> FloatArray:
+    def _full_nan(self) -> NPFloatArray:
         """Return a full NaN array of the correct shape"""
         return np.full(self._shape(), float("nan"), dtype=np.float32)
 
@@ -64,7 +65,7 @@ class Feature(Generic[T]):
             return ReturnFeature(self)
         return LongReturnsFeature(self, period)
 
-    def normalize(self, min_period=3) -> "Feature[T]":
+    def normalize(self, min_period: int=3) -> "Feature[T]":
         """Normalize the feature values by calculating the mean and standard deviation."""
         return NormalizeFeature(self, min_period)
 
@@ -90,7 +91,7 @@ class SlicedFeature(Feature[T]):
         self.feature = feature
         self._size = len(feature._zeros()[args])
 
-    def calc(self, value: T) -> FloatArray:
+    def calc(self, value: T) -> NPFloatArray:
         values = self.feature.calc(value)
         return values[self.args]
 
@@ -113,8 +114,32 @@ class FixedValueFeature(Feature[Any]):
     def size(self) -> int:
         return len(self.value)
 
-    def calc(self, value: Any) -> FloatArray:
+    def calc(self, value: Any) -> NPFloatArray:
         return self.value
+
+class RandomFeature(Feature[Any]):
+    """Feature that always returns a random value array. If a seed is provided,
+    the seed will be used to initialize the random number generator,
+    so that the same random values are generated each epoch.
+
+    If used with a seed, you can check your strategy for overfitting by running
+    several epochs and checking if the results are improving.
+    """
+
+    def __init__(self, size: int, seed: int|None = None) -> None:
+        super().__init__()
+        self._size = size
+        self._seed = seed
+        self.reset()
+
+    def size(self) -> int:
+        return self._size
+
+    def calc(self, value: Any) -> NPFloatArray:
+        return np.random.rand(self._size).astype(np.float32)
+
+    def reset(self):
+        np.random.seed(self._seed)
 
 
 class CombinedFeature(Feature[T]):
@@ -127,7 +152,7 @@ class CombinedFeature(Feature[T]):
         self.features = features
         self._size = sum(feature.size() for feature in self.features)
 
-    def calc(self, value: T) -> FloatArray:
+    def calc(self, value: T) -> NPFloatArray:
         data = [feature.calc(value) for feature in self.features]
         return np.hstack(data, dtype=np.float32)
 
@@ -140,7 +165,9 @@ class CombinedFeature(Feature[T]):
 
 
 class NormalizeFeature(Feature[T]):
-    """online normalization calculator"""
+    """online normalization calculator
+    - min_count: minimum number of values to calculate the mean and standard deviation
+    """
 
     def __init__(self, feature: Feature[T], min_count: int = 3) -> None:
         super().__init__()
@@ -148,10 +175,11 @@ class NormalizeFeature(Feature[T]):
         self.min_count = min_count
         self.existing_aggregate = (self._zero_int(), self._zeros(), self._zeros())
 
-    def _zero_int(self):
-        return np.zeros((self.size(),), dtype="int")
+    def _zero_int(self) -> NPIntArray:
+        return np.zeros((self.size(),), dtype="int64")
 
-    def denormalize(self, value):
+    def denormalize(self, value) -> NPFloatArray:
+        """Denormalize the value"""
         (count, mean, m2) = self.existing_aggregate
         stdev = np.sqrt(m2 / count) - 1e-12
         return value * stdev + mean
@@ -165,14 +193,14 @@ class NormalizeFeature(Feature[T]):
         delta2 = new_value - mean
         m2[mask] += delta[mask] * delta2[mask]
 
-    def __normalize_values(self, values) -> FloatArray:
+    def __normalize_values(self, values) -> NPFloatArray:
         (count, mean, m2) = self.existing_aggregate
         stdev = self._full_nan()
         mask = count >= self.min_count
         stdev[mask] = np.sqrt(m2[mask] / count[mask]) + 1e-12  # type: ignore
         return (values - mean) / stdev
 
-    def calc(self, value: T) -> FloatArray:
+    def calc(self, value: T) -> NPFloatArray:
         values = self.feature.calc(value)
         self.__update(values)
         return self.__normalize_values(values)
@@ -194,7 +222,7 @@ class FillFeature(Feature[T]):
         self.feature: Feature = feature
         self.fill = self._full_nan()
 
-    def calc(self, value: T) -> FloatArray:
+    def calc(self, value: T) -> NPFloatArray:
         values = self.feature.calc(value)
         mask = np.isnan(values)
         values[mask] = self.fill[mask]
@@ -218,7 +246,7 @@ class FillWithConstantFeature(Feature[T]):
         self.feature: Feature = feature
         self.fill = np.full(self._shape(), constant, dtype=np.float32)
 
-    def calc(self, value: T) -> FloatArray:
+    def calc(self, value: T) -> NPFloatArray:
         values = self.feature.calc(value)
         mask = np.isnan(values)
         values[mask] = self.fill[mask]
@@ -239,9 +267,9 @@ class ReturnFeature(Feature[T]):
         self.feature: Feature = feature
         self.history = self._full_nan()
 
-    def calc(self, value: T) -> FloatArray:
+    def calc(self, value: T) -> NPFloatArray:
         values = self.feature.calc(value)
-        r: FloatArray = values / self.history - np.float32(1.0)  # type: ignore
+        r: NPFloatArray = values / self.history - np.float32(1.0)  # type: ignore
         self.history = values
         return r
 
@@ -256,10 +284,10 @@ class ReturnFeature(Feature[T]):
 class LongReturnsFeature(Feature[T]):
     def __init__(self, feature: Feature[T], period: int) -> None:
         super().__init__()
-        self.history: deque[FloatArray] = deque(maxlen=period)
+        self.history: deque[NPFloatArray] = deque(maxlen=period)
         self.feature: Feature = feature
 
-    def calc(self, value: T) -> FloatArray:
+    def calc(self, value: T) -> NPFloatArray:
         values = self.feature.calc(value)
         h = self.history
 
@@ -287,10 +315,10 @@ class MaxReturnFeature(Feature[T]):
     def __init__(self, feature: Feature[T], period: int) -> None:
         super().__init__()
         assert feature.size() == 1
-        self.history: deque[FloatArray] = deque(maxlen=period)
+        self.history: deque[NPFloatArray] = deque(maxlen=period)
         self.feature: Feature = feature
 
-    def calc(self, value: T) -> FloatArray:
+    def calc(self, value: T) -> NPFloatArray:
         values = self.feature.calc(value)
         h = self.history
         h.append(values)
@@ -316,10 +344,10 @@ class MinReturnFeature(Feature[T]):
 
     def __init__(self, feature: Feature[T], period: int) -> None:
         super().__init__()
-        self.history: deque[FloatArray] = deque(maxlen=period)
+        self.history: deque[NPFloatArray] = deque(maxlen=period)
         self.feature: Feature = feature
 
-    def calc(self, value: T) -> FloatArray:
+    def calc(self, value: T) -> NPFloatArray:
         values = self.feature.calc(value)
         h = self.history
         h.append(values)
@@ -348,7 +376,7 @@ class SMAFeature(Feature[T]):
         self.history = np.zeros((self.period, feature.size()), dtype=np.float32)
         self._cnt = 0
 
-    def calc(self, value: T) -> FloatArray:
+    def calc(self, value: T) -> NPFloatArray:
         values = self.feature.calc(value)
         idx = self._cnt % self.period
         self.history[idx] = values
@@ -376,7 +404,7 @@ class SMAFeature(Feature[T]):
 class EquityFeature(Feature[Account]):
     """Calculates the total equity value of the account"""
 
-    def calc(self, value: Account) -> FloatArray:
+    def calc(self, value: Account) -> NPFloatArray:
         return np.array(value.equity_value(), dtype=np.float32)
 
     def size(self):
@@ -392,7 +420,7 @@ class UnrealizedPNLFeature(Feature[Account]):
     ```
     """
 
-    def calc(self, value: Account) -> FloatArray:
+    def calc(self, value: Account) -> NPFloatArray:
         mkt_value = value.convert(value.mkt_value())
         pnl = value.unrealized_pnl_value()
         if mkt_value and pnl:
@@ -423,7 +451,7 @@ class DayOfWeekFeature(Feature[Event]):
         self.tz = tz
         self.one_hot_encoded = one_hot_encoded
 
-    def calc(self, value: Event) -> FloatArray:
+    def calc(self, value: Event) -> NPFloatArray:
         dt = datetime.astimezone(value.time, self.tz)
         weekday = dt.weekday()
         if not self.one_hot_encoded:
@@ -452,7 +480,7 @@ class DayOfMonthFeature(Feature[Event]):
         self.tz = tz
         self.one_hot_encoded = one_hot_encoded
 
-    def calc(self, value: Event) -> FloatArray:
+    def calc(self, value: Event) -> NPFloatArray:
         dt = datetime.astimezone(value.time, self.tz)
         day = dt.day - 1  # day of month is 1-31, we want 0-30
         if not self.one_hot_encoded:
@@ -480,7 +508,7 @@ class MonthOfYearFeature(Feature[Event]):
         self.tz = tz
         self.one_hot_encoded = one_hot_encoded
 
-    def calc(self, value: Event) -> FloatArray:
+    def calc(self, value: Event) -> NPFloatArray:
         dt = datetime.astimezone(value.time, self.tz)
         month = dt.month - 1  # month is 1-12, we want 0-11
         if not self.one_hot_encoded:
@@ -501,7 +529,7 @@ class TimeDifference(Feature[Event]):
         super().__init__()
         self._last_time: datetime | None = None
 
-    def calc(self, value: Event) -> FloatArray:
+    def calc(self, value: Event) -> NPFloatArray:
         if self._last_time:
             diff = value.time - self._last_time
             self._last_time = value.time
@@ -528,7 +556,7 @@ class TaFeature(Feature[Event]):
         self.period = period
         self.assets = list(assets)
 
-    def calc(self, value: Event) -> FloatArray:
+    def calc(self, value: Event) -> NPFloatArray:
         result = []
         nan = float("nan")
         for asset in self.assets:
@@ -611,7 +639,7 @@ class BarFeature(Feature[Event]):
         super().__init__()
         self.assets = assets
 
-    def calc(self, value: Event) -> FloatArray:
+    def calc(self, value: Event) -> NPFloatArray:
         result = self._full_nan()
         for idx, asset in enumerate(self.assets):
             item = value.price_items.get(asset)
@@ -635,7 +663,7 @@ class QuoteFeature(Feature[Event]):
         super().__init__()
         self.assets = assets
 
-    def calc(self, value: Event) -> FloatArray:
+    def calc(self, value: Event) -> NPFloatArray:
         result = self._full_nan()
         for idx, asset in enumerate(self.assets):
             item = value.price_items.get(asset)
@@ -663,10 +691,10 @@ class CacheFeature(Feature[Event]):
     def __init__(self, feature: Feature[Event], validate=False) -> None:
         super().__init__()
         self.feature: Feature = feature
-        self._cache: dict[datetime, FloatArray] = {}
+        self._cache: dict[datetime, NPFloatArray] = {}
         self.validate = validate
 
-    def calc(self, value: Event) -> FloatArray:
+    def calc(self, value: Event) -> NPFloatArray:
         time = value.time
         if time in self._cache:
             values = self._cache[time]
@@ -695,8 +723,8 @@ class CacheFeature(Feature[Event]):
 
 class VolumeFeature(Feature[Event]):
     """Extract the trading volume for one or more assets in the event.
-    Make sure that the data avaialble in the event contains adjusted volume data (for example for stock splits),
-    otherwise the results will be incorrect.
+    Make sure that the data avaialble in the event contains adjusted volume data
+    (for example for stock splits), otherwise the results will be incorrect.
     """
 
     def __init__(self, *assets: Asset, volume_type: str = "DEFAULT") -> None:
@@ -704,7 +732,7 @@ class VolumeFeature(Feature[Event]):
         self.assets = assets
         self.volume_type = volume_type
 
-    def calc(self, value: Event):
+    def calc(self, value: Event) -> NPFloatArray:
         volumes = [value.get_volume(asset, self.volume_type) for asset in self.assets]
         return np.array(volumes, dtype=np.float32)
 

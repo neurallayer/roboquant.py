@@ -1,6 +1,6 @@
 import unittest
 
-from roboquant.journals import RunMetric, MetricsJournal, FeedMetric, MarketMetric, PNLMetric
+from roboquant.journals import RunMetric, MetricsJournal, FeedMetric, MarketMetric, PNLMetric, TimeSeries
 from roboquant.strategies.emacrossover import EMACrossover
 from roboquant.run import run
 from roboquant.journals.scorecard import ScoreCard
@@ -27,6 +27,11 @@ class TestJournal(unittest.TestCase):
         df = equity.to_dataframe()
         self.assertEqual(1218, len(df))
         self.assertEqual("pnl/equity", df.Name)
+
+        def mistake():
+            TimeSeries("unequal-length", equity.timeline, equity.values[2:])
+
+        self.assertRaises(ValueError, mistake)
 
 
 if __name__ == "__main__":

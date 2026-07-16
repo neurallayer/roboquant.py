@@ -14,6 +14,12 @@ from roboquant.timeframe import Timeframe
 
 @dataclass
 class TimeSeries:
+    """A time series of a metric. It contains the name of the metric,
+    a timeline and the values of the metric at each point in time.
+
+    It contains convenience methods to plot the time series and to convert it to a Pandas dataframe.
+    """
+
     name: str
     timeline: list[datetime]
     values: list[float]
@@ -31,7 +37,7 @@ class TimeSeries:
         return Timeframe(self.timeline[0], self.timeline[-1], True) if len(self) > 0 else Timeframe.EMPTY
 
     def plot(self, plot_x: bool = True, ax = None, **kwargs):
-        """Plot one of the metrics. Optional a `matplotlib.axes.Axes` can be provided
+        """Plot the time series. Optional a `matplotlib.axes.Axes` can be provided
         This requires matplotlib to be installed."""
         if not ax:
             from matplotlib import pyplot as plt

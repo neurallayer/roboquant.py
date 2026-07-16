@@ -4,7 +4,7 @@ from roboquant.journals.feedmetric import FeedMetric
 from roboquant.journals.marketmetric import MarketMetric
 from roboquant.journals.journal import Journal
 from roboquant.journals.metric import Metric
-from roboquant.journals.metricsjournal import MetricsJournal
+from roboquant.journals.metricsjournal import MetricsJournal, TimeSeries
 from roboquant.journals.pnlmetric import PNLMetric
 from roboquant.journals.pricemetric import PriceItemMetric
 from roboquant.journals.runmetric import RunMetric
@@ -23,5 +23,6 @@ __all__ = [
     "PriceItemMetric",
     "RunMetric",
     "TensorboardJournal",
+    "TimeSeries",
     "ScoreCard"
 ]
