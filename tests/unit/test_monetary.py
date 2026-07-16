@@ -21,6 +21,8 @@ class TestMonetary(unittest.TestCase):
         amt1 = 100@USD
         self.assertEqual(amt1.value, 100)
         self.assertEqual(amt1.currency, USD)
+        self.assertEqual(f"{amt1:.2f}", "100.00@USD")
+
         amt2 = 200@USD
         w = amt1 + amt2
         self.assertIsInstance(w, Wallet)
@@ -50,11 +52,14 @@ class TestMonetary(unittest.TestCase):
         z = v + v - v
         self.assertDictEqual(z, v)
 
+        self.assertEqual(f"{w:.0f}", "200@USD + 50@EUR")
+
         def _update(self):
             a = Amount(USD, 10)
             a.value = 100  # type: ignore
 
         self.assertRaises(Exception, _update)
+
 
     def test_conversion(self):
         now = datetime.now()

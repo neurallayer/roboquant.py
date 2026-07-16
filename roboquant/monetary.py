@@ -384,6 +384,17 @@ class Amount:
         """
         return f"{self.value:,.2f}@{self.currency}"
 
+    def __format__(self, format_spec: str) -> str:
+        """Return a formatted string representation of the amount.
+
+        Args:
+            format_spec (str): The format specification.
+
+        Returns:
+            str: The formatted string representation.
+        """
+        return f"{self.value:{format_spec}}@{self.currency}"
+
 
 class Wallet(defaultdict[Currency, float]):
     """A wallet holds monetary values of different currencies.
@@ -503,3 +514,14 @@ class Wallet(defaultdict[Currency, float]):
             str: The string representation.
         """
         return " + ".join([f"{a}" for a in self.amounts()])
+
+    def __format__(self, format_spec: str) -> str:
+        """Return a formatted string representation of the wallet.
+
+        Args:
+            format_spec (str): The format specification.
+
+        Returns:
+            str: The formatted string representation.
+        """
+        return " + ".join([f"{a:{format_spec}}" for a in self.amounts()])
