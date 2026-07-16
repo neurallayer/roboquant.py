@@ -1,4 +1,5 @@
 import logging
+import re
 from abc import ABC, abstractmethod
 from dataclasses import dataclass
 from decimal import Decimal
@@ -155,18 +156,17 @@ class Crypto(Asset):
     """
 
     @staticmethod
-    def from_symbol(symbol: str, sep: str = "/"):
-        """Create a Crypto asset from a symbol string. Based on the separator it will
-        try to determine the currency.
+    def from_symbol(symbol: str):
+        """Create a Crypto asset from a symbol string. It will automatically extract the quote currency from the symbol,
+        which is assumed to be the last part of the symbol.
 
         Args:
             symbol (str): The symbol string of the crypto asset.
-            sep (str, optional): The separator used in the symbol string. Defaults to "/".
 
         Returns:
             Crypto: The created crypto asset.
         """
-        currency = symbol.split(sep)[-1]
+        currency = re.split(r"[^a-zA-Z0-9\s]", symbol)[-1]
         return Crypto(symbol, Currency(currency))
 
     def serialize(self):
@@ -204,18 +204,16 @@ class Forex(Asset):
     """
 
     @staticmethod
-    def from_symbol(symbol: str, sep: str = "/"):
-        """Create a Forex asset from a symbol string. The second part of the symbol is the
+    def from_symbol(symbol: str) -> "Forex":
+        """Create a Forex asset from a symbol string. The last part of the symbol is assumed to be the
         currency.
 
         Args:
             symbol (str): The symbol string of the forex asset.
-            sep (str, optional): The separator used in the symbol string. Defaults to "/".
-
         Returns:
             Forex: The created forex asset.
         """
-        currency = symbol.split(sep)[-1]
+        currency = re.split(r"[^a-zA-Z0-9\s]", symbol)[-1]
         return Forex(symbol, Currency(currency))
 
     def serialize(self):

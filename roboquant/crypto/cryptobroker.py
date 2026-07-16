@@ -1,7 +1,7 @@
 import logging
 import ccxt
 from roboquant.account import Account, Position
-from roboquant.asset import Asset
+from roboquant.asset import Asset, Crypto
 from roboquant.brokers.broker import LiveBroker, Order
 from roboquant.event import Event
 from roboquant.monetary import Wallet, Amount, USD
@@ -75,13 +75,30 @@ class CryptoBroker(LiveBroker):
 
     def _get_open_orders(self) -> list[Order]:
         # Default implementation for retrieving open orders
-        result = self.__client.fetch_open_orders()
+        orders = self.__client.fetch_open_orders() # type: ignore
+        orders = self.filter_by(orders, 'status', 'open')
+        result = []
+        for order in orders:
+            asset = Asset(order['symbol'])
+            size = order['amount']
+            limit = order['price']
+            size = size if order['side'] == 'buy' else -size
+            o = Order(asset, size, limit)
+            o.id = order['id']
+            result.append(o)
         return result
 
     def _get_positions(self) -> dict[Asset, Position]:
-        result = self.__client.fetch_positions()
+        positions = self.__client.fetch_positions() # type: ignore
+        result = []
+        for position in positions:
+            asset = Crypto.from_symbol(position['symbol'])
+            size = position['amount']
+            avg_entry_price = position['entry_price']
+            p = Position(asset, size, avg_entry_price)
+            result.append(p)
         return result
 
-    def _update_order(self, order: Order):
+    def _update_order(self, order: Order) -> None:
         raise NotImplementedError
 

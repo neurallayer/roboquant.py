@@ -132,6 +132,8 @@ class MyTrader(Trader):
         return orders
 ```
 
+In roboquant a sell order has a negative size while a buy order has a positive size.
+
 ### FlexTrader (default, configurable)
 
 ```python
