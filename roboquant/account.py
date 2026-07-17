@@ -219,25 +219,6 @@ class Account:
         """
         return self.realized_pnl() + self.unrealized_pnl()
 
-    def required_buying_power(self, order: Order) -> Amount:
-        """
-        Return the amount of buying power required for a certain order. The underlying logic takes into
-        account that a reduction in position size doesn't require buying power.
-
-        Args:
-            order (Order): The order for which to calculate the required buying power.
-
-        Returns:
-            Amount: The required buying power as an Amount.
-        """
-        pos_size = self.get_position_size(order.asset)
-
-        # Only buying power required if the remaining order size increases the position size
-        if abs(pos_size + order.remaining) > abs(pos_size):
-            return order.asset.contract_amount(abs(order.remaining), order.limit)
-
-        return Amount(order.asset.currency, 0.0)
-
     def unrealized_pnl_value(self) -> float:
         """
         Return the unrealized profit and loss value denoted in the base currency of the account.

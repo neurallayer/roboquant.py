@@ -50,7 +50,7 @@ class SimBroker(Broker):
         self._order_entry: dict[str, date] = {}
         self.timezone = timezone
 
-    def reset(self):
+    def reset(self) -> None:
         """Reset the broker with the cash and buying power set to the initial deposit."""
         self._account = Account(self.deposit.currency)
         self._modify_orders: list[Order] = []
@@ -83,7 +83,7 @@ class SimBroker(Broker):
         return asset.contract_value(size, price - pos.avg_price)
 
 
-    def _update_account(self, trade: Trade):
+    def _update_account(self, trade: Trade) -> None:
         """Update the account positions, trades and cash based on a new trade"""
         acc = self._account
         acc.trades.append(trade)
@@ -153,7 +153,7 @@ class SimBroker(Broker):
         return None
 
     @staticmethod
-    def _update_positions(account: Account, event: Event, price_type: str = "DEFAULT"):
+    def _update_positions(account: Account, event: Event, price_type: str = "DEFAULT") -> None:
         """Update the open positions in the account with the latest market prices found in the event"""
 
         account.last_update = event.time
@@ -162,13 +162,13 @@ class SimBroker(Broker):
             if price := event.get_price(asset, price_type):
                 position.mkt_price = price
 
-    def __next_order_id(self):
+    def __next_order_id(self) -> str:
         """Generate a new order id. The order id is a simple integer that is incremented for each new order."""
         result = str(self._order_id)
         self._order_id += 1
         return result
 
-    def place_orders(self, orders: list[Order]):
+    def place_orders(self, orders: list[Order]) -> None:
         """Place new orders at this broker. The orders get assigned a unique order-id if there isn't one already.
 
         Orders that are placed that have already an order-id are either update- or cancellation-orders.
@@ -184,7 +184,7 @@ class SimBroker(Broker):
             else:
                 self._modify_orders.append(order)
 
-    def _remove_order(self, order: Order):
+    def _remove_order(self, order: Order) -> None:
         """Remove an order from the account, called when an order is completed, expired or cancelled."""
         self._account.orders.remove(order)
         self._order_entry.pop(order.id)
@@ -220,7 +220,7 @@ class SimBroker(Broker):
         self._order_entry[order.id] = time.astimezone(self.timezone).date()
         return False
 
-    def _process_open_orders(self, event: Event):
+    def _process_open_orders(self, event: Event) -> None:
         if not self._account.orders:
             return
         prices = event.price_items
@@ -239,14 +239,15 @@ class SimBroker(Broker):
                         logger.info("completed order %s", order)
                         self._remove_order(order)
 
-    def _calculate_open_orders(self):
+    def _calculate_open_orders(self) -> Wallet:
         """Calculate the buying power required for the open orders"""
         result = Wallet()
         for order in self._account.orders:
-            result += self._account.required_buying_power(order)
+            if order.is_buy and order.remaining:
+                result += order.asset.contract_amount(order.remaining, order.limit)
         return result
 
-    def _calculate_short_positions(self):
+    def _calculate_short_positions(self) -> Wallet:
         reserved = Wallet()
         for asset, position in self._account.short_positions().items():
             short_value = asset.contract_amount(-position.size, position.mkt_price)

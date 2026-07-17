@@ -65,13 +65,17 @@ class CryptoBroker(LiveBroker):
 
     def _get_balance(self) -> Wallet:
         # Default implementation for retrieving account balance
-        result = self.__client.fetch_balance()
-        logger.info("Fetched balance: %s", result)
-        return Wallet()
+        result = self.__client.fetch_balance()  # type: ignore
+        w = Wallet()
+        for currency, balance in result['free'].items():
+            if balance > 0:
+                w += Amount(currency, balance)
+        return w
 
     def _get_buying_power(self) -> Amount:
         # Default implementation for retrieving account balance
-        return 1000.0@USD
+        info = self.__client.fetch_balance()["info"]  # type: ignore
+        return Amount(info["currency"], float(info["buying_power"]))
 
     def _get_open_orders(self) -> list[Order]:
         # Default implementation for retrieving open orders
