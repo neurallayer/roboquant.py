@@ -74,11 +74,15 @@ class ChronosStrategy(rq.strategies.TaStrategy):
             prediction_length=self.prediction_length,
         )
 
-        estimate = result[0, 4].mean().item()  # Get the estimation using the 0.5 quantile
+        # Get the estimations using the 0.5 quantile
+        # shape is (batch_size, num_quantiles, prediction_length)
+        mean = result[0, 4].mean().item()
+        high = result[0, 4].max().item()
+        low = result[0, 4].min().item()
 
-        if estimate > 0.001:
+        if mean > 0 and high > 0.001:
             return rq.Signal.buy(asset)
-        elif estimate < -0.001:
+        elif mean < 0 and low < -0.001:
             return rq.Signal.sell(asset)
 
 

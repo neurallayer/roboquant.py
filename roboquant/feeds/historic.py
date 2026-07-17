@@ -37,9 +37,16 @@ class HistoricFeed(Feed, ABC):
             items.append(item)
 
     def assets(self) -> list[Asset]:
-        """Return the list of unique symbols available in this feed"""
+        """Return the list of unique assets available in this feed"""
         self._update()
         return list(self.__assets)
+
+    def symbols(self) -> list[str]:
+        """Return the list of unique symbols available in this feed"""
+        symbols = set()
+        for asset in self.assets():
+            symbols.add(asset.symbol)
+        return list(symbols)
 
     def get_asset(self, symbol: str) -> Asset:
         """Retrieve the first asset that matches the provided symbol name.
