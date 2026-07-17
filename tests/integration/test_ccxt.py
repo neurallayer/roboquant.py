@@ -45,5 +45,6 @@ class TestCCXT(unittest.TestCase):
         account = broker.sync()
         print(account)
 
+
 if __name__ == "__main__":
     unittest.main()

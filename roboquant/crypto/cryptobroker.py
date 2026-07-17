@@ -4,7 +4,7 @@ from roboquant.account import Account, Position
 from roboquant.asset import Asset, Crypto
 from roboquant.brokers.broker import LiveBroker, Order
 from roboquant.event import Event
-from roboquant.monetary import Wallet, Amount, USD
+from roboquant.monetary import Wallet, Amount
 
 from dotenv import load_dotenv
 
@@ -15,7 +15,9 @@ logger = logging.getLogger(__name__)
 
 
 class CryptoBroker(LiveBroker):
-    """Broker that supports cryptocurrency exchanges using the ccxt library.
+    """Broker that supports cryptocurrency exchanges using the ccxt library. Not all exchanges
+    support all features, so check the documentation of the exchange you want to use. If a required feature is not supported,
+    a `NotSupported` exception will be raised.
     """
 
     def __init__(self, exchange: ccxt.Exchange, *args, **kwargs):
@@ -40,11 +42,16 @@ class CryptoBroker(LiveBroker):
             amount = float(abs(order.size)),
             price = order.limit,
         )
-
         logger.info("result place order order=%s result=%s", order, result)
 
-
     def _get_account(self, event: Event | None = None) -> Account:
+        """Sync the account object from the real broker. It requires that following
+        methods are supported by your broker:
+        - fetch_balance
+        - fetch_open_orders
+        - fetch_positions
+        """
+
         account = Account()
         account.orders = self._get_open_orders()
         account.positions = self._get_positions()
@@ -55,13 +62,9 @@ class CryptoBroker(LiveBroker):
     def _cancel_order(self, order: Order):
         # Default implementation for cancelling a
         order_id = order.id
-        try:
-            result = self.__client.cancel_order(order_id)  # type: ignore
-            logger.info("Cancelled order order_id=%s result=%s", order_id, result)
-            return result
-        except Exception as e:
-            logger.error("Failed to cancel order order_id=%s error=%s", order_id, e)
-            raise
+        result = self.__client.cancel_order(order_id)  # type: ignore
+        logger.info("Cancelled order order_id=%s result=%s", order_id, result)
+        return result
 
     def _get_balance(self) -> Wallet:
         # Default implementation for retrieving account balance
@@ -95,16 +98,18 @@ class CryptoBroker(LiveBroker):
         result = {}
         try:
             positions = self.__client.fetch_positions() # type: ignore
-            for position in positions:
-                asset = Crypto.from_symbol(position['symbol'])
-                size = position['amount']
-                avg_entry_price = position['entry_price']
-                p = Position(asset, size, avg_entry_price)
-                result[asset] = p
-        except Exception as e:
-            logger.error("Failed to fetch positions: %s", e)
-        finally:
+        except ccxt.NotSupported as e:
+            logger.error(e)
             return result
+
+        for position in positions:
+            size = position['amount']
+            asset = Crypto.from_symbol(position['symbol'])
+            size = position['amount']
+            avg_entry_price = position['entry_price']
+            p = Position(asset, size, avg_entry_price)
+            result[asset] = p
+        return result
 
     def _update_order(self, order: Order) -> None:
         raise NotImplementedError
