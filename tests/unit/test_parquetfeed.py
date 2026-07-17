@@ -31,10 +31,9 @@ class TestParquetFeed(unittest.TestCase):
 
     def test_predefined_feed(self):
         feed = ParquetFeed.us_stocks_10()
+        symbols = "MSFT,NVDA,AAPL,AMZN,META,GOOGL,AVGO,JPM,XOM,TSLA".split(",")
         feed_symbols = {asset.symbol for asset in feed.assets()}
-        symbols_str = "MSFT,NVDA,AAPL,AMZN,META,GOOGL,AVGO,JPM,XOM,TSLA"
-        symbols = set(symbols_str.split(","))
-        self.assertEqual(feed_symbols, symbols)
+        self.assertEqual(set(feed_symbols), set(symbols))
         run_price_item_feed(feed, feed.assets(), self)
 
 

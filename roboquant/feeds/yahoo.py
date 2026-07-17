@@ -81,6 +81,16 @@ class YahooFeed(HistoricFeed):
         return Stock(symbol)
 
     @staticmethod
+    def us_stocks_10(
+        start_date: str | date | datetime = "2020-01-01", end_date: str | date | datetime | None = None, interval="1d"
+    ) -> "YahooFeed":
+        """Returns a YahooFeed with 10 large us stocks: MSFT,NVDA,AAPL,AMZN,META,GOOGL,AVGO,JPM,XOM,TSLA
+        Can be used for quick testing, but this selection has a strong survivor bias.
+        """
+        symbols = "MSFT,NVDA,AAPL,AMZN,META,GOOGL,AVGO,JPM,XOM,TSLA".split(",")
+        return YahooFeed(*symbols, start_date=start_date, end_date=end_date, interval=interval)
+
+    @staticmethod
     def __auto_adjust(df):
         ratio = df["Adj Close"] / df["Close"]
         df["Open"] = df["Open"] * ratio

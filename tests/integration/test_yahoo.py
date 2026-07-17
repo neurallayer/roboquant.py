@@ -26,6 +26,11 @@ class TestYahoo(unittest.TestCase):
         feed = YahooFeed("INVALID_TICKER_NAME", start_date="2010-01-01", end_date="2020-01-01")
         self.assertEqual(0, len(feed.assets()))
 
+    def test_us_stocks_10(self):
+        feed = YahooFeed.us_stocks_10()
+        symbols = feed.symbols()
+        self.assertTrue("MSFT" in symbols)
+        self.assertEqual(10, len(feed.assets()))
 
 if __name__ == "__main__":
     unittest.main()

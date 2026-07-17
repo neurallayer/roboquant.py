@@ -10,7 +10,7 @@ from itertools import product
 import roboquant as rq
 
 # Feed with over 25 years of data
-FEED = rq.feeds.YahooFeed("GOOG", "MSFT", "NVDA", start_date="2000-01-01")
+FEED = rq.feeds.YahooFeed.us_stocks_10(start_date="2000-01-01")
 print(FEED)
 
 

@@ -132,12 +132,8 @@ class Timeframe:
         Returns:
             str: String representation of the timeframe.
         """
-        if self.is_empty():
-            return "EMPTY_TIMEFRAME"
-
-        last_char = "]" if self.inclusive else ">"
-        fmt_str = "%Y-%m-%d %H:%M:%S"
-        return f"[{self.start.strftime(fmt_str)} ― {self.end.strftime(fmt_str)}{last_char}"
+        format = "%Y-%m-%d %H:%M:%S"
+        return self.strftime(format)
 
     @property
     def duration(self) -> timedelta:
@@ -227,6 +223,24 @@ class Timeframe:
             tf = Timeframe(start_dt, start_dt + duration)
             result.append(tf)
         return result
+
+    def strftime(self, format: str) -> str:
+        """
+        Return a string representation of the timeframe using the
+        provided format. See also `datetime.strftime()`
+
+        Returns:
+            str: String formatter of the timeframe.
+        """
+        if self.is_empty():
+            return "EMPTY"
+
+        if self == Timeframe.INFINITE:
+            return "INFINITE"
+
+        last_char = ']' if self.inclusive else '>'
+        return f"[{self.start.strftime(format)} ― {self.end.strftime(format)}{last_char}"
+
 
     def __eq__(self, other: Any) -> bool:
         """
