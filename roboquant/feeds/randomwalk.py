@@ -8,10 +8,10 @@ import numpy as np
 
 from roboquant.asset import Asset, Stock
 from roboquant.event import Bar, TradePrice, Quote
-from .historic import HistoricFeed
+from roboquant.feeds.historic import InMemoryFeed
 
 
-class RandomWalk(HistoricFeed):
+class RandomWalk(InMemoryFeed):
     """This feed simulates a random-walk of stock prices.
     It can generate `Trade`, `Quote`, or `Bar` prices."""
 

@@ -27,7 +27,7 @@ from alpaca.trading.enums import AssetClass
 
 from roboquant.asset import Asset, Crypto, Option, Stock
 from roboquant.event import Bar, Event, PriceItem, Quote, TradePrice
-from roboquant.feeds.historic import HistoricFeed
+from roboquant.feeds.historic import InMemoryFeed
 from roboquant.feeds.live import LiveFeed
 
 
@@ -134,7 +134,7 @@ class AlpacaLiveFeed(LiveFeed):
             logger.warning("cannot subscribe to bars for options")
 
 
-class _AlpacaHistoricFeed(HistoricFeed):
+class _AlpacaHistoricFeed(InMemoryFeed):
     """Base class for Alpaca historic feeds.
     This class is not intended to be used directly."""
 

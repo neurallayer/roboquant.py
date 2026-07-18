@@ -5,12 +5,12 @@ import warnings
 
 from roboquant.asset import Asset, Stock
 from roboquant.event import Bar
-from roboquant.feeds.historic import HistoricFeed
+from roboquant.feeds.historic import InMemoryFeed
 
 logger = logging.getLogger(__name__)
 
 
-class YahooFeed(HistoricFeed):
+class YahooFeed(InMemoryFeed):
     """A feed using the Yahoo Finance to retrieve historic market data. By default, it will retrieve daily data, but
     you can specify a different interval."""
 

@@ -5,12 +5,12 @@ from datetime import date, datetime, timezone
 
 from roboquant.asset import Asset, Crypto
 from roboquant.event import Bar
-from roboquant.feeds.historic import HistoricFeed
+from roboquant.feeds.historic import InMemoryFeed
 
 logger = logging.getLogger(__name__)
 
 
-class CryptoFeed(HistoricFeed):
+class CryptoFeed(InMemoryFeed):
     """A feed using the CCXT library to retrieve historic crypto market data. By default, it will retrieve daily data, but
     you can specify a different interval."""
 
