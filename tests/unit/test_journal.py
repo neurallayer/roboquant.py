@@ -26,7 +26,7 @@ class TestJournal(unittest.TestCase):
         self.assertEqual(1218, len(equity))
         df = equity.to_dataframe()
         self.assertEqual(1218, len(df))
-        self.assertEqual("pnl/equity", df.Name)
+        self.assertTrue(equity.name in df.columns)
 
         def mistake():
             TimeSeries("unequal-length", equity.timeline, equity.values[2:])

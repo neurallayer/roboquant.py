@@ -55,7 +55,7 @@ class Asset(ABC):
         return Amount(self.currency, value)
 
     def __eq__(self, value: object) -> bool:
-        """Check if two assets are equal based on their symbol and currency.
+        """Check if two assets are equal based on their class, symbol and currency.
 
         Args:
             value (object): The other asset to compare with.

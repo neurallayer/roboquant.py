@@ -21,7 +21,7 @@ class TimeSeries:
         if len(self.timeline) != len(self.values):
             raise ValueError("Timeline and values must have the same length")
 
-    def __len__(self):
+    def __len__(self) -> int:
         return len(self.timeline)
 
     def timeframe(self) -> Timeframe:
@@ -31,7 +31,7 @@ class TimeSeries:
 
     def plot(self, plot_x: bool = True, ax = None, **kwargs):
         """Plot the time series. Optional a `matplotlib.axes.Axes` can be provided
-        This requires matplotlib to be installed."""
+        This method requires matplotlib to be installed."""
         if not ax:
             from matplotlib import pyplot as plt
             _, ax = plt.subplots()
@@ -52,8 +52,7 @@ class TimeSeries:
 
         d = {
             "time": self.timeline,
-            "value": self.values
+            self.name: self.values
         }
         df = pd.DataFrame.from_dict(d, orient="columns")
-        df.Name = self.name
-        return df.set_index("time") if time_index else df  # type: ignore
+        return df.set_index("time") if time_index else df # type: ignore

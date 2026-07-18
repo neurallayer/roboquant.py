@@ -510,7 +510,8 @@ class Wallet(defaultdict[Currency, float]):
         return sum(amount.convert_to(currency, dt) for amount in self.amounts())
 
     def __repr__(self) -> str:
-        """Return a string representation of the wallet.
+        """Return a string representation of the wallet without any formatting on the
+        monetary values.
 
         Returns:
             str: The string representation.
@@ -518,10 +519,12 @@ class Wallet(defaultdict[Currency, float]):
         return " + ".join([f"{a}" for a in self.amounts()])
 
     def __format__(self, format_spec: str) -> str:
-        """Return a formatted string representation of the wallet.
+        """Return a formatted string representation of the wallet. All the amounts
+        will be formatted according to the format_spec.
 
         Args:
-            format_spec (str): The format specification.
+            format_spec (str): The format specification, same as is used for float.
+                For example ".2f"
 
         Returns:
             str: The formatted string representation.
