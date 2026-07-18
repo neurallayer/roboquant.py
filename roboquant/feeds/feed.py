@@ -22,7 +22,7 @@ class Feed(ABC):
         Parameters
         ----------
         timeframe : Timeframe
-            An optional timeframe to limit the ectns to.
+            An optional timeframe to limit the events to.
         """
         ...
 

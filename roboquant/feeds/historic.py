@@ -1,7 +1,7 @@
 from abc import ABC, abstractmethod
 from datetime import datetime
 from itertools import chain
-from typing import Sequence, override
+from typing import Any, Generator, Sequence, override
 
 from roboquant.asset import Asset
 from roboquant.event import Bar, Event, PriceItem
@@ -40,11 +40,14 @@ class HistoricFeed(Feed, ABC):
         except StopIteration:
             raise ValueError(f"no asset found with symbol={symbol}")
 
-    def get_ohlcv(self, asset: Asset, timeframe: Timeframe | None = None) -> dict[datetime, Sequence[float]]:
+    def get_ohlcv(self, asset: Asset | str, timeframe: Timeframe | None = None) -> dict[datetime, Sequence[float]]:
         """Get the OHLCV values for an asset in this feed.
         The returned value is a `dict` with the key being the `datetime` and the value being an `array`
         of the OHLCV values.
         """
+
+        if isinstance(asset, str):
+            asset = self.get_asset(asset)
 
         result: dict[datetime, Sequence[float]] = {}
         for event in self.play(timeframe):
@@ -94,7 +97,7 @@ class HistoricFeed(Feed, ABC):
                 result[asset.symbol].append(price)
         return result
 
-    def to_dataframe(self, asset: Asset, timeframe: Timeframe | None = None):
+    def to_dataframe(self, asset: Asset | str, timeframe: Timeframe | None = None):
         """Return the bars for the asset as a Pandas dataframe, with the index being the event time
         and the columns being "Open", "High", "Low", "Close", "Volume".
 
@@ -108,7 +111,7 @@ class HistoricFeed(Feed, ABC):
 
     def plot(
         self,
-        asset: Asset,
+        asset: Asset | str,
         price_type: str = "DEFAULT",
         timeframe: Timeframe | None = None,
         ax = None,
@@ -118,7 +121,7 @@ class HistoricFeed(Feed, ABC):
         Plots the prices of a single asset. This function requires matplotlib to be installed.
 
         Args:
-            asset (Asset): The asset for which to plot prices.
+            asset (Asset | str): The asset or symbol for which to plot prices.
             price_type (str, optional): The type of price to plot, e.g., "OPEN" or "CLOSE". Defaults to "DEFAULT".
             timeframe (Timeframe | None, optional): The timeframe over which to plot prices. If None, the entire feed
                 timeframe is used. Defaults to None.
@@ -135,7 +138,7 @@ class HistoricFeed(Feed, ABC):
         return result
 
 
-    def get_prices(self, asset: Asset, price_type : str ="DEFAULT", timeframe: Timeframe | None = None
+    def get_prices(self, asset: Asset | str, price_type : str ="DEFAULT", timeframe: Timeframe | None = None
     ) -> TimeSeries:
         """
         Retrieve the prices for a given asset, optional over a specified timeframe and return the result
@@ -153,6 +156,9 @@ class HistoricFeed(Feed, ABC):
         """
         x :list[datetime] = []
         y : list[float] = []
+
+        if isinstance(asset, str):
+            asset = self.get_asset(asset)
 
         for event in self.play(timeframe):
             price = event.get_price(asset, price_type)
@@ -240,7 +246,7 @@ class InMemoryFeed(HistoricFeed, ABC):
         items = self.__data[last_time]
         return Event(last_time, items)
 
-    def play(self, timeframe: Timeframe | None = None):
+    def play(self, timeframe: Timeframe | None = None) -> Generator[Event, Any, None]:
         for k, v in self.__data.items():
             if not timeframe or k in timeframe:
                 yield Event(k, v)
