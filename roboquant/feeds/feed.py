@@ -4,6 +4,7 @@ from typing import Any, Generator, Sequence
 
 from roboquant.asset import Asset
 from roboquant.event import Bar, Event
+from roboquant.timeseries import TimeSeries
 from roboquant.timeframe import Timeframe
 
 
@@ -123,20 +124,17 @@ class Feed(ABC):
         Returns:
             list: The result of the `ax.plot()` function, which is a list of Line2D objects.
         """
-        if not ax:
-            from matplotlib import pyplot as plt
-            _, ax = plt.subplots()
 
-        times, prices = self.get_prices(asset, price_type, timeframe)
-        result = ax.plot(times, prices, **kwargs)  # type: ignore
-        ax.set_title(asset.symbol)
+        ts = self.get_prices(asset, price_type, timeframe)
+        result = ts.plot(**kwargs)
         return result
 
 
     def get_prices(self, asset: Asset, price_type : str ="DEFAULT", timeframe: Timeframe | None = None
-    ) -> tuple[list[datetime], list[float]]:
+    ) -> TimeSeries:
         """
-        Retrieve the prices for a given asset, optional over a specified timeframe.
+        Retrieve the prices for a given asset, optional over a specified timeframe and return the result
+        as a `TimeSeries`.
 
         Args:
             asset (Asset): The asset for which to retrieve prices.
@@ -146,15 +144,14 @@ class Feed(ABC):
             If None, the entire available timeframe is used. Defaults to None.
 
         Returns:
-            tuple[list[datetime], list[float]]: A tuple containing two lists:
-                - A list of datetime objects representing the times at which prices were recorded.
-                - A list of float values representing the prices of the asset at the corresponding times.
+            Timeseries with the name being the symbol name of the asset.
         """
         x :list[datetime] = []
         y : list[float] = []
+
         for event in self.play(timeframe):
             price = event.get_price(asset, price_type)
             if price:
                 x.append(event.time)
                 y.append(price)
-        return x, y
+        return TimeSeries(asset.symbol, x, y)

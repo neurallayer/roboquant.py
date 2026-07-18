@@ -32,7 +32,7 @@ class Trade:
 @dataclass(slots=True)
 class Position:
     """The position of an asset in the account. The position prices are denoted in the currency of the asset that
-    is linked to this posistion. See also `Account.positions`.
+    is linked to this posistion. See also :meth:`roboquant.Account.positions`.
     """
 
     size: Decimal
@@ -212,7 +212,8 @@ class Account:
 
     def pnl(self) -> Wallet:
         """
-        Return the total profit and loss of the account, which is the sum of realized and unrealized PnL.
+        Return the total profit and loss of the account, which is
+        the sum of realized and unrealized PnL.
 
         Returns:
             Wallet: The total profit and loss.
@@ -242,7 +243,10 @@ class Account:
         return pos.size if pos else Decimal()
 
     def get_position_list(self) -> list[dict[str, Any]]:
-        """Return all open positions including their pnl as a list of dicts"""
+        """Return all open positions including their pnl as a list of dicts.
+        This comes in handy for further processing, like converting
+        them to a dataframe.
+        """
         result: list[dict[str, Any]] = []
         for asset, pos in self.positions.items():
             result.append(
@@ -261,7 +265,9 @@ class Account:
         return result
 
     def get_order_list(self) -> list[dict[str, Any]]:
-        """Return all open orders as a list of dicts"""
+        """Return all open orders as a list of dicts.
+        This comes in handy for further processing, like converting
+        them to a dataframe."""
         result: list[dict[str, Any]] = []
         for order in self.orders:
             result.append(
@@ -287,7 +293,21 @@ class Account:
                 return order
 
     def __repr__(self) -> str:
-        """Condensed representation of this account."""
+        """Condensed representation of this account. It by default won't
+        display decimals for the various amounts. But you can use the float
+        formatting spec to influence this behavior: f"{account:{.4f}}"
+        """
+        return f"{self:,.0f}"
+
+    def __format__(self, format_spec: str) -> str:
+        """Return a float formatted string representation of the wallet.
+
+        Args:
+            format_spec (str): The format specification.
+
+        Returns:
+            str: The formatted string representation.
+        """
         p = [f"{v.size}@{k.symbol}" for k, v in self.positions.items()]
         p_str = ", ".join(p) or "none"
 
@@ -297,12 +317,12 @@ class Account:
         mkt = self.mkt_value() or Amount(self.base_currency, 0.0)
 
         result = (
-            f"buying power : {self.buying_power}\n"
-            f"cash         : {self.cash}\n"
-            f"equity       : {self.equity()}\n"
+            f"buying power : {self.buying_power:{format_spec}}\n"
+            f"cash         : {self.cash:{format_spec}}\n"
+            f"equity       : {self.equity():{format_spec}}\n"
             f"positions    : {p_str}\n"
             f"trades       : {len(self.trades)}\n"
-            f"mkt value    : {mkt}\n"
+            f"mkt value    : {mkt:{format_spec}}\n"
             f"orders       : {o_str}\n"
             f"last update  : {self.last_update}"
         )

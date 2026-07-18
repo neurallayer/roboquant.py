@@ -17,6 +17,7 @@ from .monetary import Amount, Wallet
 from .asset import Asset, Stock, Crypto, Forex, Option
 from .run import run
 from .timeframe import Timeframe, utcnow
+from .timeseries import TimeSeries
 
 __all__ = [
     "brokers",
@@ -43,5 +44,6 @@ __all__ = [
     "Option",
     "run",
     "Timeframe",
+    "TimeSeries",
     "utcnow",
 ]

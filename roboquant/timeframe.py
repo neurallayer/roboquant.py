@@ -94,6 +94,9 @@ class Timeframe:
                 milliseconds: float=0, minutes: float=0, hours: float=0, weeks: float=0) -> "Timeframe":
         """
         Convenient method to create a future timeframe, the kwargs arguments will be passed to the timedelta.
+        The start date is now.
+
+        For example, if you want a timeframe for next three hours: `tf = Timeframe.next(hours = 3)`
 
         Args:
             inclusive (bool): Should the end datetime be inclusive, default is False.
@@ -227,7 +230,7 @@ class Timeframe:
     def strftime(self, format: str) -> str:
         """
         Return a string representation of the timeframe using the
-        provided format. See also `datetime.strftime()`
+        provided format. See also :func:`datetime.strftime`
 
         Returns:
             str: String formatter of the timeframe.

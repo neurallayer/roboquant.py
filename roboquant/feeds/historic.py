@@ -10,7 +10,7 @@ from .feed import Feed
 
 class HistoricFeed(Feed, ABC):
     """
-    Utility base class for feeds that produce historic price-items.
+    Utility base class for feeds that produce historic price-items and store the in-memory.
     Internally, it uses a sorted-by-datetime dictionary to store the data. So all data
     is kept in memory.
     """
@@ -38,7 +38,6 @@ class HistoricFeed(Feed, ABC):
 
     def assets(self) -> list[Asset]:
         """Return the list of unique assets available in this feed"""
-        self._update()
         return list(self.__assets)
 
     def symbols(self) -> list[str]:
@@ -65,7 +64,6 @@ class HistoricFeed(Feed, ABC):
 
     def timeline(self) -> list[datetime]:
         """Return the timeline of this feed as a list of datatime objects"""
-        self._update()
         return list(self.__data.keys())
 
     def timeframe(self) -> Timeframe:
@@ -77,6 +75,10 @@ class HistoricFeed(Feed, ABC):
         return Timeframe.EMPTY
 
     def _update(self):
+        """invoke this method once all historic data has been added, so internal state
+        can be updated.
+        """
+
         if self.__modified:
             self.__data = dict(sorted(self.__data.items()))
             price_items = chain.from_iterable(self.__data.values())
@@ -85,7 +87,6 @@ class HistoricFeed(Feed, ABC):
 
     def get_first_event(self) -> Event | None:
         """Return the first event in this feed, or None if no events are available"""
-        self._update()
         if not self.__data:
             return None
 
@@ -95,7 +96,6 @@ class HistoricFeed(Feed, ABC):
 
     def get_last_event(self) -> Event | None:
         """Return the last event in this feed, or None if no events are available"""
-        self._update()
         if not self.__data:
             return None
 
@@ -104,7 +104,6 @@ class HistoricFeed(Feed, ABC):
         return Event(last_time, items)
 
     def play(self, timeframe: Timeframe | None = None):
-        self._update()
         for k, v in self.__data.items():
             if not timeframe or k in timeframe:
                 yield Event(k, v)
