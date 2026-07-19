@@ -4,16 +4,15 @@
 ![PyPI - Version](https://img.shields.io/pypi/v/roboquant?)
 ![PyPI - License](https://img.shields.io/pypi/l/roboquant?)
 ![PyPI - Python Version](https://img.shields.io/pypi/pyversions/roboquant?)
-![PyPI - Status](https://img.shields.io/pypi/status/roboquant?)
 ![GitHub Actions Workflow Status](https://img.shields.io/github/actions/workflow/status/neurallayer/roboquant.py/verify.yml)
 [![discord](https://img.shields.io/discord/954650958300856340?label=discord)](https://discord.com/channels/954650958300856340/954650958300856343)
 
-Roboquant is an open-source algorithmic trading platform. It is flexible, user-friendly and completely free to use. It is designed for anyone serious about algo-trading. 
+Roboquant is an open-source algorithmic trading platform written in Python. It is flexible, user-friendly and completely free to use. It is designed for anyone serious about algo-trading. 
 
 So whether you are a beginning retail trader or an established trading firm, roboquant can help you to develop robust and fully automated trading strategies. You can find out more at [roboquant.org](https://roboquant.org).
 
 ## Usage
-The following code snippet shows the steps required to run a full back-test on a number of stocks.
+The following code snippet shows the required steps to run a full back-test on a number of stocks.
 
 ```python
 import roboquant as rq
@@ -24,6 +23,19 @@ account = rq.run(feed, strategy)
 print(account)
 ```
 
+## Features
+Below are some of the key features of *roboquant*:
+- fast back testing and live trading
+- AI/ML based strategies
+- market data feeds from CSV files, Yahoo Finance, Alpaca and many crypto exchanges
+- multi-currency trading
+- multi-asset trading, stocks, options, forex and crypto out of the box
+- larger-than-memory data feeds 
+- TaLib based indicators
+- plotting of prices and metrics
+- integration with pandas
+- modulair and extensible 
+
 ## Install
 Roboquant can be installed like most other Python packages, using tools like `uv`, `pip` or `conda`.
 Make sure you have Python version 3.12 or higher installed.
@@ -32,10 +44,10 @@ Make sure you have Python version 3.12 or higher installed.
 python3 -m pip install --upgrade roboquant
 ```
 
-The core of roboquant limits the number of dependencies. But you can install roboquant including one or more of the optional dependencies if you require certain additional functionality:
+The core installation of roboquant limits the number of dependencies. But you can install roboquant including one or more of the optional dependencies if you require certain additional functionality:
 
 ```shell
-# AI based strategies using PyTorch and SB3
+# AI based strategies using PyTorch and/or SB3
 python3 -m pip install --upgrade "roboquant[ai]"
 
 # Integration with Interactive Brokers
@@ -46,30 +58,6 @@ python3 -m pip install --upgrade "roboquant[alpaca]"
 
 # Integration many crypto exchanges via CCXT package
 python3 -m pip install --upgrade "roboquant[crypto]"
-```
-
-## Building from source
-Roboquant.py uses `uv` as the main tool for handling package dependencies. 
-
-```shell
-uv sync --all-extras --dev
-```
-
-You should now be in the virtual environment and ready to build/install roboquant:
-
-```shell
-uv build
-uv pip install .
-```
-
-Some other useful commands:
-
-```shell
-# build & validate the code
-./bin/verify.sh
-
-# publish, only works if UV_PUBLISH_TOKEN is set
-./bin/publish.sh
 ```
 
 ## License

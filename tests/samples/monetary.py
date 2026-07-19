@@ -26,9 +26,15 @@ wallet += Amount(EUR, 10)
 assert wallet[EUR] == 40.0
 print("The wallet contains", wallet)
 
+# %% [markdown]
+# Roboquant supports trading in assets of different currencies.
+# But for this to work correctly, a currency converter needs to registered.
+#
+# Out of the box there is the European Central Bank conversion that can be
+# used if you are only need fiat currencies. It contains daily conversion rates
+# between all major currencies since the year 2000.
+
 # %%
-# Install the ECB currency converter so we can
-# convert between many different currencies
 ECBConversion().register()
 
 # %%

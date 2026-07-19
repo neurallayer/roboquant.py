@@ -53,3 +53,12 @@ class MetricsJournal(Journal):
         for _, m in self._history:
             result.update(m.keys())
         return list(result)
+
+    def plot(self, metric_name: str, plot_x: bool = True, ax = None, **kwargs):
+        """Plot the metric. Optional a `matplotlib.axes.Axes` can be provided
+        This method requires matplotlib to be installed."""
+
+        ts = self.get_metric(metric_name)
+        return ts.plot(plot_x=plot_x,ax=ax, **kwargs)
+
+

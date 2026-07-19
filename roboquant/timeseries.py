@@ -10,7 +10,7 @@ class TimeSeries:
     """A time series contains a name, a timeline and the values of the metric at each point in time. It
     is used in several places in roboquant.
 
-    It contains convenience methods to plot the time series and to convert it to a Pandas dataframe.
+    It contains convenience methods to plot the time series or to convert it to a Pandas dataframe.
     """
 
     name: str
@@ -56,3 +56,14 @@ class TimeSeries:
         }
         df = pd.DataFrame.from_dict(d, orient="columns")
         return df.set_index("time") if time_index else df # type: ignore
+
+    def filter(self, timeframe: Timeframe) -> "TimeSeries":
+        """Return a new Timeseries instance which only include observations that fall within the provided timeframe.
+        """
+        t: list[datetime] = []
+        v: list[float] = []
+        for idx, time in enumerate(self.timeline):
+            if time in timeframe:
+                t.append(time)
+                v.append(self.values[idx])
+        return TimeSeries(self.name, t, v)

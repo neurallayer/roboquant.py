@@ -106,7 +106,7 @@ class HistoricFeed(Feed, ABC):
         import pandas as pd
 
         ohlcv = self.get_ohlcv(asset, timeframe)
-        columns = ["Open", "High", "Low", "Close", "Volume"]
+        columns = ["open", "high", "low", "close", "volume"]
         return pd.DataFrame.from_dict(ohlcv, orient="index", columns=columns)  # type: ignore
 
     def plot(
@@ -134,7 +134,7 @@ class HistoricFeed(Feed, ABC):
         """
 
         ts = self.get_prices(asset, price_type, timeframe)
-        result = ts.plot(**kwargs)
+        result = ts.plot(ax=ax, **kwargs)
         return result
 
 
