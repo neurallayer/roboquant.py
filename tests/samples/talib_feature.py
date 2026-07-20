@@ -1,5 +1,4 @@
 # %%
-# pylint: disable=no-member
 import roboquant.ta as ta
 import roboquant as rq
 from roboquant.asset import Asset
