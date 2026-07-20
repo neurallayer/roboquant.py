@@ -3,11 +3,7 @@ from .csvfeed import CSVFeed
 from .feed import Feed
 from .randomwalk import RandomWalk
 from .sql import SQLFeed
-
-try:
-    from .yahoo import YahooFeed
-except ImportError:
-    pass
+from .yahoo import YahooFeed
 
 __all__ = [
     "Feed",

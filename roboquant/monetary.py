@@ -115,28 +115,28 @@ class CurrencyConverter(ABC):
 
     @abstractmethod
     def convert(self, amount: "Amount", to_currency: Currency, dt: datetime) -> float:
-        """Convert the monetary amount into another currency at the provided time.
+        """Convert a monetary amount to another currency at the given time.
 
         Args:
-            amount (Amount): The amount to convert.
-            to_currency (Currency): The target currency.
-            dt (datetime): The date and time of the conversion.
+            amount: The amount to convert.
+            to_currency: The target currency.
+            dt: The time of the conversion.
 
         Returns:
-            float: The converted monetary value.
+            The converted monetary value.
         """
         ...
 
     def register(self):
         """Register this converter to be used for all conversions between amounts.
-        At any time, there can only be one registered converter, so this will replace the currently registered converter.
+        There can only be one registered converter, so this will replace the currently registered converter.
         """
         Amount.register_converter(self)
 
 
 class NoConversion(CurrencyConverter):
     """The default currency converter that doesn't convert between currencies. If you don't trade in different currencies, this
-    will be sufficient."""
+    will be sufficient. It will raise an exception if a conversion is required."""
 
     def convert(self, amount: "Amount", to_currency: Currency, dt: datetime) -> float:
         """Raise an error as no conversion is supported."""
@@ -311,10 +311,10 @@ class Amount:
     @staticmethod
     def register_converter(converter: CurrencyConverter):
         """Register a new currency converter to handle conversions between different currencies.
-        It will replace the current registered converter. There can only be one converter active at a time.
+        It will replace the current registered converter since there can only be one converter active.
 
         Args:
-            converter (CurrencyConverter): The new currency converter.
+            converter: The new currency converter.
         """
         Amount.__converter = converter
 
@@ -327,10 +327,10 @@ class Amount:
         return [(self.currency, self.value)]
 
     def amounts(self) -> list["Amount"]:
-        """Return a list with only this amount, this brings the `Amount` class in line with the `Wallet` class.
+        """Return a list with only this amount. This brings the `Amount` class in line with the `Wallet` class.
 
         Returns:
-            list[Amount]: A list containing this amount.
+            A list containing this amount.
         """
         return [self]
 
@@ -352,10 +352,10 @@ class Amount:
         use `convert_to` instead.
 
         Args:
-            other (Currency): The target currency.
+            other: The target currency.
 
         Returns:
-            Amount: The resulting Amount object.
+            The resulting Amount object.
         """
         dt = datetime.now(tz=timezone.utc)
         return Amount(other, self.convert_to(other, dt))
@@ -365,11 +365,11 @@ class Amount:
         If an exchange rate is required, it will invoke the registered `Amount.converter` under the hood.
 
         Args:
-            currency (Currency): The target currency.
-            dt (datetime): The date and time of the conversion.
+            currency: The target currency.
+            dt: The date and time of the conversion.
 
         Returns:
-            float: The converted monetary value.
+            The converted monetary value.
         """
         if currency == self.currency:
             return self.value
@@ -501,11 +501,11 @@ class Wallet(defaultdict[Currency, float]):
         """Convert all the amounts held in this wallet to a single currency and return the value.
 
         Args:
-            currency (Currency): The target currency.
-            dt (datetime): The date and time of the conversion.
+            currency: The target currency.
+            dt: The time of the conversion.
 
         Returns:
-            float: The converted monetary value.
+            The converted monetary value.
         """
         return sum(amount.convert_to(currency, dt) for amount in self.amounts())
 
@@ -514,7 +514,7 @@ class Wallet(defaultdict[Currency, float]):
         monetary values.
 
         Returns:
-            str: The string representation.
+            The string representation.
         """
         return " + ".join([f"{a}" for a in self.amounts()])
 
@@ -523,10 +523,10 @@ class Wallet(defaultdict[Currency, float]):
         will be formatted according to the format_spec.
 
         Args:
-            format_spec (str): The format specification, same as is used for float.
+            format_spec: The format specification, same as is used for float.
                 For example ".2f"
 
         Returns:
-            str: The formatted string representation.
+            The formatted string representation.
         """
         return " + ".join([f"{a:{format_spec}}" for a in self.amounts()])

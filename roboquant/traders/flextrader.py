@@ -67,7 +67,7 @@ class _Context:
             )
 
     def log_orders(self, orders):
-        """Log an exit due to to a signal being converted into an order"""
+        """Log an exit due to a signal being converted into an order"""
         if logger.isEnabledFor(logging.INFO):
             logger.info(
                 "<== %s converter signal into order(s) %s",
@@ -110,7 +110,7 @@ class FlexTrader(Trader):
     - price_type: the price type to use when determining order value, for example "CLOSE". Default is "DEFAULT"
     - shuffle_signals: shuffle the signals before processing them, default is false
     - limit_offset_perc: the offset as percentage for the order limit price. A value of 0.01 means the limit price will be
-    1% below market price for buy orders and 1% above the market price for sell orders. Default is 0.0.
+    1% below market price for buy orders and 1% above the market price for SELL orders. Default is 0.0.
     - tif: the time-in-force policy to use, default is `DAY`
 
     It might be sometimes challenging to understand why a signal isn't converted into an order. The flex-trader logs

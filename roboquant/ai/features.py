@@ -21,7 +21,7 @@ class Feature(Generic[T]):
     roboquant machine learning models and can be used to extract relevant information.
 
     The ones included by default are either based on an `Event` or an `Account`.
-    Typically Event features are used for input data and Account features are used for
+    Typically, Event features are used for input data and Account features are used for
     reward/label/output data.
 
     Features can be combined, sliced, nested, normalized and cached to create more

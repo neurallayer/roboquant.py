@@ -14,7 +14,7 @@ class LiveFeed(Feed):
     events that are published are monotonic in time (so always increasing).
 
     If a new event has a timestamp that is before or equal to the previous event, the
-    timestamp will be auto-corrected so the event occurs after the previous event. The
+    timestamp will be autocorrected so the event occurs after the previous event. The
     default is to increment it by 1 microsecond over the previous event, but this is configurable.
 
     There is also support for creating an empty event (heartbeat) if for a certain duration no event was

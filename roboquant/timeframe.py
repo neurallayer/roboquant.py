@@ -135,8 +135,8 @@ class Timeframe:
         Returns:
             str: String representation of the timeframe.
         """
-        format = "%Y-%m-%d %H:%M:%S"
-        return self.strftime(format)
+        format_str = "%Y-%m-%d %H:%M:%S"
+        return self.strftime(format_str)
 
     @property
     def duration(self) -> timedelta:
