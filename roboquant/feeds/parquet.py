@@ -1,7 +1,7 @@
 import logging
 import os.path
 from array import array
-from typing import Any, Iterable
+from typing import Any, Iterable, Iterator
 
 import pyarrow as pa
 import pyarrow.parquet as pq
@@ -52,7 +52,7 @@ class ParquetFeed(HistoricFeed):
         """Check if the parquet file exists"""
         return os.path.exists(self.parquet_path)
 
-    def play(self, timeframe: Timeframe | None = None):
+    def play(self, timeframe: Timeframe | None = None) -> Iterator[Event]:
         # pylint: disable=too-many-locals
         with pq.ParquetFile(self.parquet_path) as dataset:
             last_time: Any = None

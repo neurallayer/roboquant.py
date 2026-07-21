@@ -1,7 +1,7 @@
 from abc import ABC, abstractmethod
 from datetime import datetime
 from itertools import chain
-from typing import Any, Generator, Sequence, override
+from typing import Iterator, Sequence, override
 
 from roboquant.asset import Asset
 from roboquant.event import Bar, Event, PriceItem
@@ -246,7 +246,7 @@ class InMemoryFeed(HistoricFeed, ABC):
         items = self.__data[last_time]
         return Event(last_time, items)
 
-    def play(self, timeframe: Timeframe | None = None) -> Generator[Event, Any, None]:
+    def play(self, timeframe: Timeframe | None = None) -> Iterator[Event]:
         for k, v in self.__data.items():
             if not timeframe or k in timeframe:
                 yield Event(k, v)

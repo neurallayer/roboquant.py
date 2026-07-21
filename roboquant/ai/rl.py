@@ -1,5 +1,5 @@
 import logging
-from typing import Callable, Generator, Any
+from typing import Callable, Iterator
 import gymnasium as gym
 from gymnasium import spaces
 from gymnasium.envs.registration import register
@@ -55,7 +55,7 @@ class TradingEnv(gym.Env):
         self.broker: SimBroker = broker or SimBroker()
         self.feed = feed
 
-        self._event_gen: Generator[Event, Any, None] = None # type: ignore
+        self._event_gen: Iterator[Event] = None # type: ignore
         self.event: Event | None = None
         self.account: Account = None # type: ignore
         self.obs_feature = obs_feature

@@ -1,5 +1,5 @@
 from abc import ABC, abstractmethod
-from typing import Any, Generator
+from typing import Iterator
 
 from roboquant.event import Event
 from roboquant.timeframe import Timeframe
@@ -15,14 +15,15 @@ class Feed(ABC):
     """
 
     @abstractmethod
-    def play(self, timeframe: Timeframe| None = None) -> Generator[Event, Any, None]:
+    def play(self, timeframe: Timeframe| None = None) -> Iterator[Event]: # Generator[Event, Any, None]:
         """
         (Re-)play the events contained in the feed.
 
-        Parameters
-        ----------
-        timeframe : Timeframe
-            An optional timeframe to limit the events to.
+        Parameters:
+            timeframe (Timeframe): An optional timeframe to limit the events to.
+
+        Returns:
+            An iterator of Events.
         """
         ...
 

@@ -1,7 +1,7 @@
 from datetime import datetime, timedelta, timezone
 from multiprocessing import Queue
 from queue import Empty, Full
-from typing import Any, Generator
+from typing import Iterator
 
 from roboquant.event import Event
 from roboquant.timeframe import Timeframe
@@ -28,7 +28,7 @@ class LiveFeed(Feed):
         self.increment = timedelta(microseconds=1)
         self.heartbeat_timeout = 10
 
-    def play(self, timeframe: Timeframe | None = None) -> Generator[Event, Any, None]:
+    def play(self, timeframe: Timeframe | None = None) -> Iterator[Event]:
         self._queue = Queue()
         timeout = self.heartbeat_timeout
         while True:

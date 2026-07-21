@@ -1,3 +1,7 @@
+# %% [markdown]
+# When you have a large set of historic market data, CVSFeed is not the most efficient
+# way to access it.
+
 # %%
 import os
 import roboquant as rq
