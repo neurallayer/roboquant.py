@@ -1,6 +1,7 @@
+from datetime import date
 import logging
 import re
-from abc import ABC, abstractmethod
+from abc import ABC
 from dataclasses import dataclass
 from decimal import Decimal
 from typing import Type
@@ -15,9 +16,9 @@ class Asset(ABC):
     """Abstract base class for all types of assets, ranging from stocks to cryptocurrencies.
     Every asset has always at least a `symbol` and `currency` defined. Assets are immutable.
 
-    The combination of the class, symbol, and currency has to be unique for each asset. If that is not the case, the symbol
-    could be extended with some additional information to make it unique. For example, for stocks,
-    the exchange could be added to the symbol.
+    The combination of the class, symbol, and currency has to be unique for each asset. If that is
+    not the case, the symbol could be extended with some additional information to make it unique.
+    For example, for stocks, the exchange could be added to the symbol.
     """
 
     symbol: str
@@ -71,7 +72,7 @@ class Asset(ABC):
 
         return False
 
-    def __hash__(self):
+    def __hash__(self) -> int:
         """Return the hash of the asset based on its symbol.
 
         Returns:
@@ -79,26 +80,26 @@ class Asset(ABC):
         """
         return hash(self.symbol)
 
+    @property
     def asset_class(self) -> str:
-        """Return the class name of the asset, the default implementation returns the class name of the instance.
+        """Return the class of the asset, the default implementation returns the Python class name of the instance.
 
         Returns:
             str: The class name of the asset.
         """
         return self.__class__.__name__
 
-    @abstractmethod
     def serialize(self) -> str:
         """Serialize the asset to a string representation that can be used to reconstruct the asset later on.
+        The default implementation generates `"{self.asset_class}:{self.symbol}:{self.currency}"`
 
         Returns:
             str: The serialized string representation of the asset.
         """
-        ...
+        return f"{self.asset_class}:{self.symbol}:{self.currency}"
 
-    @staticmethod
-    @abstractmethod
-    def deserialize(value: str) -> "Asset":
+    @classmethod
+    def deserialize(cls, value:str) -> "Asset":
         """Deserialize a string value to an asset.
         This method should be able to deserialize the string that was created using the `serialize` method.
 
@@ -108,7 +109,10 @@ class Asset(ABC):
         Returns:
             Asset: The deserialized asset.
         """
-        ...
+        type, symbol, curr = value.split(":")
+        result = cls(symbol, Currency(curr))
+        assert type == result.asset_class
+        return result
 
 
 @dataclass(frozen=True, slots=True)
@@ -122,28 +126,6 @@ class Stock(Asset):
     `Currency` can be provided for non-US listings.
     """
 
-    def serialize(self):
-        """Serialize the stock asset to a string representation.
-
-        Returns:
-            str: The serialized string representation of the stock asset.
-        """
-        return f"Stock:{self.symbol}:{self.currency}"
-
-    @staticmethod
-    def deserialize(value: str) -> "Stock":
-        """Deserialize a string value to a stock asset.
-
-        Args:
-            value (str): The serialized string representation of the stock asset.
-
-        Returns:
-            Stock: The deserialized stock asset.
-        """
-        asset_class, symbol, currency = value.split(":")
-        assert asset_class == "Stock"
-        return Stock(symbol, Currency(currency))
-
 
 @dataclass(frozen=True, slots=True)
 class Crypto(Asset):
@@ -156,7 +138,7 @@ class Crypto(Asset):
     """
 
     @staticmethod
-    def from_symbol(symbol: str):
+    def from_symbol(symbol: str) -> "Crypto":
         """Create a Crypto asset from a symbol string. It will automatically extract the quote currency from the symbol,
         which is assumed to be the last part of the symbol.
 
@@ -167,28 +149,6 @@ class Crypto(Asset):
             Crypto: The created crypto asset.
         """
         currency = re.split(r"[^a-zA-Z0-9\s]", symbol)[-1]
-        return Crypto(symbol, Currency(currency))
-
-    def serialize(self):
-        """Serialize the crypto asset to a string representation.
-
-        Returns:
-            str: The serialized string representation of the crypto asset.
-        """
-        return f"Crypto:{self.symbol}:{self.currency}"
-
-    @staticmethod
-    def deserialize(value: str) -> "Crypto":
-        """Deserialize a string value to a crypto asset.
-
-        Args:
-            value (str): The serialized string representation of the crypto asset.
-
-        Returns:
-            Crypto: The deserialized crypto asset.
-        """
-        asset_class, symbol, currency = value.split(":")
-        assert asset_class == "Crypto"
         return Crypto(symbol, Currency(currency))
 
 
@@ -216,28 +176,6 @@ class Forex(Asset):
         currency = re.split(r"[^a-zA-Z0-9\s]", symbol)[-1]
         return Forex(symbol, Currency(currency))
 
-    def serialize(self):
-        """Serialize the crypto asset to a string representation.
-
-        Returns:
-            str: The serialized string representation of the crypto asset.
-        """
-        return f"Forex:{self.symbol}:{self.currency}"
-
-    @staticmethod
-    def deserialize(value: str) -> "Forex":
-        """Deserialize a string value to a crypto asset.
-
-        Args:
-            value (str): The serialized string representation of the crypto asset.
-
-        Returns:
-            Forex: The deserialized crypto asset.
-        """
-        asset_class, symbol, currency = value.split(":")
-        assert asset_class == "Forex"
-        return Forex(symbol, Currency(currency))
-
 
 @dataclass(frozen=True, slots=True)
 class Option(Asset):
@@ -245,9 +183,10 @@ class Option(Asset):
 
     An option represents the right to buy or sell an underlying asset at a
     specified strike and expiry. The `symbol` should identify the contract
-    unambiguously, for example using an OCC-style option symbol. Option prices
-    are quoted per underlying unit, so this class multiplies contract value by
-    `100` to model the standard US equity option contract size.
+    unambiguously, for example using an OCC-style option symbol.
+
+    Option prices are quoted per underlying unit, so this class multiplies contract value by
+    `100` to model standard equity option contract sizes. This multiplier cannot be changed.
     """
 
     def contract_value(self, size: Decimal, price: float) -> float:
@@ -262,27 +201,63 @@ class Option(Asset):
         """
         return float(size) * price * 100.0
 
-    @staticmethod
-    def deserialize(value: str) -> "Option":
-        """Deserialize a string value to an option asset.
+    def decode_occ_symbol(self) -> dict:
+        """
+        Decode the symbol into its components.
 
-        Args:
-            value (str): The serialized string representation of the option asset.
+        Standard format:
+            ROOT + YYMMDD + C/P + STRIKE
+        where STRIKE is usually 8 digits (strike * 1000, padded with zeros),
+        but a 5‑digit variant (strike * 100) is also supported.
 
         Returns:
-            Option: The deserialized option asset.
-        """
-        asset_class, symbol, currency = value.split(":")
-        assert asset_class == "Option"
-        return Option(symbol, Currency(currency))
+            dict: {
+                'underlying': str,
+                'expiration': datetime.date,
+                'option_type': str,   # 'C' or 'P'
+                'strike': float
+            }
 
-    def serialize(self):
-        """Serialize the option asset to a string representation.
-
-        Returns:
-            str: The serialized string representation of the option asset.
+        Raises:
+            ValueError: If the symbol does not match the expected format.
         """
-        return f"Option:{self.symbol}:{self.currency}"
+        # Strip any leading/trailing whitespace
+        symbol = self.symbol.strip()
+
+        # Regular expression to capture the main parts.
+        # Root: one or more uppercase letters
+        # Expiry: 6 digits (YYMMDD)
+        # Type: C or P
+        # Strike: 5 or 8 digits (we'll treat both)
+        pattern = r"^([A-Z]+)(\d{6})([CP])(\d{5,8})$"
+        match = re.match(pattern, symbol)
+        if not match:
+            raise ValueError(f"Invalid OCC symbol format: {symbol}")
+
+        root, expiry_str, option_type, strike_str = match.groups()
+
+        # Parse expiration date
+        try:
+            subyear = int(expiry_str[:2])
+            year = 2000 + subyear if subyear < 70 else 1900 + subyear
+            month = int(expiry_str[2:4])
+            day = int(expiry_str[4:6])
+            expiration = date(year, month, day)
+        except ValueError as e:
+            raise ValueError(f"Invalid expiration date in symbol: {expiry_str}") from e
+
+        # Decode strike price
+        # If length is 8, divide by 1000; if length is 5, divide by 100.
+        # (Some older or non‑OCC sources may use 5 digits.)
+        if len(strike_str) == 8:
+            strike = int(strike_str) / 1000.0
+        elif len(strike_str) == 5:
+            strike = int(strike_str) / 100.0
+        else:
+            # This case shouldn't happen due to regex, but just in case
+            raise ValueError(f"Unexpected strike length: {len(strike_str)}")
+
+        return {"underlying": root, "expiration": expiration, "option_type": option_type, "strike": strike}
 
 
 # Keep the registered asset classes in a dictionary so they can be deserialized later on
@@ -290,7 +265,7 @@ __asset_classes: dict[str, Type[Asset]] = {}
 __cache: dict[str, Asset] = {}
 
 
-def register_asset_class(clazz: Type[Asset]):
+def register_asset_class(clazz: Type[Asset]) -> None:
     """Register an asset class so it can be deserialized later on.
 
     Args:
@@ -298,6 +273,7 @@ def register_asset_class(clazz: Type[Asset]):
     """
     __asset_classes[clazz.__name__] = clazz
     logging.info("registered asset class %s", clazz.__name__)
+
 
 
 def deserialize_to_asset(value: str) -> Asset:
@@ -314,9 +290,8 @@ def deserialize_to_asset(value: str) -> Asset:
     """
     asset = __cache.get(value)
     if not asset:
-        asset_class, _ = value.split(":", maxsplit=1)
-        deserializer = __asset_classes[asset_class].deserialize
-        asset = deserializer(value)
+        asset_class, _ = value.split(":", 1)
+        asset = __asset_classes[asset_class].deserialize(value)
         __cache[value] = asset
     return asset
 

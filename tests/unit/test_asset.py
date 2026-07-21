@@ -1,3 +1,4 @@
+from dataclasses import dataclass
 from decimal import Decimal
 import unittest
 
@@ -50,22 +51,26 @@ class TestAsset(unittest.TestCase):
         self.assertEqual(cv, 100*150.0*100)
 
     def test_custom_asset(self):
+
+        @dataclass(frozen=True)
         class CustomAsset(Asset):
 
+            multiplier: int = 2
+
             def contract_value(self, size: Decimal, price: float) -> float:
-                return super().contract_value(size, price) * 1.5
+                return super().contract_value(size, price) * self.multiplier
 
             def serialize(self) -> str:
-                return f"CustomAsset:{self.symbol}:{self.currency}"
+                return f"CustomAsset:{self.symbol}:{self.currency}:{self.multiplier}"
 
-            @staticmethod
-            def deserialize(value: str) -> "CustomAsset":
-                _, symbol, currency = value.split(":")
-                return CustomAsset(symbol, Currency(currency))
+            @classmethod
+            def deserialize(cls, value: str) -> "CustomAsset":
+                _, symbol, currency_name, multiplier = value.split(":")
+                return CustomAsset(symbol, Currency(currency_name), int(multiplier))
 
-        a = CustomAsset("TEST/XYZ", Currency("XYZ"))
+        a = CustomAsset("TEST/XYZ", Currency("XYZ"), 4)
         v = a.contract_value(Decimal(100), 150.0)
-        self.assertEqual(v, 100 * 150.0 * 1.5)
+        self.assertEqual(v, 100 * 150.0 * 4)
         serialized = a.serialize()
         self.assertEqual(a, CustomAsset.deserialize(serialized))
 

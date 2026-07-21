@@ -1,7 +1,9 @@
 # %%
 import pandas as pd
 import roboquant as rq
+from dataclasses import asdict
 
+pd.set_option('display.width', 1000)
 # %%
 feed = rq.feeds.YahooFeed("IBM", start_date="2020-01-01")
 df = feed.to_dataframe(rq.Stock("IBM"))
@@ -14,11 +16,21 @@ df = pd.DataFrame(data)
 df.bfill(inplace=True)
 print("Asset correlations", df.corr(), sep="\n")
 
+
 # %%
 strategy = rq.strategies.EMACrossover()
 account = rq.run(feed, strategy)
-df = pd.DataFrame(account.get_position_list())
-print("Open positions", df, sep="\n")
+positions = [asdict(asset) | asdict(position) for asset, position in account.positions.items()]
+df = pd.json_normalize(positions)
+print(df)
+
+# %%
+strategy = rq.strategies.EMACrossover()
+account = rq.run(feed, strategy)
+trades = [asdict(trade) for trade in account.trades]
+df = pd.json_normalize(trades)
+df.set_index("time")
+
 
 # %%
 strategy = rq.strategies.EMACrossover()

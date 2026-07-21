@@ -1,7 +1,6 @@
 from dataclasses import dataclass
 from datetime import datetime
 from decimal import Decimal
-from typing import Any
 
 from roboquant.asset import Asset
 from roboquant.monetary import USD, Amount, Currency, Wallet
@@ -63,13 +62,13 @@ class Position:
 class Account:
     """Represents a trading account. The account maintains the following state during a run:
 
-    - Available buying power for orders in the base currency of the account.
-    - Cash available in the account.
-    - The open positions, each denoted in the currency of the asset.
-    - The open orders, each denoted in the currency of the asset.
-    - The trades that have been executed, each denoted in the currency of the asset.
-    - Calculated derived equity value of the account in the base currency of the account.
-    - The last time the account was updated.
+    Attributes:
+        buying_power (Amount): Available buying power for orders in the base currency of the account.
+        cash (Wallet): The cash available in the account.
+        positions (Dict[Asset, Position]): the open positions, each denoted in the currency of the asset.
+        orders (list[Order]): the open orders, each denoted in the currency of the asset.
+        trades (list[Trade]): the trades that have been executed, each denoted in the currency of the asset.
+        last_update (datetime): The last time the account was updated.
 
     Only the `broker` updates the account and does this only during its `sync` method.
     """
@@ -241,50 +240,6 @@ class Account:
         """
         pos = self.positions.get(asset)
         return pos.size if pos else Decimal()
-
-    def get_position_list(self) -> list[dict[str, Any]]:
-        """Return all open positions including their pnl as a list of dicts.
-        This comes in handy for further processing, like converting
-        them to a dataframe.
-        """
-        result: list[dict[str, Any]] = []
-        for asset, pos in self.positions.items():
-            result.append(
-                {
-                    "asset class": asset.asset_class(),
-                    "symbol": asset.symbol,
-                    "currency": asset.currency,
-                    "size": pos.size,
-                    "type": "LONG" if pos.is_long else "SHORT",
-                    "avg price": pos.avg_price,
-                    "mkt price": pos.mkt_price,
-                    "value": asset.contract_value(pos.size, pos.mkt_price),
-                    "pnl": asset.contract_value(pos.size, pos.mkt_price - pos.avg_price),
-                }
-            )
-        return result
-
-    def get_order_list(self) -> list[dict[str, Any]]:
-        """Return all open orders as a list of dicts.
-        This comes in handy for further processing, like converting
-        them to a dataframe."""
-        result: list[dict[str, Any]] = []
-        for order in self.orders:
-            result.append(
-                {
-                    "id": order.id,
-                    "asset class": order.asset.asset_class(),
-                    "symbol": order.asset.symbol,
-                    "currency": order.asset.currency,
-                    "size": order.size,
-                    "type": "BUY" if order.is_buy else "SELL",
-                    "value": order.value(),
-                    "fill": order.fill,
-                    "tif": order.tif,
-                    "info": str(order.info) if order.info else "-",
-                }
-            )
-        return result
 
     def get_order(self, order_id: str) -> Order | None:
         """Return an order by its id, or None if no matching order can be found"""

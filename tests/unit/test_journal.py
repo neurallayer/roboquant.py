@@ -29,7 +29,7 @@ class TestJournal(unittest.TestCase):
         self.assertTrue(equity.name in df.columns)
 
         def mistake():
-            TimeSeries("unequal-length", equity.timeline, equity.values[2:])
+            TimeSeries("unequal-length", equity.timeline, equity.data[2:])
 
         self.assertRaises(ValueError, mistake)
 

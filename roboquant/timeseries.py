@@ -15,10 +15,10 @@ class TimeSeries:
 
     name: str
     timeline: list[datetime]
-    values: list[float]
+    data: list[float]
 
     def __post_init__(self):
-        if len(self.timeline) != len(self.values):
+        if len(self.timeline) != len(self.data):
             raise ValueError("Timeline and values must have the same length")
 
     def __len__(self) -> int:
@@ -37,9 +37,9 @@ class TimeSeries:
             _, ax = plt.subplots()
 
         if plot_x:
-            result = ax.plot(self.timeline, self.values, **kwargs)  # type: ignore
+            result = ax.plot(self.timeline, self.data, **kwargs)  # type: ignore
         else:
-            result = ax.plot(self.values, **kwargs)
+            result = ax.plot(self.data, **kwargs)
 
         ax.set_title(self.name)
         return result
@@ -52,7 +52,7 @@ class TimeSeries:
 
         d = {
             "time": self.timeline,
-            self.name: self.values
+            self.name: self.data
         }
         df = pd.DataFrame.from_dict(d, orient="columns")
         return df.set_index("time") if time_index else df # type: ignore
@@ -65,5 +65,5 @@ class TimeSeries:
         for idx, time in enumerate(self.timeline):
             if time in timeframe:
                 t.append(time)
-                v.append(self.values[idx])
+                v.append(self.data[idx])
         return TimeSeries(self.name, t, v)

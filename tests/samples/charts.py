@@ -11,9 +11,14 @@ from datetime import timedelta
 
 plt.style.use('dark_background')
 mpl.rcParams['figure.facecolor'] = '#202020'
+
 # %%
 feed = rq.feeds.YahooFeed("JPM", "IBM", "F", start_date="2010-01-01")
 
+# %% [markdown]
+# Plot a price chart for each of the assets in the feed
+
+# %%
 for asset in feed.assets():
     feed.plot(asset, linewidth=0.5)
 
