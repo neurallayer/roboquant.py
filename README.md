@@ -25,16 +25,15 @@ print(account)
 
 ## Features
 Below are some of the key features of *roboquant*:
-- fast back testing and live trading
-- AI/ML based strategies
-- market data feeds from CSV files, Yahoo Finance, Alpaca and many crypto exchanges
-- multi-currency trading
-- multi-asset trading, stocks, options, forex and crypto out of the box
-- larger-than-memory data feeds 
-- TaLib based indicators
-- plotting of prices and metrics
-- integration with pandas
-- modulair and extensible 
+- [x] fast back testing and live trading
+- [x] AI/ML based strategies
+- [x] market data feeds from CSV files, Yahoo Finance, Alpaca and many crypto exchanges
+- [x] multi-currency trading
+- [x] multi-asset trading, stocks, options, forex and crypto out of the box
+- [x] larger-than-memory data feeds 
+- [x] TaLib based indicators and strategies
+- [x] plotting of prices and metrics
+- [x] modulair and extensible 
 
 ## Install
 Roboquant can be installed like most other Python packages, using tools like `uv`, `pip` or `conda`.
@@ -47,7 +46,7 @@ python3 -m pip install --upgrade roboquant
 The core installation of roboquant limits the number of dependencies. But you can install roboquant including one or more of the optional dependencies if you require certain additional functionality:
 
 ```shell
-# AI based strategies using PyTorch and/or SB3
+# AI based strategies using PyTorch and SB3
 python3 -m pip install --upgrade "roboquant[ai]"
 
 # Integration with Interactive Brokers
