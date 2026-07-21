@@ -87,10 +87,10 @@ class SequenceDataset(Dataset):
         calc_l = len(self.target_data) - self.input_sequences - self.output_sequences - self.gap + 1
         return max(0, calc_l)
 
-    def __getitem__(self, idx):
+    def __getitem__(self, index):
         """Get a sample from the dataset."""
-        end = idx + self.input_sequences
-        features = self.input_data[idx:end]
+        end = index + self.input_sequences
+        features = self.input_data[index:end]
         start = end + self.gap
         target = self.target_data[start: start + self.output_sequences]
         if self.transform:

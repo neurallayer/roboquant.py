@@ -55,7 +55,7 @@ class TimeSeries:
             self.name: self.data
         }
         df = pd.DataFrame.from_dict(d, orient="columns")
-        return df.set_index("time") if time_index else df # type: ignore
+        return df.set_index("time") if time_index else df
 
     def filter(self, timeframe: Timeframe) -> "TimeSeries":
         """Return a new Timeseries instance which only include observations that fall within the provided timeframe.

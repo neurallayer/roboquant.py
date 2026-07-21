@@ -80,7 +80,7 @@ class ScoreCard(Journal):
 
         for asset, timeseries in self._prices.items():
             ax = axes[plot_nr]
-            ax.plot(timeseries.time, timeseries.data, **kwargs)  # type: ignore
+            ax.plot(timeseries.time, timeseries.data, **kwargs)
             ax.set_title(asset.symbol)
             buy_orders = self._buy_orders[asset]
             ax.scatter(buy_orders.time, buy_orders.data, marker="^", color="green")

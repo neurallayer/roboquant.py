@@ -1,5 +1,6 @@
 from array import array
 from collections import UserDict
+from typing import Sequence
 
 import numpy as np
 from numpy.typing import NDArray, DTypeLike
@@ -19,11 +20,11 @@ class NumpyBuffer:
     def __init__(self, rows: int, columns: int, dtype: DTypeLike = "float32", order: str="C") -> None:
         """Create a new Numpy buffer"""
         size = int(rows * 1.25 + 3)  # slight overallocation to minimize copying when buffer is full
-        self.__data: NDArray = np.full((size, columns), np.nan, dtype=dtype, order=order)  # type: ignore
+        self.__data: NDArray = np.full(shape=(size, columns), fill_value=np.nan, dtype=dtype, order=order)  # type: ignore
         self.__idx = 0
         self.rows = rows
 
-    def append(self, data: array | NDArray | list | tuple) -> bool:
+    def append(self, data: array | NDArray | list | tuple | Sequence[float]) -> bool:
         """Append data to this buffer. Return True if the buffer is full, False otherwise"""
         if self.__idx >= len(self.__data):
             self.__data[0 : self.rows] = self.__data[-self.rows :]
@@ -104,7 +105,7 @@ class OHLCVBuffers(UserDict[Asset, OHLCVBuffer]):
                 if asset not in self:
                     self[asset] = OHLCVBuffer(self.size)
                 ohlcv = self[asset]
-                if ohlcv.append(item.ohlcv):  # type: ignore
+                if ohlcv.append(item.ohlcv):
                     assets.add(asset)
         return assets
 

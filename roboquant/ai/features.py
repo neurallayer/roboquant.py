@@ -197,7 +197,7 @@ class NormalizeFeature(Feature[T]):
         (count, mean, m2) = self.existing_aggregate
         stdev = self._full_nan()
         mask = count >= self.min_count
-        stdev[mask] = np.sqrt(m2[mask] / count[mask]) + 1e-12  # type: ignore
+        stdev[mask] = np.sqrt(m2[mask] / count[mask]) + 1e-12
         return (values - mean) / stdev
 
     def calc(self, value: T) -> NPFloatArray:
@@ -269,7 +269,7 @@ class ReturnFeature(Feature[T]):
 
     def calc(self, value: T) -> NPFloatArray:
         values = self.feature.calc(value)
-        r: NPFloatArray = values / self.history - np.float32(1.0)  # type: ignore
+        r: NPFloatArray = values / self.history - np.float32(1.0)
         self.history = values
         return r
 
