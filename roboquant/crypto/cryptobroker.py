@@ -62,13 +62,13 @@ class CryptoBroker(LiveBroker):
     def _cancel_order(self, order: Order):
         # Default implementation for cancelling a
         order_id = order.id
-        result = self.__client.cancel_order(order_id)  # type: ignore
+        result = self.__client.cancel_order(order_id)
         logger.info("Cancelled order order_id=%s result=%s", order_id, result)
         return result
 
     def _get_balance(self) -> Wallet:
         # Default implementation for retrieving account balance
-        result = self.__client.fetch_balance()  # type: ignore
+        result = self.__client.fetch_balance()
         w = Wallet()
         for currency, balance in result['free'].items():
             if balance > 0:
@@ -82,7 +82,7 @@ class CryptoBroker(LiveBroker):
 
     def _get_open_orders(self) -> list[Order]:
         # Default implementation for retrieving open orders
-        orders = self.__client.fetch_open_orders() # type: ignore
+        orders = self.__client.fetch_open_orders()
         result = []
         for order in orders:
             asset = Asset(order['symbol'])
@@ -97,7 +97,7 @@ class CryptoBroker(LiveBroker):
     def _get_positions(self) -> dict[Asset, Position]:
         result = {}
         try:
-            positions = self.__client.fetch_positions() # type: ignore
+            positions = self.__client.fetch_positions()
         except ccxt.NotSupported as e:
             logger.error(e)
             return result
@@ -107,7 +107,7 @@ class CryptoBroker(LiveBroker):
             asset = Crypto.from_symbol(position['symbol'])
             size = position['amount']
             avg_entry_price = position['entry_price']
-            p = Position(size, avg_entry_price)
+            p = Position(size, avg_entry_price, float("nan"))
             result[asset] = p
         return result
 

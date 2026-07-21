@@ -2,6 +2,7 @@ import logging
 import ccxt
 from array import array
 from datetime import date, datetime, timezone
+from typing import Any
 
 from roboquant.asset import Asset, Crypto
 from roboquant.event import Bar
@@ -49,12 +50,12 @@ class CryptoFeed(InMemoryFeed):
 
                 while not done:
                     # fetch_ohlcv returns a list of lists, each containing [timestamp, open, high, low, close, volume]
-                    rows: list[list[float]] = exchange.fetch_ohlcv(
+                    rows: list[list[Any]] = exchange.fetch_ohlcv(
                         symbol=symbol,
                         timeframe=interval,
                         since=since,
                         limit=None,
-                    )  # type: ignore
+                    )
 
                     if not rows:
                         break

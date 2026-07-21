@@ -122,8 +122,8 @@ class ParquetFeed(HistoricFeed):
             stat = md.row_group(idx).column(0).statistics
             if start is None and stat.max >= timeframe.start:
                 start = idx
-            if stat.min > timeframe.end:
-                return range(start, idx)  # type: ignore
+            if start is not None and stat.min > timeframe.end:
+                return range(start, idx)
 
         return [] if start is None else range(start, md.num_row_groups)
 
@@ -190,14 +190,14 @@ class ParquetFeed(HistoricFeed):
                     asset_str = item.asset.serialize()
                     match item:
                         case Quote():
-                            items.append({"time": t, "type": 1, "asset": asset_str, "prices": item.data.tolist()})  # type: ignore
+                            items.append({"time": t, "type": 1, "asset": asset_str, "prices": item.data.tolist()})
                         case Bar():
                             items.append(
                                 {
                                     "time": t,
                                     "type": 2,
                                     "asset": asset_str,
-                                    "prices": item.ohlcv.tolist(),   # type: ignore
+                                    "prices": item.ohlcv.tolist(),
                                     "freq": item.frequency,
                                 }
                             )
