@@ -929,4 +929,4 @@ if "_ta_lib" in globals():
     for func_name in _ta_lib.__TA_FUNCTION_NAMES__:  # type: ignore
         # if func_name not in globals():
         #        print("new function", func_name)
-        globals()[func_name] = getattr(_ta_lib, "stream_%s" % func_name)  # type: ignore
+        globals()[func_name] = getattr(_ta_lib, "stream_%s" % func_name)

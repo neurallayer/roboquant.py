@@ -55,9 +55,9 @@ class TradingEnv(gym.Env):
         self.broker: SimBroker = broker or SimBroker()
         self.feed = feed
 
-        self._event_gen: Iterator[Event] = None # type: ignore
+        self._event_gen: Iterator[Event]
         self.event: Event | None = None
-        self.account: Account = None # type: ignore
+        self.account: Account
         self.obs_feature = obs_feature
         self.reward_feature = reward_feature
         self.timefame = timeframe
@@ -170,7 +170,7 @@ class SB3PolicyStrategy(Strategy):
         env: TradingEnv = model.env  # type: ignore
         return cls(env.obs_feature, env.assets, model.policy)
 
-    def create_signals(self, event) -> list[Signal]:
+    def create_signals(self, event: Event) -> list[Signal]:
         obs = self.obs_feature.calc(event)
         if np.any(np.isnan(obs)):
             return []
