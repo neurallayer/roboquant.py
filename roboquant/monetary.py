@@ -19,8 +19,8 @@ logger = logging.getLogger(__name__)
 
 
 class Currency(str):
-    """Currency class represents a monetary currency and is a subclass of `str`. It doesn't
-    differentiate between fiat- and crypto-currencies.
+    """Represents a monetary currency and is a subclass of `str`.
+    It doesn't differentiate between fiat- and crypto-currencies.
 
     It is possible to create an `Amount` using a combination of a `number` and a `Currency`:
     ```
@@ -138,18 +138,20 @@ class CurrencyConverter(ABC):
 
 
 class NoConversion(CurrencyConverter):
-    """The default currency converter that doesn't convert between currencies. If you don't trade in different currencies, this
-    will be sufficient. It will raise an exception if a conversion is required."""
+    """The default currency converter that doesn't convert between currencies.
+    If you don't trade in different currencies, this will be sufficient.
+    It will raise an exception if a conversion is required during a run."""
 
     def convert(self, amount: "Amount", to_currency: Currency, dt: datetime) -> float:
-        """Raise an error as no conversion is supported."""
+        """Raise an error as no conversions are supported."""
         raise NotImplementedError("The default NoConversion doesn't support any conversions")
 
 
 class ECBConversion(CurrencyConverter):
     """CurrencyConverter that retrieves its exchange rates from the ECB (European Central Bank).
-    These exchange rates are based on the Euro and are updated daily by the ECB. They don't contain
-    any historical data from before the Euro was introduced in 1999.
+    These exchange rates are based on the Euro and are updated daily by the ECB.
+    They don't contain any historical data from before the Euro was introduced in 1999 and also
+    there is not support for crypto-currencies.
     """
 
     __file_name = Path.home() / ".roboquant" / "eurofxref-hist.csv"
@@ -158,7 +160,7 @@ class ECBConversion(CurrencyConverter):
         """Initialize the ECBConversion.
 
         Args:
-            force_download (bool): Force download of the latest exchange rates if True.
+            force_download: Force download of the latest exchange rates if True.
         """
         self._rates: Dict[Currency, List[Any]] = {}
         if force_download or not self.up_to_date():

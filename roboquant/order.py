@@ -21,7 +21,7 @@ class Order:
     """
 
     asset: Asset
-    """The asset of this order."""
+    """The underlying asset of this order."""
 
     size: Decimal
     """The size (number of contracts) of the order. Positive for buy orders, negative for sell orders.
@@ -95,7 +95,7 @@ class Order:
 
     def value(self) -> float:
         """
-        Return the total contract value of this order, it ignores the already filled part of the order.
+        The total contract value of this order, it ignores the already filled part of the order.
 
         Returns:
             float: The total contract value of the order.
@@ -104,7 +104,7 @@ class Order:
 
     def remaining_value(self) -> float:
         """
-        Return the remaining contract value of this order denoted in the currency of the asset.
+        The remaining contract value of this order denoted in the currency of the asset.
 
         Returns:
             float: The remaining contract value of the order.
@@ -113,7 +113,7 @@ class Order:
 
     def amount(self) -> Amount:
         """
-        Return the total value of this order as a single Amount denoted in the currency of the asset.
+        The total market value of this order as a single Amount denoted in the currency of the asset.
 
         Returns:
             Amount: The total value of the order.
@@ -123,39 +123,27 @@ class Order:
     @property
     def is_buy(self) -> bool:
         """
-        Return True if this is a BUY order, False otherwise.
-
-        Returns:
-            bool: True if this is a BUY order, False otherwise.
+        True if this is a BUY order, False otherwise.
         """
         return self.size > 0
 
     @property
     def is_sell(self) -> bool:
         """
-        Return True if this is a SELL order, False otherwise.
-
-        Returns:
-            bool: True if this is a SELL order, False otherwise.
+        True if this is a SELL order, False otherwise.
         """
         return self.size < 0
 
     @property
     def remaining(self) -> Decimal:
         """
-        Return the remaining order size that still needs to be filled.
-
-        Returns:
-            Decimal: The remaining order size.
+        The remaining order size that still needs to be filled.
         """
         return self.size - self.fill
 
     @property
     def is_cancellation(self) -> bool:
         """
-        Return True if this is a cancellation order, False otherwise.
-
-        Returns:
-            bool: True if this is a cancellation order, False otherwise.
+        True if this is a cancellation order, False otherwise.
         """
         return self.size.is_zero()
