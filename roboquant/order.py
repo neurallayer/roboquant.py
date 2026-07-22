@@ -58,8 +58,8 @@ class Order:
 
     def cancel(self) -> "Order":
         """
-        Create a cancellation order. You can only cancel an order that has an `id` assigned to it.
-        The returned order is a regular order, but with its `size` set to zero. All additional properties are kept.
+        Create a cancellation order. You can only cancel an order that has already an `id` assigned to it.
+        The returned order is a regular order, but with its `size` set to zero. All other properties are kept.
 
         Returns:
             Order: A new order with the same properties but size set to zero.

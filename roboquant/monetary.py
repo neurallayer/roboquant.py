@@ -10,7 +10,7 @@ from csv import reader
 from dataclasses import dataclass
 from datetime import datetime, timezone
 from pathlib import Path
-from typing import ClassVar, Any, Dict, List
+from typing import ClassVar, Any, Dict, List, Self
 
 import requests
 
@@ -19,7 +19,8 @@ logger = logging.getLogger(__name__)
 
 
 class Currency(str):
-    """Currency class represents a monetary currency and is a subclass of `str`.
+    """Currency class represents a monetary currency and is a subclass of `str`. It doesn't
+    differentiate between fiat- and crypto-currencies.
 
     It is possible to create an `Amount` using a combination of a `number` and a `Currency`:
     ```
@@ -29,7 +30,7 @@ class Currency(str):
     ```
     """
 
-    def __rmatmul__(self, other: float | int):
+    def __rmatmul__(self, other: float | int) -> "Amount":
         """Create a new `Amount` using this currency and the provided `other` value.
 
         Args:
@@ -111,7 +112,8 @@ USDC = Currency("USDC")
 
 
 class CurrencyConverter(ABC):
-    """Abstract base class for currency converters. They are used to convert monetary amounts from one currency to another."""
+    """Abstract base class for currency converters. They are used to convert monetary amounts
+    from one currency to another."""
 
     @abstractmethod
     def convert(self, amount: "Amount", to_currency: Currency, dt: datetime) -> float:
@@ -120,7 +122,8 @@ class CurrencyConverter(ABC):
         Args:
             amount: The amount to convert.
             to_currency: The target currency.
-            dt: The time of the conversion.
+            dt: The time of the conversion. This ensures that during backtesting the correct
+                conversion rate is used.
 
         Returns:
             The converted monetary value.
@@ -434,7 +437,7 @@ class Wallet(defaultdict[Currency, float]):
             self[k] += v
         return self
 
-    def __isub__(self, other: "Amount | Wallet"):
+    def __isub__(self, other: "Amount | Wallet") -> Self:
         """Subtract another amount or wallet from this wallet.
 
         Args:
