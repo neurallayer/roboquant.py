@@ -24,7 +24,7 @@ class PriceItem:
         """Returns the price for the provided price_type. If a type is unknown, returns the `DEFAULT` price.
 
         Args:
-            price_type (str): The type of price to return. A price-type is by convention always a capatalized string.
+            price_type (str): The type of price to return. A price-type is by convention always a capitalized string.
             For example, `OPEN`, `CLOSE`, `HIGH`, `LOW`, `BID` or `ASK.
 
         Returns:
@@ -260,7 +260,7 @@ class Event:
     other types of data, such as fundamental metrics or social media signals.
 
     Args:
-        time (datetime): The timestamp of the event, which will converted to be in UTC timezone. This ensures
+        dt (datetime): The timestamp of the event, which will converted to be in UTC timezone. This ensures
                          consistency when dealing with events across different systems and improves performance.
         items (list[Any]): A list of items associated with the event. These items can represent
                            various types of information, such as `PriceItem` instances (e.g., `Quote`,

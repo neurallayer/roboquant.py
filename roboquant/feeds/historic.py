@@ -152,7 +152,7 @@ class HistoricFeed(Feed, ABC):
             If None, the entire available timeframe is used. Defaults to None.
 
         Returns:
-            Timeseries with the name being the symbol name of the asset.
+            TimeSeries with the name being the symbol name of the asset.
         """
         x :list[datetime] = []
         y : list[float] = []

@@ -12,7 +12,7 @@ logger = logging.getLogger(__name__)
 
 
 class CryptoFeed(InMemoryFeed):
-    """A feed using the CCXT library to retrieve historic crypto market data. By default, it will retrieve daily data, but
+    """retrieve historic crypto market data using the CCXT library. By default, it will retrieve daily data, but
     you can specify a different interval."""
 
     def __init__(
@@ -25,12 +25,11 @@ class CryptoFeed(InMemoryFeed):
     ):
         """
         Create a new CryptoFeed instance
-        Parameters:
-        - symbols: list of symbols to retrieve
-        - start_date: the start date of the data to retrieve, default in `2020-01-01`
-        - end_date: the end date of the data to retrieve, default is `None` (today)
-        - interval: the interval of the data to retrieve, default is `1d` (daily)
-
+        Args:
+            symbols: list of symbols to retrieve
+            start_date: the start date of the data to retrieve, default in `2020-01-01`
+            end_date: the end date of the data to retrieve, default is `None` (today)
+            interval: the interval of the data to retrieve, default is `1d` (daily)
         """
 
         super().__init__()
