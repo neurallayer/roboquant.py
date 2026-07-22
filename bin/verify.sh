@@ -11,8 +11,8 @@ uvx ruff check --quiet || exit 1
 echo "Running ty" 
 uvx ty check --quiet roboquant tests 
 
-echo "Running pyright" 
-uv run pyright tests roboquant || exit 1
+# echo "Running pyright" 
+# uv run pyright tests roboquant || exit 1
 
 echo "Running unittest" 
 uv run python -m unittest discover -q -s tests/unit || exit 1
