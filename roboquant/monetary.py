@@ -400,6 +400,8 @@ class Amount:
         """
         return f"{self.value:{format_spec}}@{self.currency}"
 
+    def __bool__(self) -> bool:
+        return self.value.__bool__()
 
 class Wallet(defaultdict[Currency, float]):
     """A wallet holds monetary values of different currencies.
@@ -500,6 +502,14 @@ class Wallet(defaultdict[Currency, float]):
         result.update(self)
         return result
 
+    def deposit(self, amount: Amount) -> None:
+        """Deposit an amount into this wallet"""
+        self[amount.currency] += amount.value
+
+    def withdraw(self, amount: Amount) -> None:
+        """Withdraw an amount from this wallet"""
+        self[amount.currency] -= amount.value
+
     def convert_to(self, currency: Currency, dt: datetime) -> float:
         """Convert all the amounts held in this wallet to a single currency and return the value.
 
@@ -514,16 +524,16 @@ class Wallet(defaultdict[Currency, float]):
 
     def __repr__(self) -> str:
         """Return a string representation of the wallet without any formatting on the
-        monetary values.
+        monetary values. Zero amounts will not be shown.
 
         Returns:
             The string representation.
         """
-        return " + ".join([f"{a}" for a in self.amounts()])
+        return " + ".join([f"{a}" for a in self.amounts() if a])
 
     def __format__(self, format_spec: str) -> str:
         """Return a formatted string representation of the wallet. All the amounts
-        will be formatted according to the format_spec.
+        will be formatted according to the format_spec. Zero amounts will not be shown.
 
         Args:
             format_spec: The format specification, same as is used for float.
@@ -532,4 +542,4 @@ class Wallet(defaultdict[Currency, float]):
         Returns:
             The formatted string representation.
         """
-        return " + ".join([f"{a:{format_spec}}" for a in self.amounts()])
+        return " + ".join([f"{a:{format_spec}}" for a in self.amounts() if a])

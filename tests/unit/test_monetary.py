@@ -28,6 +28,12 @@ class TestMonetary(unittest.TestCase):
         self.assertIsInstance(w, Wallet)
         self.assertEqual(w[USD], 300)
 
+    def test_zero_wallet(self):
+        w = Wallet(10@USD, 0@EUR)
+        self.assertTrue(EUR in w)
+        self.assertTrue("USD" in f"{w}")
+        self.assertFalse("EUR" in f"{w}")
+
     def test_currency(self):
         w = 12 @ USD + 20 @ EUR
         assert isinstance(w, Wallet)

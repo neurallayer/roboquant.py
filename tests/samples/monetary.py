@@ -17,14 +17,16 @@ assert amt1 == amt2 == amt3
 
 # %%
 # Different ways to create and modify wallets
-wallet = 20@EUR + 10@USD + 1000@JPY + 10@USD
-assert isinstance(wallet, Wallet)
-assert wallet == Wallet(*wallet.amounts())
+wallet1 = 20@EUR + 10@USD + 1000@JPY + 10@USD
+wallet2 = Wallet(20@EUR, 10@USD, 1000@JPY, 10@USD)
+assert wallet1 == wallet2
 
-wallet += EUR(10.0)
-wallet += Amount(EUR, 10)
-assert wallet[EUR] == 40.0
-print("The wallet contains", wallet)
+wallet1 += EUR(10.0)
+wallet1 += Amount(EUR, 10)
+wallet1.deposit(10@EUR)
+wallet1.withdraw(20@EUR)
+assert wallet1[EUR] == 30.0
+print("The wallet contains", wallet1)
 
 # %% [markdown]
 # Roboquant supports trading in assets of different currencies.
@@ -39,8 +41,8 @@ ECBConversion().register()
 
 # %%
 # Convert a wallet to a single currency at todays exchange rate
-print("The total value of the wallet today is", wallet@EUR)
-print("The total value of the wallet today is", wallet@USD)
+print("The total value of the wallet today is", wallet1@EUR)
+print("The total value of the wallet today is", wallet1@USD)
 
 # %%
 # Convert between amounts
@@ -53,7 +55,7 @@ print(amt,"in JYP yesterday is", amt.convert_to(JPY, yesterday))
 # %%
 # Convert a wallet to a single currency at different dates
 dt1 = datetime.fromisoformat("2010-01-01")
-print("Value of wallet in USD in 2010 is", wallet.convert_to(USD, dt1))
+print("Value of wallet in USD in 2010 is", wallet1.convert_to(USD, dt1))
 
 dt2 = datetime.fromisoformat("2020-01-01")
-print("Value of wallet in USD in 2020 is", wallet.convert_to(USD, dt2))
+print("Value of wallet in USD in 2020 is", wallet1.convert_to(USD, dt2))

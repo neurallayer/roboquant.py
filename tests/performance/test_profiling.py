@@ -5,9 +5,11 @@ from pstats import Stats, SortKey
 
 import roboquant as rq
 
-
+print("Loading large set of CSV files ...")
 path = os.path.expanduser("~/data/daily/us/nasdaq stocks/1")
 feed = rq.feeds.CSVFeed.stooq_us_daily(path)
+print(f"timeframe: {feed.timeframe()}")
+print(f"number of assets: {len(feed.assets())}")
 
 class TestProfile(unittest.TestCase):
     """Collect profiling statistics over a simple backtest. This can be used to detect
