@@ -17,12 +17,11 @@ class Broker(ABC):
     """
 
     @abstractmethod
-    def place_orders(self, orders: list[Order]):
+    def place_orders(self, orders: list[Order]) -> None:
         """
         Place zero or more orders at this broker.
 
-        The following logic applies:
-
+        The following order logic applies:
         - If the order doesn't yet have an `id`, it is considered to be a new order and will get assigned a new id.
         - If the order has an `id` and its `size` is zero, it is a cancellation order of an existing order with the same id.
         - If the order has an `id` and its `size` is non-zero, it is an update order of an existing order with the same id.
@@ -41,7 +40,7 @@ class Broker(ABC):
             event: optional the latest event.
 
         Returns:
-            The latest account object.
+            The latest state of the account.
 
         """
         ...
@@ -149,11 +148,12 @@ class LiveBroker(Broker):
         order = Order(
             asset=asset,
             size=-Decimal(size), # Negative size for sell orders
-            limit=limit,
+            limit=float(limit),
             tif=tif,
+            fill=Decimal(fill),
+            id = str(id)
         )
-        order.fill = - Decimal(fill) # Negative fill for sell orders
-        order.id = str(id)
+
         return order
 
     @staticmethod
@@ -171,12 +171,12 @@ class LiveBroker(Broker):
         """
         order = Order(
             asset=asset,
-            size=Decimal(size),
+            size=Decimal(size), # Negative size for sell orders
             limit=float(limit),
-            tif = tif
+            tif=tif,
+            fill=Decimal(fill),
+            id = str(id)
         )
-        order.fill = Decimal(fill)
-        order.id = str(id)
         return order
 
     def place_orders(self, orders: list[Order]):

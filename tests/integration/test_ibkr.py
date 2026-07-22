@@ -2,6 +2,7 @@ import logging
 import time
 import unittest
 from decimal import Decimal
+from dataclasses import replace
 
 from roboquant import Order
 from roboquant.asset import Stock
@@ -48,7 +49,7 @@ class TestIBKR(unittest.TestCase):
         existing_orders = {order.id for order in account.orders}
 
         # Place an order
-        order = Order(asset, 10, limit)
+        order = Order(asset, Decimal(10), limit)
         broker.place_orders([order])
         self.assertEqual(broker.metrics["new"], 1)
         time.sleep(5)
@@ -68,7 +69,7 @@ class TestIBKR(unittest.TestCase):
 
             # Update an order
             new_limit = limit - 1.0
-            update_order = new_order.modify(5, new_limit)
+            update_order = new_order.modify(Decimal(5), new_limit)
             broker.place_orders([update_order])
             self.assertEqual(broker.metrics["update"], 1)
             time.sleep(5)
@@ -99,8 +100,7 @@ class TestIBKR(unittest.TestCase):
         account = broker.sync()
         print(account)
         cancel_orders = [order.cancel() for order in account.orders if order.size]
-        for order in cancel_orders:
-            order.info = {"outside_rth" : True}
+        cancel_orders = [replace(order, info = {"outside_rth" : True}) for order in cancel_orders]
         broker.place_orders(cancel_orders)
         time.sleep(10)
         account = broker.sync()

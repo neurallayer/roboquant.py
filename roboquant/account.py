@@ -58,7 +58,7 @@ class Position:
         """Return a zero position size with no known prices"""
         return Position(Decimal(), float("nan"), float("nan"))
 
-
+@dataclass
 class Account:
     """Represents a trading account. The account maintains the following state during a run:
 

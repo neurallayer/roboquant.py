@@ -23,6 +23,6 @@ class Metric(ABC):
             orders: The orders to calculate metrics for.
 
         Returns:
-            the result of the calculation as a dictionary.
+            The result of the calculations.
         """
         ...

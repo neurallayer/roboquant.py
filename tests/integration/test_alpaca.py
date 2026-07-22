@@ -1,3 +1,4 @@
+from decimal import Decimal
 import time
 import unittest
 import os
@@ -52,7 +53,7 @@ class TestAlpaca(unittest.TestCase):
         print(account)
         self.assertTrue(account.buying_power.value > 0)
         self.assertTrue(account.equity_value() > 0)
-        order = Order(self.assets[0], 1, 100.0)
+        order = Order(self.assets[0], Decimal(1), 100.0)
         print(order)
         broker.place_orders([order])
         time.sleep(5)
@@ -71,7 +72,7 @@ class TestAlpaca(unittest.TestCase):
         account = broker.sync()
         print(account)
 
-        order = Order(self.assets[0], -10, 100.0, "GTC")
+        order = Order(self.assets[0], Decimal(-10), 100.0, "GTC")
         print(order)
         broker.place_orders([order])
         time.sleep(5)

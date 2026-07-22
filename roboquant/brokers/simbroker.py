@@ -1,5 +1,6 @@
 from datetime import date, datetime, timezone
 from decimal import Decimal
+from dataclasses import replace
 import logging
 
 from roboquant.account import Account, Position, Trade
@@ -37,24 +38,16 @@ class SimBroker(Broker):
         """
 
         super().__init__()
-        self._account = Account(deposit.currency)
-        self._modify_orders: list[Order] = []
-        self._create_orders: list[Order] = []
-        self._account.cash = Wallet(deposit)
-        self._account.buying_power = deposit
-        self._order_id = 0
-
         self.slippage = slippage
         self.price_type = price_type
         self.deposit = deposit
-        self._order_entry: dict[str, date] = {}
         self.timezone = timezone
+        self.reset()
 
     def reset(self) -> None:
         """Reset the broker with the cash and buying power set to the initial deposit."""
         self._account = Account(self.deposit.currency)
-        self._modify_orders: list[Order] = []
-        self._create_orders: list[Order] = []
+        self._orders: dict[str, Order] = {}
         self._account.cash = Wallet(self.deposit)
         self._account.buying_power = self.deposit
         self._order_id = 0
@@ -178,35 +171,19 @@ class SimBroker(Broker):
         """
         for order in orders:
             if not order.id:
-                order.id = self.__next_order_id()
                 assert order.size != 0, "order size of a new order cannot be zero"
-                self._create_orders.append(order)
-            else:
-                self._modify_orders.append(order)
+                order = replace(order, id = self.__next_order_id())
+
+            self._orders[order.id] = order
 
     def _remove_order(self, order: Order) -> None:
         """Remove an order from the account, called when an order is completed, expired or cancelled."""
-        self._account.orders.remove(order)
+        del self._orders[order.id]
         self._order_entry.pop(order.id)
 
-    def _process_modify_orders(self):
-        """Process the modify orders. Modify orders will allways be handled and not propagate to the next sync call."""
-
-        for order in self._modify_orders:
-            orig_order = next((o for o in self._account.orders if o.id == order.id), None)
-            if not orig_order:
-                logger.info("couldn't find order with id %s", order.id)
-                continue
-            if order.size.is_zero():
-                logger.info("cancelled order %s", orig_order)
-                self._remove_order(orig_order)
-            else:
-                # update the order
-                orig_order.size = order.size or orig_order.size
-                orig_order.limit = order.limit or orig_order.limit
-                logger.info("modified order %s", orig_order)
-
-        self._modify_orders = []
+    def _update_order(self, order: Order) -> None:
+            """Remove an order from the account, called when an order is completed, expired or cancelled."""
+            self._orders[order.id] = order
 
     def _order_is_expired(self, order: Order, time: datetime) -> bool:
         if order.tif == "GTC":
@@ -220,12 +197,13 @@ class SimBroker(Broker):
         self._order_entry[order.id] = time.astimezone(self.timezone).date()
         return False
 
-    def _process_open_orders(self, event: Event) -> None:
-        if not self._account.orders:
+    def _process_orders(self, event: Event) -> None:
+        if not self._orders:
             return
         prices = event.price_items
+        orders = self._orders.copy().values()
 
-        for order in self._account.orders.copy():
+        for order in orders:
             if self._order_is_expired(order, event.time):
                 logger.info("expired order %s", order)
                 self._remove_order(order)
@@ -234,10 +212,13 @@ class SimBroker(Broker):
                 if trade is not None:
                     logger.info("executed order=%s trx=%s", order, trade)
                     self._update_account(trade)
-                    order.fill += trade.size
+                    new_fill = order.fill + trade.size
+                    order = replace(order, fill = new_fill)
                     if not order.remaining:
                         logger.info("completed order %s", order)
                         self._remove_order(order)
+                    else:
+                        self._update_order(order)
 
     def _calculate_open_orders(self) -> Wallet:
         """Calculate the buying power required for the open orders"""
@@ -271,18 +252,13 @@ class SimBroker(Broker):
         return the updated the account as a result."""
 
         acc = self._account
+
         if event:
             acc.last_update = event.time
-
-        acc.orders += self._create_orders
-        self._create_orders = []
-
-        self._process_modify_orders()
-
-        if event:
-            self._process_open_orders(event)
+            self._process_orders(event)
             self._update_positions(acc, event, self.price_type)
 
+        acc.orders = list(self._orders.values())
         acc.buying_power = self._calculate_buyingpower()
         return acc
 

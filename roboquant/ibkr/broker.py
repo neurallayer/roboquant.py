@@ -214,6 +214,7 @@ class IBKRBroker(LiveBroker):
 
         qty = float(abs(order.size))
         side = "BUY" if order.size > 0 else "SELL"
+        info = order.info or {}
         return OrderRequest(
             conid=int(conid),
             side=side,
@@ -222,7 +223,7 @@ class IBKRBroker(LiveBroker):
             acct_id=str(self.client.account_id),
             price=order.limit,
             tif=order.tif,
-            **order.info
+            **info
         )
 
     def _update_order(self, order: rq.Order):

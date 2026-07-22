@@ -13,9 +13,9 @@ class TensorboardJournal(Journal):
         """
         Initialize the TensorboardJournal.
 
-        Parameters:
+        Args:
             writer: A tensorboard writer instance (`tensorboard.summary.Writer`).
-            metrics: The metrics that should be calculated and added to the tensorboard writer.
+            metrics: Metrics that should be calculated at each step and added to the tensorboard writer.
         """
         super().__init__()
         self.__writer = writer

@@ -1,5 +1,4 @@
-from copy import deepcopy
-from dataclasses import dataclass
+from dataclasses import dataclass, replace
 from decimal import Decimal
 from typing import Any, Literal
 
@@ -7,16 +6,16 @@ from roboquant.asset import Asset
 from roboquant.monetary import Amount
 
 
-@dataclass(slots=True)
+@dataclass(slots=True, frozen=True)
 class Order:
     """
     A trading order for a particular asset. Each order has a mandatory `size` and a `limit` price.
     Orders with a positive `size` are buy orders, and with a negative `size` are sell orders.
 
     The `gtd` (good till date) is optional, and if not set implies the order is valid
-    forever. The `info` can hold any arbitrary properties (kwargs) set on the order.
+    for the DAY. The `info` can hold any arbitrary properties (kwargs) set on the order.
 
-    The `id` and `fill` are automatically set by the `Broker` and should not be updated.
+    The `id` and `fill` are set by the `Broker` and should not be updated.
     """
 
     asset: Asset
@@ -34,48 +33,26 @@ class Order:
     supported by the broker.
     """
 
-    tif: Literal["GTC", "DAY"]
+    tif: Literal["GTC", "DAY"] = "DAY"
     """The time in force of the order. `GTC` = Good Till Cancelled, `DAY` = valid for a day only."""
 
-    info: dict[str, Any]
+    info: dict[str, Any] | None = None
     """Any additional information about the order"""
 
-    id: str
+    id: str = ""
     """The unique id of the order. This is set by the broker only and should not be updated by the user.
     The id is an empty string for new orders and set to a non-empty string when the order is placed with the broker.
     The id is used to identify the order when modifying or cancelling it.
     """
 
-    fill: Decimal
+    fill: Decimal = Decimal()
     """The filled size of the order, set by the broker only. Just like the size, positive for buy orders,
     negative for sell orders. So the remaining size is `size - fill`"""
 
-    def __init__(
-        self,
-        asset: Asset,
-        size: Decimal | str | int | float,
-        limit: float | str,
-        tif: Literal["GTC", "DAY"] = "DAY",
-        **kwargs: Any,
-    ):
-        """
-        Args:
-            asset (Asset): The asset of this order.
-            size (Decimal | str | int | float): The size of the order. Positive for buy orders, negative for sell orders.
-            limit (float): The limit price of the order, denoted in the currency of the asset.
-            tif (Literal["GTC", "DAY"], optional): The time in force of the order. Defaults to "DAY".
-            **kwargs: Any additional information about the order. It is passed to the broker in the `info` attribute, but not
-            maintained over time. Typically used by the broker for additional arguments to their API calls.
-        """
-        self.asset = asset
-        self.size = Decimal(size)
-        assert not self.size.is_zero(), "Cannot create a new order with size is zero"
 
-        self.limit = float(limit)
-        self.id = ""
-        self.fill = Decimal()
-        self.info = kwargs
-        self.tif = tif
+    def __post_init__(self):
+        if self.size.is_zero():
+            assert id != ""
 
     def cancel(self) -> "Order":
         """
@@ -88,11 +65,9 @@ class Order:
         assert self.id, "Can only cancel orders with an already assigned id"
         assert self.size, "Cannot cancel a cancellation order, size has to be non-zero"
 
-        result = deepcopy(self)
-        result.size = Decimal()
-        return result
+        return replace(self, size = Decimal())
 
-    def modify(self, size: Decimal | str | int | float | None = None, limit: float | None = None) -> "Order":
+    def modify(self, size: Decimal | None = None, limit: float | None = None) -> "Order":
         """
         Create an modify-order. You can update the size and/or the limit of an order.
         The returned order has the same id as the original order. You can only update existing orders that have an id assigned.
@@ -113,25 +88,9 @@ class Order:
         if size is not None:
             assert not size.is_zero(), "size cannot be set to zero, use order.cancel() to cancel an order"
 
-        result = deepcopy(self)
-        result.size = size or result.size
-        result.limit = limit or result.limit
-        return result
-
-    def __deepcopy__(self, _):
-        """
-        Create a deep copy of the order.
-
-        Args:
-            _ : Unused parameter for deepcopy.
-
-        Returns:
-            Order: A deep copy of the order.
-        """
-        result = Order(self.asset, self.size, self.limit, self.tif, **self.info)
-        result.id = self.id
-        result.fill = self.fill
-        return result
+        size = size if size is not None else self.size
+        limit = limit if limit is not None else self.limit
+        return replace(self, size=size, limit = limit)
 
     def value(self) -> float:
         """

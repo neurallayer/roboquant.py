@@ -29,7 +29,7 @@ class TestSimbroker(unittest.TestCase):
         account = broker.sync()
         self.assertEqual(1_000_000.0, account.buying_power.value)
 
-        order = Order(TestSimbroker.apple, 100, 101.0)
+        order = Order(TestSimbroker.apple, Decimal(100), 101.0)
         broker.place_orders([order])
         # No sync yet called
         self.assertEqual(len(account.orders), 0)
@@ -47,7 +47,7 @@ class TestSimbroker(unittest.TestCase):
         self.assertEqual(Decimal(100), account.positions[TestSimbroker.apple].size)
 
         # Limit should prevent execution
-        order = Order(TestSimbroker.apple, -50, 101.0)
+        order = Order(TestSimbroker.apple, Decimal(-50), 101.0)
         broker.place_orders([order])
         account = broker.sync(event)
         self.assertEqual(len(account.orders), 1)
@@ -56,7 +56,7 @@ class TestSimbroker(unittest.TestCase):
         self.assertEqual(Decimal(100), account.positions[TestSimbroker.apple].size)
 
         # Lower the limit so it gets executed
-        order = order.modify(limit=99.0)
+        order = account.orders[0].modify(limit=99.0)
         broker.place_orders([order])
         account = broker.sync(event)
         self.assertEqual(len(account.orders), 0)
