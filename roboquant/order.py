@@ -9,13 +9,15 @@ from roboquant.monetary import Amount
 @dataclass(slots=True, frozen=True)
 class Order:
     """
-    A trading order for a particular asset. Each order has a mandatory `size` and a `limit` price.
-    Orders with a positive `size` are buy orders, and with a negative `size` are sell orders.
+    A trading order for a particular asset. Orders are immutable.
+
+    Each order has a mandatory `size` and a `limit` price. Orders with a positive `size`
+    are buy orders, and with a negative `size` are sell orders.
 
     The `gtd` (good till date) is optional, and if not set implies the order is valid
-    for the DAY. The `info` can hold any arbitrary properties (kwargs) set on the order.
+    for the DAY. The `info` can hold any arbitrary properties set on the order.
 
-    The `id` and `fill` are set by the `Broker` and should not be updated.
+    The `id` and `fill` properties are managed by the `Broker`.
     """
 
     asset: Asset
@@ -75,16 +77,15 @@ class Order:
         If you want to cancel an order, use the `cancel` method instead. The size of an order cannot be modified to zero.
 
         Args:
-            size (Decimal | str | int | float | None, optional): The new size of the order.
-            limit (float | None, optional): The new limit price of the order.
+            size: The new size of the order.
+            limit: The new limit price of the order.
 
         Returns:
-            Order: A new order with the updated size and limit.
+            A new order with the updated size and limit.
         """
         assert self.id, "Can only update an order with an assigned id"
         assert self.size, "Cannot modify a cancellation order, size has to be non-zero"
 
-        size = Decimal(size) if size is not None else None
         if size is not None:
             assert not size.is_zero(), "size cannot be set to zero, use order.cancel() to cancel an order"
 
