@@ -2454,6 +2454,7 @@ version = "2.4.1"
 source = { editable = "." }
 dependencies = [
     { name = "numpy" },
+    { name = "pandas" },
     { name = "pyarrow" },
     { name = "requests" },
     { name = "ta-lib" },
@@ -2494,6 +2495,7 @@ requires-dist = [
     { name = "ccxt", marker = "extra == 'crypto'", specifier = ">=4.5.65" },
     { name = "ibind", extras = ["oauth"], marker = "extra == 'ibkr'", specifier = ">=0.1.22" },
     { name = "numpy", specifier = ">2.0.0" },
+    { name = "pandas", specifier = ">=2.2.0" },
     { name = "pyarrow", specifier = ">24.0.0" },
     { name = "requests", specifier = ">2.30.0" },
     { name = "sb3-contrib", marker = "extra == 'ai'", specifier = ">=2.9.0" },

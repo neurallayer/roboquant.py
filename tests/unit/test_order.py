@@ -26,6 +26,11 @@ class TestOrder(unittest.TestCase):
         self.assertFalse(cancel_order.size)
         self.assertEqual(order.id, cancel_order.id)
 
+    def test_order_execute(self):
+        order = Order(apple, Decimal(100), 100.0)
+        self.assertTrue(order.is_executable(99))
+        self.assertFalse(order.is_executable(101))
+
 
 if __name__ == "__main__":
     unittest.main()

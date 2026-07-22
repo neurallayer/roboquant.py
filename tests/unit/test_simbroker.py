@@ -43,6 +43,8 @@ class TestSimbroker(unittest.TestCase):
         account = broker.sync(event)
         self.assertEqual(len(account.orders), 0)
         self.assertEqual(len(account.positions), 1)
+        position = account.positions[order.asset]
+        self.assertEqual(position.size, order.size)
         self.assert_orders(account)
         self.assertEqual(Decimal(100), account.positions[TestSimbroker.apple].size)
 

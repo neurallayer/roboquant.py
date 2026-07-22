@@ -2,10 +2,11 @@
 from dataclasses import dataclass
 from datetime import datetime
 
+import pandas as pd
+
 from roboquant.timeframe import Timeframe
 
-
-@dataclass
+@dataclass(slots=True, frozen=True)
 class TimeSeries:
     """A time series contains a name, a timeline and the values of the metric at each point in time. It
     is used in several places in roboquant.
@@ -48,7 +49,6 @@ class TimeSeries:
         """Return the timeseries as a Pandas dataframe optionally with the time being the index
         and the value being the column.
         """
-        import pandas as pd
 
         d = {
             "time": self.timeline,

@@ -134,8 +134,7 @@ class SimBroker(Broker):
         """Simulate a market execution and return a Trade object if the order has (partially) been executed."""
 
         price = self._get_execution_price(order, item)
-        executable = price <= order.limit if order.is_buy else price >= order.limit
-        if executable:
+        if order.is_executable(price):
             fill = self._get_fill(order, price)
             fee = self._get_fee(Trade(order.asset, time, fill, price, 0.0))
             pnl = self._pnl(order.asset, order.remaining, price) - fee
@@ -151,9 +150,10 @@ class SimBroker(Broker):
 
         account.last_update = event.time
 
-        for asset, position in account.positions.items():
+        for asset, pos in account.positions.items():
             if price := event.get_price(asset, price_type):
-                position.mkt_price = price
+                pos.mkt_price = price
+                pos.pnl = asset.contract_value(pos.size, pos.avg_price - price)
 
     def __next_order_id(self) -> str:
         """Generate a new order id. The order id is a simple integer that is incremented for each new order."""
@@ -181,9 +181,15 @@ class SimBroker(Broker):
         del self._orders[order.id]
         self._order_entry.pop(order.id)
 
-    def _update_order(self, order: Order) -> None:
-            """Remove an order from the account, called when an order is completed, expired or cancelled."""
-            self._orders[order.id] = order
+
+    def _fill_order(self, order: Order, trade: Trade) -> None:
+            """Fill an order"""
+            new_fill = order.fill + trade.size
+            order = replace(order, fill = new_fill)
+            if order.remaining.is_zero():
+                self._remove_order(order)
+            else:
+                self._orders[order.id] = order
 
     def _order_is_expired(self, order: Order, time: datetime) -> bool:
         if order.tif == "GTC":
@@ -212,13 +218,8 @@ class SimBroker(Broker):
                 if trade is not None:
                     logger.info("executed order=%s trx=%s", order, trade)
                     self._update_account(trade)
-                    new_fill = order.fill + trade.size
-                    order = replace(order, fill = new_fill)
-                    if not order.remaining:
-                        logger.info("completed order %s", order)
-                        self._remove_order(order)
-                    else:
-                        self._update_order(order)
+                    self._fill_order(order, trade)
+
 
     def _calculate_open_orders(self) -> Wallet:
         """Calculate the buying power required for the open orders"""

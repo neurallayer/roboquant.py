@@ -1,6 +1,8 @@
-from dataclasses import dataclass
+from dataclasses import dataclass, asdict
 from datetime import datetime
 from decimal import Decimal
+
+import pandas as pd
 
 from roboquant.asset import Asset
 from roboquant.monetary import USD, Amount, Currency, Wallet
@@ -24,8 +26,8 @@ class Trade:
     asset: Asset
     time: datetime
     size: Decimal
-    price: float
-    pnl: float
+    price: float = float("nan")
+    pnl: float = float("nan")
 
 
 @dataclass(slots=True)
@@ -40,8 +42,11 @@ class Position:
     avg_price: float
     """Average price paid denoted in the currency of the asset"""
 
-    mkt_price: float
+    mkt_price: float = float("nan")
     """Latest market price denoted in the currency of the asset"""
+
+    pnl: float = float("nan")
+    """The pnl for this position"""
 
     @property
     def is_short(self):
@@ -282,3 +287,17 @@ class Account:
             f"last update  : {self.last_update}"
         )
         return result
+
+
+    def trades_to_dataframe(self) -> pd.DataFrame:
+        """Return the trades as a dataframe"""
+        return pd.json_normalize([asdict(trade) for trade in self.trades])
+
+    def orders_to_dataframe(self)-> pd.DataFrame:
+        """Return the orders as a dataframe"""
+        return pd.json_normalize([asdict(order) for order in self.orders])
+
+    def positions_to_dataframe(self)-> pd.DataFrame:
+        """Return the positions as a dataframe"""
+        return  pd.json_normalize([asdict(asset) | asdict(pos) for asset, pos in self.positions.items()])
+

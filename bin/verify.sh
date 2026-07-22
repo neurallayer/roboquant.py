@@ -6,10 +6,10 @@ uv sync --quiet --all-extras --dev
 
 # QA
 echo "Running ruff" 
-uvx ruff check --quiet || exit 1
+uvx ruff check || exit 1
 
 echo "Running ty" 
-uvx ty check --quiet roboquant tests 
+uvx ty check roboquant tests 
 
 # echo "Running pyright" 
 # uv run pyright tests roboquant || exit 1

@@ -1,7 +1,6 @@
 # %%
 import pandas as pd
 import roboquant as rq
-from dataclasses import asdict
 
 pd.set_option('display.width', 1000)
 # %%
@@ -20,17 +19,11 @@ print("Asset correlations", df.corr(), sep="\n")
 # %%
 strategy = rq.strategies.EMACrossover()
 account = rq.run(feed, strategy)
-positions = [asdict(asset) | asdict(position) for asset, position in account.positions.items()]
-df = pd.json_normalize(positions)
-print(df)
 
-# %%
-strategy = rq.strategies.EMACrossover()
-account = rq.run(feed, strategy)
-trades = [asdict(trade) for trade in account.trades]
-df = pd.json_normalize(trades)
-df.set_index("time")
-
+#%%
+print(account.positions_to_dataframe(), "\n\n")
+print(account.orders_to_dataframe(), "\n\n")
+print(account.trades_to_dataframe(), "\n\n")
 
 # %%
 strategy = rq.strategies.EMACrossover()
