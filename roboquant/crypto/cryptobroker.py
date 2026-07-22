@@ -32,7 +32,7 @@ class CryptoBroker(LiveBroker):
         # Default implementation for disconnecting from the crypto exchange
         logger.info("Disconnecting from crypto exchange...")
 
-    def _place_order(self, order: Order):
+    def _place_order(self, order: Order) -> None:
         # Default implementation for placing an order
         side = 'buy' if order.is_buy else 'sell'
         result = self.__client.create_order(
@@ -89,8 +89,8 @@ class CryptoBroker(LiveBroker):
             size = order['amount']
             limit = order['price']
             size = size if order['side'] == 'buy' else -size
-            o = Order(asset, size, limit)
-            o.id = order['id']
+            id = order["id"]
+            o = Order(asset, size, limit, id = id)
             result.append(o)
         return result
 
