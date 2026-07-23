@@ -2,7 +2,7 @@ from abc import ABC, abstractmethod
 from datetime import timedelta
 from decimal import Decimal
 import time
-from typing import Literal
+from typing import Literal, override
 
 from roboquant.account import Account
 from roboquant.asset import Asset
@@ -92,6 +92,7 @@ class LiveBroker(Broker):
             "sync": 0,
         }
 
+    @override
     def sync(self, event: Event | None = None) -> Account:
         now = utcnow()
 
@@ -179,6 +180,7 @@ class LiveBroker(Broker):
         )
         return order
 
+    @override
     def place_orders(self, orders: list[Order]):
         if not orders:
             return

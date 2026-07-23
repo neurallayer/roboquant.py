@@ -2,6 +2,7 @@ from datetime import date, datetime, timezone
 from decimal import Decimal
 from dataclasses import replace
 import logging
+from typing import override
 
 from roboquant.account import Account, Position, Trade
 from roboquant.asset import Asset
@@ -154,6 +155,7 @@ class SimBroker(Broker):
         self._order_id += 1
         return result
 
+    @override
     def place_orders(self, orders: list[Order]) -> None:
         """Place new orders at this broker. The orders get assigned a unique order-id if there isn't one already.
 
@@ -243,6 +245,7 @@ class SimBroker(Broker):
         result -= self._calculate_short_positions()
         return Amount(self._account.base_currency, self._account.convert(result))
 
+    @override
     def sync(self, event: Event | None = None) -> Account:
         """This will perform the order-execution simulation for the open orders and
         return the updated the account as a result."""

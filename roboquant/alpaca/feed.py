@@ -66,6 +66,8 @@ class AlpacaLiveFeed(LiveFeed):
 
         assert market in ["iex", "sip", "crypto", "option"], "invalid market"
 
+        self.stream: StockDataStream | CryptoDataStream | OptionDataStream
+
         match market:
             case "sip":
                 self.stream = StockDataStream(api_key, secret_key, feed=DataFeed.SIP)

@@ -20,6 +20,9 @@ reportPrivateImportUsage = "none"
 module-root = ""
 module-name = "roboquant"
 
+[tool.pyrefly]
+infer-with-first-use = false
+
 [project]
 name = "roboquant"
 version = "2.5.1"

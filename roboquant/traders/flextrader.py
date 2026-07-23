@@ -3,7 +3,7 @@ import logging
 from decimal import Decimal
 from enum import Flag, auto
 import random
-from typing import Any, Literal
+from typing import Any, Literal, override
 
 from roboquant.asset import Asset
 from roboquant.event import Event
@@ -30,12 +30,12 @@ class _PositionChange(Flag):
     _EXIT = EXIT_LONG | EXIT_SHORT
 
     @property
-    def is_entry(self):
+    def is_entry(self) -> bool:
         """Return True is the status is open, False otherwise"""
         return self in _PositionChange._ENTRY
 
     @property
-    def is_exit(self):
+    def is_exit(self) -> bool:
         """Return True is the status is closed, False otherwise"""
         return self in _PositionChange._EXIT
 
@@ -57,7 +57,7 @@ class _Context:
     def __init__(self, time: datetime) -> None:
         self.time = time.replace(tzinfo=None)  # Allow for nicer printing
 
-    def log_received(self, **kwargs):
+    def log_received(self, **kwargs: Any) -> None:
         if logger.isEnabledFor(logging.INFO):
             extra = " ".join(f"{k}={v}" for k, v in kwargs.items())
             logger.info(
@@ -66,7 +66,7 @@ class _Context:
                 extra
             )
 
-    def log_orders(self, orders):
+    def log_orders(self, orders: list[Order]) -> None:
         """Log an exit due to a signal being converted into an order"""
         if logger.isEnabledFor(logging.INFO):
             logger.info(
@@ -75,7 +75,7 @@ class _Context:
                 orders,
             )
 
-    def log_rule(self, rule: str, **kwargs: Any):
+    def log_rule(self, rule: str, **kwargs: Any) -> None:
         """Log an exit due to a signal being discarded by a triggered rule"""
         if logger.isEnabledFor(logging.INFO):
             extra = " ".join(f"{k}={v}" for k, v in kwargs.items())
@@ -154,6 +154,7 @@ class FlexTrader(Trader):
         rounded_size = round(size, self.size_digits)
         return rounded_size
 
+    @override
     def create_orders(self, signals: list[Signal], event: Event, account: Account) -> list[Order]:
         # pylint: disable=too-many-branches,too-many-statements,too-many-locals
         if not signals:
