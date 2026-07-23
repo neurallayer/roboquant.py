@@ -2450,9 +2450,10 @@ wheels = [
 
 [[package]]
 name = "roboquant"
-version = "2.5.0"
+version = "2.5.1"
 source = { editable = "." }
 dependencies = [
+    { name = "matplotlib" },
     { name = "numpy" },
     { name = "pandas" },
     { name = "pyarrow" },
@@ -2483,7 +2484,6 @@ dev = [
     { name = "chronos-forecasting" },
     { name = "ipykernel" },
     { name = "ipywidgets" },
-    { name = "matplotlib" },
     { name = "pyright" },
     { name = "python-dotenv" },
     { name = "ty" },
@@ -2494,6 +2494,7 @@ requires-dist = [
     { name = "alpaca-py", marker = "extra == 'alpaca'", specifier = ">=0.43.5" },
     { name = "ccxt", marker = "extra == 'crypto'", specifier = ">=4.5.65" },
     { name = "ibind", extras = ["oauth"], marker = "extra == 'ibkr'", specifier = ">=0.1.22" },
+    { name = "matplotlib", specifier = ">=3.11.0" },
     { name = "numpy", specifier = ">2.0.0" },
     { name = "pandas", specifier = ">=2.2.0" },
     { name = "pyarrow", specifier = ">24.0.0" },
@@ -2512,7 +2513,6 @@ dev = [
     { name = "chronos-forecasting", specifier = ">=2.3.1" },
     { name = "ipykernel", specifier = ">=7.3.0" },
     { name = "ipywidgets", specifier = ">=8.1.6" },
-    { name = "matplotlib", specifier = ">=3.11.0" },
     { name = "pyright", specifier = ">=1.1.411" },
     { name = "python-dotenv", specifier = ">=1.1.0" },
     { name = "ty", specifier = ">=0.0.62" },

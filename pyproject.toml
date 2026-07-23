@@ -22,7 +22,7 @@ module-name = "roboquant"
 
 [project]
 name = "roboquant"
-version = "2.5.0"
+version = "2.5.1"
 authors = [{ name = "roboquant team", email = "info@roboquant.org" }]
 description = "A fast algorithmic trading platform with support for AI based strategies"
 readme = "README.md"
@@ -60,7 +60,8 @@ dependencies = [
   "yfinance>1.5.0",
   "pyarrow>24.0.0",
   "ta-lib==0.6.5",
-  "pandas>=2.2.0"
+  "pandas>=2.2.0",
+  "matplotlib>=3.11.0",
 ]
 
 [project.optional-dependencies]
@@ -81,7 +82,6 @@ Issues = "https://github.com/neurallayer/roboquant.py/issues"
 
 [dependency-groups]
 dev = [
-  "matplotlib>=3.11.0",
   "python-dotenv>=1.1.0",
   "pyright>=1.1.411",
   "ipykernel>=7.3.0",
