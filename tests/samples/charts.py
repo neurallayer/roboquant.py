@@ -8,6 +8,7 @@ import matplotlib.pyplot as plt
 import matplotlib as mpl
 import roboquant as rq
 from datetime import timedelta
+from roboquant.journals.report import Report
 
 plt.style.use('dark_background')
 mpl.rcParams['figure.facecolor'] = '#202020'
@@ -25,7 +26,8 @@ for asset in feed.assets():
 # %%
 strategy = rq.strategies.EMACrossover()
 journal = rq.journals.MetricsJournal.pnl()
-rq.run(feed, strategy, journal=journal)
+account = rq.run(feed, strategy, journal=journal)
+feed.plot("IBM", trades=account.trades, linewidth=0.5, color="grey")
 
 # %%
 equity = journal.get_metric("pnl/equity")
@@ -36,6 +38,7 @@ _ = equity.plot(color="green", linewidth=0.5)
 
 timeframes = feed.timeframe().split(4)
 _, ax = plt.subplots()
+
 
 for timeframe in timeframes:
     strategy = rq.strategies.EMACrossover()
@@ -60,6 +63,27 @@ for timeframe in timeframes:
     equity.plot(plot_x=False, ax=ax, linewidth=0.5, color="grey")
 
 
+# %% [markdown]
+# Report enables to publication of matlplotlib charts. They can be saved
+# as a single self-contained PDF file or HTML file.
+
+# %%
+strategy = rq.strategies.EMACrossover()
+journal = rq.journals.MetricsJournal.pnl()
+account = rq.run(feed, strategy, journal=journal)
+
+report = Report()
+for asset in feed.assets():
+    feed.plot(asset, trades = account.trades, linewidth=0.5, color="grey")
+    report.add_current_figure()
+
+for metric_name in journal.get_metric_names():
+    journal.plot(metric_name)
+    report.add_current_figure()
+
+report.save_as_pdf("/tmp/report.pdf")
+report.save_as_html("/tmp/report.html")
+
 # %%
 # Using the scorecard journal
 strategy = rq.strategies.EMACrossover()
@@ -67,3 +91,5 @@ asset = feed.assets()[0]
 scorecard = rq.journals.ScoreCard(rq.journals.PNLMetric(), include_prices=True)
 rq.run(feed, strategy, journal=scorecard)
 scorecard.plot(size=(8.27, 30), linewidth=0.5)
+
+

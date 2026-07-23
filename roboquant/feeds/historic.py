@@ -3,6 +3,7 @@ from datetime import datetime
 from itertools import chain
 from typing import Iterator, Sequence, override
 
+from roboquant.account import Trade
 from roboquant.asset import Asset
 from roboquant.event import Bar, Event, PriceItem
 from roboquant.timeframe import Timeframe
@@ -115,10 +116,12 @@ class HistoricFeed(Feed, ABC):
         price_type: str = "DEFAULT",
         timeframe: Timeframe | None = None,
         ax = None,
+        trades: list[Trade] | None = None,
         **kwargs,
     ):
         """
         Plots the prices of a single asset. This function requires matplotlib to be installed.
+        It also support plotting trades on the samme chart,
 
         Args:
             asset (Asset | str): The asset or symbol for which to plot prices.
@@ -127,14 +130,40 @@ class HistoricFeed(Feed, ABC):
                 timeframe is used. Defaults to None.
             ax (matplotlib.axes.Axes, optional): The matplotlib axis where the plot will be drawn. If not specified,
                 the default pyplot axis will be used.
+            trades: trades to be plotted as markers.
             **kwargs: Additional keyword arguments to pass to the `ax.plot()` function.
 
         Returns:
             list: The result of the `ax.plot()` function, which is a list of Line2D objects.
         """
+        if isinstance(asset, str):
+            asset = self.get_asset(asset)
 
         ts = self.get_prices(asset, price_type, timeframe)
         result = ts.plot(ax=ax, **kwargs)
+        if not ax:
+            from matplotlib import pyplot as plt
+            _, ax = plt.subplots()
+
+        result = ax.plot(ts.timeline, ts.data, **kwargs)  # type: ignore
+
+        if trades:
+            trades = [t for t in trades if t.asset == asset]
+
+            buy = [t for t in trades if t.size > 0]
+            if buy:
+                x = [t.time for t in buy]
+                y = [t.price for t in buy]
+                ax.scatter(x, y, marker="^", color="green") # type: ignore
+
+            sell = [t for t in trades if t.size < 0]
+            if sell:
+                x = [t.time for t in sell]
+                y = [t.price for t in sell]
+                ax.scatter(x, y, marker="v", color="red") # type: ignore
+
+        ax.set_title(asset.symbol)
+
         return result
 
 
