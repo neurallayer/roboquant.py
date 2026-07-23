@@ -5,13 +5,9 @@
 # and the `roboquant` plotting capabilities.
 # %%
 import matplotlib.pyplot as plt
-import matplotlib as mpl
 import roboquant as rq
 from datetime import timedelta
 from roboquant.journals.report import Report
-
-plt.style.use('dark_background')
-mpl.rcParams['figure.facecolor'] = '#202020'
 
 # %%
 feed = rq.feeds.YahooFeed("JPM", "IBM", "F", start_date="2010-01-01")
@@ -68,7 +64,7 @@ for timeframe in timeframes:
 # as a single self-contained PDF file or HTML file.
 
 # %%
-strategy = rq.strategies.EMACrossover()
+strategy = rq.strategies.EMACrossover(26,50)
 journal = rq.journals.MetricsJournal.pnl()
 account = rq.run(feed, strategy, journal=journal)
 
@@ -77,9 +73,15 @@ for asset in feed.assets():
     feed.plot(asset, trades = account.trades, linewidth=0.5, color="grey")
     report.add_current_figure()
 
-for metric_name in journal.get_metric_names():
-    journal.plot(metric_name)
-    report.add_current_figure()
+journal.plot("pnl/equity")
+report.add_current_figure()
+
+df = account.trades_to_dataframe().round(2)
+top_trades = df.sort_values("pnl", ascending=False)[:25]
+report.add_df(top_trades, "top 25 winners")
+
+down_trades = df.sort_values("pnl", ascending=True)[:25]
+report.add_df(down_trades, "top 25 losers")
 
 report.save_as_pdf("/tmp/report.pdf")
 report.save_as_html("/tmp/report.html")
