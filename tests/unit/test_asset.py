@@ -17,7 +17,7 @@ class TestAsset(unittest.TestCase):
         self.assertEqual(tesla, tesla2)
         self.assertRaises(AssertionError, Stock.deserialize, "Stock2:GOOG:USD")
 
-        cv = tesla.contract_value(Decimal(100), 150.0)
+        cv = tesla.value(Decimal(100), 150.0)
         self.assertEqual(cv, 100*150.0)
 
     def test_crypto(self):
@@ -47,7 +47,7 @@ class TestAsset(unittest.TestCase):
         self.assertEqual(tesla, tesla2)
         self.assertRaises(AssertionError, Option.deserialize, "Option2:TSLA250228C00100000:USD")
 
-        cv = tesla.contract_value(Decimal(100), 150.0)
+        cv = tesla.value(Decimal(100), 150.0)
         self.assertEqual(cv, 100*150.0*100)
 
     def test_custom_asset(self):
@@ -57,8 +57,8 @@ class TestAsset(unittest.TestCase):
 
             multiplier: int = 2
 
-            def contract_value(self, size: Decimal, price: float) -> float:
-                return super().contract_value(size, price) * self.multiplier
+            def value(self, size: Decimal, price: float) -> float:
+                return super().value(size, price) * self.multiplier
 
             def serialize(self) -> str:
                 return f"CustomAsset:{self.symbol}:{self.currency}:{self.multiplier}"
@@ -69,7 +69,7 @@ class TestAsset(unittest.TestCase):
                 return CustomAsset(symbol, Currency(currency_name), int(multiplier))
 
         a = CustomAsset("TEST/XYZ", Currency("XYZ"), 4)
-        v = a.contract_value(Decimal(100), 150.0)
+        v = a.value(Decimal(100), 150.0)
         self.assertEqual(v, 100 * 150.0 * 4)
         serialized = a.serialize()
         self.assertEqual(a, CustomAsset.deserialize(serialized))

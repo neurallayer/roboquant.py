@@ -27,8 +27,8 @@ class Asset(ABC):
     currency: Currency = USD
     """The currency of the asset, default is `USD`"""
 
-    def contract_value(self, size: Decimal, price: float) -> float:
-        """Return the total contract value given the provided size and price.
+    def value(self, size: Decimal, price: float) -> float:
+        """Return the total value given the provided size and price.
         The default implementation simply multiplies the size with the price, but for some asset types, like options,
         this can be overridden to include a contract size multiplier.
 
@@ -41,8 +41,8 @@ class Asset(ABC):
         """
         return float(size) * price
 
-    def contract_amount(self, size: Decimal, price: float) -> Amount:
-        """Return the total contract amount given the provided size and price.
+    def amount(self, size: Decimal, price: float) -> Amount:
+        """Return the total amount given the provided size and price.
         The returned amount is denoted in the currency of the asset.
 
         Args:
@@ -52,7 +52,7 @@ class Asset(ABC):
         Returns:
             Amount: The total contract amount.
         """
-        value = self.contract_value(size, price)
+        value = self.value(size, price)
         return Amount(self.currency, value)
 
     def __eq__(self, value: object) -> bool:
@@ -189,7 +189,7 @@ class Option(Asset):
     `100` to model standard equity option contract sizes. This multiplier cannot be changed.
     """
 
-    def contract_value(self, size: Decimal, price: float) -> float:
+    def value(self, size: Decimal, price: float) -> float:
         """Contract value for this option type is the `size` times the `price` times `100`.
 
         Args:

@@ -159,7 +159,7 @@ logging.getLogger("roboquant.traders.flextrader").setLevel(logging.INFO)
 ## Order API
 
 ```python
-Order(asset, size, limit, tif, **kwargs)
+Order(asset, size, limit, tif)
 # size:  Decimal (positive=buy, negative=sell)
 # limit: float
 # tif:   "DAY" | "GTC"

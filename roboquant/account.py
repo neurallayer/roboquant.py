@@ -12,7 +12,7 @@ from roboquant.order import Order
 @dataclass(slots=True, frozen=True)
 class Trade:
     """
-    A trade represents a (partially) executed order with its filled size and execution price.
+    Represents a (partially) executed order with its filled size and execution price.
     It is immutable and can be used to track the execution of an order.
 
     Attributes:
@@ -21,13 +21,14 @@ class Trade:
         price (float): The price at which the trade was executed, in the currency of the asset.
         pnl (float): The profit and loss of the trade, calculated as the difference between the trade price and the average
         paid price.
+        fee: any commission paid, denoted in the currency of the asset
     """
 
     asset: Asset
     time: datetime
     size: Decimal
-    price: float = float("nan")
-    pnl: float = float("nan")
+    price: float
+    pnl: float
 
 
 @dataclass(slots=True)
@@ -45,9 +46,6 @@ class Position:
     mkt_price: float = float("nan")
     """Latest market price denoted in the currency of the asset"""
 
-    pnl: float = float("nan")
-    """The pnl for this position"""
-
     @property
     def is_short(self):
         """Return True if this is a short position, False otherwise"""
@@ -61,7 +59,8 @@ class Position:
     @staticmethod
     def zero():
         """Return a zero position size with no known prices"""
-        return Position(Decimal(), float("nan"), float("nan"))
+        return Position(Decimal(), 0.0, float("nan"))
+
 
 @dataclass
 class Account:
@@ -109,7 +108,7 @@ class Account:
         """
         result = Wallet()
         for asset, position in self.positions.items():
-            result += asset.contract_amount(position.size, position.mkt_price)
+            result += asset.amount(position.size, position.mkt_price)
         return result
 
     def convert(self, x: Wallet | Amount) -> float:
@@ -136,7 +135,7 @@ class Account:
             float: The position value in the base currency.
         """
         pos = self.positions.get(asset)
-        return asset.contract_value(pos.size, pos.mkt_price) if pos else 0.0
+        return asset.value(pos.size, pos.mkt_price) if pos else 0.0
 
     def short_positions(self) -> dict[Asset, Position]:
         """
@@ -169,7 +168,7 @@ class Account:
         Returns:
             float: The contract value in the base currency.
         """
-        return asset.contract_amount(size, price).convert_to(self.base_currency, self.last_update)
+        return asset.amount(size, price).convert_to(self.base_currency, self.last_update)
 
     def equity(self) -> Wallet:
         """
@@ -199,7 +198,7 @@ class Account:
         """
         result = Wallet()
         for asset, position in self.positions.items():
-            result += asset.contract_amount(position.size, position.mkt_price - position.avg_price)
+            result += asset.amount(position.size, position.mkt_price - position.avg_price)
         return result
 
     def realized_pnl(self) -> Wallet:

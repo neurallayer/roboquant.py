@@ -40,7 +40,7 @@ class MarketMetric(Metric):
         # Calculate the total PNL for all positions
         w = Wallet()
         for asset, position in self.positions.items():
-            w += asset.contract_amount(position.size, position.mkt_price - position.avg_price)
+            w += asset.amount(position.size, position.mkt_price - position.avg_price)
 
         pnl = account.convert(w)
         avg_pnl = pnl / len(self.positions)

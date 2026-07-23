@@ -7,6 +7,11 @@ from roboquant.order import Order
 from roboquant.account import Account
 from roboquant.asset import Stock
 from roboquant.brokers import SimBroker
+from roboquant.strategies import EMACrossover
+from roboquant import run
+from roboquant.monetary import USD
+
+from tests.common import get_feed
 
 
 class TestSimbroker(unittest.TestCase):
@@ -23,6 +28,16 @@ class TestSimbroker(unittest.TestCase):
         for o in account.orders:
             self.assertTrue(o.id)
             self.assertTrue(o.fill < o.size if o.is_buy else o.fill > o.size)
+
+    def test_bookkeeping(self):
+        feed = get_feed()
+        strategy = EMACrossover()
+        broker = SimBroker()
+        account = run(feed, strategy, broker=broker)
+        equity = account.equity()[USD]
+        equity2 = (account.pnl() + broker.deposit)[USD]
+        self.assertTrue(equity != 0)
+        self.assertAlmostEqual(equity, equity2)
 
     def test_simbroker(self):
         broker = SimBroker()

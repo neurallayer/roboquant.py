@@ -100,7 +100,7 @@ class Order:
         Returns:
             float: The total contract value of the order.
         """
-        return self.asset.contract_value(self.size, self.limit)
+        return self.asset.value(self.size, self.limit)
 
     def remaining_value(self) -> float:
         """
@@ -109,7 +109,7 @@ class Order:
         Returns:
             float: The remaining contract value of the order.
         """
-        return self.asset.contract_value(self.remaining, self.limit)
+        return self.asset.value(self.remaining, self.limit)
 
     def amount(self) -> Amount:
         """
