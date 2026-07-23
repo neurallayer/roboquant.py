@@ -160,7 +160,7 @@ class TradePrice(PriceItem):
     trade_price: float
     """The price of the trade"""
 
-    trade_volume: float
+    trade_volume: float = float("nan")
     """The volume of the trade"""
 
     def price(self, price_type: str = "DEFAULT") -> float:

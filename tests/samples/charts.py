@@ -56,7 +56,7 @@ for timeframe in timeframes:
     journal = rq.journals.MetricsJournal.pnl()
     rq.run(feed, strategy, journal=journal, timeframe=timeframe)
     equity = journal.get_metric("pnl/equity")
-    equity.plot(plot_x=False, ax=ax, linewidth=0.5, color="grey")
+    equity.plot(plot_timeline=False, ax=ax, linewidth=0.5, color="grey")
 
 
 # %% [markdown]
@@ -94,4 +94,4 @@ scorecard = rq.journals.ScoreCard(rq.journals.PNLMetric(), include_prices=True)
 rq.run(feed, strategy, journal=scorecard)
 scorecard.plot(size=(8.27, 30), linewidth=0.5)
 
-
+# %%

@@ -202,7 +202,7 @@ class HistoricFeed(Feed, ABC):
 
 
 
-class InMemoryFeed(HistoricFeed, ABC):
+class InMemoryFeed(HistoricFeed):
     """
     Base class for feeds that contain historic market data and store them in-memory.
     Internally, it uses a sorted-by-datetime dictionary to store the market data.
