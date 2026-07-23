@@ -126,7 +126,7 @@ class Account:
     def position_value(self, asset: Asset) -> float:
         """
         Return position value denoted in the base currency of the account. If there is no
-        open position, 0.0 wil lbe returned. Short positions will return a negative value.
+        open position, 0.0 will be returned. Short positions will return a negative value.
 
         Args:
             asset (Asset): The asset for which to calculate the position value.
@@ -158,7 +158,7 @@ class Account:
     def contract_value(self, asset: Asset, size: Decimal, price: float) -> float:
         """
         Contract value denoted in the base currency of the account. So if the asset is denoted in another
-        currency, an automatic currency conversion will done.
+        currency, an automatic currency conversion will be performed.
 
         Args:
             asset (Asset): The asset for which to calculate the contract value.

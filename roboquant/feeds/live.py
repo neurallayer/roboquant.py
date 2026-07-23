@@ -1,10 +1,10 @@
-from datetime import datetime, timedelta, timezone
-from multiprocessing import Queue
+from datetime import datetime, timedelta
+from queue import Queue
 from queue import Empty, Full
 from typing import Iterator
 
 from roboquant.event import Event
-from roboquant.timeframe import Timeframe
+from roboquant.timeframe import Timeframe, utcnow
 from .feed import Feed
 
 
@@ -29,11 +29,12 @@ class LiveFeed(Feed):
         self.heartbeat_timeout = 10
 
     def play(self, timeframe: Timeframe | None = None) -> Iterator[Event]:
-        self._queue = Queue()
+        queue = Queue()
+        self._queue = queue
         timeout = self.heartbeat_timeout
         while True:
             try:
-                if event := self._queue.get(timeout=timeout):
+                if event := queue.get(timeout=timeout):
                     if not timeframe or event.time in timeframe:
                         yield event
                     elif event.time < timeframe.start:
@@ -42,15 +43,15 @@ class LiveFeed(Feed):
                         break
             except Empty:
                 # We are here due to a timeout, so we need to send a heartbeat event
-                event = Event(datetime.now(tz=timezone.utc), [])
-                if not timeframe or event.time in timeframe:
-                    yield event
-                elif event.time < timeframe.start:
+                time = utcnow()
+                if not timeframe or time in timeframe:
+                    yield Event.empty(time)
+                elif time < timeframe.start:
                     continue
                 else:
                     break
 
-        self._queue.close()
+        queue.task_done()
         self._queue = None
 
     def _put(self, event: Event):

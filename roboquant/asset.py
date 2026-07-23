@@ -109,9 +109,9 @@ class Asset(ABC):
         Returns:
             Asset: The deserialized asset.
         """
-        type, symbol, curr = value.split(":")
+        asset_class, symbol, curr = value.split(":")
         result = cls(symbol, Currency(curr))
-        assert type == result.asset_class
+        assert asset_class == result.asset_class
         return result
 
 
@@ -238,8 +238,8 @@ class Option(Asset):
 
         # Parse expiration date
         try:
-            subyear = int(expiry_str[:2])
-            year = 2000 + subyear if subyear < 70 else 1900 + subyear
+            decade = int(expiry_str[:2])
+            year = 2000 + decade if decade < 70 else 1900 + decade
             month = int(expiry_str[2:4])
             day = int(expiry_str[4:6])
             expiration = date(year, month, day)
