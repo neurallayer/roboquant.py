@@ -24,7 +24,9 @@ _close_html_snippet = """
 
 
 class Report:
-    """Collect matplotlib figures and save them into a single HTML or PDF file."""
+    """Collect matplotlib figures and save them into a single HTML or PDF file.
+    For convenience it is also possible to DataFrames to the report.
+    """
 
     def __init__(self) -> None:
         self._figures: list[plt.Figure] = []

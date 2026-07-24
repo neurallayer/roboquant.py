@@ -13,7 +13,7 @@ class ScoreCard(Journal):
     """Tracks progress of a run so it can be plotted using matplotlib charts afterwards.
     It will track the following aspects:
     - the price of the assets
-    - the orders for that asset as markers on the price chart
+    - the trades for the asset as markers on the price chart
     - any additional metric that has been provided
 
     This works best on smaller runs with a limited number of assets and orders.
@@ -54,7 +54,6 @@ class ScoreCard(Journal):
             for ax, asset in zip(axs.flatten(), assets):
                 ax.grid(True, color="grey", linestyle="--")
                 self._feed.plot(asset, ax = ax, trades = self._trades, linewidth=1)
-
 
         metric_names = self._journal.get_metric_names()
         rows = len(metric_names) // 2 + len(metric_names) % 2
