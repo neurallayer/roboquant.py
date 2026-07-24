@@ -10,7 +10,7 @@ from csv import reader
 from dataclasses import dataclass
 from datetime import datetime, timezone
 from pathlib import Path
-from typing import ClassVar, Any, Dict, List, Self
+from typing import ClassVar, Any, Dict, List, Self, override
 
 import requests
 
@@ -39,9 +39,10 @@ class Currency(str):
         Returns:
             Amount: The resulting Amount object.
 
-        Example:
+        Examples:
         ```
         amount1 = 100@USD
+        amount2 = -99.95@EUR
         ```
         """
         assert isinstance(other, (float, int))
@@ -58,7 +59,8 @@ class Currency(str):
 
         Example:
         ```
-        amount = USD(100)
+        amount1 = USD(100)
+        amount2 = EUR(-99.95)
         ```
         """
         return Amount(self, other)
@@ -233,6 +235,7 @@ class ECBConversion(CurrencyConverter):
         idx = min(idx, len(rates) - 1)
         return rates[idx][1]
 
+    @override
     def convert(self, amount: "Amount", to_currency: Currency, dt: datetime) -> float:
         """Convert the monetary amount into another currency at the provided time.
 
@@ -265,6 +268,7 @@ class StaticConversion(CurrencyConverter):
         self.rates = rates
         self.rates[base_currency] = 1.0
 
+    @override
     def convert(self, amount: "Amount", to_currency: Currency, dt: datetime) -> float:
         """Convert the monetary amount into another currency using static rates.
 
@@ -284,6 +288,7 @@ class One2OneConversion(CurrencyConverter):
     for testing purposes, never real trading. So for example, 1 USD equals 1 EUR equals 1 GPB.
     """
 
+    @override
     def convert(self, amount: "Amount", to_currency: Currency, dt: datetime) -> float:
         """Convert the monetary amount into another currency at a 1:1 rate.
 

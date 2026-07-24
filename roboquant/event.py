@@ -8,7 +8,7 @@ from typing import Any
 from roboquant.asset import Asset
 
 
-@dataclass(slots=True)
+@dataclass(slots=True, frozen=True)
 class PriceItem:
     """Baseclass for the different types of prices related to an asset, like trades or quotes.
 
@@ -43,7 +43,7 @@ class PriceItem:
         """
 
 
-@dataclass(slots=True)
+@dataclass(slots=True, frozen=True)
 class Quote(PriceItem):
     """Quote price of an asset, containing ASK and BID prices.
 
@@ -147,7 +147,7 @@ class Quote(PriceItem):
                 return (self.data[1] + self.data[3]) / 2.0
 
 
-@dataclass(slots=True)
+@dataclass(slots=True, frozen=True)
 class TradePrice(PriceItem):
     """Holds a single price and optional the volume.
     Often this reflects an actual trade, but it can also be used in different scenarios.
@@ -186,7 +186,7 @@ class TradePrice(PriceItem):
         return self.trade_volume
 
 
-@dataclass(slots=True)
+@dataclass(slots=True, frozen=True)
 class Bar(PriceItem):
     """Represents a bar (a.k.a. candlestick) with open-, high-, low-, close-price and volume data.
 
@@ -202,7 +202,7 @@ class Bar(PriceItem):
     """The frequency of the bar, for example, 1s, 15m, 4h, 1d"""
 
     @classmethod
-    def from_adj_close(cls, asset: Asset, ohlcv: array[float], adj_close: float, frequency: str=""):
+    def from_adj_close(cls, asset: Asset, ohlcv: array[float], adj_close: float, frequency: str = ""):
         """Create a Bar instance from adjusted close price.
 
         Args:

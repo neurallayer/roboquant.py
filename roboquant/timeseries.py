@@ -1,6 +1,7 @@
 
 from dataclasses import dataclass
 from datetime import datetime
+from typing import Any
 
 import pandas as pd
 
@@ -30,7 +31,7 @@ class TimeSeries:
         an empty timeframe will be returned."""
         return Timeframe(self.timeline[0], self.timeline[-1], True) if len(self) > 0 else Timeframe.EMPTY
 
-    def plot(self, plot_timeline: bool = True, ax = None, **kwargs):
+    def plot(self, plot_timeline: bool = True, ax = None, **kwargs: Any):
         """Plot the time series. Optional a `matplotlib.axes.Axes` can be provided
         This method requires matplotlib to be installed."""
         if not ax:
@@ -45,7 +46,7 @@ class TimeSeries:
         ax.set_title(self.name)
         return result
 
-    def to_dataframe(self, time_index: bool = False):
+    def to_dataframe(self, time_index: bool = False) -> pd.DataFrame:
         """Return the timeseries as a Pandas dataframe optionally with the time being the index
         and the value being the column.
         """
@@ -68,7 +69,3 @@ class TimeSeries:
                 v.append(self.data[idx])
         return TimeSeries(self.name, t, v)
 
-    def add(self, time: datetime, value: float):
-        """Add a single observation to the timeseries"""
-        self.timeline.append(time)
-        self.data.append(value)

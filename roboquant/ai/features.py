@@ -65,7 +65,7 @@ class Feature(Generic[T]):
             return ReturnFeature(self)
         return LongReturnsFeature(self, period)
 
-    def normalize(self, min_period: int=3) -> "Feature[T]":
+    def normalize(self, min_period: int = 3) -> "Feature[T]":
         """Normalize the feature values by calculating the mean and standard deviation."""
         return NormalizeFeature(self, min_period)
 
@@ -117,6 +117,7 @@ class FixedValueFeature(Feature[Any]):
     def calc(self, value: Any) -> NPFloatArray:
         return self.value
 
+
 class RandomFeature(Feature[Any]):
     """Feature that always returns a random value array. If a seed is provided,
     the seed will be used to initialize the random number generator,
@@ -126,7 +127,7 @@ class RandomFeature(Feature[Any]):
     several epochs and checking if the results are improving.
     """
 
-    def __init__(self, size: int, seed: int|None = None) -> None:
+    def __init__(self, size: int, seed: int | None = None) -> None:
         super().__init__()
         self._size = size
         self._seed = seed
@@ -282,6 +283,7 @@ class ReturnFeature(Feature[T]):
 
 
 class LongReturnsFeature(Feature[T]):
+
     def __init__(self, feature: Feature[T], period: int) -> None:
         super().__init__()
         self.history: deque[NPFloatArray] = deque(maxlen=period)
@@ -424,7 +426,7 @@ class UnrealizedPNLFeature(Feature[Account]):
         mkt_value = value.convert(value.mkt_value())
         pnl = value.unrealized_pnl_value()
         if mkt_value and pnl:
-             return np.array(pnl/mkt_value, dtype=np.float32)
+            return np.array(pnl / mkt_value, dtype=np.float32)
         return np.array(0.0, dtype=np.float32)
 
     def size(self):

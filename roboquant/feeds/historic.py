@@ -140,15 +140,15 @@ class HistoricFeed(Feed, ABC):
             asset = self.get_asset(asset)
 
         ts = self.get_prices(asset, price_type, timeframe)
-        result = ts.plot(ax=ax, **kwargs)
         if not ax:
             from matplotlib import pyplot as plt
             _, ax = plt.subplots()
 
-        result = ax.plot(ts.timeline, ts.data, **kwargs)  # type: ignore
+        ax.plot(ts.timeline, ts.data, **kwargs)  # type: ignore
 
         if trades:
-            trades = [t for t in trades if t.asset == asset]
+            tf = ts.timeframe()
+            trades = [t for t in trades if t.asset == asset and t.time in tf]
 
             buy = [t for t in trades if t.size > 0]
             if buy:
@@ -164,7 +164,7 @@ class HistoricFeed(Feed, ABC):
 
         ax.set_title(asset.symbol)
 
-        return result
+        return ax
 
 
     def get_prices(self, asset: Asset | str, price_type : str ="DEFAULT", timeframe: Timeframe | None = None
