@@ -1,12 +1,24 @@
+from typing import override
+
 from roboquant.journals.journal import Journal
 from roboquant.journals.metric import Metric
 
 
 class TensorboardJournal(Journal):
-    """Record metrics to a Tensorboard compatible file. The wall time is set to the event time, so
-    with the right configuration in the tensorboard UI, you can see the metrics evolve over the correct historic timeline.
+    """Record metrics to a Tensorboard compatible file.
 
-    This can be used outside the realm of machine learning, but requires the tensorboard library to be installed.
+    The wall time is set to the event time, so with the right configuration
+    in the tensorboard UI, you can see the metrics evolve over the correct historic timeline.
+
+    This can be used outside the realm of machine learning, but requires
+    the tensorboard library to be installed.
+
+    Example
+    ```
+    from tensorboard.summary import Writer
+    writer = Writer("./runs")
+    journal = TensorboardJournal(writer, RunMetric(), PNLMetric())
+    ```
     """
 
     def __init__(self, writer, *metrics: Metric) -> None:
@@ -18,13 +30,15 @@ class TensorboardJournal(Journal):
             metrics: Metrics that should be calculated at each step and added to the tensorboard writer.
         """
         super().__init__()
+        assert hasattr(writer, "add_scalar") and callable(writer.add_scalar), "writer not a tensorboard writer"
         self.__writer = writer
         self._step : int = 0
         self.metrics = metrics
 
+    @override
     def track(self, event, account, signals, orders) -> None:
         """
-        Track the metrics and record them to the tensorboard writer.
+        Calculate the metrics and add them to the tensorboard writer.
 
         Parameters:
             event: The event containing the time and other relevant information.

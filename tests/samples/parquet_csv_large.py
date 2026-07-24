@@ -10,9 +10,10 @@ from roboquant.feeds.parquet import ParquetFeed
 # %%
 feed = ParquetFeed("/tmp/us_nasdaq.parquet")
 if not feed.exists():
-    print("Recording feed...")
+    print("Starting CSV feed...")
     path = os.path.expanduser("~/data/daily/us/nasdaq stocks/")
     csv_feed = rq.feeds.CSVFeed.stooq_us_daily(path)
+    print("Recording feed...")
     feed.record(csv_feed, row_group_size=100_000)
 
 # %%

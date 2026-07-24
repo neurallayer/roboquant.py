@@ -28,7 +28,7 @@ def run(
         timeframe: Optionally limit the run to events within this timeframe. The default is None
 
     Returns:
-        The latest version of the account
+        The latest state of the trading account
     """
 
     broker = broker or SimBroker()
