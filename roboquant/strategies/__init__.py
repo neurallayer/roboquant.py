@@ -4,7 +4,6 @@ from .emacrossover import EMACrossover
 from .ibsstrategy import IBSStrategy
 from .multistrategy import MultiStrategy
 from .strategy import Strategy
-from .cachedstrategy import CachedStrategy
 
 __all__ = [
     "Strategy",
@@ -15,5 +14,4 @@ __all__ = [
     "NumpyBuffer",
     "OHLCVBuffer",
     "IBSStrategy",
-    "CachedStrategy"
 ]

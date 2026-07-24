@@ -32,10 +32,7 @@ class EMACrossover(Strategy):
     def create_signals(self, event: Event) -> list[Signal]:
         result: list[Signal] = []
         for asset, price in event.get_prices(self.price_type).items():
-            if asset not in self._history:
-                self._history[asset] = self._Calculator(self.fast, self.slow, price=price)
-            else:
-                calculator = self._history[asset]
+            if calculator := self._history.get(asset):
                 old_rating = calculator.is_above()
                 step = calculator.add_price(price)
 
@@ -46,6 +43,9 @@ class EMACrossover(Strategy):
                             result.append(Signal.buy(asset))
                         else:
                             result.append(Signal.sell(asset))
+            else:
+                self._history[asset] = self._Calculator(self.fast, self.slow, price=price)
+
         return result
 
     class _Calculator:

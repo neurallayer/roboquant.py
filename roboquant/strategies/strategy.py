@@ -5,9 +5,14 @@ from roboquant.signal import Signal
 
 
 class Strategy(ABC):
-    """A strategy creates signals based on incoming events and the items contained within these events.
-    Often the items represent market data associated with an asset, but other types of items
-    are also supported.
+    """Responsible for creating signals based on incoming events.
+
+    So a strategy doesn't generate the orders, that is the responsibility of
+    a `Trader`.
+
+    Often the items in the event represent market data and the strategy uses
+    this to perform (technical) analysis. But it is also possible for
+    events to contain different data and for example perform fundamental analysis.
     """
 
     @abstractmethod

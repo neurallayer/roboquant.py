@@ -8,8 +8,10 @@ from roboquant.strategies.strategy import Strategy
 
 
 class MultiStrategy(Strategy):
-    """Combine multiple strategies. The MultiStrategy provides additional control on how to
-    handle conflicting signals for the same asset via the signal_filter:
+    """Combine multiple strategies into one.
+
+    The MultiStrategy provides additional control on how to handle conflicting signals
+    for the same asset via the signal_filter:
 
     - first: in case of multiple signals for the same asset, the first one prevails.
     - last:  in case of multiple signals for the same asset, the last one prevails.
