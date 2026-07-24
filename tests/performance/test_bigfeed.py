@@ -45,7 +45,7 @@ class TestBigFeed(unittest.TestCase):
         self._print(account, journal, len(feed.assets()), load_time, runtime)
 
     def test_big_feed_intraday(self):
-        print("============ 5 Min Bars ============")
+        print("============ 5 min Bars ============")
         start = time.time()
         path = os.path.expanduser("~/data/5 min/us/nyse stocks/")
         feed = rq.feeds.CSVFeed.stooq_us_intraday(path)

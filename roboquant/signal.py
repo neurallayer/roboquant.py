@@ -5,14 +5,15 @@ from roboquant.asset import Asset
 
 
 class SignalType(Flag):
-    """Indicates how a signal can be used, either:
+    """Indicates how a signal can be used.
 
-    - ENTRY: enter or increase a position size
-    - EXIT: close or reduce a position size
-    - ENTRY_EXIT: can be used both to enter/increase or close/reduce position sizes.
+    Attributes:
+        ENTRY: enter or increase a position size
+        EXIT: close or reduce a position size
+        ENTRY_EXIT: can be used both to enter/increase or close/reduce position sizes.
 
-    It is up to the `Trader` to handle these types correctly. For example, a trader can choose to ignore these types all
-    together and treat them all as ENTRY_EXIT signals.
+    It is up to the :class:`rq.traders.Trader` implementation to handle these types correctly.
+    For example, a trader can choose to ignore these types all together and treat them all as ENTRY_EXIT signals.
     """
 
     ENTRY = auto()
@@ -24,7 +25,7 @@ class SignalType(Flag):
     ENTRY_EXIT = ENTRY | EXIT
     """Indicates that this signal can be used for both entering and exiting a position size"""
 
-    def __repr__(self):
+    def __repr__(self) -> str:
         return self.name.split(".")[-1] if self.name else super().__repr__()
 
 @dataclass(slots=True, frozen=True)

@@ -25,7 +25,7 @@ infer-with-first-use = false
 
 [project]
 name = "roboquant"
-version = "2.5.1"
+version = "2.5.2"
 authors = [{ name = "roboquant team", email = "info@roboquant.org" }]
 description = "A fast algorithmic trading platform with support for AI based strategies"
 readme = "README.md"
@@ -70,7 +70,6 @@ dependencies = [
 [project.optional-dependencies]
 ai = [
   "torch>=2.9.0",
-  "tensorboard>=2.21.0",
   "stable-baselines3>=2.9.0",
   "sb3-contrib>=2.9.0",
 ]
@@ -91,4 +90,5 @@ dev = [
   "ipywidgets>=8.1.6",
   "chronos-forecasting>=2.3.1",
   "ty>=0.0.62",
+  "tensorboard>=2.21.0",
 ]

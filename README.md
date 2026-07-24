@@ -29,7 +29,7 @@ Below are some of the key features of *roboquant*:
 - [x] AI/ML based strategies
 - [x] market data feeds from CSV files, Yahoo Finance, Alpaca and many crypto exchanges
 - [x] multi-currency trading
-- [x] multi-asset trading, stocks, options, forex and crypto out of the box
+- [x] multi-asset trading with stocks, options, forex and crypto out of the box
 - [x] larger-than-memory data feeds 
 - [x] TaLib based indicators and strategies
 - [x] plotting of prices and metrics

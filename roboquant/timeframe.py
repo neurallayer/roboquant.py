@@ -17,10 +17,12 @@ class Timeframe:
     __slots__ = "start", "end", "inclusive"
 
     EMPTY: "Timeframe"
-    """Represents an empty timeframe, with a start and end time set to the same value."""
+    """Represents an empty timeframe, with a start- and end-time
+    set to the same value."""
 
     INFINITE: "Timeframe"
-    """Represents an infinite timeframe, with a start time set to the year 1900 and an end time set to the year 2200."""
+    """Represents an infinite timeframe, with a start time set to the year 1900
+    and an end time set to the year 2200."""
 
     def __init__(self, start: datetime, end: datetime, inclusive: bool =False):
         """
