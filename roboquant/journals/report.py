@@ -1,3 +1,6 @@
+from matplotlib.figure import Figure
+from typing import Any
+
 import matplotlib.pyplot as plt
 from matplotlib.backends.backend_pdf import PdfPages
 from pathlib import Path
@@ -23,7 +26,7 @@ _close_html_snippet = """
 class Report:
     """Collect matplotlib figures and save them into a single HTML or PDF file."""
 
-    def __init__(self):
+    def __init__(self) -> None:
         self._figures: list[plt.Figure] = []
 
     def add_figure(self, fig: plt.Figure) -> None:
@@ -67,7 +70,7 @@ class Report:
                     plt.close(fig)
 
     @staticmethod
-    def __chart_to_html(fig, **kwargs):
+    def __chart_to_html(fig: Figure, **kwargs: Any) -> str:
         buf = io.BytesIO()
         fig.savefig(buf, format="png", **kwargs)
         buf.seek(0)
@@ -77,7 +80,7 @@ class Report:
             + 'style="max-width:100%; margin-bottom:20px; display:block;" />'
         )
 
-    def save_as_html(self, filepath: str | Path, close_figures: bool = True, **kwargs):
+    def save_as_html(self, filepath: str | Path, close_figures: bool = True, **kwargs : Any) -> None:
         """Save as a single HTML file"""
 
         filepath = Path(filepath)

@@ -1,3 +1,5 @@
+from typing import override
+
 from roboquant.event import Event
 from roboquant.account import Account
 from roboquant.asset import Asset
@@ -13,14 +15,15 @@ class FeedMetric(Metric):
     - count the number of unique assets so for encountered
     """
 
-    def __init__(self, price_type: str = "DEFAULT"):
+    def __init__(self, price_type: str = "DEFAULT") -> None:
         self._prev_prices: dict[Asset, float] = {}
-        self.price_type = price_type
-        self._last_total = 1.0
+        self.price_type: str = price_type
+        self._last_total: float = 1.0
 
+    @override
     def calc(self, event: Event, account: Account, signals: list[Signal], orders: list[Order]) -> dict[str, float]:
-        mkt_return = 0.0
-        n = 0
+        mkt_return: float = 0.0
+        n: int = 0
         for asset, price in event.get_prices(self.price_type).items():
             if prev_price := self._prev_prices.get(asset):
                 mkt_return += price / prev_price - 1.0

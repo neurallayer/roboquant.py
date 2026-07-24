@@ -34,7 +34,7 @@ class BasicJournal(Journal):
     max_positions: int = 0
     trades: int = 0
 
-    def __init__(self, log_level=logging.INFO):
+    def __init__(self, log_level: int=logging.INFO) -> None:
         self.__log_level = log_level
         self._assets: set[Asset] = set()
 

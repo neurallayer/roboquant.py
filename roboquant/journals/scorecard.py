@@ -6,7 +6,7 @@ from roboquant.account import Account
 from roboquant.journals.metricsjournal import MetricsJournal
 from roboquant.signal import Signal
 from roboquant.order import Order
-from typing import List
+from typing import Any, List
 
 
 class ScoreCard(Journal):
@@ -19,7 +19,7 @@ class ScoreCard(Journal):
     This works best on smaller runs with a limited number of assets and orders.
     """
 
-    def __init__(self, *metrics: Metric, include_prices: bool = True, price_type: str = "DEFAULT"):
+    def __init__(self, *metrics: Metric, include_prices: bool = True, price_type: str = "DEFAULT") -> None:
         super().__init__()
         self._include_prices = include_prices
         self._price_type = price_type
@@ -37,7 +37,7 @@ class ScoreCard(Journal):
         self._trades = account.trades
         self._journal.track(event, account, signals, orders)
 
-    def plot(self, size: tuple[float, float] = (8.27, 11.69), **kwargs):
+    def plot(self, size: tuple[float, float] = (8.27, 11.69), **kwargs: Any) -> None:
         """Plot a chart with the following sub-charts:
         - prices of the configured asset. Orders als small green up (BUY) and red down (SELL) triangles.
         - metrics that have been configured, each in their own chart.

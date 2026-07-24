@@ -16,7 +16,7 @@ class Journal(ABC):
     """
 
     @abstractmethod
-    def track(self, event: Event, account: Account, signals: list[Signal], orders: list[Order]):
+    def track(self, event: Event, account: Account, signals: list[Signal], orders: list[Order]) -> None:
         """This method is invoked at each step of a run and provides the journal with the opportunity to
         track and log various metrics.
 

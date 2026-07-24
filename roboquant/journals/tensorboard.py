@@ -9,7 +9,7 @@ class TensorboardJournal(Journal):
     This can be used outside the realm of machine learning, but requires the tensorboard library to be installed.
     """
 
-    def __init__(self, writer, *metrics: Metric):
+    def __init__(self, writer, *metrics: Metric) -> None:
         """
         Initialize the TensorboardJournal.
 
@@ -22,7 +22,7 @@ class TensorboardJournal(Journal):
         self._step : int = 0
         self.metrics = metrics
 
-    def track(self, event, account, signals, orders):
+    def track(self, event, account, signals, orders) -> None:
         """
         Track the metrics and record them to the tensorboard writer.
 

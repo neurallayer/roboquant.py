@@ -1,3 +1,4 @@
+from typing import Self
 from datetime import datetime
 
 from roboquant.journals.journal import Journal
@@ -20,12 +21,12 @@ class MetricsJournal(Journal):
     convenience method to plot a metric.
     """
 
-    def __init__(self, *metrics: Metric):
+    def __init__(self, *metrics: Metric) -> None:
         self.metrics = metrics
         self._history: list[tuple[datetime, dict[str, float]]] = []
 
     @classmethod
-    def pnl(cls):
+    def pnl(cls) -> Self:
         """Return a metrics journal pre-configured with the PNL metric"""
         return cls(PNLMetric())
 

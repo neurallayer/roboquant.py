@@ -15,7 +15,7 @@ class AlphaBeta(Metric):
     Calculate the alpha and beta metric over a given window size.
     """
 
-    def __init__(self, window_size: int, price_type: str = "DEFAULT", risk_free_return: float = 0.0):
+    def __init__(self, window_size: int, price_type: str = "DEFAULT", risk_free_return: float = 0.0) -> None:
         """
         window_size: the rolling window_size to use. The alpha and beta are only calculated once the window is filled.
         price_type: the type of price to use to calculate the market returns, default is "DEFAULT"
@@ -40,7 +40,7 @@ class AlphaBeta(Metric):
                 result += prices[asset] / self.__last_prices[asset]
         return 1.0 if cnt == 0 else result / cnt
 
-    def __update(self, equity: float, prices: dict[Asset, float]):
+    def __update(self, equity: float, prices: dict[Asset, float]) -> None:
         self.__last_equity = equity
         self.__last_prices.update(prices)
 
