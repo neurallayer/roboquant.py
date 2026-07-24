@@ -305,13 +305,17 @@ class One2OneConversion(CurrencyConverter):
 
 @dataclass(frozen=True, slots=True)
 class Amount:
-    """Immutable monetary value in a single `Currency`.
+    """Immutable monetary value denoted in a single `Currency`.
 
-    An amount combines a numeric value with the currency it is denominated in,
-    for example `Amount(USD, 100)`, `USD(100)`, or `100 @ USD`. Arithmetic with
-    another `Amount` keeps each currency separate and returns a `Wallet`; no
-    implicit currency conversion is performed. Use `convert_to` or the `@`
-    operator to convert through the registered `CurrencyConverter`.
+    Attributes
+        currency: The currency the amount is denoted in.
+        value: The monetary value of the amount.
+
+    Examples
+    ```
+    amt = Amount(USD, 100)
+    amt = 50@EUR
+    ```
     """
 
     currency: Currency
@@ -324,7 +328,7 @@ class Amount:
         It will replace the current registered converter since there can only be one converter active.
 
         Args:
-            converter: The new currency converter.
+            converter: The new currency converter to register.
         """
         Amount.__converter = converter
 
@@ -389,7 +393,7 @@ class Amount:
         return Amount.__converter.convert(self, currency, dt)
 
     def __repr__(self) -> str:
-        """Return a string representation of the amount.
+        """Return a string representation of the amount using 2 decimals.
 
         Returns:
             str: The string representation.
@@ -400,7 +404,7 @@ class Amount:
         """Return a formatted string representation of the amount.
 
         Args:
-            format_spec (str): The format specification.
+            format_spec (str): The format specification, for example ".4f"
 
         Returns:
             str: The formatted string representation.

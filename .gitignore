@@ -13,3 +13,4 @@ build/
 .pytest_cache/
 .env
 .DS_Store
+reference/
