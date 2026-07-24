@@ -6,7 +6,7 @@ from roboquant.account import Account
 from roboquant.journals.metricsjournal import MetricsJournal
 from roboquant.signal import Signal
 from roboquant.order import Order
-from typing import Any, List
+from typing import List
 
 
 class ScoreCard(Journal):
@@ -37,35 +37,29 @@ class ScoreCard(Journal):
         self._trades = account.trades
         self._journal.track(event, account, signals, orders)
 
-    def plot(self, size: tuple[float, float] = (8.27, 11.69), **kwargs: Any) -> None:
-        """Plot a chart with the following sub-charts:
-        - prices of the configured asset. Orders als small green up (BUY) and red down (SELL) triangles.
-        - metrics that have been configured, each in their own chart.
+    def plot(self) -> None:
+        """Plot 2 charts:
+        - prices of the assets in the feed. Trades are small green up (BUY) and red down (SELL) triangle markers.
+        - metrics that have been configured and captured.
         """
         from matplotlib import pyplot as plt
         self._feed._update()
 
-        ratios = [5 for _ in self._feed.assets()] + [2 for _ in self._journal.get_metric_names()]
-        fig, axes = plt.subplots(
-            len(self._feed.assets()) + len(self._journal.get_metric_names()),
-            sharex=True, gridspec_kw={"height_ratios": ratios}
-        )
-
-        if not hasattr(axes, "__getitem__"):
-            axes = [axes]
-
-        fig.set_size_inches(size)
-        fig.tight_layout()
-
-        plot_nr = 0
-
         if self._include_prices:
-            for asset in self._feed.assets():
-                ax = axes[plot_nr]
-                self._feed.plot(asset, ax=ax, trades = self._trades)
-                plot_nr += 1
+            assets = self._feed.assets()
+            rows = len(assets) // 2 + len(assets) % 2
 
-        for name in self._journal.get_metric_names():
-            ax = axes[plot_nr]
-            self._journal.plot(name, ax=ax)
-            plot_nr += 1
+            _ , axs = plt.subplots(rows, 2, figsize=(20, 3 * len(assets)))
+
+            for ax, asset in zip(axs.flatten(), assets):
+                ax.grid(True, color="grey", linestyle="--")
+                self._feed.plot(asset, ax = ax, trades = self._trades, linewidth=1)
+
+
+        metric_names = self._journal.get_metric_names()
+        rows = len(metric_names) // 2 + len(metric_names) % 2
+        _ , axs = plt.subplots(rows, 2, figsize=(20, 3 * len(metric_names)))
+
+        for ax, name in zip(axs.flatten(), metric_names):
+            ax.grid(True, color="grey", linestyle="--")
+            self._journal.plot(name, ax=ax, linewidth=1)

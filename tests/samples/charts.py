@@ -10,31 +10,34 @@ from datetime import timedelta
 from roboquant.journals.report import Report
 
 # %%
-feed = rq.feeds.YahooFeed("JPM", "IBM", "F", start_date="2010-01-01")
+feed = rq.feeds.YahooFeed.us_stocks_10()
 
 # %% [markdown]
-# Plot a price chart for each of the assets in the feed
-
-# %%
-for asset in feed.assets():
-    feed.plot(asset, linewidth=0.5)
+# Plot a price chart for one of the assets in the feed
+_ = feed.plot("MSFT", linewidth=0.5, color="grey")
 
 # %%
 strategy = rq.strategies.EMACrossover()
 journal = rq.journals.MetricsJournal.pnl()
 account = rq.run(feed, strategy, journal=journal)
-feed.plot("IBM", trades=account.trades, linewidth=0.5, color="grey")
+
+# %%
+tf = rq.Timeframe.previous(days=365)
+_, axs = plt.subplots(5, 2, figsize=(20, 30))
+
+for ax, asset in zip(axs.flatten(), feed.assets()):
+    ax.grid(True, color="grey", linestyle="--")
+    feed.plot(asset, timeframe = tf, ax = ax, trades = account.trades, linewidth=1)
 
 # %%
 equity = journal.get_metric("pnl/equity")
-_ = equity.plot(color="green", linewidth=0.5)
+_ = equity.plot(color="green", linewidth=1)
 
 # %%
 # Perform a walk forward over 4 equal timeframes and plot each run on the same chart.
 
 timeframes = feed.timeframe().split(4)
 _, ax = plt.subplots()
-
 
 for timeframe in timeframes:
     strategy = rq.strategies.EMACrossover()
@@ -92,6 +95,6 @@ strategy = rq.strategies.EMACrossover()
 asset = feed.assets()[0]
 scorecard = rq.journals.ScoreCard(rq.journals.PNLMetric(), include_prices=True)
 rq.run(feed, strategy, journal=scorecard)
-scorecard.plot(size=(8.27, 30), linewidth=0.5)
+scorecard.plot()
 
 # %%
