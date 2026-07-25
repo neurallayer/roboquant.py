@@ -6,13 +6,15 @@ from roboquant.timeframe import Timeframe
 
 class TestTimeframe(unittest.TestCase):
 
+    two_days = timedelta(days=2)
+
     def test_timeframe_creation(self):
         tf1 = Timeframe.fromisoformat("2020-01-01T00:00:00+00:00", "2021-01-01T00:00:00+00:00")
         tf2 = Timeframe(datetime(2020, 1, 1, tzinfo=timezone.utc), datetime(2021, 1, 1, tzinfo=timezone.utc))
         self.assertEqual(tf1, tf2)
 
     def test_timeframe_inclusive(self):
-        tf = Timeframe.next(days=2, inclusive=True)
+        tf = Timeframe.next(self.two_days, inclusive=True)
         self.assertEqual("UTC", tf.start.tzname())
         self.assertEqual("UTC", tf.end.tzname())
 
@@ -22,7 +24,7 @@ class TestTimeframe(unittest.TestCase):
         self.assertTrue(tf.end in tf)
 
     def test_timeframe_exclusive(self):
-        tf = Timeframe.next(days=2, inclusive=False)
+        tf = Timeframe.next(self.two_days, inclusive=False)
         now = datetime.now(timezone.utc)
         self.assertTrue(now in tf)
         self.assertTrue(tf.start in tf)
@@ -49,13 +51,13 @@ class TestTimeframe(unittest.TestCase):
 
     def test_timeframe_sample(self):
         tf = Timeframe.fromisoformat("2000-01-01T00:00:00+00:00", "2020-01-01T00:00:00+00:00")
-        days_365 = timedelta(days=365)
-        tfs = tf.sample(days_365, 10)
+        one_year = timedelta(days=365)
+        tfs = tf.sample(10, one_year)
         self.assertEqual(10, len(tfs))
         for t in tfs:
             self.assertGreaterEqual(t.start, tf.start)
             self.assertGreaterEqual(tf.end, t.end)
-            self.assertEqual(t.end - t.start, days_365)
+            self.assertEqual(t.end - t.start, one_year)
 
 
 if __name__ == "__main__":

@@ -1,4 +1,4 @@
-from typing import Tuple
+from typing import Tuple, override
 
 import numpy as np
 
@@ -44,6 +44,7 @@ class AlphaBeta(Metric):
         self.__last_equity = equity
         self.__last_prices.update(prices)
 
+    @override
     def calc(self, event: Event, account: Account, signals: list[Signal], orders: list[Order]) -> dict[str, float]:
         prices = event.get_prices(self.price_type)
         equity = account.equity_value()

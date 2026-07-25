@@ -1,6 +1,6 @@
 # %%
-import os
 from datetime import timedelta
+import os
 import logging
 import roboquant as rq
 from roboquant.alpaca import AlpacaBroker, AlpacaLiveFeed
@@ -29,7 +29,7 @@ feed = rq.feeds.BarAggregatorFeed(alpaca_feed, timedelta(seconds=15), price_type
 
 # %%
 strategy = rq.strategies.EMACrossover(13, 26)
-timeframe = rq.Timeframe.next(minutes=15)
+timeframe = rq.Timeframe.next("15 min")
 journal = rq.journals.BasicJournal()
 account = rq.run(feed, strategy, broker=broker, journal=journal, timeframe=timeframe)
 

@@ -1,6 +1,7 @@
 import random
 from datetime import datetime, timedelta, timezone
 from typing import Any
+import pandas as pd
 
 
 def utcnow() -> datetime:
@@ -70,14 +71,13 @@ class Timeframe:
         return self.start == self.end and not self.inclusive
 
     @staticmethod
-    def previous(inclusive : bool = False, days: float=0, seconds: float=0, microseconds: float=0,
-                milliseconds: float=0, minutes: float=0, hours: float=0, weeks: float=0) -> "Timeframe":
+    def previous(duration: timedelta | str, inclusive : bool = False) -> "Timeframe":
         """
-        Convenient method to create a historic timeframe, the kwargs arguments will be passed to the timedelta.
+        Convenient method to create a historic timeframe.
 
         Args:
+            duration: how long in the past should the timeframe extend
             inclusive (bool): Should the end datetime be inclusive, default is False.
-            **kwargs: Arguments to be passed to timedelta.
 
         Returns:
             Timeframe: A new Timeframe instance.
@@ -85,15 +85,15 @@ class Timeframe:
         Usage:
             tf = Timeframe.previous(days=365)
         """
+        if isinstance(duration, str):
+                duration = pd.to_timedelta(duration)
 
-        td = timedelta(days, seconds, microseconds, milliseconds, minutes, hours, weeks)
         end = datetime.now(timezone.utc)
-        start = end - td
+        start = end - duration
         return Timeframe(start, end, inclusive)
 
     @staticmethod
-    def next(inclusive : bool = False,days: float=0, seconds: float=0, microseconds: float=0,
-                milliseconds: float=0, minutes: float=0, hours: float=0, weeks: float=0) -> "Timeframe":
+    def next(duration: timedelta | str, inclusive : bool = False) -> "Timeframe":
         """
         Convenient method to create a future timeframe, the kwargs arguments will be passed to the timedelta.
         The start date is now.
@@ -101,19 +101,24 @@ class Timeframe:
         For example, if you want a timeframe for next three hours: `tf = Timeframe.next(hours = 3)`
 
         Args:
+            duration: how long in the future should the timeframe extend.
             inclusive (bool): Should the end datetime be inclusive, default is False.
-            **kwargs: Arguments to be passed to timedelta.
 
         Returns:
             Timeframe: A new Timeframe instance.
 
         Usage:
-            tf = Timeframe.next(minutes=30)
+        ```
+        tf = Timeframe.next(minutes=30)
+        tf = Timeframe.next("300 days")
+        ```
         """
 
-        td = timedelta(days, seconds, microseconds, milliseconds, minutes, hours, weeks)
+        if isinstance(duration, str):
+            duration = pd.to_timedelta(duration)
+
         start = datetime.now(timezone.utc)
-        end = start + td
+        end = start + duration
         return Timeframe(start, end, inclusive)
 
     def __contains__(self, dt: datetime) -> bool:
@@ -170,12 +175,12 @@ class Timeframe:
         years = timedelta(days=365) / self.duration
         return (1.0 + rate) ** years - 1.0
 
-    def split(self, n: int | timedelta | Any) -> list["Timeframe"]:
+    def split(self, n: int | timedelta) -> list["Timeframe"]:
         """
         Split the timeframe in sequential equal parts and return the resulting list of timeframes.
 
         Args:
-            n (int | timedelta | Any): The number of parts or the duration of each part.
+            n (int | timedelta): The number of parts or the duration of each part.
 
         Returns:
             list[Timeframe]: List of resulting timeframes.
@@ -199,13 +204,13 @@ class Timeframe:
             last.end = self.end
         return result
 
-    def sample(self, duration: timedelta | Any, n: int = 1) -> list["Timeframe"]:
+    def sample(self, n: int, duration: timedelta | str) -> list["Timeframe"]:
         """
         Sample one or more timeframes of `duration` length with replacements from this timeframe.
 
         Args:
-            duration (timedelta | Any): The duration of each sample.
             n (int): The number of samples to generate, default is 1.
+            duration (timedelta | str): The duration of each sample.
 
         Returns:
             list[Timeframe]: List of sampled timeframes.
@@ -217,10 +222,13 @@ class Timeframe:
             The returned list can contain duplicates and the resulting timeframes can overlap.
         """
 
+        if isinstance(duration, str):
+            duration = pd.to_timedelta(duration)
+
         result: list[Timeframe] = []
         end = self.end - duration
         if end < self.start:
-            raise ValueError("sample duration is too large for this timeframe")
+            raise ValueError("sample duration is too long for this timeframe")
 
         while len(result) < n:
             start = random.uniform(self.start.timestamp(), end.timestamp())

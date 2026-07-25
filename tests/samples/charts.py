@@ -6,7 +6,6 @@
 # %%
 import matplotlib.pyplot as plt
 import roboquant as rq
-from datetime import timedelta
 from roboquant.journals.report import Report
 
 # %%
@@ -22,7 +21,7 @@ journal = rq.journals.MetricsJournal.pnl()
 account = rq.run(feed, strategy, journal=journal)
 
 # %%
-tf = rq.Timeframe.previous(days=365)
+tf = rq.Timeframe.previous("365 days")
 _, axs = plt.subplots(5, 2, figsize=(20, 30))
 
 for ax, asset in zip(axs.flatten(), feed.assets()):
@@ -50,8 +49,8 @@ for timeframe in timeframes:
 # Run 50 1-year back tests and plot the equity curve for each run on the same chart.
 # This provides insights how the results are distrubuted and what to expect.
 
-one_year = timedelta(days=365)
-timeframes = feed.timeframe().sample(one_year, 50)
+
+timeframes = feed.timeframe().sample(30, "365 days")
 _, ax = plt.subplots()
 
 for timeframe in timeframes:

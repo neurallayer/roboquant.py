@@ -1,5 +1,6 @@
 import logging
 from dataclasses import dataclass
+from typing import override
 
 from roboquant.order import Order
 from roboquant.signal import Signal
@@ -38,6 +39,7 @@ class BasicJournal(Journal):
         self.__log_level = log_level
         self._assets: set[Asset] = set()
 
+    @override
     def track(self, event: Event, account: Account, signals: list[Signal], orders: list[Order]) -> None:
         self.items += len(event.items)
         self._assets = self._assets.union(event.price_items.keys())

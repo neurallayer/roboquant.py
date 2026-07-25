@@ -1,5 +1,5 @@
 from datetime import datetime, timedelta
-from queue import Queue
+from queue import SimpleQueue
 from queue import Empty, Full
 from typing import Iterator
 
@@ -23,13 +23,13 @@ class LiveFeed(Feed):
 
     def __init__(self):
         super().__init__()
-        self._queue: Queue | None = None
+        self._queue: SimpleQueue | None = None
         self._last_time = datetime.fromisoformat("1900-01-01T00:00:00+00:00")
         self.increment = timedelta(microseconds=1)
-        self.heartbeat_timeout = 10
+        self.heartbeat_timeout: float = 10.0
 
     def play(self, timeframe: Timeframe | None = None) -> Iterator[Event]:
-        queue = Queue()
+        queue = SimpleQueue()
         self._queue = queue
         timeout = self.heartbeat_timeout
         while True:
@@ -51,7 +51,6 @@ class LiveFeed(Feed):
                 else:
                     break
 
-        queue.task_done()
         self._queue = None
 
     def _put(self, event: Event):

@@ -28,7 +28,7 @@ class TestRoboquant(unittest.TestCase):
             self.fail()
 
     def test_montecarlo_run(self):
-        for tf in self.feed.timeframe().sample(timedelta(days=265), 10):
+        for tf in self.feed.timeframe().sample(10, timedelta(days=265)):
             account = rq.run(self.feed, rq.strategies.EMACrossover(), timeframe=tf)
             self.assertLessEqual(account.last_update, tf.end)
 

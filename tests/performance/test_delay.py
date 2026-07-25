@@ -1,3 +1,4 @@
+from datetime import timedelta
 import os
 import time
 import unittest
@@ -32,7 +33,7 @@ class TestDelay(unittest.TestCase):
         print(title)
         print("=" * len(title))
 
-        timeframe = Timeframe.next(minutes=1)
+        timeframe = Timeframe.next(timedelta(minutes=1))
 
         delays = []
         n = 0
