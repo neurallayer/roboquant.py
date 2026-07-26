@@ -1,6 +1,8 @@
 import unittest
 
-from roboquant.journals import RunMetric, MetricsJournal, FeedMetric, MarketMetric, PNLMetric, TimeSeries
+from roboquant.timeseries import TimeSeries
+from roboquant.journals import MetricsJournal
+from roboquant.journals.metrics import AssetMetric, MarketMetric, PNLMetric, RunMetric
 from roboquant.strategies.emacrossover import EMACrossover
 from roboquant.run import run
 from roboquant.journals.scorecard import ScoreCard
@@ -19,7 +21,7 @@ class TestJournal(unittest.TestCase):
     def test_metrics_journal(self):
         feed = get_feed()
         strategy = EMACrossover()
-        journal = MetricsJournal(RunMetric(), FeedMetric(), MarketMetric(), PNLMetric())
+        journal = MetricsJournal(RunMetric(), AssetMetric(), MarketMetric(), PNLMetric())
         run(feed, strategy, journal=journal)
         self.assertTrue(journal.get_metric_names())
         equity = journal.get_metric("pnl/equity")

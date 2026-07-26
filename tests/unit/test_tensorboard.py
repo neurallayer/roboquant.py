@@ -5,7 +5,8 @@ from pathlib import Path
 from tensorboard.summary import Writer
 
 import roboquant as rq
-from roboquant.journals import RunMetric, PNLMetric, TensorboardJournal
+from roboquant.journals import TensorboardJournal
+from roboquant.journals.metrics import PNLMetric, RunMetric
 from tests.common import get_feed
 
 

@@ -1,9 +1,8 @@
-from typing import Self
+from typing import Self, override
 from datetime import datetime
 
 from roboquant.journals.journal import Journal
-from roboquant.journals.metric import Metric
-from roboquant.journals.pnlmetric import PNLMetric
+from roboquant.journals.metrics import Metric, PNLMetric
 from roboquant.account import Account
 from roboquant.signal import Signal
 from roboquant.event import Event
@@ -17,7 +16,7 @@ class MetricsJournal(Journal):
     Implementation of a journal that allows for metrics to be added and captured at each step. It will store
     the results of the metrics in memory.
 
-    The calculated metric values can be retrieved via the `get_metric` method. There is also
+    The calculated metric values can be retrieved via `get_metric`. There is also
     convenience method to plot a metric.
     """
 
@@ -30,6 +29,7 @@ class MetricsJournal(Journal):
         """Return a metrics journal pre-configured with the PNL metric"""
         return cls(PNLMetric())
 
+    @override
     def track(self, event: Event, account: Account, signals: List[Signal], orders: List[Order]) -> None:
         result: Dict[str, float] = {}
         for metric in self.metrics:

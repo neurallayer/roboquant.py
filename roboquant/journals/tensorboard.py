@@ -1,7 +1,7 @@
 from typing import override
 
 from roboquant.journals.journal import Journal
-from roboquant.journals.metric import Metric
+from roboquant.journals.metrics import Metric
 
 
 class TensorboardJournal(Journal):

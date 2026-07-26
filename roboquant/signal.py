@@ -50,7 +50,7 @@ class Signal:
     """
 
     asset: Asset
-    """The asset this signal is related to."""
+    """The asset this signal applies to."""
 
     rating: float
     """The rating of this signal, normally a float value between -1.0 and 1.0.

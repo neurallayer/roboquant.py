@@ -6,6 +6,7 @@
 # %%
 import matplotlib.pyplot as plt
 import roboquant as rq
+import roboquant.journals.metrics
 from roboquant.journals.report import Report
 
 # %%
@@ -92,7 +93,7 @@ report.save_as_html("/tmp/report.html")
 # Using the scorecard journal
 strategy = rq.strategies.EMACrossover()
 asset = feed.assets()[0]
-scorecard = rq.journals.ScoreCard(rq.journals.PNLMetric(), include_prices=True)
+scorecard = rq.journals.ScoreCard(roboquant.journals.metrics.PNLMetric(), include_prices=True)
 rq.run(feed, strategy, journal=scorecard)
 scorecard.plot()
 
