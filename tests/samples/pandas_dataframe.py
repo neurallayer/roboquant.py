@@ -21,7 +21,7 @@ strategy = rq.strategies.EMACrossover()
 account = rq.run(feed, strategy)
 
 #%%
-print(account.positions_to_dataframe(), "\n\n")
+print(account.positions.to_dataframe(), "\n\n")
 print(account.orders_to_dataframe(), "\n\n")
 print(account.trades_to_dataframe(), "\n\n")
 

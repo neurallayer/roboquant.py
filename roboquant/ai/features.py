@@ -423,8 +423,8 @@ class UnrealizedPNLFeature(Feature[Account]):
     """
 
     def calc(self, value: Account) -> NPFloatArray:
-        mkt_value = value.convert(value.mkt_value())
-        pnl = value.unrealized_pnl_value()
+        mkt_value = value.convert(value.positions.mkt_value())
+        pnl = value.convert(value.positions.unrealized_pnl())
         if mkt_value and pnl:
             return np.array(pnl / mkt_value, dtype=np.float32)
         return np.array(0.0, dtype=np.float32)

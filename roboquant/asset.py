@@ -52,6 +52,9 @@ class Asset(ABC):
         Returns:
             Amount: The total contract amount.
         """
+        if size == 0:
+            return Amount(self.currency, 0.0)
+
         value = self.value(size, price)
         return Amount(self.currency, value)
 

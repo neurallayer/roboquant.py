@@ -2,6 +2,7 @@ from decimal import Decimal
 import logging
 from time import sleep
 from typing import Any, override
+from roboquant.account import Positions
 from roboquant.brokers.broker import LiveBroker
 import roboquant as rq
 from roboquant.ibkr._types import AccountInfo, ContractInfo, PositionInfo, OrderInfo
@@ -137,9 +138,9 @@ class IBKRBroker(LiveBroker):
         self._mapper = _AssetMapper(client)
 
 
-    def __get_positions(self) -> dict[rq.Asset, rq.Position]:
+    def __get_positions(self) -> Positions:
         """Return all the open positions"""
-        result: dict[rq.Asset, rq.Position] = {}
+        result = Positions()
         positions: list[PositionInfo] = self.client.positions().data or []  # type: ignore
         for pos_info in positions:
             conid = pos_info["conid"]

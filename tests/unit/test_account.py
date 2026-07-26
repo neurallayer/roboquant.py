@@ -17,9 +17,9 @@ class TestAccount(unittest.TestCase):
         self.assertEqual(acc.buying_power.value, 0.0)
         self.assertEqual(acc.buying_power.currency, USD)
         self.assertEqual(acc.base_currency, USD)
-        self.assertEqual(acc.unrealized_pnl().convert_to(USD, now), 0.0)
+        self.assertEqual(acc.positions.unrealized_pnl().convert_to(USD, now), 0.0)
         self.assertEqual(acc.realized_pnl().convert_to(USD, now), 0.0)
-        self.assertEqual(acc.mkt_value().convert_to(USD, now), 0.0)
+        self.assertEqual(acc.positions.mkt_value().convert_to(USD, now), 0.0)
         self.assertEqual(acc.equity_value(), 1_000.0)
         self.assertEqual(acc.last_update, now)
         self.assertEqual(len(acc.positions), 0)
@@ -33,9 +33,9 @@ class TestAccount(unittest.TestCase):
             symbol = Stock(f"AA${i}")
             acc.positions[symbol] = Position(Decimal(10), 10.0, 11.0)
 
-        self.assertAlmostEqual(acc.mkt_value().convert_to(USD, now), 5*10*11.0)
+        self.assertAlmostEqual(acc.positions.mkt_value().convert_to(USD, now), 5*10*11.0)
         self.assertAlmostEqual(acc.equity_value(), 1_000.0 + (5*10*11.0))
-        self.assertAlmostEqual(acc.unrealized_pnl().convert_to(USD, now), 50.0)
+        self.assertAlmostEqual(acc.positions.unrealized_pnl().convert_to(USD, now), 50.0)
 
 
 if __name__ == "__main__":

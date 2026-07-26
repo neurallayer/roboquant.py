@@ -1,7 +1,7 @@
 import logging
 from typing import override
 import ccxt
-from roboquant.account import Account, Position
+from roboquant.account import Account, Position, Positions
 from roboquant.asset import Asset, Crypto
 from roboquant.brokers.broker import LiveBroker, Order
 from roboquant.event import Event
@@ -98,8 +98,8 @@ class CryptoBroker(LiveBroker):
             result.append(o)
         return result
 
-    def _get_positions(self) -> dict[Asset, Position]:
-        result = {}
+    def _get_positions(self) -> Positions:
+        result = Positions()
         try:
             positions = self.__client.fetch_positions()
         except ccxt.NotSupported as e:

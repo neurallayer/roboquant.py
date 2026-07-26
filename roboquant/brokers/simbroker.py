@@ -226,7 +226,7 @@ class SimBroker(Broker):
 
     def _calculate_short_positions(self) -> Wallet:
         reserved = Wallet()
-        for asset, position in self._account.short_positions().items():
+        for asset, position in self._account.positions.short_positions().items():
             short_value = asset.amount(-position.size, position.mkt_price)
             reserved += short_value
         return reserved
