@@ -104,7 +104,7 @@ class SimBroker(Broker):
         return pnl
 
     def _process_fill(self, asset: Asset, fill: Decimal, price: float, time: datetime) -> None:
-        """Update the account positions, trades and cash based on a new trade"""
+        """Update the account positions, trades and cash based on a new fill"""
         acc = self._account
         acc.cash -= asset.amount(fill, price)
         fee = self._fee(asset, fill, price, time)
@@ -117,6 +117,8 @@ class SimBroker(Broker):
         """Return the execution price to use for an order based on the price item.
 
         The default implementation is a fixed slippage percentage based on the configured price_type.
+        But is the price-item is a `Quote`, it will use the ask- en bid-price instead without
+        any additional slippage.
         """
         if isinstance(item, Quote):
             return item.ask_price if order.is_buy else item.bid_price
@@ -139,14 +141,11 @@ class SimBroker(Broker):
         logger.info("order not executable order=%s market-price=%s", order, price)
         return Decimal()
 
-    @staticmethod
-    def _update_account(account: Account, event: Event, price_type: str = "DEFAULT") -> None:
+    def _update_account_positions(self, event: Event) -> None:
         """Update the account with the latest market prices found in the event"""
 
-        account.last_update = event.time
-
-        for asset, pos in account.positions.items():
-            if price := event.get_price(asset, price_type):
+        for asset, pos in self._account.positions.items():
+            if price := event.get_price(asset, self.price_type):
                 pos.mkt_price = price
 
     def __next_order_id(self) -> str:
@@ -210,8 +209,7 @@ class SimBroker(Broker):
                 self._remove_order(order)
             elif item := prices.get(order.asset):
                 price = self._get_execution_price(order, item)
-                fill = self._execute(order, price)
-                if fill:
+                if fill := self._execute(order, price):
                     logger.info("executed order=%s fill=%s", order, fill)
                     self._fill_order(order, fill)
                     self._process_fill(order.asset, fill, price, event.time)
@@ -250,13 +248,12 @@ class SimBroker(Broker):
         """This will perform the order-execution simulation for the open orders and
         return the updated the account as a result."""
 
-        acc = self._account
-
         if event:
-            acc.last_update = event.time
+            self._account.last_update = event.time
             self._process_orders(event)
-            self._update_account(acc, event, self.price_type)
+            self._update_account_positions(event)
 
+        acc = self._account
         acc.orders = list(self._orders.values())
         acc.buying_power = self._calculate_buyingpower()
         return acc

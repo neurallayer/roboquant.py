@@ -6,7 +6,7 @@ from typing import Any
 
 from roboquant.asset import Asset, Crypto
 from roboquant.event import Bar
-from roboquant.feeds.historic import InMemoryFeed
+from roboquant.feeds.historicfeed import InMemoryFeed
 
 logger = logging.getLogger(__name__)
 

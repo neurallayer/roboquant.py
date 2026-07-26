@@ -2,6 +2,7 @@ import unittest
 from datetime import timedelta
 
 import roboquant as rq
+import math
 from tests.common import get_feed
 
 
@@ -21,6 +22,10 @@ class TestRoboquant(unittest.TestCase):
         for tf in self.feed.timeframe().split(5):
             account = rq.run(self.feed, rq.strategies.EMACrossover(), timeframe=tf)
             self.assertLessEqual(account.last_update, tf.end)
+            for p in account.positions.values():
+                self.assertTrue(math.isfinite(p.mkt_price))
+                self.assertTrue(math.isfinite(p.avg_price))
+                self.assertTrue(p.size != 0)
 
         if account:
             self.assertEqual(self.feed.timeframe().end, account.last_update)

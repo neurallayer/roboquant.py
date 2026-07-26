@@ -1,7 +1,7 @@
 # %%
 import os
 import roboquant as rq
-from roboquant.feeds.parquet import ParquetFeed
+from roboquant.feeds.parquetfeed import ParquetFeed
 
 
 # %%

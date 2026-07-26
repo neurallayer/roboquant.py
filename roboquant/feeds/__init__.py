@@ -2,8 +2,8 @@ from .util import BarAggregatorFeed, TimeGroupingFeed
 from .csvfeed import CSVFeed
 from .feed import Feed
 from .randomwalk import RandomWalk
-from .sql import SQLFeed
-from .yahoo import YahooFeed
+from .sqlfeed import SQLFeed
+from .yahoofeed import YahooFeed
 
 __all__ = [
     "Feed",

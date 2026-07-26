@@ -19,6 +19,10 @@ from .run import run
 from .timeframe import Timeframe, utcnow
 from .timeseries import TimeSeries
 
+from importlib.metadata import version
+__version__ = version("roboquant")
+
+
 __all__ = [
     "brokers",
     "feeds",

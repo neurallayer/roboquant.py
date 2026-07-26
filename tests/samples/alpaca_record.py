@@ -2,8 +2,8 @@
 import os
 from timeit import default_timer as timer
 from roboquant.alpaca import AlpacaHistoricStockFeed
-from roboquant.feeds.parquet import ParquetFeed
-from roboquant.feeds.sql import SQLFeed
+from roboquant.feeds.parquetfeed import ParquetFeed
+from roboquant.feeds.sqlfeed import SQLFeed
 from dotenv import load_dotenv
 
 

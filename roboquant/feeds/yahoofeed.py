@@ -1,11 +1,12 @@
 import logging
 from array import array
 from datetime import date, datetime, timezone
+import math
 import warnings
 
 from roboquant.asset import Asset, Stock
 from roboquant.event import Bar
-from roboquant.feeds.historic import InMemoryFeed
+from roboquant.feeds.historicfeed import InMemoryFeed
 
 logger = logging.getLogger(__name__)
 
@@ -65,13 +66,16 @@ class YahooFeed(InMemoryFeed):
                 for t in df.itertuples(index=True):
                     dt = t[0].to_pydatetime().astimezone(timezone.utc)
                     prices = t[1:6]
-                    asset = self._get_asset(symbol)
-                    b = Bar(asset, array("f", prices), interval)
-                    self._add_item(dt, b)
+
+                    # in rare conditions the prices can be nan
+                    if math.isfinite(prices[0]):
+                        asset = self._get_asset(symbol)
+                        b = Bar(asset, array("f", prices), interval)
+                        self._add_item(dt, b)
 
                 logger.info("retrieved symbol=%s items=%s", symbol, len(df))
             except:  # noqa: E722
-                logger.warning("Error retrieving symbol=%s", symbol)
+                logging.exception("Error retrieving symbol=%s", symbol)
 
         self._update()
 

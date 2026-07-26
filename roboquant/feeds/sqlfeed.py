@@ -8,7 +8,7 @@ from typing import Any, Literal
 from roboquant.asset import deserialize_to_asset, Asset
 from roboquant.event import Bar, PriceItem, Quote
 from roboquant.event import Event
-from roboquant.feeds.historic import HistoricFeed
+from roboquant.feeds.historicfeed import HistoricFeed
 from roboquant.timeframe import Timeframe
 from roboquant.feeds.feed import Feed
 

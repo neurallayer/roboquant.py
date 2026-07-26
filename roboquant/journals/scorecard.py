@@ -1,4 +1,4 @@
-from roboquant.feeds.historic import InMemoryFeed
+from roboquant.feeds.historicfeed import InMemoryFeed
 from roboquant.journals.journal import Journal
 from roboquant.journals.metrics import Metric
 from roboquant.event import Event, TradePrice

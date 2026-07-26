@@ -10,7 +10,7 @@ from roboquant.event import Quote, Bar, TradePrice
 from roboquant.event import Event
 from roboquant.feeds.feed import Feed
 from roboquant.asset import deserialize_to_asset, Asset
-from .historic import HistoricFeed
+from .historicfeed import HistoricFeed
 from roboquant.timeframe import Timeframe
 
 logger = logging.getLogger(__name__)

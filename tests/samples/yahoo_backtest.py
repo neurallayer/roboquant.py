@@ -6,7 +6,7 @@
 import roboquant as rq
 
 # %%
-feed = rq.feeds.YahooFeed("JPM", "IBM", "TSLA", "F", "INTC", start_date="2015-01-01")
+feed = rq.feeds.YahooFeed("TSLA", "MSFT", "GOOG", start_date="2010-01-10")
 
 # %%
 strategy = rq.strategies.EMACrossover()

@@ -1,6 +1,6 @@
 # %%
 import roboquant as rq
-from roboquant.feeds.parquet import ParquetFeed
+from roboquant.feeds.parquetfeed import ParquetFeed
 
 # %%
 yahoo_feed = rq.feeds.YahooFeed("JPM", "IBM", "F", "MSFT", "TSLA", start_date="2000-01-01")

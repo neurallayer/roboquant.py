@@ -2,7 +2,7 @@
 from sb3_contrib import RecurrentPPO
 from sb3_contrib.common.recurrent.policies import RecurrentActorCriticPolicy
 from roboquant import run
-from roboquant.feeds.yahoo import YahooFeed
+from roboquant.feeds.yahoofeed import YahooFeed
 from roboquant.ai.features import BarFeature, EquityFeature, CombinedFeature, SMAFeature, PriceFeature
 from roboquant.ai.rl import TradingEnv, SB3PolicyStrategy
 

@@ -1,3 +1,4 @@
+from collections import UserDict
 from dataclasses import dataclass, asdict
 from datetime import datetime
 from decimal import Decimal
@@ -60,6 +61,71 @@ class Position:
     def zero():
         """Return a zero position size with no known prices"""
         return Position(Decimal(), 0.0, float("nan"))
+
+
+class Positions(UserDict[Asset, Position]):
+
+    def position_value(self, asset: Asset) -> float:
+        """
+        Return position value denoted in the base currency of the account. If there is no
+        open position, 0.0 will be returned. Short positions will return a negative value.
+
+        Args:
+            asset (Asset): The asset for which to calculate the position value.
+
+        Returns:
+            float: The position value in the base currency.
+        """
+        pos = self.get(asset)
+        return asset.value(pos.size, pos.mkt_price) if pos else 0.0
+
+    def short_positions(self) -> dict[Asset, Position]:
+        """
+        Return all the open short positions in the account.
+
+        Returns:
+            dict[Asset, Position]: A dictionary of assets and their corresponding short positions.
+        """
+        return {asset: position for (asset, position) in self.items() if position.is_short}
+
+    def long_positions(self) -> dict[Asset, Position]:
+        """
+        Return all the open long positions in the account.
+
+        Returns:
+            dict[Asset, Position]: A dictionary of assets and their corresponding long positions.
+        """
+        return {asset: position for (asset, position) in self.items() if position.is_long}
+
+    def unrealized_pnl(self) -> Wallet:
+        """
+        Return the sum of the unrealized profit and loss for the open positions.
+
+        Returns:
+            Wallet: The unrealized profit and loss.
+        """
+        result = Wallet()
+        for asset, position in self.items():
+            result += asset.amount(position.size, position.mkt_price - position.avg_price)
+        return result
+
+    def mkt_value(self) -> Wallet:
+        """
+        Return the sum of the market values of the open positions in the account. Short
+        positions have a negative market value.
+
+        Returns:
+            Wallet: The total market value of all open positions.
+        """
+        result = Wallet()
+        for asset, position in self.items():
+            result += asset.amount(position.size, position.mkt_price)
+        return result
+
+    def to_dataframe(self)-> pd.DataFrame:
+            """Return the positions as a dataframe"""
+            return  pd.json_normalize([asdict(asset) | asdict(pos) for asset, pos in self.items()])
+
 
 
 @dataclass
@@ -137,23 +203,23 @@ class Account:
         pos = self.positions.get(asset)
         return asset.value(pos.size, pos.mkt_price) if pos else 0.0
 
-    def short_positions(self) -> dict[Asset, Position]:
+    def short_positions(self) -> "Positions":
         """
         Return all the open short positions in the account.
 
         Returns:
             dict[Asset, Position]: A dictionary of assets and their corresponding short positions.
         """
-        return {asset: position for (asset, position) in self.positions.items() if position.is_short}
+        return Positions({asset: position for (asset, position) in self.positions.items() if position.is_short})
 
-    def long_positions(self) -> dict[Asset, Position]:
+    def long_positions(self) -> "Positions":
         """
         Return all the open long positions in the account.
 
         Returns:
             dict[Asset, Position]: A dictionary of assets and their corresponding long positions.
         """
-        return {asset: position for (asset, position) in self.positions.items() if position.is_long}
+        return Positions({asset: position for (asset, position) in self.positions.items() if position.is_long})
 
     def contract_value(self, asset: Asset, size: Decimal, price: float) -> float:
         """
