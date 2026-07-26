@@ -196,11 +196,6 @@ class HistoricFeed(Feed, ABC):
                 y.append(price)
         return TimeSeries(asset.symbol, x, y)
 
-    def __repr__(self) -> str:
-        feed = self.__class__.__name__
-        return f"{feed}(assets={len(self.assets())} timeframe={self.timeframe()})"
-
-
 
 class InMemoryFeed(HistoricFeed):
     """
@@ -275,6 +270,7 @@ class InMemoryFeed(HistoricFeed):
         items = self.__data[last_time]
         return Event(last_time, items)
 
+    @override
     def play(self, timeframe: Timeframe | None = None) -> Iterator[Event]:
         for k, v in self.__data.items():
             if not timeframe or k in timeframe:
@@ -283,3 +279,7 @@ class InMemoryFeed(HistoricFeed):
                 continue
             else:
                 break
+
+    def __repr__(self) -> str:
+        feed = self.__class__.__name__
+        return f"{feed}(assets={len(self.assets())} timeframe={self.timeframe()})"

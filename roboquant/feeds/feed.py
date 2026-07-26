@@ -26,7 +26,3 @@ class Feed(ABC):
             An iterator of the events.
         """
         ...
-
-    def timeframe(self) -> Timeframe:
-        """Return the timeframe of this feed, default is Timeframe.INFINITE"""
-        return Timeframe.INFINITE

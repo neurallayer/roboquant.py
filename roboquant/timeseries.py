@@ -34,17 +34,17 @@ class TimeSeries:
     def plot(self, plot_timeline: bool = True, ax = None, **kwargs: Any):
         """Plot the time series. Optional a `matplotlib.axes.Axes` can be provided
         This method requires matplotlib to be installed."""
-        if not ax:
+        if ax is None:
             from matplotlib import pyplot as plt
             _, ax = plt.subplots()
 
         if plot_timeline:
-            result = ax.plot(self.timeline, self.data, **kwargs)  # type: ignore
+            ax.plot(self.timeline, self.data, **kwargs)  # type: ignore
         else:
-            result = ax.plot(self.data, **kwargs)
+            ax.plot(self.data, **kwargs)
 
         ax.set_title(self.name)
-        return result
+        return ax
 
     def to_dataframe(self, time_index: bool = False) -> pd.DataFrame:
         """Return the timeseries as a Pandas dataframe optionally with the time being the index

@@ -4,7 +4,7 @@ from time import sleep
 from typing import Any
 from roboquant.brokers.broker import LiveBroker
 import roboquant as rq
-from roboquant.ibkr.types import AccountInfo, ContractInfo, PositionInfo, OrderInfo
+from roboquant.ibkr._types import AccountInfo, ContractInfo, PositionInfo, OrderInfo
 
 
 from ibind import IbkrClient, StockQuery, OrderRequest, QuestionType  # noqa: E402
