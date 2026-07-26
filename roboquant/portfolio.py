@@ -9,6 +9,8 @@ from collections import UserDict
 from dataclasses import asdict, dataclass
 from decimal import Decimal
 
+from roboquant.order import Order
+
 
 @dataclass(slots=True)
 class Position:
@@ -79,6 +81,7 @@ class Portfolio(UserDict[Asset, Position]):
     def unrealized_pnl(self) -> Wallet:
         """
         Return the sum of the unrealized profit and loss for the open positions.
+        This includes both long- and short-positions
 
         Returns:
             Wallet: The unrealized profit and loss.
@@ -100,6 +103,16 @@ class Portfolio(UserDict[Asset, Position]):
         for asset, position in self.items():
             result += asset.amount(position.size, position.mkt_price)
         return result
+
+    def close_orders(self, ndigits:int = 2) -> list[Order]:
+         """Create the orders required to close the current open positions.
+         The limit price of the orders is equal to the last known market price.
+
+         Attributes:
+            ndigits: how many digits to use for the limit price
+         """
+         orders = [Order(asset, -pos.size, round(pos.mkt_price, ndigits)) for asset, pos in self.items()]
+         return orders
 
     def to_dataframe(self)-> pd.DataFrame:
             """Return the positions as a dataframe"""

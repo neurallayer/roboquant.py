@@ -2,7 +2,7 @@
 from time import sleep
 import logging
 from roboquant import Order
-from roboquant.ibkr.broker import IBKRBroker
+from roboquant.ibkr.ibkrbroker import IBKRBroker
 
 # %%
 logging.basicConfig()

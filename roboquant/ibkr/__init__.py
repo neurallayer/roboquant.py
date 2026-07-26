@@ -1,3 +1,3 @@
-from roboquant.ibkr.broker import IBKRBroker
+from roboquant.ibkr.ibkrbroker import IBKRBroker
 
 __all__ = ["IBKRBroker"]

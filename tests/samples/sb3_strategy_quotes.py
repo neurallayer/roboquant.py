@@ -2,7 +2,7 @@
 import os
 from sb3_contrib import RecurrentPPO
 from roboquant import run
-from roboquant.alpaca.feed import AlpacaHistoricStockFeed
+from roboquant.alpaca.alpacafeed import AlpacaHistoricStockFeed
 from roboquant.asset import Stock
 from roboquant.ai.features import EquityFeature, QuoteFeature
 from roboquant.ai.rl import TradingEnv, SB3PolicyStrategy

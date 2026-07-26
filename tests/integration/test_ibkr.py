@@ -12,7 +12,7 @@ from dotenv import load_dotenv
 
 load_dotenv()
 
-from roboquant.ibkr.broker import IBKRBroker  # noqa: E402
+from roboquant.ibkr.ibkrbroker import IBKRBroker  # noqa: E402
 
 
 class TestIBKR(unittest.TestCase):

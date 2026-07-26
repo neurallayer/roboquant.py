@@ -1,5 +1,6 @@
 """This example shows how to perform a walk-forward using a multi-process approach.
-This allows you to utilize all the CPU's available on the machine (at the cost of higher memory usage)
+This allows you to utilize all the CPU's available on the machine (typically at the cost
+of higher memory usage).
 
 Each run is over a certain timeframe and set of parameters for the EMA Crossover strategy.
 """
@@ -40,9 +41,11 @@ if __name__ == "__main__":
         ema_params = [(3, 5), (5, 7), (10, 15), (15, 21)]
 
         # All the combinations of parameters (Cartesian product)
-        all_params = product(timeframe_params, ema_params)
+        all_params = list(product(timeframe_params, ema_params))
 
-        # run the walk-forward in parallel
+        assert len(all_params) == len(timeframe_params) * len(ema_params)
+
+        # run the walk-forwards in parallel
         equities = p.map(walk_forward, all_params)
 
         # print some results

@@ -9,7 +9,7 @@ from alpaca.trading.models import Order as AOrder
 from alpaca.trading.requests import GetOrdersRequest, LimitOrderRequest, ReplaceOrderRequest
 from roboquant.portfolio import Portfolio, Position
 from roboquant.account import Account
-from roboquant.alpaca.feed import _get_asset
+from roboquant.alpaca.alpacafeed import _get_asset
 from roboquant.brokers.broker import LiveBroker, Order
 from roboquant.monetary import Wallet, Amount, USD
 
