@@ -2,7 +2,7 @@ from abc import ABC, abstractmethod
 from dataclasses import dataclass
 from decimal import Decimal
 import sys
-from typing import Dict, List, Tuple, override
+from typing import Tuple, override
 
 import numpy as np
 
@@ -55,7 +55,8 @@ class PNLMetric(Metric):
         self.max_equity: float = sys.float_info.min
         self.min_equity: float = sys.float_info.max
 
-    def calc(self, event: Event, account: Account, signals: List[Signal], orders: List[Order]) -> Dict[str, float]:
+    @override
+    def calc(self, event: Event, account: Account, signals: list[Signal], orders: list[Order]) -> dict[str, float]:
         equity = account.equity_value()
 
         total, realized, unrealized = self.__get_pnl_values(equity, account)
@@ -122,8 +123,8 @@ class PriceMetric(Metric):
         self.volume_type = volume_type
 
     @override
-    def calc(self, event: Event, account: Account, signals: list[Signal], orders: list[Order]) -> Dict[str, float]:
-        result: Dict[str, float] = {}
+    def calc(self, event: Event, account: Account, signals: list[Signal], orders: list[Order]) -> dict[str, float]:
+        result: dict[str, float] = {}
         for asset, item in event.price_items.items():
             symbol = asset.symbol
             if symbol in self.symbols or not self.symbols:
@@ -149,7 +150,8 @@ class RunMetric(Metric):
     orders: int = 0  # Total number of orders processed
     signals: int = 0 # Total number of signals processed
 
-    def calc(self, event: Event, account: Account, signals: List[Signal], orders: List[Order]) -> Dict[str, float]:
+    @override
+    def calc(self, event: Event, account: Account, signals: list[Signal], orders: list[Order]) -> dict[str, float]:
         """
         Update the metrics based on the provided event, account, signals, and orders.
 
@@ -185,7 +187,8 @@ class MarketMetric(Metric):
         self.positions: dict[Asset, Position] = {}
         self.price_type = price_type
 
-    def calc(self, event: Event, account: Account, signals: list[Signal], orders: list[Order]) -> Dict[str, float]:
+    @override
+    def calc(self, event: Event, account: Account, signals: list[Signal], orders: list[Order]) -> dict[str, float]:
         for asset, item in event.price_items.items():
             price = item.price(self.price_type)
             if asset not in self.positions:

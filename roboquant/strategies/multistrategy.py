@@ -38,11 +38,11 @@ class MultiStrategy(Strategy):
             case "none":
                 return signals
             case "last":
-                s = {s.asset: s for s in signals}
-                return list(s.values())
+                d = {s.asset: s for s in signals}
+                return list(d.values())
             case "first":
-                s = {s.asset: s for s in reversed(signals)}
-                return list(s.values())
+                d = {s.asset: s for s in reversed(signals)}
+                return list(d.values())
             case "mean":
                 result: list[Signal] = []
                 for key, group in groupby(signals, lambda signal: signal.asset):
