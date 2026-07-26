@@ -4,7 +4,7 @@ import re
 from abc import ABC
 from dataclasses import dataclass
 from decimal import Decimal
-from typing import Type
+from typing import Type, override
 
 from roboquant.monetary import USD, Amount, Currency
 
@@ -189,6 +189,7 @@ class Option(Asset):
     `100` to model standard equity option contract sizes. This multiplier cannot be changed.
     """
 
+    @override
     def value(self, size: Decimal, price: float) -> float:
         """Contract value for this option type is the `size` times the `price` times `100`.
 

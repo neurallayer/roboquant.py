@@ -1,3 +1,5 @@
+from typing import override
+
 from roboquant.signal import Signal
 from roboquant.event import Bar, Event
 from roboquant.strategies.strategy import Strategy
@@ -22,6 +24,7 @@ class IBSStrategy(Strategy):
         self.__buy = buy_threshold
         self.__sell = sell_threshold
 
+    @override
     def create_signals(self, event: Event) -> list[Signal]:
         result: list[Signal] = []
         for asset, item in event.price_items.items():

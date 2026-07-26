@@ -144,6 +144,7 @@ class NoConversion(CurrencyConverter):
     If you don't trade in different currencies, this will be sufficient.
     It will raise an exception if a conversion is required during a run."""
 
+    @override
     def convert(self, amount: "Amount", to_currency: Currency, dt: datetime) -> float:
         """Raise an error as no conversions are supported."""
         raise NotImplementedError("The default NoConversion doesn't support any conversions")

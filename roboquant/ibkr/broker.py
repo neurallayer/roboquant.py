@@ -1,7 +1,7 @@
 from decimal import Decimal
 import logging
 from time import sleep
-from typing import Any
+from typing import Any, override
 from roboquant.brokers.broker import LiveBroker
 import roboquant as rq
 from roboquant.ibkr._types import AccountInfo, ContractInfo, PositionInfo, OrderInfo
@@ -226,20 +226,24 @@ class IBKRBroker(LiveBroker):
             **info
         )
 
+    @override
     def _update_order(self, order: rq.Order):
         req = self._create_order_request(order)
         result = self.client.modify_order(order.id, req, answers=default_answers)
         logger.info("update order result %s", result)
 
+    @override
     def _place_order(self, order: rq.Order):
         req = self._create_order_request(order)
         result = self.client.place_order(req, answers=default_answers)
         logger.info("place order result %s", result)
 
+    @override
     def _cancel_order(self, order: rq.Order):
         result = self.client.cancel_order(order.id)
         logger.info("cancel order result %s", result)
 
+    @override
     def _get_account(self):
         account = rq.account.Account()
         account.positions = self.__get_positions()

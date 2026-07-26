@@ -1,6 +1,6 @@
 from itertools import groupby
 from statistics import mean
-from typing import Literal
+from typing import Literal, override
 
 from roboquant.event import Event
 from roboquant.signal import Signal
@@ -29,6 +29,7 @@ class MultiStrategy(Strategy):
         self.strategies = list(strategies)
         self.filter = signal_filter
 
+    @override
     def create_signals(self, event: Event) -> list[Signal]:
         signals: list[Signal] = []
         for strategy in self.strategies:

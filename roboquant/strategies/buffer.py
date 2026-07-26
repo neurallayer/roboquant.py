@@ -1,6 +1,5 @@
-from array import array
 from collections import UserDict
-from typing import Sequence
+from typing import Any, Sequence
 
 import numpy as np
 from numpy.typing import NDArray, DTypeLike
@@ -24,7 +23,7 @@ class NumpyBuffer:
         self.__idx = 0
         self.rows = rows
 
-    def append(self, data: array | NDArray | list | tuple | Sequence[float]) -> bool:
+    def append(self, data: Sequence[float] | NDArray[Any]) -> bool:
         """Append data to this buffer. Return True if the buffer is full, False otherwise"""
 
         # Check if buffer is overflowing
@@ -36,11 +35,11 @@ class NumpyBuffer:
         self.__idx += 1
         return self.__idx >= self.rows
 
-    def __array__(self)-> NDArray:
+    def __array__(self)-> NDArray[Any]:
         start = max(0, self.__idx - self.rows)
         return self.__data[start : self.__idx]
 
-    def _get(self, column: int) -> NDArray:
+    def _get(self, column: int) -> NDArray[Any]:
         start = max(0, self.__idx - self.rows)
         return self.__data[start : self.__idx, column]
 

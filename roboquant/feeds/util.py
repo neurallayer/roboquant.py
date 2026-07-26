@@ -1,6 +1,6 @@
 from array import array
 from datetime import timedelta
-from typing import Literal
+from typing import Any, Iterator, Literal, override
 
 from roboquant.asset import Asset
 from roboquant.event import Event, Bar, TradePrice, Quote
@@ -99,8 +99,9 @@ class TimeGroupingFeed(Feed):
         self.feed = feed
         self.timeout = timeout
 
-    def play(self, timeframe: Timeframe | None = None):
-        items = []
+    @override
+    def play(self, timeframe: Timeframe | None = None) -> Iterator[Event]:
+        items: list[Any] = []
         time = None
         for event in self.feed.play(timeframe):
             time = time or event.time

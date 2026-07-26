@@ -25,10 +25,10 @@ class RandomWalk(InMemoryFeed):
         start_price_min: float = 50.0,
         start_price_max: float = 200.0,
         volume: float = 1000.0,
-        price_dev=0.01,
-        spread_dev=0.001,
-        seed=None,
-        symbol_len=4,
+        price_dev: float =0.01,
+        spread_dev: float =0.001,
+        seed: int | None =None,
+        symbol_len: int =4,
     ):
         # pylint: disable=too-many-locals
         super().__init__()

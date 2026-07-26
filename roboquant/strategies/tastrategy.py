@@ -1,4 +1,5 @@
 from abc import abstractmethod
+from typing import override
 
 from roboquant.asset import Asset
 from roboquant.event import Event
@@ -20,6 +21,7 @@ class TaStrategy(Strategy):
         self._data = AssetBuffers(period)
         self.period = period
 
+    @override
     def create_signals(self, event: Event) -> list[Signal]:
         result: list[Signal] = []
         assets = self._data.add_event(event)
@@ -62,6 +64,7 @@ class TaMultiAssetStrategy(Strategy):
         self._data = AssetBuffers(period)
         self.period = period
 
+    @override
     def create_signals(self, event: Event) -> list[Signal]:
         assets = self._data.add_event(event)
         if assets:

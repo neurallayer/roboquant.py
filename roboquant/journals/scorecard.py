@@ -6,7 +6,7 @@ from roboquant.account import Account
 from roboquant.journals.metricsjournal import MetricsJournal
 from roboquant.signal import Signal
 from roboquant.order import Order
-from typing import List
+from typing import List, override
 
 
 class ScoreCard(Journal):
@@ -29,6 +29,7 @@ class ScoreCard(Journal):
         self._trades = []
         self._journal = MetricsJournal(*metrics)
 
+    @override
     def track(self, event: Event, account: Account, signals: List[Signal], orders: List[Order]) -> None:
         if self._include_prices:
             for asset, price in event.get_prices(self._price_type).items():

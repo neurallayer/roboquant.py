@@ -3,7 +3,7 @@ from array import array
 from dataclasses import dataclass
 from datetime import datetime, timezone
 from functools import cached_property
-from typing import Any
+from typing import Any, override
 
 from roboquant.asset import Asset
 
@@ -53,6 +53,7 @@ class Quote(PriceItem):
 
     data: array[float]  # [ask-price, ask-volume, bid-price, bid-volume]
 
+    @override
     def price(self, price_type: str = "MID") -> float:
         """Return the price, the default being the mid-point price. The default is the mid-point price,
         which is the average of the ask and bid price.
@@ -127,6 +128,7 @@ class Quote(PriceItem):
         """
         return (self.data[0] + self.data[2]) / 2.0
 
+    @override
     def volume(self, volume_type: str = "MID") -> float:
         """Return the volume, the default being the MID volume (average of BID and ASK volume).
 
@@ -163,6 +165,7 @@ class TradePrice(PriceItem):
     trade_volume: float = float("nan")
     """The volume of the trade"""
 
+    @override
     def price(self, price_type: str = "DEFAULT") -> float:
         """Return the price of the trade.
 
@@ -174,6 +177,7 @@ class TradePrice(PriceItem):
         """
         return self.trade_price
 
+    @override
     def volume(self, volume_type: str = "DEFAULT") -> float:
         """Return the volume of the trade.
 
@@ -218,6 +222,7 @@ class Bar(PriceItem):
         ohlcv = array("f", [ohlcv[0] * adj, ohlcv[1] * adj, ohlcv[2] * adj, adj_close, ohlcv[4] / adj])
         return cls(asset, ohlcv, frequency)
 
+    @override
     def price(self, price_type: str = "CLOSE") -> float:
         """Return the price for the bar, default being the CLOSE price.
 
@@ -239,6 +244,7 @@ class Bar(PriceItem):
             case _:
                 return self.ohlcv[3]
 
+    @override
     def volume(self, volume_type: str = "DEFAULT") -> float:
         """Return the volume of the bar. A bar has only one type of volume.
 

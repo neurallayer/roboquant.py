@@ -1,4 +1,5 @@
 import logging
+from typing import override
 import ccxt
 from roboquant.account import Account, Position
 from roboquant.asset import Asset, Crypto
@@ -32,6 +33,7 @@ class CryptoBroker(LiveBroker):
         # Default implementation for disconnecting from the crypto exchange
         logger.info("Disconnecting from crypto exchange...")
 
+    @override
     def _place_order(self, order: Order) -> None:
         # Default implementation for placing an order
         side = 'buy' if order.is_buy else 'sell'
@@ -44,6 +46,7 @@ class CryptoBroker(LiveBroker):
         )
         logger.info("result place order order=%s result=%s", order, result)
 
+    @override
     def _get_account(self, event: Event | None = None) -> Account:
         """Sync the account object from the real broker. It requires that following
         methods are supported by your broker:
@@ -59,6 +62,7 @@ class CryptoBroker(LiveBroker):
         account.buying_power = self._get_buying_power()
         return account
 
+    @override
     def _cancel_order(self, order: Order):
         # Default implementation for cancelling a
         order_id = order.id
@@ -111,6 +115,7 @@ class CryptoBroker(LiveBroker):
             result[asset] = p
         return result
 
+    @override
     def _update_order(self, order: Order) -> None:
         raise NotImplementedError
 

@@ -1,7 +1,11 @@
 from typing import override
 
+from roboquant.account import Account
+from roboquant.event import Event
 from roboquant.journals.journal import Journal
 from roboquant.journals.metrics import Metric
+from roboquant.order import Order
+from roboquant.signal import Signal
 
 
 class TensorboardJournal(Journal):
@@ -36,7 +40,7 @@ class TensorboardJournal(Journal):
         self.metrics = metrics
 
     @override
-    def track(self, event, account, signals, orders) -> None:
+    def track(self, event: Event, account: Account, signals: list[Signal], orders: list[Order]) -> None:
         """
         Calculate the metrics and add them to the tensorboard writer.
 
@@ -55,3 +59,5 @@ class TensorboardJournal(Journal):
                 self.__writer.add_scalar(name, value, self._step, wall_time=time)
 
         self._step += 1
+
+
