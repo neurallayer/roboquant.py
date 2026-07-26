@@ -1,0 +1,119 @@
+from roboquant.asset import Asset
+from roboquant.monetary import Amount, Wallet
+
+
+import pandas as pd
+
+
+from collections import UserDict
+from dataclasses import asdict, dataclass
+from decimal import Decimal
+
+
+@dataclass(slots=True)
+class Position:
+    """The position of an asset in the portfolio. The position prices are denoted in the currency of the asset that
+    is linked to this posistion.
+    """
+
+    size: Decimal
+    """Position size as a Decimal with a negative size indicating a short position"""
+
+    avg_price: float
+    """Average price paid denoted in the currency of the asset"""
+
+    mkt_price: float = float("nan")
+    """Latest market price denoted in the currency of the asset"""
+
+    @property
+    def is_short(self):
+        """Return True if this is a short position, False otherwise"""
+        return self.size < 0
+
+    @property
+    def is_long(self):
+        """Return True if this is a long position, False otherwise"""
+        return self.size > 0
+
+    @staticmethod
+    def zero():
+        """Return a zero position size with no known prices"""
+        return Position(Decimal(), 0.0, float("nan"))
+
+
+class Portfolio(UserDict[Asset, Position]):
+    """Contains all the open postions with the corresponding asset"""
+
+    def value(self, asset: Asset) -> Amount:
+        """
+        Return position amount denoted in the base currency of the account. If there is no
+        open position, 0.0 will be returned. Short positions will return a negative value.
+
+        Args:
+            asset (Asset): The asset for which to calculate the position value.
+
+        Returns:
+            float: The position value in the base currency.
+        """
+        pos = self.get(asset) or Position.zero()
+        return asset.amount(pos.size, pos.mkt_price)
+
+    def short_positions(self) -> "Portfolio":
+        """
+        Return all the open short positions in the account.
+
+        Returns:
+            dict[Asset, Position]: A dictionary of assets and their corresponding short positions.
+        """
+        return Portfolio({asset: position for (asset, position) in self.items() if position.is_short})
+
+    def long_positions(self) -> "Portfolio":
+        """
+        Return all the open long positions in the account.
+
+        Returns:
+            dict[Asset, Position]: A dictionary of assets and their corresponding long positions.
+        """
+        return Portfolio({asset: position for (asset, position) in self.items() if position.is_long})
+
+    def unrealized_pnl(self) -> Wallet:
+        """
+        Return the sum of the unrealized profit and loss for the open positions.
+
+        Returns:
+            Wallet: The unrealized profit and loss.
+        """
+        result = Wallet()
+        for asset, position in self.items():
+            result += asset.amount(position.size, position.mkt_price - position.avg_price)
+        return result
+
+    def mkt_value(self) -> Wallet:
+        """
+        Return the sum of the market values of the open positions in the account. Short
+        positions have a negative market value.
+
+        Returns:
+            Wallet: The total market value of all open positions.
+        """
+        result = Wallet()
+        for asset, position in self.items():
+            result += asset.amount(position.size, position.mkt_price)
+        return result
+
+    def to_dataframe(self)-> pd.DataFrame:
+            """Return the positions as a dataframe"""
+            return  pd.json_normalize([asdict(asset) | asdict(pos) for asset, pos in self.items()])
+
+    def size(self, asset: Asset) -> Decimal:
+            """
+            Return the position size for an asset, or zero if there is no open position for that asset.
+
+            Args:
+                asset (Asset): The asset for which to get the position size.
+
+            Returns:
+                Decimal: The position size as a Decimal.
+            """
+            pos = self.get(asset)
+            return pos.size if pos else Decimal()

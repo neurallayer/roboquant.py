@@ -9,7 +9,8 @@ from roboquant import journals
 from roboquant import strategies
 from roboquant import traders
 
-from .account import Account, Position
+from .portfolio import Position, Portfolio
+from .account import Account
 from .event import Event, PriceItem, Bar, TradePrice, Quote
 from .signal import Signal, SignalType
 from .order import Order
@@ -31,6 +32,7 @@ __all__ = [
     "traders",
     "Account",
     "Position",
+    "Portfolio",
     "Event",
     "PriceItem",
     "Bar",

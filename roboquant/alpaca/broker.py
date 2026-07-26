@@ -7,7 +7,8 @@ from alpaca.trading.models import Position as APosition
 from alpaca.trading.models import Order as AOrder
 
 from alpaca.trading.requests import GetOrdersRequest, LimitOrderRequest, ReplaceOrderRequest
-from roboquant.account import Account, Position, Positions
+from roboquant.portfolio import Portfolio, Position
+from roboquant.account import Account
 from roboquant.alpaca.feed import _get_asset
 from roboquant.brokers.broker import LiveBroker, Order
 from roboquant.monetary import Wallet, Amount, USD
@@ -43,7 +44,7 @@ class AlpacaBroker(LiveBroker):
         return orders
 
     def _sync_positions(self):
-        positions = Positions()
+        positions = Portfolio()
         open_pos: list[APosition] = self.__client.get_all_positions()  # type: ignore
 
         for p in open_pos:
@@ -63,7 +64,7 @@ class AlpacaBroker(LiveBroker):
         if acc.cash:
             account.cash = Wallet(Amount(USD, float(acc.cash)))
 
-        account.positions = self._sync_positions()
+        account.portfolio = self._sync_positions()
         account.orders = self._sync_orders()
         return account
 

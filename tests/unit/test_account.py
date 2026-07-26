@@ -1,7 +1,8 @@
 import unittest
 from decimal import Decimal
 
-from roboquant.account import Account, Position
+from roboquant.portfolio import Position
+from roboquant.account import Account
 from roboquant.asset import Stock
 from roboquant.monetary import Wallet, Amount, USD
 from roboquant.timeframe import utcnow
@@ -17,12 +18,12 @@ class TestAccount(unittest.TestCase):
         self.assertEqual(acc.buying_power.value, 0.0)
         self.assertEqual(acc.buying_power.currency, USD)
         self.assertEqual(acc.base_currency, USD)
-        self.assertEqual(acc.positions.unrealized_pnl().convert_to(USD, now), 0.0)
-        self.assertEqual(acc.realized_pnl().convert_to(USD, now), 0.0)
-        self.assertEqual(acc.positions.mkt_value().convert_to(USD, now), 0.0)
-        self.assertEqual(acc.equity_value(), 1_000.0)
+        self.assertEqual(acc.portfolio.unrealized_pnl(), Wallet())
+        self.assertEqual(acc.realized_pnl(), Wallet())
+        self.assertEqual(acc.portfolio.mkt_value(), Wallet())
+        self.assertEqual(acc.equity(), acc.cash)
         self.assertEqual(acc.last_update, now)
-        self.assertEqual(len(acc.positions), 0)
+        self.assertEqual(len(acc.portfolio), 0)
         self.assertEqual(len(acc.trades), 0)
 
     def test_account_with_positions(self):
@@ -31,11 +32,11 @@ class TestAccount(unittest.TestCase):
         acc.cash = Wallet(Amount(USD, 1_000.0))
         for i in range(5):
             symbol = Stock(f"AA${i}")
-            acc.positions[symbol] = Position(Decimal(10), 10.0, 11.0)
+            acc.portfolio[symbol] = Position(Decimal(10), 10.0, 11.0)
 
-        self.assertAlmostEqual(acc.positions.mkt_value().convert_to(USD, now), 5*10*11.0)
+        self.assertAlmostEqual(acc.portfolio.mkt_value().convert_to(USD, now), 5*10*11.0)
         self.assertAlmostEqual(acc.equity_value(), 1_000.0 + (5*10*11.0))
-        self.assertAlmostEqual(acc.positions.unrealized_pnl().convert_to(USD, now), 50.0)
+        self.assertAlmostEqual(acc.portfolio.unrealized_pnl().convert_to(USD, now), 50.0)
 
 
 if __name__ == "__main__":

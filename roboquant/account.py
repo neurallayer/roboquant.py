@@ -1,10 +1,10 @@
-from collections import UserDict
 from dataclasses import dataclass, asdict
 from datetime import datetime
 from decimal import Decimal
 
 import pandas as pd
 
+from roboquant.portfolio import Portfolio
 from roboquant.asset import Asset
 from roboquant.monetary import USD, Amount, Currency, Wallet
 from roboquant.order import Order
@@ -32,114 +32,6 @@ class Trade:
     pnl: float
 
 
-@dataclass(slots=True)
-class Position:
-    """The position of an asset in the account. The position prices are denoted in the currency of the asset that
-    is linked to this posistion. See also :meth:`roboquant.Account.positions`.
-    """
-
-    size: Decimal
-    """Position size as a Decimal with a negative size indicating a short position"""
-
-    avg_price: float
-    """Average price paid denoted in the currency of the asset"""
-
-    mkt_price: float = float("nan")
-    """Latest market price denoted in the currency of the asset"""
-
-    @property
-    def is_short(self):
-        """Return True if this is a short position, False otherwise"""
-        return self.size < 0
-
-    @property
-    def is_long(self):
-        """Return True if this is a long position, False otherwise"""
-        return self.size > 0
-
-    @staticmethod
-    def zero():
-        """Return a zero position size with no known prices"""
-        return Position(Decimal(), 0.0, float("nan"))
-
-
-class Positions(UserDict[Asset, Position]):
-
-    def value(self, asset: Asset) -> Amount:
-        """
-        Return position amount denoted in the base currency of the account. If there is no
-        open position, 0.0 will be returned. Short positions will return a negative value.
-
-        Args:
-            asset (Asset): The asset for which to calculate the position value.
-
-        Returns:
-            float: The position value in the base currency.
-        """
-        pos = self.get(asset) or Position.zero()
-        return asset.amount(pos.size, pos.mkt_price)
-
-    def short_positions(self) -> dict[Asset, Position]:
-        """
-        Return all the open short positions in the account.
-
-        Returns:
-            dict[Asset, Position]: A dictionary of assets and their corresponding short positions.
-        """
-        return {asset: position for (asset, position) in self.items() if position.is_short}
-
-    def long_positions(self) -> dict[Asset, Position]:
-        """
-        Return all the open long positions in the account.
-
-        Returns:
-            dict[Asset, Position]: A dictionary of assets and their corresponding long positions.
-        """
-        return {asset: position for (asset, position) in self.items() if position.is_long}
-
-    def unrealized_pnl(self) -> Wallet:
-        """
-        Return the sum of the unrealized profit and loss for the open positions.
-
-        Returns:
-            Wallet: The unrealized profit and loss.
-        """
-        result = Wallet()
-        for asset, position in self.items():
-            result += asset.amount(position.size, position.mkt_price - position.avg_price)
-        return result
-
-    def mkt_value(self) -> Wallet:
-        """
-        Return the sum of the market values of the open positions in the account. Short
-        positions have a negative market value.
-
-        Returns:
-            Wallet: The total market value of all open positions.
-        """
-        result = Wallet()
-        for asset, position in self.items():
-            result += asset.amount(position.size, position.mkt_price)
-        return result
-
-    def to_dataframe(self)-> pd.DataFrame:
-            """Return the positions as a dataframe"""
-            return  pd.json_normalize([asdict(asset) | asdict(pos) for asset, pos in self.items()])
-
-    def size(self, asset: Asset) -> Decimal:
-            """
-            Return the position size for an asset, or zero if there is no open position for that asset.
-
-            Args:
-                asset (Asset): The asset for which to get the position size.
-
-            Returns:
-                Decimal: The position size as a Decimal.
-            """
-            pos = self.get(asset)
-            return pos.size if pos else Decimal()
-
-
 @dataclass
 class Account:
     """Represents a trading account. The account maintains the following state during a run:
@@ -155,7 +47,7 @@ class Account:
     Only the `broker` updates the account and does this only during its `sync` method.
     """
 
-    __slots__ = "buying_power", "positions", "orders", "last_update", "cash", "trades"
+    __slots__ = "buying_power", "portfolio", "orders", "last_update", "cash", "trades"
 
     def __init__(self, base_currency: Currency = USD):
         """
@@ -165,7 +57,7 @@ class Account:
             base_currency (Currency): The base currency of the account, defaults to USD.
         """
         self.buying_power: Amount = Amount(base_currency, 0.0)
-        self.positions: Positions = Positions()
+        self.portfolio: Portfolio = Portfolio()
         self.orders: list[Order] = []
         self.last_update: datetime = datetime.fromisoformat("1900-01-01T00:00:00+00:00")
         self.cash: Wallet = Wallet()
@@ -211,11 +103,11 @@ class Account:
         Returns:
             Wallet: The equity of the account.
         """
-        return self.cash + self.positions.mkt_value()
+        return self.cash + self.portfolio.mkt_value()
 
     def equity_value(self) -> float:
         """
-        Return the equity value denoted in the base currency of the account.x
+        Return the equity value denoted in the base currency of the account.
 
         Returns:
             float: The equity value in the base currency.
@@ -237,12 +129,12 @@ class Account:
     def pnl(self) -> Wallet:
         """
         Return the total profit and loss of the account, which is
-        the sum of realized and unrealized PnL.
+        the sum of realized- and unrealized-PnL.
 
         Returns:
             Wallet: The total profit and loss.
         """
-        return self.realized_pnl() + self.positions.unrealized_pnl()
+        return self.realized_pnl() + self.portfolio.unrealized_pnl()
 
     def get_order(self, order_id: str) -> Order | None:
         """Return an order by its id, or None if no matching order can be found"""
@@ -266,13 +158,13 @@ class Account:
         Returns:
             str: The formatted string representation.
         """
-        p = [f"{v.size}@{k.symbol}" for k, v in self.positions.items()]
+        p = [f"{v.size}@{k.symbol}" for k, v in self.portfolio.items()]
         p_str = ", ".join(p) or "none"
 
         o = [f"{o.size}@{o.asset.symbol}" for o in self.orders]
         o_str = ", ".join(o) or "none"
 
-        mkt = self.positions.mkt_value() or Amount(self.base_currency, 0.0)
+        mkt = self.portfolio.mkt_value() or Amount(self.base_currency, 0.0)
 
         result = (
             f"buying power : {self.buying_power:{format_spec}}\n"
@@ -285,7 +177,6 @@ class Account:
             f"last update  : {self.last_update}"
         )
         return result
-
 
     def trades_to_dataframe(self) -> pd.DataFrame:
         """Return the trades as a dataframe"""

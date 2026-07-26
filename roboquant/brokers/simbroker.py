@@ -4,7 +4,8 @@ from dataclasses import replace
 import logging
 from typing import override
 
-from roboquant.account import Account, Position, Trade
+from roboquant.portfolio import Position
+from roboquant.account import Account, Trade
 from roboquant.asset import Asset
 from roboquant.brokers.broker import Broker
 from roboquant.event import Event, Quote, PriceItem
@@ -73,10 +74,10 @@ class SimBroker(Broker):
         """update position based on a fill and return the realized pnl"""
         assert fill != 0, "fill cannot be zero"
 
-        pos = self._account.positions.get(asset)
+        pos = self._account.portfolio.get(asset)
         if pos is None:
             pos = Position.zero()
-            self._account.positions[asset] = pos
+            self._account.portfolio[asset] = pos
 
         new_size = pos.size + fill
 
@@ -99,7 +100,7 @@ class SimBroker(Broker):
             pos.size = new_size
             pos.avg_price = avg_price
         else:
-            del self._account.positions[asset]
+            del self._account.portfolio[asset]
 
         return pnl
 
@@ -144,7 +145,7 @@ class SimBroker(Broker):
     def _update_account_positions(self, event: Event) -> None:
         """Update the account with the latest market prices found in the event"""
 
-        for asset, pos in self._account.positions.items():
+        for asset, pos in self._account.portfolio.items():
             if price := event.get_price(asset, self.price_type):
                 pos.mkt_price = price
 
@@ -226,7 +227,7 @@ class SimBroker(Broker):
 
     def _calculate_short_positions(self) -> Wallet:
         reserved = Wallet()
-        for asset, position in self._account.positions.short_positions().items():
+        for asset, position in self._account.portfolio.short_positions().items():
             short_value = asset.amount(-position.size, position.mkt_price)
             reserved += short_value
         return reserved

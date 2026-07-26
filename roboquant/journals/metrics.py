@@ -6,7 +6,8 @@ from typing import Tuple, override
 
 import numpy as np
 
-from roboquant.account import Account, Position
+from roboquant.account import Account
+from roboquant.portfolio import Position
 from roboquant.asset import Asset
 from roboquant.event import Event
 from roboquant.monetary import USD, Amount, Wallet
@@ -75,7 +76,7 @@ class PNLMetric(Metric):
         if self.first_equity is None:
             self.first_equity = equity
 
-        unrealized = account.convert(account.positions.unrealized_pnl())
+        unrealized = account.convert(account.portfolio.unrealized_pnl())
         total = equity - self.first_equity
         realized = total - unrealized
         return total, realized, unrealized

@@ -16,7 +16,7 @@ print(account)
 open_order_assets = {order.asset for order in account.orders}
 orders = [
     Order(asset, -pos.size, round(pos.mkt_price, 2))
-    for asset, pos in account.positions.items()
+    for asset, pos in account.portfolio.items()
     if asset not in open_order_assets
 ]
 
