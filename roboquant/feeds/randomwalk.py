@@ -32,8 +32,8 @@ class RandomWalk(InMemoryFeed):
     ):
         # pylint: disable=too-many-locals
         super().__init__()
-        rnd = np.random.default_rng(seed)
-        assets = self.__get_assets(rnd, n_symbols, symbol_len)
+        self._rnd = np.random.default_rng(seed)
+        assets = self.__get_assets(n_symbols, symbol_len)
         assert len(assets) == n_symbols
 
         start_date = start_date if isinstance(start_date, datetime) else datetime.fromisoformat(str(start_date))
@@ -51,7 +51,7 @@ class RandomWalk(InMemoryFeed):
                 raise ValueError("unsupported item_type", price_type)
 
         for asset in assets:
-            prices = self.__price_path(rnd, n_prices, price_dev, start_price_min, start_price_max)
+            prices = self.__price_path(n_prices, price_dev, start_price_min, start_price_max)
             for i in range(n_prices):
                 item = item_gen(asset, prices[i], volume, spread_dev)
                 self._add_item(timeline[i], item)
@@ -76,24 +76,22 @@ class RandomWalk(InMemoryFeed):
         bid = price - spread
         return Quote(asset, array("f", [price, ask, volume, bid, volume]))
 
-    @staticmethod
     def __get_assets(
-        rnd,
-        n_symbols,
-        symbol_len,
+        self,
+        n_symbols: int,
+        symbol_len: int,
     ) -> list[Asset]:
         assets = set()
         alphabet = np.array(list(string.ascii_uppercase))
         while len(assets) < n_symbols:
-            symbol = "".join(rnd.choice(alphabet, size=symbol_len))
+            symbol = "".join(self._rnd.choice(alphabet, size=symbol_len))
             asset = Stock(symbol)
             assets.add(asset)
         return list(assets)
 
-    @staticmethod
-    def __price_path(rnd, n, scale, min_price: float, max_price: float):
-        change = rnd.normal(loc=1.0, scale=scale, size=(n,))
-        change[0] = rnd.uniform(min_price, max_price)
+    def __price_path(self, n: int, scale: float, min_price: float, max_price: float):
+        change = self._rnd.normal(loc=1.0, scale=scale, size=(n,))
+        change[0] = self._rnd.uniform(min_price, max_price)
         price = change.cumprod()
         price[price < 0.01] = 0.01
         return price

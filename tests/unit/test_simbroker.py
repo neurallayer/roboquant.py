@@ -1,3 +1,4 @@
+import math
 import unittest
 from datetime import datetime, timezone
 from decimal import Decimal
@@ -36,6 +37,7 @@ class TestSimbroker(unittest.TestCase):
         account = run(feed, strategy, broker=broker)
         equity = account.equity()[USD]
         equity2 = (account.pnl() + broker.deposit)[USD]
+        self.assertTrue(math.isfinite(equity))
         self.assertTrue(equity != 0)
         self.assertAlmostEqual(equity, equity2)
 
