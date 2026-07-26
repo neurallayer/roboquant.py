@@ -14,7 +14,7 @@ feed = rq.feeds.YahooFeed.us_stocks_10()
 
 # %% [markdown]
 # Plot a price chart for one of the assets in the feed
-_ = feed.plot("MSFT", linewidth=0.5, color="grey")
+_ = feed.plot("MSFT")
 
 # %%
 strategy = rq.strategies.EMACrossover()

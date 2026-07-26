@@ -12,17 +12,20 @@ from typing import List, override
 class ScoreCard(Journal):
     """Tracks progress of a run so it can be plotted using matplotlib charts afterwards.
     It will track the following aspects:
-    - the price of the assets
+    - the price and volume of the assets
     - the trades for the asset as markers on the price chart
     - any additional metric that has been provided
 
-    This works best on smaller runs with a limited number of assets and orders.
+    This works best on smaller runs with a limited number of assets and trades.
     """
 
-    def __init__(self, *metrics: Metric, include_prices: bool = True, price_type: str = "DEFAULT") -> None:
+    def __init__(
+        self, *metrics: Metric, include_prices: bool = True, price_type: str = "DEFAULT", volume_type: str = "DEFAULT"
+    ) -> None:
         super().__init__()
         self._include_prices = include_prices
         self._price_type = price_type
+        self._volume_type = volume_type
         self._step = 0
         self.metrics = metrics
         self._feed = InMemoryFeed()
@@ -32,8 +35,10 @@ class ScoreCard(Journal):
     @override
     def track(self, event: Event, account: Account, signals: List[Signal], orders: List[Order]) -> None:
         if self._include_prices:
-            for asset, price in event.get_prices(self._price_type).items():
-                self._feed._add_item(event.time, TradePrice(asset, price))
+            for asset, item in event.price_items.items():
+                price = item.price(self._price_type)
+                volume = item.volume(self._volume_type)
+                self._feed._add_item(event.time, TradePrice(asset, price, volume))
 
         self._trades = account.trades
         self._journal.track(event, account, signals, orders)
@@ -44,21 +49,21 @@ class ScoreCard(Journal):
         - metrics that have been configured and captured.
         """
         from matplotlib import pyplot as plt
-        self._feed._update()
 
         if self._include_prices:
+            self._feed._update()
             assets = self._feed.assets()
             rows = len(assets) // 2 + len(assets) % 2
 
-            _ , axs = plt.subplots(rows, 2, figsize=(20, 3 * len(assets)))
+            _, axs = plt.subplots(rows, 2, figsize=(20, 3 * len(assets)))
 
             for ax, asset in zip(axs.flatten(), assets):
                 ax.grid(True, color="grey", linestyle="--")
-                self._feed.plot(asset, ax = ax, trades = self._trades, linewidth=1)
+                self._feed.plot(asset, ax=ax, trades=self._trades)
 
         metric_names = self._journal.get_metric_names()
         rows = len(metric_names) // 2 + len(metric_names) % 2
-        _ , axs = plt.subplots(rows, 2, figsize=(20, 3 * len(metric_names)))
+        _, axs = plt.subplots(rows, 2, figsize=(20, 3 * len(metric_names)))
 
         for ax, name in zip(axs.flatten(), metric_names):
             ax.grid(True, color="grey", linestyle="--")

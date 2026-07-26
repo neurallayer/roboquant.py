@@ -114,9 +114,11 @@ class HistoricFeed(Feed, ABC):
         self,
         asset: Asset | str,
         price_type: str = "DEFAULT",
+        volume_type: str = "DEFAULT",
         timeframe: Timeframe | None = None,
         ax = None,
         trades: list[Trade] | None = None,
+        plot_volume: bool = True,
         **kwargs: Any,
     ):
         """
@@ -139,7 +141,19 @@ class HistoricFeed(Feed, ABC):
         if isinstance(asset, str):
             asset = self.get_asset(asset)
 
-        ts = self.get_prices(asset, price_type, timeframe)
+        t : list[datetime] = []
+        p : list[float] = []
+        v : list[float] = []
+
+        if isinstance(asset, str):
+            asset = self.get_asset(asset)
+
+        for event in self.play(timeframe):
+            if item := event.price_items.get(asset):
+                t.append(event.time)
+                p.append(item.price(price_type))
+                v.append(item.volume(volume_type))
+
         if not ax:
             from matplotlib import pyplot as plt
             _, ax = plt.subplots(figsize=(15,8))
@@ -148,10 +162,14 @@ class HistoricFeed(Feed, ABC):
         if not kwargs:
             kwargs = {"linewidth": 1}
 
-        ax.plot(ts.timeline, ts.data, **kwargs)  # type: ignore
+        ax.plot(t, p, **kwargs)  # type: ignore
 
-        if trades:
-            tf = ts.timeframe()
+        if plot_volume:
+            ax2 = ax.twinx()
+            ax2.bar(t, v, alpha=0.3, color = "grey") # type: ignore
+
+        if trades and t:
+            tf = Timeframe(t[0], t[-1], True)
             trades = [t for t in trades if t.asset == asset and t.time in tf]
 
             buy = [t for t in trades if t.size > 0]
@@ -199,6 +217,8 @@ class HistoricFeed(Feed, ABC):
                 x.append(event.time)
                 y.append(price)
         return TimeSeries(asset.symbol, x, y)
+
+
 
 
 class InMemoryFeed(HistoricFeed):
