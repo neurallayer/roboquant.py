@@ -26,6 +26,8 @@ class NumpyBuffer:
 
     def append(self, data: array | NDArray | list | tuple | Sequence[float]) -> bool:
         """Append data to this buffer. Return True if the buffer is full, False otherwise"""
+
+        # Check if buffer is overflowing
         if self.__idx >= len(self.__data):
             self.__data[0 : self.rows] = self.__data[-self.rows :]
             self.__idx = self.rows
@@ -56,7 +58,8 @@ class NumpyBuffer:
 
 class OHLCVBuffer(NumpyBuffer):
     """A OHLCV buffer (first-in-first-out) of a fixed capacity.
-    It stores the data in a `NumpyBuffer` with 5 columns (open, high, low, close, volume).
+    It stores the data in a `NumpyBuffer` with 5 columns (open, high, low, close, volume)
+    and has utilitiy methods to get the OHLVC values.
     """
 
     def __init__(self, capacity: int) -> None:
@@ -84,8 +87,8 @@ class OHLCVBuffer(NumpyBuffer):
         return self._get(4)
 
 
-class OHLCVBuffers(UserDict[Asset, OHLCVBuffer]):
-    """A map of OHLCV buffers that tracks multiple assets"""
+class AssetBuffers(UserDict[Asset, OHLCVBuffer]):
+    """Keep track of OHLCV buffers for all assets in an event."""
 
     def __init__(self, size: int):
         super().__init__()
@@ -96,7 +99,8 @@ class OHLCVBuffers(UserDict[Asset, OHLCVBuffer]):
         - had a priceitem of the type `Bar` (so have been added)
         - and are ready to be processed (so a full buffer)
 
-        Note that `PriceItems` in the event that are not of the type `Bar` are ignored.
+        Note that `PriceItems` in the event that are not of the type `Bar`
+        are ignored.
         """
         assets: set[Asset] = set()
         for item in event.items:

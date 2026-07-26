@@ -3,7 +3,7 @@ from abc import abstractmethod
 from roboquant.asset import Asset
 from roboquant.event import Event
 from roboquant.signal import Signal
-from roboquant.strategies.buffer import OHLCVBuffers, OHLCVBuffer
+from roboquant.strategies.buffer import AssetBuffers, OHLCVBuffer
 from roboquant.strategies.strategy import Strategy
 
 
@@ -17,7 +17,7 @@ class TaStrategy(Strategy):
 
     def __init__(self, period: int) -> None:
         super().__init__()
-        self._data = OHLCVBuffers(period)
+        self._data = AssetBuffers(period)
         self.period = period
 
     def create_signals(self, event: Event) -> list[Signal]:
@@ -59,7 +59,7 @@ class TaMultiAssetStrategy(Strategy):
 
     def __init__(self, period: int) -> None:
         super().__init__()
-        self._data = OHLCVBuffers(period)
+        self._data = AssetBuffers(period)
         self.period = period
 
     def create_signals(self, event: Event) -> list[Signal]:
