@@ -32,11 +32,14 @@ class TimeSeries:
         return Timeframe(self.timeline[0], self.timeline[-1], True) if len(self) > 0 else Timeframe.EMPTY
 
     def plot(self, plot_timeline: bool = True, ax = None, **kwargs: Any):
-        """Plot the time series. Optional a `matplotlib.axes.Axes` can be provided
-        This method requires matplotlib to be installed."""
+        """Plot the time series. Optional a `matplotlib.axes.Axes` can be provided."""
         if ax is None:
             from matplotlib import pyplot as plt
-            _, ax = plt.subplots()
+            _, ax = plt.subplots(figsize=(15,8))
+            ax.grid(True)
+
+        if not kwargs:
+            kwargs = {"linewidth": 1}
 
         if plot_timeline:
             ax.plot(self.timeline, self.data, **kwargs)  # type: ignore

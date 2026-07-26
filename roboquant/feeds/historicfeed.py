@@ -1,7 +1,7 @@
 from abc import ABC, abstractmethod
 from datetime import datetime
 from itertools import chain
-from typing import Iterator, Sequence, override
+from typing import Any, Iterator, Sequence, override
 
 from roboquant.account import Trade
 from roboquant.asset import Asset
@@ -117,7 +117,7 @@ class HistoricFeed(Feed, ABC):
         timeframe: Timeframe | None = None,
         ax = None,
         trades: list[Trade] | None = None,
-        **kwargs,
+        **kwargs: Any,
     ):
         """
         Plots the prices of a single asset. This function requires matplotlib to be installed.
@@ -142,7 +142,11 @@ class HistoricFeed(Feed, ABC):
         ts = self.get_prices(asset, price_type, timeframe)
         if not ax:
             from matplotlib import pyplot as plt
-            _, ax = plt.subplots()
+            _, ax = plt.subplots(figsize=(15,8))
+            ax.grid(True)
+
+        if not kwargs:
+            kwargs = {"linewidth": 1}
 
         ax.plot(ts.timeline, ts.data, **kwargs)  # type: ignore
 
