@@ -30,7 +30,7 @@ class BarAggregatorFeed(Feed):
         self.continuation = continuation
         self.price_type = price_type
 
-    def __aggr_trade2bar(self, evt: Event, bars: dict[Asset, Bar], freq: str):
+    def __aggregate_trade2bar(self, evt: Event, bars: dict[Asset, Bar], freq: str):
         for item in evt.items:
             if self.price_type == "trade" and isinstance(item, TradePrice):
                 price = item.trade_price
@@ -77,7 +77,7 @@ class BarAggregatorFeed(Feed):
                 bars = {} if not self.continuation else self.__get_continued_bars(bars)
                 next_time += self.freq
 
-            self.__aggr_trade2bar(event, bars, bar_freq)
+            self.__aggregate_trade2bar(event, bars, bar_freq)
 
         if bars and self.send_remaining and next_time:
             items = list(bars.values())

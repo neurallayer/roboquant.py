@@ -101,15 +101,15 @@ class FlexTrader(Trader):
 
     - one_order_only: don't create new orders for an asset if there is already an open orders for that same asset
     - size_fractions: enable fractional order sizes (if size_fractions is larger than 0), default is 0
-    - safety_margin_perc: the safety margin as percentage of equity that should remain available (to avoid margin calls),
+    - safety_margin_pct: the safety margin as percentage of equity that should remain available (to avoid margin calls),
     default is 0.05 (5%)
-    - max_position_perc: the max percentage of the equity to allocate to a single position, default is 0.1 (10%)
-    - max_order_perc: the max percentage of the equity to allocate to a new order, default is 0.05 (5%)
-    - min_order_perc: the min percentage of the equity to allocate to a new order, default is 0.02 (2%)
+    - max_position_pct: the max percentage of the equity to allocate to a single position, default is 0.1 (10%)
+    - max_order_pct: the max percentage of the equity to allocate to a new order, default is 0.05 (5%)
+    - min_order_pct: the min percentage of the equity to allocate to a new order, default is 0.02 (2%)
     - shorting: allow orders that could result in a short position, default is false
     - price_type: the price type to use when determining order value, for example "CLOSE". Default is "DEFAULT"
     - shuffle_signals: shuffle the signals before processing them, default is false
-    - limit_offset_perc: the offset as percentage for the order limit price. A value of 0.01 means the limit price will be
+    - limit_offset_pct: the offset as percentage for the order limit price. A value of 0.01 means the limit price will be
     1% below market price for buy orders and 1% above the market price for SELL orders. Default is 0.0.
     - tif: the time-in-force policy to use, default is `DAY`
 
@@ -125,27 +125,27 @@ class FlexTrader(Trader):
         self,
         one_order_only: bool = True,
         size_fractions: int = 0,
-        safety_margin_perc: float = 0.05,
+        safety_margin_pct: float = 0.05,
         shorting: bool = False,
-        max_order_perc: float = 0.05,
-        min_order_perc: float = 0.02,
-        max_position_perc: float = 0.1,
+        max_order_pct: float = 0.05,
+        min_order_pct: float = 0.02,
+        max_position_pct: float = 0.1,
         price_type: str = "DEFAULT",
         shuffle_signals: bool = False,
-        limit_offset_perc: float = 0.0,
+        limit_offset_pct: float = 0.0,
         tif: Literal["DAY", "GTC"] = "DAY"
     ) -> None:
         super().__init__()
         self.one_order_only = one_order_only
         self.size_digits: int = size_fractions
-        self.safety_margin_perc: float = safety_margin_perc
+        self.safety_margin_pct: float = safety_margin_pct
         self.shorting = shorting
-        self.max_order_perc = max_order_perc
-        self.min_order_perc = min_order_perc
-        self.max_position_perc = max_position_perc
+        self.max_order_pct = max_order_pct
+        self.min_order_pct = min_order_pct
+        self.max_position_pct = max_position_pct
         self.price_type = price_type
         self.shuffle_signals = shuffle_signals
-        self.limit_offset_perc: float = limit_offset_perc
+        self.limit_offset_pct: float = limit_offset_pct
         self.tif: Literal["DAY", "GTC"] = tif
 
     def _get_order_size(self, rating: float, contract_price: float, max_order_value: float) -> Decimal:
@@ -165,10 +165,10 @@ class FlexTrader(Trader):
 
         orders: list[Order] = []
         equity = account.equity_value()
-        max_order_value = equity * self.max_order_perc
-        min_order_value = equity * self.min_order_perc
-        max_pos_value = equity * self.max_position_perc
-        available = account.buying_power.value - self.safety_margin_perc * equity
+        max_order_value = equity * self.max_order_pct
+        min_order_value = equity * self.min_order_pct
+        max_pos_value = equity * self.max_position_pct
+        available = account.buying_power.value - self.safety_margin_pct * equity
         order_assets = {order.asset for order in account.orders}
         ctx = _Context(event.time)
 
@@ -267,7 +267,7 @@ class FlexTrader(Trader):
 
         Overwrite this method if you want to implement different logic.
         """
-        multiplier = 1.0 - self.limit_offset_perc if size > 0 else 1.0 + self.limit_offset_perc
+        multiplier = 1.0 - self.limit_offset_pct if size > 0 else 1.0 + self.limit_offset_pct
         price = item.price(self.price_type) * multiplier
         limit = round(price, 2)
         result = [Order(asset, size, limit, self.tif)]

@@ -18,7 +18,7 @@ for asset in feed.assets():
 
 # %%
 strategy = rq.strategies.EMACrossover()
-trader = rq.traders.FlexTrader(size_fractions=4, max_order_perc=0.2, max_position_perc=0.5, shorting=True)
+trader = rq.traders.FlexTrader(size_fractions=4, max_order_pct=0.2, max_position_pct=0.5, shorting=True)
 broker = rq.brokers.SimBroker(deposit=10_000@USDT)
 account = rq.run(feed, strategy, trader=trader, broker=broker)
 print(account)

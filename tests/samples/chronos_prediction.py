@@ -89,7 +89,7 @@ class ChronosStrategy(rq.strategies.TaStrategy):
 # %%
 # Perform a backtest using the strategy
 strategy = ChronosStrategy(pipeline, prediction_length=prediction_days)
-trader = rq.traders.FlexTrader(max_order_perc=0.1, max_position_perc=0.8)
+trader = rq.traders.FlexTrader(max_order_pct=0.1, max_position_pct=0.8)
 account = rq.run(feed, strategy, trader=trader)
 print(account)
 

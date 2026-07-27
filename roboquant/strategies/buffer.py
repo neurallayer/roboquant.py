@@ -58,7 +58,7 @@ class NumpyBuffer:
 class OHLCVBuffer(NumpyBuffer):
     """A OHLCV buffer (first-in-first-out) of a fixed capacity.
     It stores the data in a `NumpyBuffer` with 5 columns (open, high, low, close, volume)
-    and has utilitiy methods to get the OHLVC values.
+    and has utility methods to get the OHLCV values.
     """
 
     def __init__(self, capacity: int) -> None:

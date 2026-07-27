@@ -15,7 +15,7 @@ from roboquant.order import Order
 @dataclass(slots=True)
 class Position:
     """The position of an asset in the portfolio. The position prices are denoted in the currency of the asset that
-    is linked to this posistion.
+    is linked to this position.
     """
 
     size: Decimal
@@ -81,7 +81,7 @@ class Portfolio(UserDict[Asset, Position]):
     def unrealized_pnl(self) -> Wallet:
         """
         Return the sum of the unrealized profit and loss for the open positions.
-        This includes both long- and short-positions
+        This includes both long- and short-positions.
 
         Returns:
             Wallet: The unrealized profit and loss.

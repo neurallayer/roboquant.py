@@ -168,7 +168,7 @@ class Forex(Asset):
 
     @staticmethod
     def from_symbol(symbol: str) -> "Forex":
-        """Create a Forex asset from a symbol string. The last part of the symbol is assumed to be the
+        """Create a `Forex` asset from a symbol string. The last part of the symbol is assumed to be the
         currency.
 
         Args:

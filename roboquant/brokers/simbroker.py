@@ -39,7 +39,7 @@ class SimBroker(Broker):
             slippage: The slippage to use for the execution, a percentage value. Default is 0% (0.0)
             timezone: The timezone to use for to determine order expiration when the time in force for
                 an order is set to `DAY`. Default is UTC.
-            fee: Any additional fee or commmision that applies to each order execution.
+            fee: Any additional fee or commmission that applies to each order execution.
         """
 
         super().__init__()
@@ -60,7 +60,7 @@ class SimBroker(Broker):
         self._order_entry: dict[str, date] = {}
 
     def _fee(self, asset: Asset, fill: Decimal, price: float, time: datetime) -> float:
-        """Calculate any additional fee or commision, the default is zero.
+        """Calculate any additional fee or commission, the default is zero.
 
         This is additional to any configured slippage. The slippage
         changes the execution price of the order while the fee only

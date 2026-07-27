@@ -1,19 +1,25 @@
 {
     "cSpell.words": [
         "annualize",
+        "ccxt",
         "dataframe",
+        "dotenv",
         "dtype",
+        "eurofxref",
+        "Forex",
         "hstack",
         "ibkr",
+        "ndigits",
         "ohlcv",
         "optim",
         "pnlmetric",
         "prettytable",
+        "pydatetime",
         "roboquant",
         "stooq",
         "Tensorboard",
-        "Tiingo",
-        "timeframes"
+        "timeframes",
+        "twinx"
     ],
     "python.testing.unittestArgs": [
         "-v",

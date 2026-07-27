@@ -65,8 +65,8 @@ class ParquetFeed(HistoricFeed):
                 assets = batch.column("asset")
                 prices = batch.column("prices")
                 types = batch.column("type")
-                freqs = batch.column("freq")
-                for n, a, p, t, f in zip(times, assets, prices, types, freqs):
+                frequencies = batch.column("freq")
+                for n, a, p, t, f in zip(times, assets, prices, types, frequencies):
                     if n != last_time:
                         if items:
                             now = last_time.as_py()
