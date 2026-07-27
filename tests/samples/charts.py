@@ -9,6 +9,8 @@ import roboquant as rq
 import roboquant.journals.metrics
 from roboquant.journals.report import Report
 
+plt.style.use("dark_background")
+
 # %%
 feed = rq.feeds.YahooFeed.us_stocks_10()
 
@@ -48,22 +50,22 @@ for timeframe in timeframes:
 
 # %%
 # Run 50 1-year back tests and plot the equity curve for each run on the same chart.
-# This provides insights how the results are distrubuted and what to expect.
+# This provides insights how the results are distributed and what to expect.
 
 
-timeframes = feed.timeframe().sample(30, "365 days")
-_, ax = plt.subplots()
+timeframes = feed.timeframe().sample(100, "365 days")
+_, ax = plt.subplots(figsize=(16,10))
 
 for timeframe in timeframes:
     strategy = rq.strategies.EMACrossover()
     journal = rq.journals.MetricsJournal.pnl()
     rq.run(feed, strategy, journal=journal, timeframe=timeframe)
     equity = journal.get_metric("pnl/equity")
-    equity.plot(plot_timeline=False, ax=ax, linewidth=0.5, color="grey")
+    equity.plot(plot_timeline=False, ax=ax, linewidth=0.5, color="grey", alpha=0.5)
 
 
 # %% [markdown]
-# Report enables to publication of matlplotlib charts. They can be saved
+# Report enables to publication of mathplotlib charts. They can be saved
 # as a single self-contained PDF file or HTML file.
 
 # %%
@@ -93,7 +95,7 @@ report.save_as_html("/tmp/report.html")
 # Using the scorecard journal
 strategy = rq.strategies.EMACrossover()
 asset = feed.assets()[0]
-scorecard = rq.journals.ScoreCard(roboquant.journals.metrics.PNLMetric(), include_prices=True)
+scorecard = rq.journals.Scorecard(roboquant.journals.metrics.PNLMetric(), include_prices=True)
 rq.run(feed, strategy, journal=scorecard)
 scorecard.plot()
 

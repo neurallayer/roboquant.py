@@ -1,6 +1,6 @@
 from .buffer import NumpyBuffer, OHLCVBuffer
 from .tastrategy import TaStrategy, TaMultiAssetStrategy
-from .emacrossover import EMACrossover
+from .ema_crossover import EMACrossover
 from .ibsstrategy import IBSStrategy
 from .multistrategy import MultiStrategy
 from .strategy import Strategy

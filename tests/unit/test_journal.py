@@ -3,9 +3,9 @@ import unittest
 from roboquant.timeseries import TimeSeries
 from roboquant.journals import MetricsJournal
 from roboquant.journals.metrics import AssetMetric, MarketMetric, PNLMetric, RunMetric
-from roboquant.strategies.emacrossover import EMACrossover
+from roboquant.strategies.ema_crossover import EMACrossover
 from roboquant.run import run
-from roboquant.journals.scorecard import ScoreCard
+from roboquant.journals.scorecard import Scorecard
 from tests.common import get_feed
 
 
@@ -14,7 +14,7 @@ class TestJournal(unittest.TestCase):
     def test_scorecard(self):
         feed = get_feed()
         strategy = EMACrossover()
-        journal = ScoreCard(RunMetric())
+        journal = Scorecard(RunMetric())
         run(feed, strategy, journal=journal)
         journal.plot()
 

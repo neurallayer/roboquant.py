@@ -162,7 +162,7 @@ class TradePrice(PriceItem):
     trade_price: float
     """The price of the trade"""
 
-    trade_volume: float = float("nan")
+    trade_volume: float
     """The volume of the trade"""
 
     @override

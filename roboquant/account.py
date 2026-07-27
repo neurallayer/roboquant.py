@@ -40,7 +40,8 @@ class Account:
         buying_power (Amount): Available buying power for orders in the base currency of the account.
         cash (Wallet): The cash available in the account.
         positions (Dict[Asset, Position]): the open positions, each denoted in the currency of the asset.
-        orders (list[Order]): the open orders, each denoted in the currency of the asset.
+        orders (list[Order]): the open orders, each denoted in the currency of the asset. Each order in
+            this list has an id assigned to it.
         trades (list[Trade]): the trades that have been executed, each denoted in the currency of the asset.
         last_update (datetime): The last time the account was updated.
 

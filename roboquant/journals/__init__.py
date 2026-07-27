@@ -4,7 +4,7 @@ from roboquant.journals.basicjournal import BasicJournal
 from roboquant.journals.metrics import Metric, PNLMetric, PriceMetric, RunMetric, AssetMetric, MarketMetric
 from roboquant.journals.metricsjournal import MetricsJournal
 from roboquant.journals.tensorboard import TensorboardJournal
-from roboquant.journals.scorecard import ScoreCard
+from roboquant.journals.scorecard import Scorecard
 
 __all__ = [
     "AlphaBeta",
@@ -18,5 +18,5 @@ __all__ = [
     "PriceMetric",
     "RunMetric",
     "TensorboardJournal",
-    "ScoreCard"
+    "Scorecard"
 ]

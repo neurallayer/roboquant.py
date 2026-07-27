@@ -7,10 +7,11 @@ from alpaca.trading.models import Position as APosition
 from alpaca.trading.models import Order as AOrder
 
 from alpaca.trading.requests import GetOrdersRequest, LimitOrderRequest, ReplaceOrderRequest
+from roboquant.order import Order
 from roboquant.portfolio import Portfolio, Position
 from roboquant.account import Account
-from roboquant.alpaca.alpacafeed import _get_asset
-from roboquant.brokers.broker import LiveBroker, Order
+from roboquant.alpaca.alpaca_feed import _get_asset
+from roboquant.brokers.broker import LiveBroker
 from roboquant.monetary import Wallet, Amount, USD
 
 logger = logging.getLogger(__name__)
@@ -27,7 +28,7 @@ class AlpacaBroker(LiveBroker):
         self.__client = TradingClient(api_key, secret_key)
 
     def _sync_orders(self):
-        orders: list[Order] = []
+        orders = []
         request = GetOrdersRequest(status=QueryOrderStatus.OPEN)
         alpaca_orders: list[AOrder] = self.__client.get_orders(request)  # type: ignore
         for alpaca_order in alpaca_orders:

@@ -1,7 +1,7 @@
 from roboquant.feeds.historicfeed import InMemoryFeed
 from roboquant.journals.journal import Journal
 from roboquant.journals.metrics import Metric
-from roboquant.event import Event, TradePrice
+from roboquant.event import Event
 from roboquant.account import Account
 from roboquant.journals.metricsjournal import MetricsJournal
 from roboquant.signal import Signal
@@ -9,7 +9,7 @@ from roboquant.order import Order
 from typing import List, override
 
 
-class ScoreCard(Journal):
+class Scorecard(Journal):
     """Tracks progress of a run so it can be plotted using matplotlib charts afterwards.
     It will track the following aspects:
     - the price and volume of the assets
@@ -35,10 +35,8 @@ class ScoreCard(Journal):
     @override
     def track(self, event: Event, account: Account, signals: List[Signal], orders: List[Order]) -> None:
         if self._include_prices:
-            for asset, item in event.price_items.items():
-                price = item.price(self._price_type)
-                volume = item.volume(self._volume_type)
-                self._feed._add_item(event.time, TradePrice(asset, price, volume))
+            for item in event.price_items.values():
+                self._feed._add_item(event.time, item)
 
         self._trades = account.trades
         self._journal.track(event, account, signals, orders)
@@ -59,7 +57,7 @@ class ScoreCard(Journal):
 
             for ax, asset in zip(axs.flatten(), assets):
                 ax.grid(True, color="grey", linestyle="--")
-                self._feed.plot(asset, ax=ax, trades=self._trades)
+                self._feed.plot(asset, ax=ax, trades=self._trades, price_type=self._price_type, volume_type=self._volume_type)
 
         metric_names = self._journal.get_metric_names()
         rows = len(metric_names) // 2 + len(metric_names) % 2

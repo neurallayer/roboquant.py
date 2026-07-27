@@ -3,7 +3,7 @@ import os.path
 import sqlite3
 from array import array
 from datetime import datetime
-from typing import Any, Literal
+from typing import Any, Iterator, Literal, override
 
 from roboquant.asset import deserialize_to_asset, Asset
 from roboquant.event import Bar, PriceItem, Quote
@@ -98,7 +98,8 @@ class SQLFeed(HistoricFeed):
             prices = row[2:6]
             return Quote(asset, array("f", prices))
 
-    def play(self, timeframe: Timeframe | None = None):
+    @override
+    def play(self, timeframe: Timeframe | None = None) -> Iterator[Event]:
         """Play back the data in the database to the channel"""
         with sqlite3.connect(self.db_file) as con:
             cur = con.cursor()

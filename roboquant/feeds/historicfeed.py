@@ -1,7 +1,7 @@
 from abc import ABC, abstractmethod
 from datetime import datetime
 from itertools import chain
-from typing import Any, Iterator, Sequence, override
+from typing import Any, Iterable, Iterator, Sequence, override
 
 from roboquant.account import Trade
 from roboquant.asset import Asset
@@ -117,7 +117,7 @@ class HistoricFeed(Feed, ABC):
         volume_type: str = "DEFAULT",
         timeframe: Timeframe | None = None,
         ax = None,
-        trades: list[Trade] | None = None,
+        trades: Iterable[Trade] | None = None,
         plot_volume: bool = True,
         **kwargs: Any,
     ):
@@ -152,11 +152,12 @@ class HistoricFeed(Feed, ABC):
             if item := event.price_items.get(asset):
                 t.append(event.time)
                 p.append(item.price(price_type))
-                v.append(item.volume(volume_type))
+                if plot_volume:
+                    v.append(item.volume(volume_type))
 
         if not ax:
             from matplotlib import pyplot as plt
-            _, ax = plt.subplots(figsize=(15,8))
+            _, ax = plt.subplots(figsize=(20,10))
             ax.grid(True)
 
         if not kwargs:
@@ -166,7 +167,7 @@ class HistoricFeed(Feed, ABC):
 
         if plot_volume:
             ax2 = ax.twinx()
-            ax2.bar(t, v, alpha=0.3, color = "grey") # type: ignore
+            ax2.bar(t, v, alpha=0.3) # type: ignore
 
         if trades and t:
             tf = Timeframe(t[0], t[-1], True)

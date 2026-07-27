@@ -2,6 +2,7 @@ from decimal import Decimal
 import logging
 from time import sleep
 from typing import Any, override
+from roboquant.order import Order
 from roboquant.portfolio import Portfolio
 import roboquant.portfolio
 from roboquant.brokers.broker import LiveBroker
@@ -182,7 +183,7 @@ class IBKRBroker(LiveBroker):
         logger.warning("ignoring order %s because couldn't map conid to asset", info)
 
 
-    def __get_orders(self) -> list[rq.Order]:
+    def __get_orders(self) -> list[Order]:
         """Get all the open limit orders from IBKR and convert them into roboquant orders.
         It requires that the contract-id (conid) can be mapped to a roboquant asset.
         """

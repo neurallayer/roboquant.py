@@ -35,8 +35,8 @@ logger = logging.getLogger(__name__)
 
 
 def _get_asset(symbol: str, asset_class: AssetClass) -> Asset:
-    """Convert an Alapca asset to a roboquant asset based on
-    its sybbol name and asset class.
+    """Convert an Alpaca asset to a roboquant asset based on
+    its symbol name and asset class.
     """
 
     match asset_class:
@@ -86,7 +86,7 @@ class AlpacaLiveFeed(LiveFeed):
         thread.start()
 
     async def close(self):
-        """Close the live feed connection sxtream."""
+        """Close the live feed connection stream."""
         await self.stream.close()
 
     def __put_item(self, time: datetime, item: PriceItem):

@@ -35,7 +35,7 @@ class TimeSeries:
         """Plot the time series. Optional a `matplotlib.axes.Axes` can be provided."""
         if ax is None:
             from matplotlib import pyplot as plt
-            _, ax = plt.subplots(figsize=(15,8))
+            _, ax = plt.subplots(figsize=(16,10))
             ax.grid(True)
 
         if not kwargs:

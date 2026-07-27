@@ -105,11 +105,11 @@ class PNLMetric(Metric):
 class PriceMetric(Metric):
     """Tracks the price and volume of for one or more assets found in the event."""
 
-    def __init__(self, *symbols: str, price_type: str = "DEFAULT", volume_type: str = "DEFAULT") -> None:
+    def __init__(self, *assets: Asset, price_type: str = "DEFAULT", volume_type: str = "DEFAULT") -> None:
         """Initialize PriceMetric with specified symbols and price/volume types.
         Args:
-            *symbols: Variable length argument list of str symbols to track. If none are provided,
-            all encountered symbols will be included.
+            *assets: Variable length argument list of assets to track. If none are provided,
+            all encountered assets will be included.
             price_type: Type of price to use for calculations. Defaults to "DEFAULT".
             volume_type: Type of volume to use for calculations. Defaults to "DEFAULT".
         Returns:
@@ -119,7 +119,7 @@ class PriceMetric(Metric):
         """
 
         super().__init__()
-        self.symbols = symbols
+        self.assets = assets
         self.price_type = price_type
         self.volume_type = volume_type
 
@@ -127,8 +127,8 @@ class PriceMetric(Metric):
     def calc(self, event: Event, account: Account, signals: list[Signal], orders: list[Order]) -> dict[str, float]:
         result: dict[str, float] = {}
         for asset, item in event.price_items.items():
-            symbol = asset.symbol
-            if symbol in self.symbols or not self.symbols:
+            if asset in self.assets or not self.assets:
+                symbol = asset.symbol
                 prefix = f"item/{symbol.lower()}"
                 result[f"{prefix}/price"] = item.price(self.price_type)
                 result[f"{prefix}/volume"] = item.volume(self.volume_type)
@@ -203,7 +203,7 @@ class MarketMetric(Metric):
             return {
                 "market/pnl" : 0.0,
                 "market/avg_pnl" : 0.0,
-                "market/pnl_perc" : 0.0
+                "market/pnl_pct" : 0.0
             }
 
         # Calculate the total PNL for all positions
@@ -213,12 +213,12 @@ class MarketMetric(Metric):
 
         pnl = account.convert(w)
         avg_pnl = pnl / len(self.positions)
-        pnl_perc = pnl / ( account.convert(self.initial_amount) * len(self.positions))
+        pnl_pct = pnl / ( account.convert(self.initial_amount) * len(self.positions))
 
         return {
             "market/pnl" : pnl,
             "market/avg_pnl" : avg_pnl,
-            "market/pnl_perc" : pnl_perc
+            "market/pnl_pct" : pnl_pct
         }
 
 

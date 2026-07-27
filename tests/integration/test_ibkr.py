@@ -1,4 +1,3 @@
-import logging
 import time
 import unittest
 from decimal import Decimal
@@ -12,7 +11,7 @@ from dotenv import load_dotenv
 
 load_dotenv()
 
-from roboquant.ibkr.ibkrbroker import IBKRBroker  # noqa: E402
+from roboquant.ibkr.ibkr_broker import IBKRBroker  # noqa: E402
 
 
 class TestIBKR(unittest.TestCase):
@@ -36,9 +35,6 @@ class TestIBKR(unittest.TestCase):
 
     def test_ibkr_order(self):
         Amount.register_converter(One2OneConversion())
-        logging.basicConfig(level=logging.DEBUG)
-        logging.getLogger("ibapi").setLevel(logging.WARNING)
-
         asset = Stock("JPM")
         limit = self._get_last_price(asset)
 
