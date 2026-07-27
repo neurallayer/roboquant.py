@@ -39,7 +39,7 @@ _ = equity.plot(color="green", linewidth=1)
 # Perform a walk forward over 4 equal timeframes and plot each run on the same chart.
 
 timeframes = feed.timeframe().split(4)
-_, ax = plt.subplots()
+_, ax = plt.subplots(figsize=(20,10))
 
 for timeframe in timeframes:
     strategy = rq.strategies.EMACrossover()
@@ -54,7 +54,8 @@ for timeframe in timeframes:
 
 
 timeframes = feed.timeframe().sample(100, "365 days")
-_, ax = plt.subplots(figsize=(16,10))
+_, ax = plt.subplots(figsize=(20,10))
+ax.grid(True)
 
 for timeframe in timeframes:
     strategy = rq.strategies.EMACrossover()
