@@ -139,10 +139,11 @@ class SimBroker(Broker):
     def __update_account_positions(self, event: Event) -> None:
         """Update the account with the latest market prices found in the event"""
 
-        for asset, pos in self._account.portfolio.items():
+        portfolio = self._account.portfolio
+
+        for asset, pos in portfolio.items():
             if price := event.get_price(asset, self.price_type):
-                updated_position = Position(pos.size, pos.avg_price, price)
-                self._account.portfolio[asset] = updated_position
+                portfolio[asset] = Position(pos.size, pos.avg_price, price)
 
     def __next_order_id(self) -> str:
         """Generate a new order id. The order id is a simple integer that is incremented for each new order."""

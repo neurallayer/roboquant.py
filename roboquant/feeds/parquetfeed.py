@@ -1,7 +1,8 @@
+from datetime import datetime
 import logging
 import os.path
 from array import array
-from typing import Any, Iterable, Iterator
+from typing import Iterable, Iterator
 
 import pyarrow as pa
 import pyarrow.parquet as pq
@@ -55,24 +56,28 @@ class ParquetFeed(HistoricFeed):
     def play(self, timeframe: Timeframe | None = None) -> Iterator[Event]:
         # pylint: disable=too-many-locals
         with pq.ParquetFile(self.parquet_path) as dataset:
-            last_time: Any = None
+            last_time: datetime | None = None
             items = []
 
             row_group_indexes = self.__get_row_group_indexes(timeframe)
 
-            for batch in dataset.iter_batches(row_groups=row_group_indexes):
+            for batch in dataset.iter_batches(batch_size=10_000, row_groups=row_group_indexes):
                 times = batch.column("time")
                 assets = batch.column("asset")
                 prices = batch.column("prices")
                 types = batch.column("type")
                 frequencies = batch.column("freq")
                 for n, a, p, t, f in zip(times, assets, prices, types, frequencies):
-                    if n != last_time:
-                        if items:
-                            now = last_time.as_py()
-                            event = Event(now, items)
+                    now: datetime = n.as_py()
+
+                    if timeframe and now not in timeframe:
+                        continue
+
+                    if now != last_time:
+                        if last_time and items:
+                            event = Event(last_time, items)
                             yield event
-                        last_time = n
+                        last_time = now
                         items = []
 
                     asset = deserialize_to_asset(a.as_py())
@@ -91,9 +96,8 @@ class ParquetFeed(HistoricFeed):
                             logger.warning("Unknown type %s", t.as_py())
 
             # any remainders
-            if items:
-                now = last_time.as_py()
-                event = Event(now, items)
+            if last_time and items:
+                event = Event(last_time, items)
                 yield event
 
     def __get_row_group_indexes(self, timeframe: Timeframe | None) -> Iterable[int]:

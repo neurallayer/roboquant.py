@@ -26,7 +26,7 @@ class TestParquetFeed(unittest.TestCase):
         self.assertEqual(origin_feed.count_items(), feed.count_items())
 
         run_price_item_feed(feed, origin_feed.assets(), self)
-        run_price_item_feed(feed, origin_feed.assets(), self, timeframe=feed.timeframe())
+        run_price_item_feed(feed, origin_feed.assets(), self, timeframe=feed.timeframe().split(2)[0])
         db_file.unlink(missing_ok=True)
 
     def test_predefined_feed(self):

@@ -30,10 +30,14 @@ def run_price_item_feed(
 
     last = datetime.fromisoformat("1900-01-01T00:00:00+00:00")
     n_items = 0
-    for event in feed.play():
+    for event in feed.play(timeframe=timeframe):
         test_case.assertIsInstance(event.time, datetime)
         test_case.assertEqual("UTC", event.time.tzname())
         test_case.assertGreaterEqual(event.time, last, f"{event} < {last}, items={event.items}")
+
+        if timeframe:
+            test_case.assertTrue(event.time in timeframe)
+
         last = event.time
 
         n_items += len(event.items)

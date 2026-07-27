@@ -16,7 +16,7 @@ class TestProfile(unittest.TestCase):
     performance bottlenecks and to optimize the code."""
 
     def test_profile(self):
-        print("\n\nRegular stratetgy\n##################################")
+        print("\n\nRegular strategy\n##################################")
         strategy = rq.strategies.EMACrossover()
         journal = rq.journals.BasicJournal()
 
