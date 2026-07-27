@@ -1,4 +1,5 @@
 from dataclasses import dataclass, replace
+from datetime import datetime
 from decimal import Decimal
 from typing import Any, Literal
 
@@ -17,7 +18,7 @@ class Order:
     The `gtd` (good till date) is optional, and if not set implies the order is valid
     for the DAY. The `info` can hold any arbitrary properties set on the order.
 
-    The `id` and `fill` properties are managed by the `Broker`.
+    The `id`, `fill` and `time` properties are managed by the `Broker`.
     """
 
     asset: Asset
@@ -50,6 +51,10 @@ class Order:
     fill: Decimal = Decimal()
     """The filled size of the order, set by the broker only. Just like the size, positive for buy orders,
     negative for sell orders. So the remaining size is `size - fill`"""
+
+    time: datetime | None = None
+    """When was the order placed at the exchange, so typically the first trading day after the order was submitted
+    to the broker."""
 
 
     def __post_init__(self):

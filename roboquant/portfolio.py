@@ -12,20 +12,22 @@ from decimal import Decimal
 from roboquant.order import Order
 
 
-@dataclass(slots=True)
+@dataclass(slots=True, frozen=True)
 class Position:
     """The position of an asset in the portfolio. The position prices are denoted in the currency of the asset that
     is linked to this position.
+
+    A position is immutable and is managed only by the broker.
     """
 
-    size: Decimal
+    size: Decimal = Decimal()
     """Position size as a Decimal with a negative size indicating a short position"""
 
-    avg_price: float
+    avg_price: float = 0.0
     """Average price paid denoted in the currency of the asset"""
 
     mkt_price: float = float("nan")
-    """Latest market price denoted in the currency of the asset"""
+    """Latest market price denoted in the currency of the asset. This is updated at every step in a run."""
 
     @property
     def is_short(self):
@@ -37,10 +39,6 @@ class Position:
         """Return True if this is a long position, False otherwise"""
         return self.size > 0
 
-    @staticmethod
-    def zero():
-        """Return a zero position size with no known prices"""
-        return Position(Decimal(), 0.0, float("nan"))
 
 
 class Portfolio(UserDict[Asset, Position]):
@@ -57,7 +55,7 @@ class Portfolio(UserDict[Asset, Position]):
         Returns:
             float: The position value in the base currency.
         """
-        pos = self.get(asset) or Position.zero()
+        pos = self.get(asset, Position())
         return asset.amount(pos.size, pos.mkt_price)
 
     def short_positions(self) -> "Portfolio":

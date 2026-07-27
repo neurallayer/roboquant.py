@@ -14,7 +14,7 @@ from roboquant.order import Order
 class Trade:
     """
     Represents a (partially) executed order with its filled size and execution price.
-    It is immutable and can be used to track the execution of an order.
+    It is immutable and can be used to track the realized PNL.
 
     Attributes:
         asset (Asset): The asset that was traded.

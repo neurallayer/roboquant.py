@@ -169,12 +169,12 @@ class Forex(Asset):
     @staticmethod
     def from_symbol(symbol: str) -> "Forex":
         """Create a `Forex` asset from a symbol string. The last part of the symbol is assumed to be the
-        currency.
+        currency. Any non alfanumeric character is considered to be a separator.
 
         Args:
             symbol (str): The symbol string of the forex asset.
         Returns:
-            Forex: The created forex asset.
+            Forex: The created asset of the type Forex.
         """
         currency = re.split(r"[^a-zA-Z0-9\s]", symbol)[-1]
         return Forex(symbol, Currency(currency))

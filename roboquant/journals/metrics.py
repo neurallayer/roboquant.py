@@ -1,5 +1,5 @@
 from abc import ABC, abstractmethod
-from dataclasses import dataclass
+from dataclasses import dataclass, replace
 from decimal import Decimal
 import sys
 from typing import Tuple, override
@@ -192,12 +192,14 @@ class MarketMetric(Metric):
     def calc(self, event: Event, account: Account, signals: list[Signal], orders: list[Order]) -> dict[str, float]:
         for asset, item in event.price_items.items():
             price = item.price(self.price_type)
+
             if asset not in self.positions:
                 converted_value = self.initial_amount.convert_to(asset.currency, event.time)
                 size = Decimal(converted_value / price)
                 self.positions[asset] = Position(size, price, price)
             else:
-                self.positions[asset].mkt_price = price
+                position = self.positions[asset]
+                self.positions[asset] = replace(position, mkt_price = price)
 
         if not self.positions:
             return {

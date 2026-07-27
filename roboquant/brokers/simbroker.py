@@ -1,4 +1,4 @@
-from datetime import date, datetime, timezone
+from datetime import datetime, timezone
 from decimal import Decimal
 from dataclasses import replace
 import logging
@@ -57,7 +57,6 @@ class SimBroker(Broker):
         self._account.cash = Wallet(self.deposit)
         self._account.buying_power = self.deposit
         self._order_id = 0
-        self._order_entry: dict[str, date] = {}
 
     def _fee(self, asset: Asset, fill: Decimal, price: float, time: datetime) -> float:
         """Calculate any additional fee or commission, the default is zero.
@@ -70,14 +69,11 @@ class SimBroker(Broker):
         """
         return self.fee.convert_to(asset.currency, time)
 
-    def update_position(self, asset: Asset, fill: Decimal, price: float) -> float:
+    def __update_position(self, asset: Asset, fill: Decimal, price: float) -> float:
         """update position based on a fill and return the realized pnl"""
         assert fill != 0, "fill cannot be zero"
 
-        pos = self._account.portfolio.get(asset)
-        if pos is None:
-            pos = Position.zero()
-            self._account.portfolio[asset] = pos
+        pos = self._account.portfolio.get(asset, Position())
 
         new_size = pos.size + fill
 
@@ -91,26 +87,28 @@ class SimBroker(Broker):
             avg_price = pos.avg_price
             pnl = asset.value(fill, price - pos.avg_price)
 
-        # switch position side
+        # close or switch position side
         else:
             avg_price = price
             pnl = asset.value(pos.size, price - pos.avg_price)
 
         if new_size:
-            pos.size = new_size
-            pos.avg_price = avg_price
+            self._account.portfolio[asset] = Position(new_size, avg_price, pos.mkt_price)
         else:
             del self._account.portfolio[asset]
 
         return pnl
 
-    def _process_fill(self, asset: Asset, fill: Decimal, price: float, time: datetime) -> None:
+    def __process_fill(self, asset: Asset, fill: Decimal, price: float, time: datetime) -> None:
         """Update the account positions, trades and cash based on a new fill"""
+        if not fill:
+            return
+
         acc = self._account
         acc.cash -= asset.amount(fill, price)
         fee = self._fee(asset, fill, price, time)
         acc.cash -= Amount(asset.currency, fee)
-        pnl = self.update_position(asset, fill, price) - fee
+        pnl = self.__update_position(asset, fill, price) - fee
         trade = Trade(asset, time, fill, price, pnl)
         acc.trades.append(trade)
 
@@ -129,25 +127,22 @@ class SimBroker(Broker):
         return price * (1.0 + correction)
 
 
-    def _execute(self, order: Order, price: float) -> Decimal:
+    def _get_fill(self, order: Order, price: float) -> Decimal:
         """Simulate a market execution and return the filled size.
-        This default implementation always fill the complete order if the
-        order is executable.
+        This default implementation always fill the complete order.
+
+        Overwrite this method in a subclass if a different simulation
+        is required.
         """
+        return order.remaining
 
-        if order.is_executable(price):
-            return order.remaining
-
-        # If the order is not executable, we return zero
-        logger.info("order not executable order=%s market-price=%s", order, price)
-        return Decimal()
-
-    def _update_account_positions(self, event: Event) -> None:
+    def __update_account_positions(self, event: Event) -> None:
         """Update the account with the latest market prices found in the event"""
 
         for asset, pos in self._account.portfolio.items():
             if price := event.get_price(asset, self.price_type):
-                pos.mkt_price = price
+                updated_position = Position(pos.size, pos.avg_price, price)
+                self._account.portfolio[asset] = updated_position
 
     def __next_order_id(self) -> str:
         """Generate a new order id. The order id is a simple integer that is incremented for each new order."""
@@ -171,51 +166,50 @@ class SimBroker(Broker):
 
             self._orders[order.id] = order
 
-    def _remove_order(self, order: Order) -> None:
-        """Remove an order from the account, called when an order is completed, expired or cancelled."""
-        del self._orders[order.id]
-        self._order_entry.pop(order.id)
 
-    def _fill_order(self, order: Order, fill: Decimal) -> None:
-        """Fill an order"""
-        new_fill = order.fill + fill
-        order = replace(order, fill=new_fill)
-        if order.remaining.is_zero():
-            self._remove_order(order)
-        else:
-            self._orders[order.id] = order
+    def _order_expired(self, order: Order, time: datetime) -> bool:
+        """Check if the order is expired given the provided time"""
 
-    def _order_is_expired(self, order: Order, time: datetime) -> bool:
-        if order.tif == "GTC":
+        # GTC order never expire
+        if order.tif == "GTC" or not order.time:
             return False
 
         # We are now in the DAY tif branch
-        if entry_time := self._order_entry.get(order.id):
-            return time.astimezone(self.timezone).date() > entry_time
+        order_date = order.time.astimezone(self.timezone).date()
+        exchange_date = time.astimezone(self.timezone).date()
 
-        # The first time we see this order
-        self._order_entry[order.id] = time.astimezone(self.timezone).date()
-        return False
+        return exchange_date > order_date
 
-    def _process_orders(self, event: Event) -> None:
+    def __process_orders(self, event: Event) -> None:
         if not self._orders:
             return
 
         prices = event.price_items
-        orders = self._orders.copy().values()
+        time = event.time
 
-        for order in orders:
-            if self._order_is_expired(order, event.time):
+        orders: dict[str, Order] = {}
+
+        for order in self._orders.values():
+
+            if self._order_expired(order, time):
                 logger.info("expired order %s", order)
-                self._remove_order(order)
-            elif item := prices.get(order.asset):
-                price = self._get_execution_price(order, item)
-                if fill := self._execute(order, price):
-                    logger.info("executed order=%s fill=%s", order, fill)
-                    self._fill_order(order, fill)
-                    self._process_fill(order.asset, fill, price, event.time)
+                continue
 
-        self._orders = {id: o for id, o in self._orders.items() if o.remaining}
+            if item := prices.get(order.asset):
+                if not order.time:
+                    order = replace(order, time = time)
+                price = self._get_execution_price(order, item)
+                if order.is_executable(price):
+                    fill = self._get_fill(order, price)
+                    logger.info("executed order=%s fill=%s", order, fill)
+                    order = replace(order, fill = order.fill + fill)
+                    self.__process_fill(order.asset, fill, price, time)
+
+            if order.remaining:
+                orders[order.id] = order
+
+
+        self._orders = orders
 
     def _calculate_open_orders(self) -> Wallet:
         """Calculate the buying power required for the open orders"""
@@ -251,8 +245,8 @@ class SimBroker(Broker):
 
         if event:
             self._account.last_update = event.time
-            self._process_orders(event)
-            self._update_account_positions(event)
+            self.__process_orders(event)
+            self.__update_account_positions(event)
 
         acc = self._account
         acc.orders = list(self._orders.values())

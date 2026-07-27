@@ -56,7 +56,8 @@ class TestSimbroker(unittest.TestCase):
         self.assertEqual(len(account.orders), 1)
         self.assert_orders(account)
 
-        event = self._create_event()
+        # This event should result in order to execute
+        event = self._create_event(100)
         account = broker.sync(event)
         self.assertEqual(len(account.orders), 0)
         self.assertEqual(len(account.portfolio), 1)
