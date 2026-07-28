@@ -18,7 +18,7 @@ logger = logging.getLogger(__name__)
 class CSVColumns:
     """Define the columns in a CSV file that contains historic market data.
     args:
-    - date: the column name for the date
+    - date: the column name for the date or datetime
     - open: the column name for the open price
     - high: the column name for the high price
     - low: the column name for the low price

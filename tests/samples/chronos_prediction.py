@@ -67,7 +67,7 @@ class ChronosStrategy(rq.strategies.TaStrategy):
         self.pipeline = pipeline
         self.prediction_length = prediction_length
 
-    def process_asset(self, asset: rq.Asset, ohlcv: OHLCVBuffer) -> rq.Signal | None:
+    def _create_signal(self, asset: rq.Asset, ohlcv: OHLCVBuffer) -> rq.Signal | None:
         close = perc_change(ohlcv.close())
         result = self.pipeline.predict(
             inputs=torch.tensor(close),

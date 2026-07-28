@@ -13,7 +13,7 @@ class _MyStrategy(TaStrategy):
     using talib for the technical indicators.
     """
 
-    def process_asset(self, asset, ohlcv: OHLCVBuffer):
+    def _create_signal(self, asset, ohlcv: OHLCVBuffer):
         close = ohlcv.close()
         sma12 = ta.SMA(close, timeperiod=12)
         sma26 = ta.SMA(close, timeperiod=26)

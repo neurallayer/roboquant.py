@@ -10,7 +10,7 @@ from roboquant import strategies
 from roboquant import traders
 
 from .portfolio import Position, Portfolio
-from .account import Account
+from .account import Account, Trade
 from .event import Event, PriceItem, Bar, TradePrice, Quote
 from .signal import Signal, SignalType
 from .order import Order
@@ -74,6 +74,7 @@ __all__ = [
     "Crypto",
     "Forex",
     "Option",
+    "Trade",
     "run",
     "Timeframe",
     "TimeSeries",

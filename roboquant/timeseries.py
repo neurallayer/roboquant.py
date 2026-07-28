@@ -1,7 +1,9 @@
 
 from dataclasses import dataclass
-from datetime import datetime
+from datetime import datetime, timezone
 from typing import Any
+import numpy as np
+from numpy.typing import NDArray
 
 import pandas as pd
 
@@ -12,16 +14,27 @@ class TimeSeries:
     """A time series contains a name, a timeline and values at each point in time. It
     is used in several places in roboquant, for example prices and metrics.
 
+    Under the hood, all the data is stored in numpy arrays to make further processing faster.
+
     It contains convenience methods to plot the time series or to convert it to a Pandas dataframe.
     """
 
     name: str
-    timeline: list[datetime]
-    data: list[float]
+    timeline: NDArray[np.datetime64]
+    data: NDArray[np.float64]
 
-    def __post_init__(self):
+    def __init__(self, name: str, timeline: list[datetime] | NDArray[np.datetime64], data: list[float] |NDArray[np.float64] ):
+        self.name = name
+
+        # Avoid userwarnings from numpy due to tzinfo
+        if len(timeline) and isinstance(timeline[0], datetime):
+            timeline = [t.replace(tzinfo=None) for t in timeline]
+
+        self.timeline = np.array(timeline, dtype=np.datetime64)
+        self.data = np.array(data, dtype=np.float64)
+
         if len(self.timeline) != len(self.data):
-            raise ValueError("Timeline and values must have the same length")
+            raise ValueError("Timeline and data must have the same length")
 
     def __len__(self) -> int:
         return len(self.timeline)
@@ -29,7 +42,12 @@ class TimeSeries:
     def timeframe(self) -> Timeframe:
         """Return the timeframe of the time series. If the time series is empty,
         an empty timeframe will be returned."""
-        return Timeframe(self.timeline[0], self.timeline[-1], True) if len(self) > 0 else Timeframe.EMPTY
+        if len(self) == 0:
+            return Timeframe.EMPTY
+
+        start = self.timeline[0].astype(datetime).replace(tzinfo=timezone.utc)
+        end = self.timeline[-1].astype(datetime).replace(tzinfo=timezone.utc)
+        return Timeframe(start, end, True)
 
     def plot(self, plot_timeline: bool = True, ax = None, **kwargs: Any):
         """Plot the time series.
@@ -51,17 +69,11 @@ class TimeSeries:
         ax.set_title(self.name)
         return ax
 
-    def to_dataframe(self, time_index: bool = False) -> pd.DataFrame:
-        """Return the timeseries as a Pandas dataframe optionally with the time being the index
-        and the value being the column.
+    def to_dataframe(self) -> pd.DataFrame:
+        """Return the timeseries as a Pandas dataframe with the time being the index
+        and the data being the single column.
         """
-
-        d = {
-            "time": self.timeline,
-            self.name: self.data
-        }
-        df = pd.DataFrame.from_dict(d, orient="columns")
-        return df.set_index("time") if time_index else df
+        return pd.DataFrame(data = self.data, index = self.timeline, columns=[self.name]) # type: ignore
 
     def filter(self, timeframe: Timeframe) -> "TimeSeries":
         """Return a new Timeseries instance which only include observations that fall within the provided timeframe.
@@ -69,8 +81,19 @@ class TimeSeries:
         t: list[datetime] = []
         v: list[float] = []
         for idx, time in enumerate(self.timeline):
+            time = time.astype(datetime).replace(tzinfo=timezone.utc)
             if time in timeframe:
                 t.append(time)
                 v.append(self.data[idx])
         return TimeSeries(self.name, t, v)
+
+    def pct_change(self, name : str | None = None) -> "TimeSeries":
+        """Percentage is returned as fraction, so 0.5 is 50%"""
+        name = name or self.name
+        if len(self) > 1:
+            data = np.diff(self.data) / self.data[:-1]
+            return TimeSeries(name, self.timeline[1:], data) # type: ignore
+        return TimeSeries(name, [], [])
+
+
 

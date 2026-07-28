@@ -145,9 +145,6 @@ class HistoricFeed(Feed, ABC):
         p : list[float] = []
         v : list[float] = []
 
-        if isinstance(asset, str):
-            asset = self.get_asset(asset)
-
         for event in self.play(timeframe):
             if item := event.price_items.get(asset):
                 t.append(event.time)
@@ -158,7 +155,7 @@ class HistoricFeed(Feed, ABC):
         if not ax:
             from matplotlib import pyplot as plt
             _, ax = plt.subplots(figsize=(20,10))
-            ax.grid(True, linestyle="--", linewidth=1, alpha=0.5)
+            ax.grid(True, linestyle="--", linewidth=0.5, alpha=0.5)
 
         if not kwargs:
             kwargs = {"linewidth": 1}
@@ -177,13 +174,13 @@ class HistoricFeed(Feed, ABC):
             if buy:
                 x = [t.time for t in buy]
                 y = [t.price for t in buy]
-                ax.scatter(x, y, marker="^", color="green") # type: ignore
+                ax.scatter(x, y, marker="^", color="limegreen", zorder=10) # type: ignore
 
             sell = [t for t in trades if t.size < 0]
             if sell:
                 x = [t.time for t in sell]
                 y = [t.price for t in sell]
-                ax.scatter(x, y, marker="v", color="red") # type: ignore
+                ax.scatter(x, y, marker="v", color="red", zorder=10) # type: ignore
 
         ax.set_title(asset.symbol)
 

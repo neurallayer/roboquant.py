@@ -27,12 +27,12 @@ class TaStrategy(Strategy):
         assets = self._data.add_event(event)
         for asset in assets:
             ohlcv = self._data[asset]
-            if signal := self.process_asset(asset, ohlcv):
+            if signal := self._create_signal(asset, ohlcv):
                 result.append(signal)
         return result
 
     @abstractmethod
-    def process_asset(self, asset: Asset, ohlcv: OHLCVBuffer) -> Signal | None:
+    def _create_signal(self, asset: Asset, ohlcv: OHLCVBuffer) -> Signal | None:
         """
         Create a signal for the provided asset or return None if no signal should be created.
         Subclasses should implement this method. This method is only invoked if enough data

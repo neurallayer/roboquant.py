@@ -21,7 +21,8 @@
         "stooq",
         "Tensorboard",
         "timeframes",
-        "twinx"
+        "twinx",
+        "zorder"
     ],
     "python.testing.unittestArgs": [
         "-v",

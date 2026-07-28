@@ -8,7 +8,7 @@ from tests.common import run_strategy
 class _MyStrategy(TaStrategy):
     """Example using TaStrategy as a baseclass to create a custom strategy"""
 
-    def process_asset(self, asset, ohlcv: OHLCVBuffer):
+    def _create_signal(self, asset, ohlcv: OHLCVBuffer):
         close = ohlcv.close()
         sma12 = close[-12:].mean()
         sma26 = close[-26:].mean()
