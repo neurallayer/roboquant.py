@@ -17,12 +17,18 @@ feed = rq.feeds.YahooFeed.us_stocks_10()
 
 # %% [markdown]
 # Plot a price chart for one of the assets in the feed
-_ = feed.plot("MSFT")
+feed.plot("MSFT");
 
 # %%
 strategy = rq.strategies.EMACrossover()
 journal = rq.journals.MetricsJournal.pnl()
 account = rq.run(feed, strategy, journal=journal)
+
+
+# %% [markdown]
+# We now create a figure with 10 subplots.
+# Each subplot will print the prices, volume and trades
+# of an asset.
 
 # %%
 tf = rq.Timeframe.previous("365 days")
@@ -30,17 +36,19 @@ _, axs = plt.subplots(5, 2, figsize=(20, 30))
 
 for ax, asset in zip(axs.flatten(), feed.assets()):
     ax.grid(True, color="grey", linestyle="--")
-    feed.plot(asset, timeframe = tf, ax = ax, trades = account.trades, linewidth=1)
+    feed.plot(asset, timeframe=tf, ax=ax, trades=account.trades, linewidth=1)
 
 # %%
 equity = journal.get_metric("pnl/equity")
-_ = equity.plot(color="green", linewidth=1)
+equity.plot(color="green", linewidth=1);
 
 # %%
-# Perform a walk forward over 4 equal timeframes and plot each run on the same chart.
+# Perform a walk forward over 4 equal timeframes and
+# - plot each run on the same chart.
+# - plot one curve
 
 timeframes = feed.timeframe().split(4)
-_, ax = plt.subplots(figsize=(11,5), dpi=300)
+ax = None
 overlap = "35 days"
 
 equities = []
@@ -50,39 +58,37 @@ for timeframe in timeframes:
     journal = rq.journals.MetricsJournal.pnl()
     rq.run(feed, strategy, journal=journal, timeframe=timeframe.prepend(overlap))
     equity = journal.get_metric("pnl/equity")
-    equity.plot(ax=ax, linewidth=0.5)
+    ax = equity.plot(ax=ax, linewidth=0.5)
     equities.append(equity.pct_change())
 
 single_ts = TimeSeries.concat(*equities).inverse_pct_change()
-single_ts.plot()
-
+single_ts.plot();
 # %%
 # Run 50 1-year back tests and plot the equity curve for each run on the same chart.
 # This provides insights how the results are distributed and what to expect.
 
 timeframes = feed.timeframe().sample(100, "365 days")
-_, ax = plt.subplots()
-ax.grid(True)
+ax = None
 
 for timeframe in timeframes:
     strategy = rq.strategies.EMACrossover()
     journal = rq.journals.MetricsJournal.pnl()
     rq.run(feed, strategy, journal=journal, timeframe=timeframe)
     equity = journal.get_metric("pnl/equity")
-    equity.plot(plot_timeline=False, ax=ax, linewidth=0.5, color="grey", alpha=0.5)
+    ax = equity.plot(plot_timeline=False, ax=ax, linewidth=0.5, color="grey", alpha=0.5)
 
 # %% [markdown]
 # Report enables to publication of mathplotlib charts. They can be saved
 # as a single self-contained PDF file or HTML file.
 
 # %%
-strategy = rq.strategies.EMACrossover(26,50)
+strategy = rq.strategies.EMACrossover(26, 50)
 journal = rq.journals.MetricsJournal.pnl()
 account = rq.run(feed, strategy, journal=journal)
 
 report = Report()
 for asset in feed.assets():
-    feed.plot(asset, trades = account.trades, linewidth=0.5, color="grey")
+    feed.plot(asset, trades=account.trades, linewidth=0.5, color="grey")
     report.add_current_figure()
 
 journal.plot("pnl/equity")
@@ -104,6 +110,6 @@ strategy = rq.strategies.EMACrossover()
 asset = feed.assets()[0]
 scorecard = rq.journals.Scorecard(roboquant.journals.metrics.PNLMetric(), include_prices=True)
 rq.run(feed, strategy, journal=scorecard)
-scorecard.plot()
+scorecard.plot();
 
 # %%

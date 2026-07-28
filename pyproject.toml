@@ -7,9 +7,11 @@ build-backend = "uv_build"
 
 [tool.ruff.lint]
 select = ["E", "F", "W"]
+ignore = ["E703"]  # use ; in notebook Python file
 
 [tool.ty.rules]
 unused-type-ignore-comment = "ignore"
+
 
 [tool.pyright]
 typeCheckingMode = "standard"
@@ -25,7 +27,7 @@ infer-with-first-use = false
 
 [project]
 name = "roboquant"
-version = "2.6.5"
+version = "2.6.6"
 authors = [{ name = "roboquant team", email = "info@roboquant.org" }]
 description = "A fast algorithmic trading platform with support for AI based strategies"
 readme = "README.md"
