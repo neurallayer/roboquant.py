@@ -175,6 +175,25 @@ class Timeframe:
         years = timedelta(days=365) / self.duration
         return (1.0 + rate) ** years - 1.0
 
+    def prepend(self, duration: timedelta | str) -> "Timeframe":
+        """Prepend a duration to this timeframe and return the new timeframe
+        """
+
+        if isinstance(duration, str):
+            duration = pd.to_timedelta(duration)
+
+        return Timeframe(self.start - duration, self.end, self.inclusive)
+
+    def append(self, duration: timedelta | str) -> "Timeframe":
+        """Prepend a duration to this timeframe and return the new timeframe
+        """
+
+        if isinstance(duration, str):
+            duration = pd.to_timedelta(duration)
+
+        return Timeframe(self.start, self.end + duration, self.inclusive)
+
+
     def split(self, n: int | timedelta) -> list["Timeframe"]:
         """
         Split the timeframe in sequential equal parts and return the resulting list of timeframes.

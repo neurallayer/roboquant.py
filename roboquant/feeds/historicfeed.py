@@ -154,7 +154,7 @@ class HistoricFeed(Feed, ABC):
 
         if not ax:
             from matplotlib import pyplot as plt
-            _, ax = plt.subplots(figsize=(11.69,8.27), dpi=300)
+            _, ax = plt.subplots(figsize=(11,5), dpi=300)
             ax.grid(True, linestyle="--", linewidth=0.5, alpha=0.5)
 
         if not kwargs:

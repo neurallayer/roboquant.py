@@ -8,6 +8,7 @@ import matplotlib.pyplot as plt
 import roboquant as rq
 import roboquant.journals.metrics
 from roboquant.journals.report import Report
+from roboquant.timeseries import TimeSeries
 
 plt.style.use("dark_background")
 
@@ -39,22 +40,28 @@ _ = equity.plot(color="green", linewidth=1)
 # Perform a walk forward over 4 equal timeframes and plot each run on the same chart.
 
 timeframes = feed.timeframe().split(4)
-_, ax = plt.subplots(figsize=(20,10))
+_, ax = plt.subplots(figsize=(11,5), dpi=300)
+overlap = "35 days"
+
+equities = []
 
 for timeframe in timeframes:
     strategy = rq.strategies.EMACrossover()
     journal = rq.journals.MetricsJournal.pnl()
-    rq.run(feed, strategy, journal=journal, timeframe=timeframe)
+    rq.run(feed, strategy, journal=journal, timeframe=timeframe.prepend(overlap))
     equity = journal.get_metric("pnl/equity")
     equity.plot(ax=ax, linewidth=0.5)
+    equities.append(equity.pct_change())
+
+single_ts = TimeSeries.concat(*equities).inverse_pct_change()
+single_ts.plot()
 
 # %%
 # Run 50 1-year back tests and plot the equity curve for each run on the same chart.
 # This provides insights how the results are distributed and what to expect.
 
-
 timeframes = feed.timeframe().sample(100, "365 days")
-_, ax = plt.subplots(figsize=(20,10))
+_, ax = plt.subplots()
 ax.grid(True)
 
 for timeframe in timeframes:
@@ -63,7 +70,6 @@ for timeframe in timeframes:
     rq.run(feed, strategy, journal=journal, timeframe=timeframe)
     equity = journal.get_metric("pnl/equity")
     equity.plot(plot_timeline=False, ax=ax, linewidth=0.5, color="grey", alpha=0.5)
-
 
 # %% [markdown]
 # Report enables to publication of mathplotlib charts. They can be saved

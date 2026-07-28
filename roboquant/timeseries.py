@@ -30,7 +30,7 @@ class TimeSeries:
         if len(timeline) and isinstance(timeline[0], datetime):
             timeline = [t.replace(tzinfo=None) for t in timeline]
 
-        self.timeline = np.array(timeline, dtype=np.datetime64)
+        self.timeline = np.array(timeline, dtype="datetime64[ms]")
         self.data = np.array(data, dtype=np.float64)
 
         if len(self.timeline) != len(self.data):
@@ -38,6 +38,10 @@ class TimeSeries:
 
     def __len__(self) -> int:
         return len(self.timeline)
+
+    @staticmethod
+    def empty(name: str):
+        return TimeSeries(name, [], [])
 
     def timeframe(self) -> Timeframe:
         """Return the timeframe of the time series. If the time series is empty,
@@ -55,7 +59,7 @@ class TimeSeries:
         provided, some sensible defaults will be used."""
         if ax is None:
             from matplotlib import pyplot as plt
-            _, ax = plt.subplots(figsize=(11.69,8.27), dpi=300)
+            _, ax = plt.subplots(figsize=(11, 5), dpi=300)
             ax.grid(True, linestyle="--", linewidth=0.5, alpha=0.5)
 
         if not kwargs:
@@ -95,5 +99,32 @@ class TimeSeries:
             return TimeSeries(name, self.timeline[1:], data) # type: ignore
         return TimeSeries(name, [], [])
 
+    def inverse_pct_change(self, start: float = 100.0,name : str | None = None) -> "TimeSeries":
+        name = name or self.name
+        data = np.cumprod(self.data + 1.0) * start
+        return TimeSeries(name, self.timeline, data)
+
+    @staticmethod
+    def concat(*timeseries: "TimeSeries") -> "TimeSeries":
+        """Concatenate multiple TimeSeries together and removed overlap
+        between the timeseries. The time-series are expected to be sorted.
+        """
+        timeline = []
+        data = []
+        max_time: np.datetime64 = np.datetime64("1900")
+        for ts in timeseries:
+            entries = ts.timeline > max_time
+            timeline.extend(ts.timeline[entries])
+            data.extend(ts.data[entries])
+            if timeline:
+                max_time = timeline[-1]
+
+        return TimeSeries(timeseries[0].name, timeline, data)
+
+    def __mul__(self, other: float) -> "TimeSeries":
+        return TimeSeries(self.name, self.timeline, self.data * other)
+
+    def __add__(self, other: float) -> "TimeSeries":
+        return TimeSeries(self.name, self.timeline, self.data + other)
 
 

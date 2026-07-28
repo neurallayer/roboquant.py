@@ -1,5 +1,6 @@
 import unittest
 
+from roboquant.timeseries import TimeSeries
 from tests.common import get_feed
 
 
@@ -19,6 +20,16 @@ class TestTimeSeries(unittest.TestCase):
         diff = ts.pct_change()
         self.assertEqual(len(diff), len(ts) -1)
         self.assertTrue(-1 < diff.data.mean() < 1)
+
+    def test_concat(self):
+        feed = get_feed()
+        tf1, tf2 = feed.timeframe().split(2)
+        ts1 = feed.get_prices("AAPL", timeframe=tf1)
+        ts2 = feed.get_prices("AAPL", timeframe=tf2)
+
+        ts = TimeSeries.concat(ts1, ts2)
+        self.assertEqual(ts.timeframe(), feed.timeframe())
+
 
 
 if __name__ == "__main__":
