@@ -55,8 +55,8 @@ class TimeSeries:
         provided, some sensible defaults will be used."""
         if ax is None:
             from matplotlib import pyplot as plt
-            _, ax = plt.subplots(figsize=(20,10))
-            ax.grid(True, linestyle="--", linewidth=1, alpha=0.5)
+            _, ax = plt.subplots(figsize=(11.69,8.27), dpi=300)
+            ax.grid(True, linestyle="--", linewidth=0.5, alpha=0.5)
 
         if not kwargs:
             kwargs = {"linewidth": 1}

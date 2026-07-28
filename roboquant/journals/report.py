@@ -30,6 +30,7 @@ class Report:
 
     def __init__(self) -> None:
         self._figures: list[plt.Figure] = []
+        self._figsize = (11.69,8.27)
 
     def add_figure(self, fig: plt.Figure) -> None:
         """Add a matplotlib figure to the report."""
@@ -39,7 +40,7 @@ class Report:
         """Add a df to the report.
         The dataframe will be rendered using matplotlib.
         """
-        fig, ax = plt.subplots(figsize=(11, 8))
+        fig, ax = plt.subplots(figsize=self._figsize)
 
         ax.table(cellText=df.values, colLabels=df.columns, loc="center")  # type: ignore
         ax.axis("tight")
