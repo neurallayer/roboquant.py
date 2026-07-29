@@ -8,7 +8,7 @@ import numpy as np
 
 from roboquant.asset import Asset, Stock
 from roboquant.event import Bar, TradePrice, Quote
-from roboquant.feeds.historicfeed import InMemoryFeed
+from roboquant.feeds.in_memory_feed import InMemoryFeed
 
 
 class RandomWalk(InMemoryFeed):

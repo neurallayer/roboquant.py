@@ -1,23 +1,26 @@
 from abc import ABC, abstractmethod
 from datetime import datetime
-from itertools import chain
-from typing import Any, Iterable, Iterator, Sequence, override
+from typing import Any, Iterable, Sequence
 
 from roboquant.account import Trade
 from roboquant.asset import Asset
-from roboquant.event import Bar, Event, PriceItem
+from roboquant.event import Bar
 from roboquant.timeframe import Timeframe
 from roboquant.timeseries import TimeSeries
 from .feed import Feed
 
 
+import pandas as pd
+import matplotlib.pyplot as plt
+import numpy as np
+
+
 class HistoricFeed(Feed, ABC):
-    """Base class for most implementations of Historic Feeds. Contains several methods to enhance feeds,
-    like plotting prices and conversion to dataframes."""
+    """Base class for most implementations of Historic Feeds. Contains several methods
+    to enhance feeds, like plotting prices and conversion to dataframes."""
 
     @abstractmethod
-    def assets(self) -> list[Asset]:
-        ...
+    def assets(self) -> list[Asset]: ...
 
     def symbols(self) -> list[str]:
         """Return the list of unique symbols available in this feed"""
@@ -68,7 +71,7 @@ class HistoricFeed(Feed, ABC):
             for item in event.items:
                 print("======> ", item)
 
-    def count_events(self, timeframe: Timeframe | None = None, include_empty: bool=False) -> int:
+    def count_events(self, timeframe: Timeframe | None = None, include_empty: bool = False) -> int:
         """Count the number of events in a feed"""
 
         events = 0
@@ -88,14 +91,22 @@ class HistoricFeed(Feed, ABC):
     def to_dict(
         self, *assets: Asset, timeframe: Timeframe | None = None, price_type: str = "DEFAULT"
     ) -> dict[str, list[float | None]]:
-        """Return the prices of one or more assets as a dict with the key being the symbol name."""
+        """Return the prices of one or more assets as a dict with the key being the symbol name.
+        If at a moment in time for an asset there is no known price, NaN will be stored.
 
-        assert assets, "provide at least 1 asset"
+        If no assets are provided, all assets in the feed will be used.
+        """
+        if not assets:
+                assets = tuple(self.assets())
+
         result: dict[str, list[float | None]] = {asset.symbol: [] for asset in assets}
         for evt in self.play(timeframe):
             for asset in assets:
                 price = evt.get_price(asset, price_type)
-                result[asset.symbol].append(price)
+                if price is not None:
+                    result[asset.symbol].append(price)
+                else:
+                    result[asset.symbol].append(float("nan"))
         return result
 
     def to_dataframe(self, asset: Asset | str, timeframe: Timeframe | None = None):
@@ -116,7 +127,7 @@ class HistoricFeed(Feed, ABC):
         price_type: str = "DEFAULT",
         volume_type: str = "DEFAULT",
         timeframe: Timeframe | None = None,
-        ax = None,
+        ax=None,
         trades: Iterable[Trade] | None = None,
         plot_volume: bool = True,
         **kwargs: Any,
@@ -141,9 +152,9 @@ class HistoricFeed(Feed, ABC):
         if isinstance(asset, str):
             asset = self.get_asset(asset)
 
-        t : list[datetime] = []
-        p : list[float] = []
-        v : list[float] = []
+        t: list[datetime] = []
+        p: list[float] = []
+        v: list[float] = []
 
         for event in self.play(timeframe):
             if item := event.price_items.get(asset):
@@ -153,8 +164,7 @@ class HistoricFeed(Feed, ABC):
                     v.append(item.volume(volume_type))
 
         if not ax:
-            from matplotlib import pyplot as plt
-            _, ax = plt.subplots(figsize=(11,5), dpi=300)
+            _, ax = plt.subplots()
             ax.grid(True, linestyle="--", linewidth=0.5, alpha=0.5)
 
         if not kwargs:
@@ -164,7 +174,7 @@ class HistoricFeed(Feed, ABC):
 
         if plot_volume:
             ax2 = ax.twinx()
-            ax2.bar(t, v, alpha=0.3) # type: ignore
+            ax2.bar(t, v, alpha=0.3)  # type: ignore
 
         if trades and t:
             tf = Timeframe(t[0], t[-1], True)
@@ -174,21 +184,19 @@ class HistoricFeed(Feed, ABC):
             if buy:
                 x = [t.time for t in buy]
                 y = [t.price for t in buy]
-                ax.scatter(x, y, marker="^", color="limegreen", zorder=10) # type: ignore
+                ax.scatter(x, y, marker="^", color="limegreen", zorder=10)  # type: ignore
 
             sell = [t for t in trades if t.size < 0]
             if sell:
                 x = [t.time for t in sell]
                 y = [t.price for t in sell]
-                ax.scatter(x, y, marker="v", color="red", zorder=10) # type: ignore
+                ax.scatter(x, y, marker="v", color="red", zorder=10)  # type: ignore
 
         ax.set_title(asset.symbol)
 
         return ax
 
-
-    def get_prices(self, asset: Asset | str, price_type : str ="DEFAULT", timeframe: Timeframe | None = None
-    ) -> TimeSeries:
+    def get_prices(self, asset: Asset | str, price_type: str = "DEFAULT", timeframe: Timeframe | None = None) -> TimeSeries:
         """
         Retrieve the prices for a given asset, optional over a specified timeframe and return the result
         as a `TimeSeries`.
@@ -203,8 +211,8 @@ class HistoricFeed(Feed, ABC):
         Returns:
             TimeSeries with the name being the symbol name of the asset.
         """
-        x :list[datetime] = []
-        y : list[float] = []
+        x: list[datetime] = []
+        y: list[float] = []
 
         if isinstance(asset, str):
             asset = self.get_asset(asset)
@@ -216,92 +224,40 @@ class HistoricFeed(Feed, ABC):
                 y.append(price)
         return TimeSeries(asset.symbol, x, y)
 
+    def plot_corr(
+        self, *assets: Asset, ax=None, tf: Timeframe | None = None, price_type: str = "DEFAULT", auto_scale: bool = True,
+        fontsize : int | None = None
+    ):
+        """Plot the correlation matrix of various assets in a feed. If no assets are provided, all feed assets are used"""
 
+        if not ax:
+            _, ax = plt.subplots()
 
+        d = self.to_dict(*assets, timeframe=tf, price_type=price_type)
+        df = pd.DataFrame.from_dict(d)
 
-class InMemoryFeed(HistoricFeed):
-    """
-    Base class for feeds that contain historic market data and store them in-memory.
-    Internally, it uses a sorted-by-datetime dictionary to store the market data.
-    """
+        corr = df.corr()
 
-    def __init__(self):
-        super().__init__()
-        self.__data: dict[datetime, list[PriceItem]] = {}
-        self.__modified: bool = False
-        self.__assets: set[Asset] = set()
+        vmin, vmax = None, None
+        if not auto_scale:
+            vmin = -1
+            vmax = 1
 
-    def _add_item(self, dt: datetime, item: PriceItem):
-        """Add a price-item at a moment in time to this feed.
-        Subclasses should invoke this method to populate the historic-feed.
+        c_axes = ax.matshow(corr, vmin=vmin, vmax=vmax)
+        ax.figure.colorbar(c_axes)
 
-        Items added at the same time will be part of the same event.
-        So each unique time will only produce a single event.
-        """
-        self.__modified = True
+        columns = corr.columns
+        plt.xticks(range(len(columns)), columns, fontsize = fontsize)  # type: ignore
+        plt.yticks(range(len(columns)), columns, fontsize = fontsize)  # type: ignore
 
-        if dt not in self.__data:
-            self.__data[dt] = [item]
-        else:
-            items = self.__data[dt]
-            items.append(item)
-
-    @override
-    def assets(self) -> list[Asset]:
-        """Return the list of unique assets available in this feed"""
-        return list(self.__assets)
-
-    def timeline(self) -> list[datetime]:
-        """Return the timeline of this feed as a list of datatime objects"""
-        return list(self.__data.keys())
-
-    def timeframe(self) -> Timeframe:
-        """Return the timeframe of this feed"""
-        tl = self.timeline()
-        if tl:
-            return Timeframe(tl[0], tl[-1], inclusive=True)
-
-        return Timeframe.EMPTY
-
-    def _update(self):
-        """invoke this method once all historic data has been added, so internal state
-        can be updated.
-        """
-
-        if self.__modified:
-            self.__data = dict(sorted(self.__data.items()))
-            price_items = chain.from_iterable(self.__data.values())
-            self.__assets = {item.asset for item in price_items}
-            self.__modified = False
-
-    def get_first_event(self) -> Event | None:
-        """Return the first event in this feed, or None if no events are available"""
-        if not self.__data:
-            return None
-
-        first_time = next(iter(self.__data.keys()))
-        items = self.__data[first_time]
-        return Event(first_time, items)
-
-    def get_last_event(self) -> Event | None:
-        """Return the last event in this feed, or None if no events are available"""
-        if not self.__data:
-            return None
-
-        last_time = next(reversed(self.__data.keys()))
-        items = self.__data[last_time]
-        return Event(last_time, items)
-
-    @override
-    def play(self, timeframe: Timeframe | None = None) -> Iterator[Event]:
-        for k, v in self.__data.items():
-            if not timeframe or k in timeframe:
-                yield Event(k, v)
-            elif k <= timeframe.start:
-                continue
-            else:
-                break
-
-    def __repr__(self) -> str:
-        feed = self.__class__.__name__
-        return f"{feed}(assets={len(self.assets())} timeframe={self.timeframe()})"
+        for (i, j), z in np.ndenumerate(corr.to_numpy()):
+            ax.text(
+                j,
+                i,
+                "{:0.2f}".format(z),
+                ha="center",
+                va="center",
+                color="w",
+                fontsize = fontsize,
+                bbox=dict(boxstyle="round", facecolor="#444", edgecolor="#aaa", alpha=0.3),
+            )

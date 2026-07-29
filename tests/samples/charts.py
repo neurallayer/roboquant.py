@@ -10,7 +10,10 @@ import roboquant.journals.metrics
 from roboquant.journals.report import Report
 from roboquant.timeseries import TimeSeries
 
+# Setup some default for mpl
 plt.style.use("dark_background")
+plt.rcParams['figure.figsize'] = [10.0, 5.0]
+plt.rcParams['figure.dpi'] = 150
 
 # %%
 feed = rq.feeds.YahooFeed.us_stocks_10()
@@ -40,7 +43,8 @@ for ax, asset in zip(axs.flatten(), feed.assets()):
 
 # %%
 equity = journal.get_metric("pnl/equity")
-equity.plot(color="green", linewidth=1);
+ax = equity.plot(color="green", linewidth=1)
+ax.set_title("My Custom Title");
 
 # %%
 # Perform a walk forward over 4 equal timeframes and
@@ -112,4 +116,7 @@ scorecard = rq.journals.Scorecard(roboquant.journals.metrics.PNLMetric(), includ
 rq.run(feed, strategy, journal=scorecard)
 scorecard.plot();
 
+
 # %%
+feed.plot_corr(fontsize=7);
+

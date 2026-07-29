@@ -28,7 +28,8 @@ class SQLFeed(HistoricFeed):
 
     # Used SQL statements in this class
     _sql_select_all = "SELECT * from prices order by Date"
-    _sql_select_by_date = "SELECT * from prices where Date >= ? and Date <= ? order by Date"
+    _sql_select_by_date = "SELECT * from prices where Date >= ? and Date < ? order by Date"
+    _sql_select_by_date_inclusive = "SELECT * from prices where Date >= ? and Date <= ? order by Date"
     _sql_select_timeframe = "SELECT min(Date), max(Date) from prices"
     _sql_count_items = "SELECT count(*) from prices"
     _sql_select_assets = "SELECT DISTINCT asset from prices"
@@ -98,20 +99,27 @@ class SQLFeed(HistoricFeed):
             prices = row[2:6]
             return Quote(asset, array("f", prices))
 
+
+    def __get_cursor(self, con: sqlite3.Connection, timeframe: Timeframe | None) -> sqlite3.Cursor:
+        cur = con.cursor()
+        if not timeframe:
+            return cur.execute(SQLFeed._sql_select_all)
+
+        params = [timeframe.start.isoformat(), timeframe.end.isoformat()]
+        if timeframe.inclusive:
+            cur.execute(SQLFeed._sql_select_by_date_inclusive, params)
+
+        return cur.execute(SQLFeed._sql_select_by_date, params)
+
     @override
     def play(self, timeframe: Timeframe | None = None) -> Iterator[Event]:
         """Play back the data in the database to the channel"""
         with sqlite3.connect(self.db_file) as con:
-            cur = con.cursor()
             t_old = ""
             items = []
-            result = (
-                cur.execute(SQLFeed._sql_select_by_date, [timeframe.start.isoformat(), timeframe.end.isoformat()])
-                if timeframe
-                else cur.execute(SQLFeed._sql_select_all)
-            )
+            cursor = self.__get_cursor(con, timeframe)
 
-            for row in result:
+            for row in cursor:
                 t = row[0]
                 assert t >= t_old, f"{t} t_old"
                 if t != t_old:

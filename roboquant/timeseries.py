@@ -6,6 +6,7 @@ import numpy as np
 from numpy.typing import NDArray
 
 import pandas as pd
+from matplotlib import pyplot as plt
 
 from roboquant.timeframe import Timeframe
 
@@ -58,8 +59,7 @@ class TimeSeries:
         Optional a `matplotlib.axes.Axes` can be provided. If no ax or kwargs are
         provided, some sensible defaults will be used."""
         if ax is None:
-            from matplotlib import pyplot as plt
-            _, ax = plt.subplots(figsize=(11, 5), dpi=300)
+            _, ax = plt.subplots()
             ax.grid(True, linestyle="--", linewidth=0.5, alpha=0.5)
 
         if not kwargs:

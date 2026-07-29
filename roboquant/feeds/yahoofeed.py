@@ -6,14 +6,17 @@ import warnings
 
 from roboquant.asset import Asset, Stock
 from roboquant.event import Bar
-from roboquant.feeds.historicfeed import InMemoryFeed
+from roboquant.feeds.in_memory_feed import InMemoryFeed
 
 logger = logging.getLogger(__name__)
 
 
 class YahooFeed(InMemoryFeed):
-    """A feed using the Yahoo Finance to retrieve historic market data. By default, it will retrieve daily data, but
-    you can specify a different interval."""
+    """A feed using the Yahoo Finance to retrieve historic market data.
+
+    By default, the feed will retrieve daily data, but you can
+    specify a different interval.
+    """
 
     def __init__(
         self,
@@ -24,11 +27,12 @@ class YahooFeed(InMemoryFeed):
     ):
         """
         Create a new YahooFeed instance
+
         Parameters:
-        - symbols: list of symbols to retrieve
-        - start_date: the start date of the data to retrieve, default in `2020-01-01`
-        - end_date: the end date of the data to retrieve, default is `None` (today)
-        - interval: the interval of the data to retrieve, default is `1d` (daily)
+            symbols: list of symbols to retrieve
+            start_date: the start date of the data to retrieve, default in `2020-01-01`
+            end_date: the end date of the data to retrieve, default is `None` (today)
+            interval: the interval of the data to retrieve, default is `1d` (daily)
         """
 
         super().__init__()
@@ -67,7 +71,7 @@ class YahooFeed(InMemoryFeed):
                     dt = t[0].to_pydatetime().astimezone(timezone.utc)
                     prices = t[1:6]
 
-                    # in rare conditions the prices can be nan
+                    # in rare conditions prices can be nan
                     if math.isfinite(prices[0]):
                         asset = self._get_asset(symbol)
                         b = Bar(asset, array("f", prices), interval)
@@ -81,7 +85,7 @@ class YahooFeed(InMemoryFeed):
 
     def _get_asset(self, symbol: str) -> Asset:
         """Get the asset for the given symbol. The default implementation will return a Stock denoted in USD.
-        Subclasses can override this method to provide a different asset type."""
+        Subclasses can override this method to support different asset classes."""
         return Stock(symbol)
 
     @staticmethod

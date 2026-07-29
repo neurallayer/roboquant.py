@@ -9,7 +9,7 @@ from typing import Callable
 
 from roboquant.asset import Asset, Stock
 from roboquant.event import Bar
-from roboquant.feeds.historicfeed import InMemoryFeed
+from roboquant.feeds.in_memory_feed import InMemoryFeed
 
 logger = logging.getLogger(__name__)
 
