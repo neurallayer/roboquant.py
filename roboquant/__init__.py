@@ -14,6 +14,7 @@ from .account import Account
 from .event import Event, PriceItem, Bar, TradePrice, Quote
 from .signal import Signal, SignalType
 from .order import Order
+from .trade import Trade
 from .monetary import Amount, Wallet
 from .asset import Asset, Stock, Crypto, Forex, Option
 from .run import run
@@ -23,7 +24,6 @@ from .timeseries import TimeSeries
 from importlib.metadata import version
 import platform
 
-from .trade import Trade
 __version__ = version("roboquant")
 
 def info():

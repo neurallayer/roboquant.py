@@ -97,7 +97,7 @@ class HistoricFeed(Feed, ABC):
         If no assets are provided, all assets in the feed will be used.
         """
         if not assets:
-                assets = tuple(self.assets())
+            assets = tuple(self.assets())
 
         result: dict[str, list[float | None]] = {asset.symbol: [] for asset in assets}
         for evt in self.play(timeframe):
@@ -224,7 +224,7 @@ class HistoricFeed(Feed, ABC):
         return TimeSeries(asset.symbol, x, y)
 
     def plot_corr(
-        self, *assets: Asset, ax=None, tf: Timeframe | None = None, price_type: str = "DEFAULT",
+        self, *assets: Asset, ax=None, timeframe: Timeframe | None = None, price_type: str = "DEFAULT",
         fontsize : int | None = None
     ):
         """Plot the correlation matrix of various assets in a feed. If no assets are provided, all feed assets are used
@@ -234,7 +234,7 @@ class HistoricFeed(Feed, ABC):
         if not ax:
             _, ax = plt.subplots()
 
-        d = self.to_dict(*assets, timeframe=tf, price_type=price_type)
+        d = self.to_dict(*assets, timeframe=timeframe, price_type=price_type)
         df = pd.DataFrame.from_dict(d)
         corr = df.corr()
 

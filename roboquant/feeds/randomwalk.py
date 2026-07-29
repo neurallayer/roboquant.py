@@ -33,7 +33,7 @@ class RandomWalk(InMemoryFeed):
         # pylint: disable=too-many-locals
         super().__init__()
         self._rnd = np.random.default_rng(seed)
-        assets = self.__get_assets(n_symbols, symbol_len)
+        assets = self._get_assets(n_symbols, symbol_len)
         assert len(assets) == n_symbols
 
         start_date = start_date if isinstance(start_date, datetime) else datetime.fromisoformat(str(start_date))
@@ -76,11 +76,16 @@ class RandomWalk(InMemoryFeed):
         bid = price - spread
         return Quote(asset, array("f", [price, ask, volume, bid, volume]))
 
-    def __get_assets(
+    def _get_assets(
         self,
         n_symbols: int,
         symbol_len: int,
     ) -> list[Asset]:
+        """Generate asset with a random generated symbol name.
+        The default implementation will generate Stocks that are denoted in USD.
+        Overwrite this method if you want to generate different asset classes or
+        use different currencies.
+        """
         assets = set()
         alphabet = np.array(list(string.ascii_uppercase))
         while len(assets) < n_symbols:

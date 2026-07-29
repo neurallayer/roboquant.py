@@ -1,5 +1,5 @@
 # %%
-# uncomment the following line
+# uncomment the following line if you didn't install roboquant yet on your environment.
 # %pip install roboquant
 
 # %% [markdown]
@@ -8,11 +8,8 @@
 # simple EMA Crossover strategy. The results are visualized using the `matplotlib` library
 # and the `roboquant` plotting capabilities.
 # %%
-import matplotlib.pyplot as plt
 import roboquant as rq
-import roboquant.journals.metrics
-from roboquant.journals.report import Report
-from roboquant.timeseries import TimeSeries
+import matplotlib.pyplot as plt
 
 # Setup some defaults for matplotlib
 plt.style.use("dark_background")
@@ -32,7 +29,7 @@ journal = rq.journals.MetricsJournal.pnl()
 account = rq.run(feed, strategy, journal=journal)
 
 
-# % [markdown]
+# %% [markdown]
 # ## Customize
 # You can customize many of the plots by providing parameter arguments that will be passed on
 # to matplotlib.
@@ -41,8 +38,7 @@ equity = journal.get_metric("pnl/equity")
 ax = equity.plot(color="green", linewidth=1)
 ax.set_title("My Custom Title");
 
-
-# % [markdown]
+# %% [markdown]
 # Or you can take full control of the ax and make more advanced chart figures.
 # Below we create a figure with 10 subplots.
 # We also create a more advanced title.
@@ -91,7 +87,7 @@ for timeframe in timeframes:
     equity = journal.get_metric("pnl/equity")
     equities.append(equity.pct_change())
 
-single_ts = TimeSeries.concat(*equities).inverse_pct_change()
+single_ts = rq.TimeSeries.concat(*equities).inverse_pct_change()
 single_ts.plot();
 
 # %% [markdown]
@@ -110,46 +106,23 @@ for timeframe in timeframes:
     equity = journal.get_metric("pnl/equity")[26:]
     ax = equity.plot(plot_timeline=False, ax=ax, linewidth=0.5, color="grey", alpha=0.5)
 
+
 # %% [markdown]
-# Report enables to publication of mathplotlib charts. They can be saved
-# as a single self-contained PDF file or HTML file.
-
-# %%
-strategy = rq.strategies.EMACrossover(26, 50)
-journal = rq.journals.MetricsJournal.pnl()
-account = rq.run(feed, strategy, journal=journal)
-
-report = Report()
-for asset in feed.assets():
-    feed.plot(asset, trades=account.trades, linewidth=0.5, color="grey")
-    report.add_current_figure()
-
-journal.plot("pnl/equity")
-report.add_current_figure()
-
-df = account.trades_to_dataframe().round(2)
-top_trades = df.sort_values("pnl", ascending=False)[:25]
-report.add_df(top_trades, "top 25 winners")
-
-down_trades = df.sort_values("pnl", ascending=True)[:25]
-report.add_df(down_trades, "top 25 losers")
-
-report.save_as_pdf("/tmp/report.pdf")
-report.save_as_html("/tmp/report.html")
-
-# %%
-# Using the scorecard journal
-strategy = rq.strategies.EMACrossover()
-asset = feed.assets()[0]
-scorecard = rq.journals.Scorecard(roboquant.journals.metrics.PNLMetric(), include_prices=True)
-rq.run(feed, strategy, journal=scorecard)
-scorecard.plot();
-
+# ## Correlation
+# Sometimes it is useful to inspect the correlation between assets.
+# There is a special plot that makes this visibe, although you could also
+# just show the correlation matrix:
+# ```
+# import pandas as pd
+# prices = feed.to_dict()
+# df = pd.DataFrame.from_dict(prices)
+# df.corr()
+# ```
 
 # %%
 # Mix in some ETF's to have a more diverse set of assets.
 feed = rq.feeds.YahooFeed("MSFT", "JPM", "XOM", "F", "GLD", "GSG", "BND", "LQD", "TIP", "IBIT", "VIXY")
 feed.plot_corr(fontsize=7);
 
-
 # %%
+
