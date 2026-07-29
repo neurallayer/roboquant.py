@@ -6,8 +6,6 @@
 #
 # This might be better solution if you are running a long back test and
 # don't want to wait for the result.
-#
-#
 
 # %%
 import roboquant as rq
@@ -18,6 +16,7 @@ strategy = rq.strategies.EMACrossover(26, 50)
 journal = rq.journals.MetricsJournal.pnl()
 account = rq.run(feed, strategy, journal=journal)
 
+# %%
 report = rq.journals.Report()
 
 for asset in feed.assets():
@@ -36,3 +35,5 @@ report.add_df(down_trades, "top 25 losers")
 
 report.save_as_pdf("/tmp/report.pdf")
 report.save_as_html("/tmp/report.html")
+
+print("Done")
