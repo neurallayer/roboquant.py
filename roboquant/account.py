@@ -8,28 +8,7 @@ from roboquant.portfolio import Portfolio
 from roboquant.asset import Asset
 from roboquant.monetary import USD, Amount, Currency, Wallet
 from roboquant.order import Order
-
-
-@dataclass(slots=True, frozen=True)
-class Trade:
-    """
-    Represents a (partially) executed order with its filled size and execution price.
-    It is immutable and can be used to track the realized PNL.
-
-    Attributes:
-        asset (Asset): The asset that was traded.
-        size (Decimal): The size of the trade, positive for buy trades, negative for sell trades.
-        price (float): The price at which the trade was executed, in the currency of the asset.
-        pnl (float): The profit and loss of the trade, calculated as the difference between the trade price and the average
-        paid price.
-        fee: any commission paid, denoted in the currency of the asset
-    """
-
-    asset: Asset
-    time: datetime
-    size: Decimal
-    price: float
-    pnl: float
+from roboquant.trade import Trade
 
 
 @dataclass
@@ -178,6 +157,9 @@ class Account:
             f"last update  : {self.last_update}"
         )
         return result
+
+    def trades_for_asset(self, asset: Asset) -> list[Trade]:
+        return [trade for trade in self.trades if trade.asset == asset]
 
     def trades_to_dataframe(self) -> pd.DataFrame:
         """Return the trades as a dataframe"""

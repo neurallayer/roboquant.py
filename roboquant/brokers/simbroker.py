@@ -5,12 +5,13 @@ import logging
 from typing import override
 
 from roboquant.portfolio import Position
-from roboquant.account import Account, Trade
+from roboquant.account import Account
 from roboquant.asset import Asset
 from roboquant.brokers.broker import Broker
 from roboquant.event import Event, Quote, PriceItem
 from roboquant.order import Order
 from roboquant.monetary import Amount, Wallet, USD
+from roboquant.trade import Trade
 
 logger = logging.getLogger(__name__)
 

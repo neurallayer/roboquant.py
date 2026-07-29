@@ -127,4 +127,14 @@ class TimeSeries:
     def __add__(self, other: float) -> "TimeSeries":
         return TimeSeries(self.name, self.timeline, self.data + other)
 
+    def __getitem__(self, key: Any) -> "TimeSeries":
+        d = self.data.__getitem__(key)
+        t = self.timeline.__getitem__(key)
+        if np.isscalar(d):
+            d = np.array([d])
+            t = np.array([t])
+        return TimeSeries(self.name, t, d)
+
+    def __repr__(self) -> str:
+        return f"TimeSeries(name={self.name} len={len(self)} timeframe={self.timeframe()})"
 

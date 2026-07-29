@@ -10,7 +10,7 @@ from roboquant import strategies
 from roboquant import traders
 
 from .portfolio import Position, Portfolio
-from .account import Account, Trade
+from .account import Account
 from .event import Event, PriceItem, Bar, TradePrice, Quote
 from .signal import Signal, SignalType
 from .order import Order
@@ -22,6 +22,8 @@ from .timeseries import TimeSeries
 
 from importlib.metadata import version
 import platform
+
+from .trade import Trade
 __version__ = version("roboquant")
 
 def info():

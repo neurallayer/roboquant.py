@@ -2,7 +2,7 @@ from abc import ABC, abstractmethod
 from datetime import datetime
 from typing import Any, Iterable, Sequence
 
-from roboquant.account import Trade
+from roboquant.trade import Trade
 from roboquant.asset import Asset
 from roboquant.event import Bar
 from roboquant.timeframe import Timeframe
@@ -166,6 +166,7 @@ class HistoricFeed(Feed, ABC):
         if not ax:
             _, ax = plt.subplots()
             ax.grid(True, linestyle="--", linewidth=0.5, alpha=0.5)
+            ax.set_title(asset.symbol)
 
         if not kwargs:
             kwargs = {"linewidth": 1}
@@ -191,8 +192,6 @@ class HistoricFeed(Feed, ABC):
                 x = [t.time for t in sell]
                 y = [t.price for t in sell]
                 ax.scatter(x, y, marker="v", color="red", zorder=10)  # type: ignore
-
-        ax.set_title(asset.symbol)
 
         return ax
 
@@ -225,25 +224,21 @@ class HistoricFeed(Feed, ABC):
         return TimeSeries(asset.symbol, x, y)
 
     def plot_corr(
-        self, *assets: Asset, ax=None, tf: Timeframe | None = None, price_type: str = "DEFAULT", auto_scale: bool = True,
+        self, *assets: Asset, ax=None, tf: Timeframe | None = None, price_type: str = "DEFAULT",
         fontsize : int | None = None
     ):
-        """Plot the correlation matrix of various assets in a feed. If no assets are provided, all feed assets are used"""
+        """Plot the correlation matrix of various assets in a feed. If no assets are provided, all feed assets are used
+        Returns the main ax.
+        """
 
         if not ax:
             _, ax = plt.subplots()
 
         d = self.to_dict(*assets, timeframe=tf, price_type=price_type)
         df = pd.DataFrame.from_dict(d)
-
         corr = df.corr()
 
-        vmin, vmax = None, None
-        if not auto_scale:
-            vmin = -1
-            vmax = 1
-
-        c_axes = ax.matshow(corr, vmin=vmin, vmax=vmax)
+        c_axes = ax.matshow(corr, vmin=-1, vmax=1, cmap="RdYlGn")
         ax.figure.colorbar(c_axes)
 
         columns = corr.columns
@@ -259,5 +254,7 @@ class HistoricFeed(Feed, ABC):
                 va="center",
                 color="w",
                 fontsize = fontsize,
-                bbox=dict(boxstyle="round", facecolor="#444", edgecolor="#aaa", alpha=0.3),
+                bbox=dict(boxstyle="round", facecolor='#222', edgecolor='#333', alpha=0.2),
             )
+
+        return ax

@@ -21,7 +21,7 @@ class TestTimeSeries(unittest.TestCase):
         self.assertEqual(len(diff), len(ts) -1)
         self.assertTrue(-1 < diff.data.mean() < 1)
 
-    def test_concat(self):
+    def test_concat_getitem(self):
         feed = get_feed()
         tf1, tf2 = feed.timeframe().split(2)
         ts1 = feed.get_prices("AAPL", timeframe=tf1)
@@ -30,6 +30,12 @@ class TestTimeSeries(unittest.TestCase):
         ts = TimeSeries.concat(ts1, ts2)
         self.assertEqual(ts.timeframe(), feed.timeframe())
 
+        ts3 = ts[10:20]
+        self.assertEqual(len(ts3), 10)
+
+        ts4 = ts[1]
+        self.assertEqual(len(ts4), 1)
+        self.assertEqual(ts4.data[0], ts.data[1])
 
 
 if __name__ == "__main__":
