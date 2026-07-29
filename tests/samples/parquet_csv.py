@@ -1,8 +1,12 @@
+# %% [markdown]
+# This example shows how to convert CSV files into a parquet file
+# that can then be used for back testing.
+# It also shows the use of a filter to limit with CSV files are read.
+
 # %%
 import os
 import roboquant as rq
 from roboquant.feeds.parquetfeed import ParquetFeed
-
 
 # %%
 # 10 popular symbols
