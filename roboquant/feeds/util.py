@@ -2,6 +2,8 @@ from array import array
 from datetime import timedelta
 from typing import Any, Iterator, Literal, override
 
+import pandas as pd
+
 from roboquant.asset import Asset
 from roboquant.event import Event, Bar, TradePrice, Quote
 from roboquant.timeframe import Timeframe
@@ -18,12 +20,14 @@ class BarAggregatorFeed(Feed):
     def __init__(
         self,
         feed: Feed,
-        frequency: timedelta,
+        frequency: timedelta | str,
         price_type: Literal["trade", "quote"] = "quote",
         send_remaining : bool =False,
         continuation : bool =True,
     ):
         super().__init__()
+        if isinstance(frequency, str):
+            frequency = pd.to_timedelta(frequency)
         self.feed = feed
         self.freq = frequency
         self.send_remaining = send_remaining

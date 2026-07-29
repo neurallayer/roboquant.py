@@ -20,6 +20,7 @@ class TestSignal(unittest.TestCase):
     def test_signal_exit(self):
         s1 = Signal.sell(apple, SignalType.EXIT)
         self.assertEqual(s1.type, SignalType.EXIT)
+        self.assertEqual(s1.rating, -1.0)
         self.assertFalse(s1.is_buy)
         self.assertTrue(s1.is_sell)
         self.assertFalse(s1.is_entry)
