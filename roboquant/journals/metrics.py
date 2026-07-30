@@ -240,7 +240,8 @@ class AssetMetric(Metric):
     def calc(self, event: Event, account: Account, signals: list[Signal], orders: list[Order]) -> dict[str, float]:
         mkt_return: float = 0.0
         n: int = 0
-        for asset, price in event.get_prices(self.price_type).items():
+        for asset, item in event.price_items.items():
+            price = item.price(self.price_type)
             if prev_price := self._prev_prices.get(asset):
                 mkt_return += price / prev_price - 1.0
                 n += 1
