@@ -11,7 +11,7 @@ from roboquant.order import Order
 from roboquant.portfolio import Portfolio, Position
 from roboquant.account import Account
 from roboquant.alpaca.alpaca_feed import _get_asset
-from roboquant.brokers.broker import LiveBroker
+from roboquant.brokers.livebroker import LiveBroker
 from roboquant.monetary import Wallet, Amount, USD
 
 logger = logging.getLogger(__name__)

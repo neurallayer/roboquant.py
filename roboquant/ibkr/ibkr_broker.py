@@ -5,7 +5,7 @@ from typing import Any, override
 from roboquant.order import Order
 from roboquant.portfolio import Portfolio
 import roboquant.portfolio
-from roboquant.brokers.broker import LiveBroker
+from roboquant.brokers.livebroker import LiveBroker
 import roboquant as rq
 from roboquant.ibkr._types import AccountInfo, ContractInfo, PositionInfo, OrderInfo
 
