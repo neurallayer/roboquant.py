@@ -1,10 +1,10 @@
 from roboquant.common.account import Account
+from roboquant.common.timeframe import Timeframe
 from roboquant.brokers.broker import Broker
 from roboquant.brokers.simbroker import SimBroker
 from roboquant.feeds.feed import Feed
 from roboquant.journals.journal import Journal
 from roboquant.strategies.strategy import Strategy
-from roboquant.common.timeframe import Timeframe
 from roboquant.traders.flextrader import FlexTrader
 from roboquant.traders.trader import Trader
 

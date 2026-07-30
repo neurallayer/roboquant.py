@@ -9,8 +9,7 @@ except ImportError:
     pass
 
 try:
-    from roboquant.third_party.crypto import CryptoBroker
-    from roboquant.third_party.crypto import CryptoFeed
+    from roboquant.third_party.crypto import CryptoBroker, CryptoFeed
 except ImportError:
     pass
 
