@@ -1,6 +1,6 @@
 """
-The `roboquant` package contains the `run` method and a number of shared classes
-like `Account`, `Asset` and `Event`.
+The `roboquant` package contains the `run` method and imports
+many useful classes and functions form sub-packages.
 """
 
 from roboquant import brokers
@@ -22,7 +22,7 @@ from .common.asset import Asset, Stock, Crypto, Forex, Option
 from .run import run
 from .common.timeframe import Timeframe, utcnow
 from .common.timeseries import TimeSeries
-from roboquant.util import indicators
+from roboquant.util import indicators, Report
 
 from importlib.metadata import version
 import platform
@@ -84,6 +84,7 @@ __all__ = [
     "indicators",
     "util",
     "monetary",
+    "Report",
     "Timeframe",
     "TimeSeries",
     "utcnow",

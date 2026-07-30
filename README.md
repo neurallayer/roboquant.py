@@ -49,14 +49,9 @@ The core installation of roboquant limits the number of dependencies. But you ca
 # AI based strategies using PyTorch and SB3
 python3 -m pip install --upgrade "roboquant[ai]"
 
-# Integration with Interactive Brokers
-python3 -m pip install --upgrade "roboquant[ibkr]"
+# Integration with Interactive Brokers, Alpaca and Crypto exchanges
+python3 -m pip install --upgrade "roboquant[extra]"
 
-# Integration with Alpaca broker
-python3 -m pip install --upgrade "roboquant[alpaca]"
-
-# Integration many crypto exchanges via CCXT package
-python3 -m pip install --upgrade "roboquant[crypto]"
 ```
 
 ## License

@@ -75,9 +75,11 @@ ai = [
   "stable-baselines3>=2.9.0",
   "sb3-contrib>=2.9.0",
 ]
-ibkr = ["ibind[oauth]>=0.1.22"]
-alpaca = ["alpaca-py>=0.43.5"]
-crypto = ["ccxt>=4.5.65"]
+extra = [
+  "ibind[oauth]>=0.1.22",
+  "alpaca-py>=0.43.5",
+  "ccxt>=4.5.65"
+]
 
 [project.urls]
 Homepage = "https://roboquant.org"
