@@ -13,7 +13,8 @@ from roboquant.common.timeseries import TimeSeries
 
 @dataclass
 class SignalOrderTracker(Journal):
-    """Tracks the generated signals and created orders from each step
+    """Tracks the generated signals and created orders at each step
+    of the run.
     """
 
     def __init__(self) -> None:
