@@ -40,17 +40,17 @@ Roboquant can be installed like most other Python packages, using tools like `uv
 Make sure you have Python version 3.12 or higher installed.
 
 ```shell
-python3 -m pip install --upgrade roboquant
+pip install roboquant
 ```
 
 The core installation of roboquant limits the number of dependencies. But you can install roboquant including one or more of the optional dependencies if you require certain additional functionality:
 
 ```shell
-# Include dependencies for integration with IBKR, Alpaca and Crypto exchanges
-python3 -m pip install --upgrade "roboquant[extra]"
+# Integration with IBKR, Alpaca and Crypto exchanges
+pip install "roboquant[extra]"
 
 # AI based strategies using PyTorch and SB3
-python3 -m pip install --upgrade "roboquant[ai]"
+pip install "roboquant[ai]"
 ```
 
 ## License

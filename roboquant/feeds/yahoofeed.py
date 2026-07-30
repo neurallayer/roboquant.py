@@ -84,8 +84,11 @@ class YahooFeed(InMemoryFeed):
         self._update()
 
     def _get_asset(self, symbol: str) -> Asset:
-        """Get the asset for the given symbol. The default implementation will return a Stock denoted in USD.
-        Subclasses can override this method to support different asset classes."""
+        """Get the asset for a given symbol.
+        The default implementation will return a Stock denoted in USD.
+        Subclasses can override this method to support different asset classes
+        or currencies.
+        """
         return Stock(symbol)
 
     @staticmethod

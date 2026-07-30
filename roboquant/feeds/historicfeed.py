@@ -37,7 +37,7 @@ class HistoricFeed(Feed, ABC):
         Returns:
             Asset: The first asset object that matches the provided symbol.
         Raises:
-            ValueError: If no asset is found with the specified symbol.
+            ValueError: If no asset is found matching the symbol.
         """
         try:
             return next(asset for asset in self.assets() if asset.symbol == symbol)
@@ -63,7 +63,8 @@ class HistoricFeed(Feed, ABC):
 
     def print_items(self, timeframe: Timeframe | None = None) -> None:
         """Print the items in a feed to the console.
-        This is mostly useful for debugging purposes to see what items a feed generates.
+        This is mostly useful for debugging purposes to
+        see what items a feed generates.
         """
 
         for event in self.play(timeframe):
@@ -227,8 +228,8 @@ class HistoricFeed(Feed, ABC):
         self, *assets: Asset, ax=None, timeframe: Timeframe | None = None, price_type: str = "DEFAULT",
         fontsize : int | None = None
     ):
-        """Plot the correlation matrix of various assets in a feed. If no assets are provided, all feed assets are used
-        Returns the main ax.
+        """Plot the correlation matrix of various assets in a feed. If no assets are provided,
+        all feed assets are used. Returns the main ax.
         """
 
         if not ax:

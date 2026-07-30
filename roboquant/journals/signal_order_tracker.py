@@ -13,7 +13,7 @@ from roboquant.common.timeseries import TimeSeries
 
 @dataclass
 class SignalOrderTracker(Journal):
-    """Tracks the created signals and orders from each step
+    """Tracks the generated signals and created orders from each step
     """
 
     def __init__(self) -> None:
@@ -25,10 +25,38 @@ class SignalOrderTracker(Journal):
         self.signals[event.time] = signals
         self.orders[event.time] = orders
 
-    def get_ratings(self, asset: Asset, timeframe: Timeframe | None = None) -> TimeSeries:
+    def get_order_limits(self, asset: Asset, timeframe: Timeframe | None = None) -> TimeSeries:
+        """Get the order limits for an asset within the given timeframe. Cancel or modify
+            orders are ignored.
+        """
+        timeline : list[datetime]= []
+        data : list[float] = []
+        for time, orders in self.orders.items():
+            if not timeframe or time in timeframe:
+                tmp = [order.limit for order in orders if order.asset == asset and not order.id]
+                if tmp:
+                    timeline.append(time)
+                    data.append(tmp[0])
+        return TimeSeries(asset.symbol + "-order-limits", timeline, data)
+
+    def get_order_sizes(self, asset: Asset, timeframe: Timeframe | None = None) -> TimeSeries:
+        """Get the order size for an asset within the given timeframe. Cancel or modify
+        orders are ignored.
+        """
+        timeline : list[datetime]= []
+        data : list[float] = []
+        for time, orders in self.orders.items():
+            if not timeframe or time in timeframe:
+                tmp = [float(order.size) for order in orders if order.asset == asset and not order.id]
+                if tmp:
+                    timeline.append(time)
+                    data.append(tmp[0])
+        return TimeSeries(asset.symbol + "-order-sizes", timeline, data)
+
+    def get_signal_ratings(self, asset: Asset, timeframe: Timeframe | None = None) -> TimeSeries:
         """Get the signal ratings for an asset within the given timeframe.
         If there is more than one signal at a given time, it returns
-        the rating of the first one.
+        the rating of the first signal.
         """
         timeline : list[datetime]= []
         data : list[float] = []
@@ -38,5 +66,5 @@ class SignalOrderTracker(Journal):
                 if tmp:
                     timeline.append(time)
                     data.append(tmp[0])
-        return TimeSeries(asset.symbol, timeline, data)
+        return TimeSeries(asset.symbol + "-signal-ratings", timeline, data)
 
