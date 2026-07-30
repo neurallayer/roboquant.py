@@ -1,6 +1,6 @@
 from .account import Account
 from .asset import Asset, Stock, Crypto, Forex, Option
-from .event import Event
+from .event import Event, PriceItem, Bar, Quote, TradePrice
 from .monetary import Wallet, Amount
 from .order import Order
 from .trade import Trade
@@ -17,6 +17,10 @@ __all__ = [
     "Forex",
     "Option",
     "Event",
+    "PriceItem",
+    "Bar",
+    "Quote",
+    "TradePrice",
     "Wallet",
     "Amount",
     "Order",
