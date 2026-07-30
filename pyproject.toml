@@ -78,6 +78,7 @@ ai = [
 ibkr = ["ibind[oauth]>=0.1.22"]
 alpaca = ["alpaca-py>=0.43.5"]
 crypto = ["ccxt>=4.5.65"]
+tickerall = ["tickerall>=0.1.16"]
 
 [project.urls]
 Homepage = "https://roboquant.org"
