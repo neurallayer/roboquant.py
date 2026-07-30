@@ -6,7 +6,7 @@ from statistics import mean, stdev
 from dotenv import load_dotenv
 
 from roboquant import Timeframe
-from roboquant.alpaca import AlpacaLiveFeed
+from roboquant.third_party.alpaca import AlpacaLiveFeed
 
 load_dotenv()
 
