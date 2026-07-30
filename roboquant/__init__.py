@@ -8,7 +8,7 @@ from roboquant import feeds
 from roboquant import journals
 from roboquant import strategies
 from roboquant import traders
-from roboquant.common import monetary
+from roboquant import common
 from roboquant import util
 
 from .common.portfolio import Position, Portfolio
@@ -17,12 +17,13 @@ from .common.event import Event, PriceItem, Bar, TradePrice, Quote
 from .common.signal import Signal, SignalType
 from .common.order import Order
 from .common.trade import Trade
-from .common.monetary import Amount, Wallet
+from .common.monetary import Amount, Wallet, USD, EUR, Currency
 from .common.asset import Asset, Stock, Crypto, Forex, Option
-from .run import run
 from .common.timeframe import Timeframe, utcnow
 from .common.timeseries import TimeSeries
+
 from roboquant.util import indicators, Report
+from .run import run
 
 from importlib.metadata import version
 import platform
@@ -83,9 +84,12 @@ __all__ = [
     "run",
     "indicators",
     "util",
-    "monetary",
+    "common",
     "Report",
     "Timeframe",
     "TimeSeries",
+    "Currency",
+    "USD",
+    "EUR",
     "utcnow",
 ]

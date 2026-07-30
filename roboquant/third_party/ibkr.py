@@ -4,6 +4,7 @@ from time import sleep
 from typing import Any, override
 from roboquant.common.order import Order
 from roboquant.common.portfolio import Portfolio
+from roboquant.common.monetary import Currency
 import roboquant.common.portfolio
 from roboquant.brokers.livebroker import LiveBroker
 import roboquant as rq
@@ -49,7 +50,7 @@ class _AssetMapper:
             logger.warning("only stocks are supported, got %s", asset)
             return None
 
-        contract_filter = {"isUS": True} if asset.currency == rq.monetary.USD else  {"isUS": False}
+        contract_filter = {"isUS": True} if asset.currency == rq.USD else  {"isUS": False}
 
         query = StockQuery(asset.symbol, contract_conditions=contract_filter)
         data : dict = self.client.security_stocks_by_symbol([query], default_filtering=False).data  # type: ignore
@@ -75,9 +76,9 @@ class _AssetMapper:
 
         match contract["instrument_type"]:
             case "STK":
-                asset = rq.Stock(contract["symbol"], rq.monetary.Currency(contract["currency"]))
+                asset = rq.Stock(contract["symbol"], Currency(contract["currency"]))
             case "OPT":
-                asset = rq.Option(contract["local_symbol"], rq.monetary.Currency(contract["currency"]))
+                asset = rq.Option(contract["local_symbol"], Currency(contract["currency"]))
             case _:
                 logger.warning("unsupported asset class %s", contract["instrument_type"])
 
