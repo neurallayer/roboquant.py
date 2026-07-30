@@ -7,7 +7,7 @@ from roboquant.portfolio import Portfolio
 import roboquant.portfolio
 from roboquant.brokers.livebroker import LiveBroker
 import roboquant as rq
-from roboquant.ibkr._types import AccountInfo, ContractInfo, PositionInfo, OrderInfo
+from roboquant.ibkr._ibkr_types import AccountInfo, ContractInfo, PositionInfo, OrderInfo
 
 
 from ibind import IbkrClient, StockQuery, OrderRequest, QuestionType  # noqa: E402
