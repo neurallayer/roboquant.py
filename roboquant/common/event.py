@@ -329,6 +329,8 @@ class Event:
     @cached_property
     def price_items(self) -> dict[Asset, PriceItem]:
         """Returns the price-items in this event for each asset.
+        If there are multiple price-items for an asset, the last one will
+        be returned.
 
         Returns:
             dict[Asset, PriceItem]: A dictionary mapping each asset to its corresponding price-item.
