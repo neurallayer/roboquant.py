@@ -1,8 +1,8 @@
 # %%
 from time import sleep
 import logging
-from roboquant import Order
-from roboquant.ibkr.ibkr_broker import IBKRBroker
+import roboquant as rq
+from roboquant.third_party.ibkr import IBKRBroker
 
 # %%
 logging.basicConfig()
@@ -15,7 +15,7 @@ print(account)
 # close all positions if there is not already an open order for that same asset
 open_order_assets = {order.asset for order in account.orders}
 orders = [
-    Order(asset, -pos.size, round(pos.mkt_price, 2))
+    rq.Order(asset, -pos.size, round(pos.mkt_price, 2))
     for asset, pos in account.portfolio.items()
     if asset not in open_order_assets
 ]

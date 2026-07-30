@@ -3,8 +3,10 @@ from datetime import timedelta
 import os
 import logging
 import roboquant as rq
-from roboquant.alpaca import AlpacaBroker, AlpacaLiveFeed
+from roboquant.alpaca import AlpacaLiveFeed
 from dotenv import load_dotenv
+
+from roboquant.third_party.alpaca import AlpacaBroker
 load_dotenv()
 
 # %%
