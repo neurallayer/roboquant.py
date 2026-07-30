@@ -1,5 +1,5 @@
 from .buffer import NumpyBuffer, OHLCVBuffer
-from .tastrategy import TaStrategy, TaMultiAssetStrategy
+from .indicator_strategy import IndicatorStrategy, MultiAssetIndicatorStrategy
 from .ema_crossover import EMACrossover
 from .ibsstrategy import IBSStrategy
 from .multistrategy import MultiStrategy
@@ -9,8 +9,8 @@ __all__ = [
     "Strategy",
     "MultiStrategy",
     "EMACrossover",
-    "TaStrategy",
-    "TaMultiAssetStrategy",
+    "IndicatorStrategy",
+    "MultiAssetIndicatorStrategy",
     "NumpyBuffer",
     "OHLCVBuffer",
     "IBSStrategy",

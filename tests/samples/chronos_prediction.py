@@ -58,7 +58,7 @@ plt.show()
 
 # %%
 # Make a strategy that uses the predictions to buy or sell the asset
-class ChronosStrategy(rq.strategies.TaStrategy):
+class ChronosStrategy(rq.strategies.IndicatorStrategy):
     """A strategy that uses the Chronos pipeline to predict future prices
     based on historical data. Naive approach that just serves as an example."""
 

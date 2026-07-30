@@ -5,12 +5,12 @@
 # %%
 from typing import override
 
-import roboquant.util.ta as ta
+from roboquant.util.indicators import RSI, BBANDS
 import roboquant as rq
-from roboquant.strategies import OHLCVBuffer, TaStrategy
+from roboquant.strategies import OHLCVBuffer, IndicatorStrategy
 
 # %%
-class MyStrategy(TaStrategy):
+class MyStrategy(IndicatorStrategy):
     """Example using ta-lib to create a combined RSI/BollingerBand strategy:
     1. BUY if `RSI < 30 and close < lower band`
     2. SELL if `RSI > 70 and close > upper band`
@@ -22,9 +22,9 @@ class MyStrategy(TaStrategy):
 
         period = self.period - 1
         close_prices = ohlcv.close()
-        rsi = ta.RSI(close_prices, timeperiod=period)
+        rsi = RSI(close_prices, timeperiod=period)
 
-        upper, _, lower = ta.BBANDS(close_prices, timeperiod=period, nbdevup=2, nbdevdn=2)
+        upper, _, lower = BBANDS(close_prices, timeperiod=period, nbdevup=2, nbdevdn=2)
 
         close: float = close_prices[-1]
 

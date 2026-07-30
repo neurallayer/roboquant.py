@@ -8,7 +8,7 @@ from roboquant.strategies.buffer import AssetBuffers, OHLCVBuffer
 from roboquant.strategies.strategy import Strategy
 
 
-class TaStrategy(Strategy):
+class IndicatorStrategy(Strategy):
     """Abstract base class for other strategies that helps to implement trading solutions
     based on technical indicators using a history of bars (aka candlesticks).
 
@@ -48,7 +48,7 @@ class TaStrategy(Strategy):
         ...
 
 
-class TaMultiAssetStrategy(Strategy):
+class MultiAssetIndicatorStrategy(Strategy):
     """Abstract base class for other strategies that helps to implement trading solutions
     based on technical indicators using a history of bars (aka candlesticks).
 

@@ -547,9 +547,10 @@ class TimeDifference(Feature[Event]):
         self._last_time = None
 
 
-class TaFeature(Feature[Event]):
-    """Base class for technical analysis features.
-    You can for example use TaLib to implement your own technical analysis features.
+class IndicatorFeature(Feature[Event]):
+    """Base class for technical indicator features.
+    You can for example use TaLib to implement your own
+    technical analysis features.
     """
 
     def __init__(self, *assets: Asset, period: int) -> None:

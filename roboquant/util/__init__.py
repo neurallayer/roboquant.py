@@ -1,8 +1,8 @@
 from .report import Report
-import roboquant.util.ta as ta
+import roboquant.util.indicators as indicators
 
 __all__ = [
     "Report",
-    "ta"
+    "indicators"
 ]
 

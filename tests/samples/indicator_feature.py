@@ -1,12 +1,12 @@
 # %%
-import roboquant.util.ta as ta
+from roboquant.util.indicators import RSI
 import roboquant as rq
 from roboquant.common.asset import Asset
-from roboquant.ai.features import TaFeature
+from roboquant.ai.features import IndicatorFeature
 from roboquant.strategies.buffer import OHLCVBuffer
 
 # %%
-class RSIFeature(TaFeature):
+class RSIFeature(IndicatorFeature):
     """Example using TaLib to create a RSI feature"""
 
     def __init__(self, *assets: Asset, timeperiod:int) -> None:
@@ -15,7 +15,7 @@ class RSIFeature(TaFeature):
 
     def _calc(self, asset: Asset, ohlcv: OHLCVBuffer) -> float:
         close = ohlcv.close()
-        return ta.RSI(close, timeperiod=self.timeperiod)
+        return RSI(close, timeperiod=self.timeperiod)
 
 # %%
 feed = rq.feeds.YahooFeed("IBM", "AAPL", start_date="2024-01-01", end_date="2024-02-01")

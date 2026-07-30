@@ -1,11 +1,11 @@
 import unittest
 
 from roboquant.common.signal import Signal
-from roboquant.strategies import TaStrategy, OHLCVBuffer
+from roboquant.strategies import IndicatorStrategy, OHLCVBuffer
 from tests.common import run_strategy
 
 
-class _MyStrategy(TaStrategy):
+class _MyStrategy(IndicatorStrategy):
     """Example using TaStrategy as a baseclass to create a custom strategy"""
 
     def _create_signal(self, asset, ohlcv: OHLCVBuffer):
