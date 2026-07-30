@@ -3,7 +3,7 @@ import unittest
 from roboquant.common.signal import Signal
 from roboquant.strategies.buffer import OHLCVBuffer
 from roboquant.strategies.tastrategy import TaStrategy
-import roboquant.ta as ta
+import roboquant.util.ta as ta
 import numpy as np
 
 from tests.common import run_strategy

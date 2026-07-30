@@ -1,5 +1,5 @@
 # %%
-import roboquant.ta as ta
+import roboquant.util.ta as ta
 import roboquant as rq
 from roboquant.common.asset import Asset
 from roboquant.ai.features import TaFeature

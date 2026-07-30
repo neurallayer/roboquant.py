@@ -1,7 +1,7 @@
 """Set of wrappers for the streaming version of the ta-lib indicators that makes them discoverable and typed.
 """
 
-import talib._ta_lib as _ta_lib
+import talib._ta_lib as __ta_lib
 import numpy as np
 import logging
 from enum import Enum
@@ -925,8 +925,8 @@ def IMI(open: NDArray[np.float64], close: NDArray[np.float64], timeperiod: int =
     # if fn not in _ta_lib.__TA_FUNCTION_NAMES__:
     #   if not fn.startswith("__") and fn == fn.upper():
     #        print("not found ", fn)
-if "_ta_lib" in globals():
-    for func_name in _ta_lib.__TA_FUNCTION_NAMES__:  # type: ignore
+if "__ta_lib" in globals():
+    for func_name in __ta_lib.__TA_FUNCTION_NAMES__:  # type: ignore
         # if func_name not in globals():
         #        print("new function", func_name)
-        globals()[func_name] = getattr(_ta_lib, "stream_%s" % func_name)
+        globals()[func_name] = getattr(__ta_lib, "stream_%s" % func_name)

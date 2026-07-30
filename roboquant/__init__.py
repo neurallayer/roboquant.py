@@ -22,6 +22,7 @@ from .common.asset import Asset, Stock, Crypto, Forex, Option
 from .run import run
 from .common.timeframe import Timeframe, utcnow
 from .common.timeseries import TimeSeries
+from roboquant.util import ta
 
 from importlib.metadata import version
 import platform
@@ -80,6 +81,7 @@ __all__ = [
     "Option",
     "Trade",
     "run",
+    "ta",
     "util",
     "monetary",
     "Timeframe",

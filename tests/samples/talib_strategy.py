@@ -5,7 +5,7 @@
 # %%
 from typing import override
 
-import roboquant.ta as ta
+import roboquant.util.ta as ta
 import roboquant as rq
 from roboquant.strategies import OHLCVBuffer, TaStrategy
 
