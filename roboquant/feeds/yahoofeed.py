@@ -64,7 +64,7 @@ class YahooFeed(InMemoryFeed):
                     logger.warning("no data retrieved for symbol=%s", symbol)
                     continue
 
-                # yFinance one doesn't correct the volume, so we use our own auto-adjust
+                # yFinance one doesn't adjust the volume, so we use our own auto-adjust
                 self.__auto_adjust(df)
 
                 for t in df.itertuples(index=True):

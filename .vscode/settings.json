@@ -44,5 +44,10 @@
     "python.testing.unittestEnabled": true,
     "[python]": {
         "editor.defaultFormatter": "charliermarsh.ruff"
+    },
+    "files.exclude": {
+        "**/__pycache__": true,
+        "**/.*": true,
+        "**/*.egg-info": true
     }
 }
