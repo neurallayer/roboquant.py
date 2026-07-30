@@ -8,6 +8,7 @@ uv sync --all-extras --dev
 
 # QA
 uvx ruff check
+uvx ty check roboquant tests || exit 1
 uv run pyright tests roboquant || exit 1
 uv run python -m unittest discover -s tests/unit || exit 1
 

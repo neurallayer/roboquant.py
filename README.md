@@ -12,7 +12,7 @@ Roboquant is an open-source algorithmic trading platform written in Python. It i
 So whether you are a beginning retail trader or an established trading firm, roboquant can help you to develop robust and fully automated trading strategies. You can find out more at [roboquant.org](https://roboquant.org).
 
 ## Usage
-The following code snippet shows the required steps to run a full back-test on a number of stocks.
+The following code snippet shows the required steps to run a back-test on a number of stocks.
 
 ```python
 import roboquant as rq
@@ -46,12 +46,11 @@ python3 -m pip install --upgrade roboquant
 The core installation of roboquant limits the number of dependencies. But you can install roboquant including one or more of the optional dependencies if you require certain additional functionality:
 
 ```shell
-# AI based strategies using PyTorch and SB3
-python3 -m pip install --upgrade "roboquant[ai]"
-
-# Integration with Interactive Brokers, Alpaca and Crypto exchanges
+# Include dependencies for integration with IBKR, Alpaca and Crypto exchanges
 python3 -m pip install --upgrade "roboquant[extra]"
 
+# AI based strategies using PyTorch and SB3
+python3 -m pip install --upgrade "roboquant[ai]"
 ```
 
 ## License

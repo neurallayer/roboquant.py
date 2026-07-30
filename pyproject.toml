@@ -12,7 +12,6 @@ ignore = ["E703"]  # use ; in notebook Python file
 [tool.ty.rules]
 unused-type-ignore-comment = "ignore"
 
-
 [tool.pyright]
 typeCheckingMode = "standard"
 reportPrivateImportUsage = "none" 
@@ -27,7 +26,7 @@ infer-with-first-use = false
 
 [project]
 name = "roboquant"
-version = "2.6.7"
+version = "2.7.0"
 authors = [{ name = "roboquant team", email = "info@roboquant.org" }]
 description = "A fast algorithmic trading platform with support for AI based strategies"
 readme = "README.md"
@@ -95,6 +94,5 @@ dev = [
   "chronos-forecasting>=2.3.1",
   "ty>=0.0.62",
   "tensorboard>=2.21.0",
-  "pdoc3>=0.11.6",
-  "pyrefly>=1.1.1",
+  "pdoc3>=0.11.6"
 ]
