@@ -5,13 +5,13 @@ from enum import Flag, auto
 import random
 from typing import Any, Literal, override
 
-from roboquant.asset import Asset
-from roboquant.event import Event
-from roboquant.order import Order
-from roboquant.signal import Signal
+from roboquant.common.asset import Asset
+from roboquant.common.event import Event
+from roboquant.common.order import Order
+from roboquant.common.signal import Signal
 from .trader import Trader
-from ..account import Account
-from ..event import PriceItem
+from ..common.account import Account
+from ..common.event import PriceItem
 
 logger = logging.getLogger(__name__)
 

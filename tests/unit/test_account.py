@@ -1,11 +1,11 @@
 import unittest
 from decimal import Decimal
 
-from roboquant.portfolio import Position
-from roboquant.account import Account
-from roboquant.asset import Stock
-from roboquant.monetary import Wallet, Amount, USD
-from roboquant.timeframe import utcnow
+from roboquant.common.portfolio import Position
+from roboquant.common.account import Account
+from roboquant.common.asset import Stock
+from roboquant.common.monetary import Wallet, Amount, USD
+from roboquant.common.timeframe import utcnow
 
 
 class TestAccount(unittest.TestCase):

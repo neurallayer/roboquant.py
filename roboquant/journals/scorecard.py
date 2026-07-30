@@ -1,11 +1,11 @@
 from roboquant.feeds.in_memory_feed import InMemoryFeed
 from roboquant.journals.journal import Journal
 from roboquant.journals.metrics import Metric
-from roboquant.event import Event
-from roboquant.account import Account
+from roboquant.common.event import Event
+from roboquant.common.account import Account
 from roboquant.journals.metricsjournal import MetricsJournal
-from roboquant.signal import Signal
-from roboquant.order import Order
+from roboquant.common.signal import Signal
+from roboquant.common.order import Order
 from typing import List, override
 
 

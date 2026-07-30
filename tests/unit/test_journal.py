@@ -1,6 +1,6 @@
 import unittest
 
-from roboquant.timeseries import TimeSeries
+from roboquant.common.timeseries import TimeSeries
 from roboquant.journals import MetricsJournal
 from roboquant.journals.metrics import AssetMetric, MarketMetric, PNLMetric, RunMetric
 from roboquant.strategies.ema_crossover import EMACrossover

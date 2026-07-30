@@ -2,8 +2,8 @@ import unittest
 from decimal import Decimal
 from dataclasses import replace
 
-from roboquant.order import Order
-from roboquant.asset import Stock
+from roboquant.common.order import Order
+from roboquant.common.asset import Stock
 
 
 apple = Stock("AAPL")

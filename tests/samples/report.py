@@ -17,7 +17,7 @@ journal = rq.journals.MetricsJournal.pnl()
 account = rq.run(feed, strategy, journal=journal)
 
 # %%
-report = rq.journals.Report()
+report = rq.util.Report()
 
 for asset in feed.assets():
     feed.plot(asset, trades=account.trades, linewidth=0.5, color="grey")

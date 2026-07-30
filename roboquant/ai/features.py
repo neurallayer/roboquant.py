@@ -6,9 +6,9 @@ from typing import Any, TypeVar, Generic
 import numpy as np
 from numpy.typing import NDArray, ArrayLike
 
-from roboquant.account import Account
-from roboquant.asset import Asset
-from roboquant.event import Event, Bar, Quote
+from roboquant.common.account import Account
+from roboquant.common.asset import Asset
+from roboquant.common.event import Event, Bar, Quote
 from roboquant.strategies.buffer import OHLCVBuffer
 
 T = TypeVar("T")

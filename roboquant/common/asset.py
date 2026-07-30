@@ -6,7 +6,7 @@ from dataclasses import dataclass
 from decimal import Decimal
 from typing import Type, override
 
-from roboquant.monetary import USD, Amount, Currency
+from roboquant.common.monetary import USD, Amount, Currency
 
 logger = logging.getLogger(__name__)
 

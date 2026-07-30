@@ -5,8 +5,8 @@ import os
 from alpaca.data.timeframe import TimeFrame
 
 from roboquant.alpaca import AlpacaHistoricCryptoFeed, AlpacaHistoricStockFeed, AlpacaBroker
-from roboquant.asset import Crypto, Stock
-from roboquant.order import Order
+from roboquant.common.asset import Crypto, Stock
+from roboquant.common.order import Order
 from tests.common import run_price_item_feed
 from dotenv import load_dotenv
 

@@ -3,8 +3,8 @@ from queue import SimpleQueue
 from queue import Empty, Full
 from typing import Iterator, override
 
-from roboquant.event import Event
-from roboquant.timeframe import Timeframe, utcnow
+from roboquant.common.event import Event
+from roboquant.common.timeframe import Timeframe, utcnow
 from .feed import Feed
 
 

@@ -6,8 +6,8 @@ from typing import Literal
 
 import numpy as np
 
-from roboquant.asset import Asset, Stock
-from roboquant.event import Bar, TradePrice, Quote
+from roboquant.common.asset import Asset, Stock
+from roboquant.common.event import Bar, TradePrice, Quote
 from roboquant.feeds.in_memory_feed import InMemoryFeed
 
 

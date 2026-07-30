@@ -25,8 +25,8 @@ from alpaca.data.requests import (
 from alpaca.data.timeframe import TimeFrame, TimeFrameUnit
 from alpaca.trading.enums import AssetClass
 
-from roboquant.asset import Asset, Crypto, Option, Stock
-from roboquant.event import Bar, Event, PriceItem, Quote, TradePrice
+from roboquant.common.asset import Asset, Crypto, Option, Stock
+from roboquant.common.event import Bar, Event, PriceItem, Quote, TradePrice
 from roboquant.feeds.in_memory_feed import InMemoryFeed
 from roboquant.feeds.livefeed import LiveFeed
 

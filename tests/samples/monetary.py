@@ -6,7 +6,7 @@
 # %%
 from datetime import datetime, timedelta
 from roboquant import utcnow
-from roboquant.monetary import EUR, USD, JPY, ECBConversion, Amount, Wallet
+from roboquant.common.monetary import EUR, USD, JPY, ECBConversion, Amount, Wallet
 
 # %%
 # Different ways to create an amount.

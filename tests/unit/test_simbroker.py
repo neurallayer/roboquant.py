@@ -3,14 +3,14 @@ import unittest
 from datetime import datetime, timezone
 from decimal import Decimal
 
-from roboquant.event import Event, TradePrice
-from roboquant.order import Order
-from roboquant.account import Account
-from roboquant.asset import Stock
+from roboquant.common.event import Event, TradePrice
+from roboquant.common.order import Order
+from roboquant.common.account import Account
+from roboquant.common.asset import Stock
 from roboquant.brokers import SimBroker
 from roboquant.strategies import EMACrossover
 from roboquant import run
-from roboquant.monetary import USD
+from roboquant.common.monetary import USD
 
 from tests.common import get_feed
 

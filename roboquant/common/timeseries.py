@@ -8,7 +8,7 @@ from numpy.typing import NDArray
 import pandas as pd
 from matplotlib import pyplot as plt
 
-from roboquant.timeframe import Timeframe
+from roboquant.common.timeframe import Timeframe
 
 @dataclass(slots=True)
 class TimeSeries:

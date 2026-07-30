@@ -1,7 +1,7 @@
 from datetime import datetime
 import unittest
 
-from roboquant.monetary import (
+from roboquant.common.monetary import (
     NoConversion,
     One2OneConversion,
     Wallet,

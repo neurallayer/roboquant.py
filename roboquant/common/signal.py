@@ -1,7 +1,7 @@
 from dataclasses import dataclass
 from enum import Flag, auto
 
-from roboquant.asset import Asset
+from roboquant.common.asset import Asset
 
 
 class SignalType(Flag):

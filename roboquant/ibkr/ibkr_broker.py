@@ -2,9 +2,9 @@ from decimal import Decimal
 import logging
 from time import sleep
 from typing import Any, override
-from roboquant.order import Order
-from roboquant.portfolio import Portfolio
-import roboquant.portfolio
+from roboquant.common.order import Order
+from roboquant.common.portfolio import Portfolio
+import roboquant.common.portfolio
 from roboquant.brokers.livebroker import LiveBroker
 import roboquant as rq
 from roboquant.ibkr._ibkr_types import AccountInfo, ContractInfo, PositionInfo, OrderInfo
@@ -148,7 +148,7 @@ class IBKRBroker(LiveBroker):
             conid = pos_info["conid"]
             if asset := self._mapper.get_asset(conid):
                 if size := pos_info["position"]:
-                    position = roboquant.portfolio.Position(Decimal(size), pos_info["avgPrice"], pos_info["mktPrice"])
+                    position = roboquant.common.portfolio.Position(Decimal(size), pos_info["avgPrice"], pos_info["mktPrice"])
                     result[asset] = position
             else:
                 logger.warning("ignoring position %s because couldn't map conid to asset", pos_info)
@@ -248,7 +248,7 @@ class IBKRBroker(LiveBroker):
 
     @override
     def _get_account(self):
-        account = rq.account.Account()
+        account = rq.Account()
         account.portfolio = self.__get_positions()
         account.orders = self.__get_orders()
         cash, bp = self.__get_cash_bp()

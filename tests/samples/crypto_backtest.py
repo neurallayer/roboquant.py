@@ -5,7 +5,7 @@
 import ccxt
 import roboquant as rq
 from roboquant.crypto.crypto_feed import CryptoFeed
-from roboquant.monetary import USDT
+from roboquant.common.monetary import USDT
 
 # %%
 exchange = ccxt.binance()

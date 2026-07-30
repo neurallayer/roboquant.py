@@ -3,8 +3,8 @@ from datetime import datetime
 from decimal import Decimal
 from typing import Any, Literal
 
-from roboquant.asset import Asset
-from roboquant.monetary import Amount
+from roboquant.common.asset import Asset
+from roboquant.common.monetary import Amount
 
 
 @dataclass(slots=True, frozen=True)

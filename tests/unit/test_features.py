@@ -2,7 +2,7 @@ from datetime import datetime, timezone
 import unittest
 
 import numpy as np
-from roboquant.event import Event
+from roboquant.common.event import Event
 
 from roboquant.ai.features import (
     CacheFeature,

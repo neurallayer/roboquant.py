@@ -5,7 +5,7 @@ import torch.nn.functional as F
 import numpy as np
 
 import roboquant as rq
-from roboquant.asset import Stock
+from roboquant.common.asset import Stock
 from roboquant.ai.features import BarFeature, CombinedFeature, PriceFeature, SMAFeature
 from roboquant.ai.strategies import TimeSeriesStrategy, SequenceDataset
 from tests.common import get_feed

@@ -1,4 +1,4 @@
-from roboquant.asset import Asset
+from roboquant.common.asset import Asset
 
 
 from dataclasses import dataclass

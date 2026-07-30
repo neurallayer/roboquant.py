@@ -1,7 +1,7 @@
 from abc import ABC, abstractmethod
 
-from roboquant.event import Event
-from roboquant.signal import Signal
+from roboquant.common.event import Event
+from roboquant.common.signal import Signal
 
 
 class Strategy(ABC):

@@ -1,7 +1,7 @@
 import unittest
 from datetime import datetime, timedelta, timezone
 
-from roboquant.timeframe import Timeframe
+from roboquant.common.timeframe import Timeframe
 
 
 class TestTimeframe(unittest.TestCase):

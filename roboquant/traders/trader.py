@@ -1,9 +1,9 @@
 from abc import ABC, abstractmethod
 
-from roboquant.account import Account
-from roboquant.event import Event
-from roboquant.order import Order
-from roboquant.signal import Signal
+from roboquant.common.account import Account
+from roboquant.common.event import Event
+from roboquant.common.order import Order
+from roboquant.common.signal import Signal
 
 
 class Trader(ABC):

@@ -1,6 +1,6 @@
 import unittest
 
-from roboquant.timeseries import TimeSeries
+from roboquant.common.timeseries import TimeSeries
 from tests.common import get_feed
 
 

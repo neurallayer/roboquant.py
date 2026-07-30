@@ -4,11 +4,11 @@ from decimal import Decimal
 
 import pandas as pd
 
-from roboquant.portfolio import Portfolio
-from roboquant.asset import Asset
-from roboquant.monetary import USD, Amount, Currency, Wallet
-from roboquant.order import Order
-from roboquant.trade import Trade
+from roboquant.common.portfolio import Portfolio
+from roboquant.common.asset import Asset
+from roboquant.common.monetary import USD, Amount, Currency, Wallet
+from roboquant.common.order import Order
+from roboquant.common.trade import Trade
 
 
 @dataclass

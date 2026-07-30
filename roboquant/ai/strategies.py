@@ -9,10 +9,10 @@ from numpy.typing import NDArray
 
 from torch.utils.data import DataLoader, Dataset
 
-from roboquant.asset import Asset
-from roboquant.event import Event
+from roboquant.common.asset import Asset
+from roboquant.common.event import Event
 from roboquant.ai.features import Feature, NormalizeFeature
-from roboquant.signal import Signal
+from roboquant.common.signal import Signal
 from roboquant.strategies.strategy import Strategy
 
 logger = logging.getLogger(__name__)

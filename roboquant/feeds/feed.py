@@ -1,8 +1,8 @@
 from abc import ABC, abstractmethod
 from typing import Iterator
 
-from roboquant.event import Event
-from roboquant.timeframe import Timeframe
+from roboquant.common.event import Event
+from roboquant.common.timeframe import Timeframe
 
 
 class Feed(ABC):

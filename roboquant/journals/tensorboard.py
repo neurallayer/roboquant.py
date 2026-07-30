@@ -1,11 +1,11 @@
 from typing import override
 
-from roboquant.account import Account
-from roboquant.event import Event
+from roboquant.common.account import Account
+from roboquant.common.event import Event
 from roboquant.journals.journal import Journal
 from roboquant.journals.metrics import Metric
-from roboquant.order import Order
-from roboquant.signal import Signal
+from roboquant.common.order import Order
+from roboquant.common.signal import Signal
 
 
 class TensorboardJournal(Journal):

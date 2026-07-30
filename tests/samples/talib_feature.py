@@ -1,7 +1,7 @@
 # %%
 import roboquant.ta as ta
 import roboquant as rq
-from roboquant.asset import Asset
+from roboquant.common.asset import Asset
 from roboquant.ai.features import TaFeature
 from roboquant.strategies.buffer import OHLCVBuffer
 

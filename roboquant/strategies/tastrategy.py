@@ -1,9 +1,9 @@
 from abc import abstractmethod
 from typing import override
 
-from roboquant.asset import Asset
-from roboquant.event import Event
-from roboquant.signal import Signal
+from roboquant.common.asset import Asset
+from roboquant.common.event import Event
+from roboquant.common.signal import Signal
 from roboquant.strategies.buffer import AssetBuffers, OHLCVBuffer
 from roboquant.strategies.strategy import Strategy
 

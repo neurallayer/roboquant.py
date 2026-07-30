@@ -4,8 +4,8 @@ from array import array
 from datetime import date, datetime, timezone
 from typing import Any
 
-from roboquant.asset import Asset, Crypto
-from roboquant.event import Bar
+from roboquant.common.asset import Asset, Crypto
+from roboquant.common.event import Bar
 from roboquant.feeds.in_memory_feed import InMemoryFeed
 
 logger = logging.getLogger(__name__)

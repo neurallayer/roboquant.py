@@ -4,8 +4,8 @@ from typing import Any, Sequence
 import numpy as np
 from numpy.typing import NDArray, DTypeLike
 
-from roboquant.asset import Asset
-from roboquant.event import Bar, Event
+from roboquant.common.asset import Asset
+from roboquant.common.event import Bar, Event
 
 
 class NumpyBuffer:

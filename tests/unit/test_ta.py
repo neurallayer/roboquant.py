@@ -1,6 +1,6 @@
 import unittest
 
-from roboquant.signal import Signal
+from roboquant.common.signal import Signal
 from roboquant.strategies.buffer import OHLCVBuffer
 from roboquant.strategies.tastrategy import TaStrategy
 import roboquant.ta as ta

@@ -3,13 +3,13 @@ from datetime import datetime
 
 from roboquant.journals.journal import Journal
 from roboquant.journals.metrics import Metric, PNLMetric
-from roboquant.account import Account
-from roboquant.signal import Signal
-from roboquant.event import Event
-from roboquant.order import Order
+from roboquant.common.account import Account
+from roboquant.common.signal import Signal
+from roboquant.common.event import Event
+from roboquant.common.order import Order
 from typing import Dict, List
 
-from roboquant.timeseries import TimeSeries
+from roboquant.common.timeseries import TimeSeries
 
 class MetricsJournal(Journal):
     """

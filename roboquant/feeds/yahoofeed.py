@@ -4,8 +4,8 @@ from datetime import date, datetime, timezone
 import math
 import warnings
 
-from roboquant.asset import Asset, Stock
-from roboquant.event import Bar
+from roboquant.common.asset import Asset, Stock
+from roboquant.common.event import Bar
 from roboquant.feeds.in_memory_feed import InMemoryFeed
 
 logger = logging.getLogger(__name__)

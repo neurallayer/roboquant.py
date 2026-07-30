@@ -5,10 +5,10 @@ from typing import Iterable
 from unittest import TestCase
 
 from roboquant import PriceItem, Bar, Quote, TradePrice, Timeframe
-from roboquant.asset import Asset
+from roboquant.common.asset import Asset
 from roboquant.feeds import CSVFeed
 from roboquant.feeds.feed import Feed
-from roboquant.signal import Signal
+from roboquant.common.signal import Signal
 from roboquant.strategies.strategy import Strategy
 
 

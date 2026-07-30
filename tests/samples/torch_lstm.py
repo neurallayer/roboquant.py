@@ -4,7 +4,7 @@ from torch import nn
 import torch.nn.functional as F
 
 import roboquant as rq
-from roboquant.asset import Stock
+from roboquant.common.asset import Stock
 from roboquant.journals.basicjournal import BasicJournal
 from roboquant.ai.features import BarFeature, CombinedFeature, MaxReturnFeature, PriceFeature, SMAFeature
 from roboquant.ai.strategies import TimeSeriesStrategy, logger

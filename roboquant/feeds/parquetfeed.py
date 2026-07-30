@@ -7,12 +7,12 @@ from typing import Iterable, Iterator
 import pyarrow as pa
 import pyarrow.parquet as pq
 
-from roboquant.event import Quote, Bar, TradePrice
-from roboquant.event import Event
+from roboquant.common.event import Quote, Bar, TradePrice
+from roboquant.common.event import Event
 from roboquant.feeds.feed import Feed
-from roboquant.asset import deserialize_to_asset, Asset
+from roboquant.common.asset import deserialize_to_asset, Asset
 from .historicfeed import HistoricFeed
-from roboquant.timeframe import Timeframe
+from roboquant.common.timeframe import Timeframe
 
 logger = logging.getLogger(__name__)
 

@@ -2,8 +2,8 @@ from dataclasses import dataclass
 from decimal import Decimal
 import unittest
 
-from roboquant.asset import Crypto, Stock, Option, Forex, Asset
-from roboquant.monetary import USD, Currency
+from roboquant.common.asset import Crypto, Stock, Option, Forex, Asset
+from roboquant.common.monetary import USD, Currency
 
 
 class TestAsset(unittest.TestCase):

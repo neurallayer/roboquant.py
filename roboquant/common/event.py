@@ -5,7 +5,7 @@ from datetime import datetime, timezone
 from functools import cached_property
 from typing import Any, override
 
-from roboquant.asset import Asset
+from roboquant.common.asset import Asset
 
 
 @dataclass(slots=True, frozen=True)
