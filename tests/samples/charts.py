@@ -66,8 +66,10 @@ for timeframe in timeframes:
     strategy = rq.strategies.EMACrossover()
     journal = rq.journals.MetricsJournal.pnl()
     rq.run(feed, strategy, journal=journal, timeframe=timeframe)
-    equity = journal.get_metric("pnl/equity")
+    name = f"{timeframe.strftime('%Y-%m')}"
+    equity = journal.get_metric("pnl/equity", name)
     ax = equity.plot(ax=ax, linewidth=0.5)
+    ax.legend(prop={'size': 5})
 
 # %% [markdown]
 # Run randomly sampled 1-year back tests and plot the equity curve

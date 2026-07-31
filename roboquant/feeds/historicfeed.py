@@ -89,9 +89,33 @@ class HistoricFeed(Feed, ABC):
             items += len(evt.items)
         return items
 
+    def to_timeseries(
+            self, *assets: Asset, timeframe: Timeframe | None = None, price_type: str = "DEFAULT"
+        ) -> TimeSeries:
+            """Return the prices of one or more assets as a multivariate TimeSeries.
+            The name of each individual series is the symbol name.
+            If at a moment in time for an asset there is no known price, NaN will be stored.
+
+            If no assets are provided, all assets in the feed will be used.
+            """
+            if not assets:
+                assets = tuple(self.assets())
+
+            timeline = []
+            result: dict[str, list[float]] = {asset.symbol: [] for asset in assets}
+            for evt in self.play(timeframe):
+                timeline.append(evt.time)
+                for asset in assets:
+                    price = evt.get_price(asset, price_type)
+                    if price is not None:
+                        result[asset.symbol].append(price)
+                    else:
+                        result[asset.symbol].append(float("nan"))
+            return TimeSeries(timeline, result)
+
     def to_dict(
         self, *assets: Asset, timeframe: Timeframe | None = None, price_type: str = "DEFAULT"
-    ) -> dict[str, list[float | None]]:
+    ) -> dict[str, list[float]]:
         """Return the prices of one or more assets as a dict with the key being the symbol name.
         If at a moment in time for an asset there is no known price, NaN will be stored.
 
@@ -100,7 +124,7 @@ class HistoricFeed(Feed, ABC):
         if not assets:
             assets = tuple(self.assets())
 
-        result: dict[str, list[float | None]] = {asset.symbol: [] for asset in assets}
+        result: dict[str, list[float]] = {asset.symbol: [] for asset in assets}
         for evt in self.play(timeframe):
             for asset in assets:
                 price = evt.get_price(asset, price_type)

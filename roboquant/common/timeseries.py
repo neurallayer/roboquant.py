@@ -1,17 +1,16 @@
 
 from dataclasses import dataclass
-from datetime import datetime, timezone
+from datetime import datetime
 from typing import Any
-import numpy as np
-from numpy.typing import NDArray
+from array import array
 
 import pandas as pd
 from matplotlib import pyplot as plt
 
 from roboquant.common.timeframe import Timeframe
 
-Data = list[float] |NDArray[np.float64]
-Timeline = list[datetime] | NDArray[np.datetime64]
+Data = list[float]
+Timeline = list[datetime]
 
 @dataclass(slots=True)
 class TimeSeries:
@@ -21,18 +20,15 @@ class TimeSeries:
     It contains convenience methods to plot the time series or to convert it to a Pandas dataframe.
     """
 
-    timeline: NDArray[np.datetime64]
-    data: dict[str, NDArray[np.float64]]
+    timeline: Timeline
+    data: dict[str, array[float]]
 
     def __init__(self, timeline: Timeline, data: dict[str, Data] ):
 
-        # Avoid userwarnings from numpy due to tzinfo
-        if len(timeline) and isinstance(timeline[0], datetime):
-            timeline = [t.replace(tzinfo=None) for t in timeline]
 
-        self.timeline = np.array(timeline, dtype="datetime64[ms]")
+        self.timeline = timeline
 
-        self.data = { k :np.array(v, dtype=np.float64) for k, v in data.items()}
+        self.data = { k : array("f", v) for k, v in data.items()}
 
         for name, value in self.data.items():
             if len(self.timeline) != len(value):
@@ -50,14 +46,30 @@ class TimeSeries:
     def empty(name: str):
         return TimeSeries.univariate(name, [], [])
 
+    def names(self):
+        return list(self.data.values())
+
+    def append(self, time: datetime, values: dict[str, float]):
+        """Add new values to this time-series.
+
+        If a key is missing from the provided values, a NaN will be appended for that missing key.
+
+        Note that this might result in memory reallocations in the underlying Python array,
+        so use with cause.
+        """
+        self.timeline.append(time)
+        for k, v in self.data.items():
+            new_value = values.get(k, float("nan"))
+            v.append(new_value)
+
     def timeframe(self) -> Timeframe:
         """Return the timeframe of the time series. If the time series is empty,
         an empty timeframe will be returned."""
         if len(self) == 0:
             return Timeframe.EMPTY
 
-        start = self.timeline[0].astype(datetime).replace(tzinfo=timezone.utc)
-        end = self.timeline[-1].astype(datetime).replace(tzinfo=timezone.utc)
+        start = self.timeline[0]
+        end = self.timeline[-1]
         return Timeframe(start, end, True)
 
     def plot(self, plot_timeline: bool = True, ax = None, **kwargs: Any):
@@ -68,17 +80,12 @@ class TimeSeries:
             _, ax = plt.subplots()
             ax.grid(True, linestyle="--", linewidth=0.5, alpha=0.5)
 
-        if not kwargs:
-            kwargs = {"linewidth": 1}
-
-        if plot_timeline:
-            for name, data in self.data.items():
-                ax.plot(self.timeline, data, label = name, **kwargs)  # type: ignore
-        else:
-            for name, data in self.data.items():
-                ax.plot(self.data, label = name, **kwargs) # type: ignore
-
-        ax.legend()
+        for name, series in self.data.items():
+            _kwargs = {"linewidth": 1, "label" : name} | kwargs
+            if plot_timeline:
+                ax.plot(self.timeline, series, **_kwargs)  # type: ignore
+            else:
+                ax.plot(series, **_kwargs)  # type: ignore
 
         return ax
 
@@ -86,21 +93,24 @@ class TimeSeries:
         """Return the timeseries as a Pandas dataframe with the time being the index
         and the data being the columns.
         """
-        df = pd.DataFrame.from_dict(data = self.data) # type: ignore
+        df = pd.DataFrame.from_dict(data = self.data)
         df.index = self.timeline
         return df
 
     def __getitem__(self, key: Any) -> "TimeSeries":
-        data: dict[str, Data] = {}
+        data = {}
+
         for name, series in self.data.items():
             data[name] = series.__getitem__(key)
 
         timeline = self.timeline.__getitem__(key)
 
-        if np.isscalar(timeline):
+        # Check for single value
+        if isinstance(timeline, datetime):
             for name, series in data.items():
-                data[name] = np.array([series])
-            timeline = np.array([timeline])
+                data[name] = [series]
+            timeline = [timeline]
+
         return TimeSeries(timeline, data)
 
     def __repr__(self) -> str:

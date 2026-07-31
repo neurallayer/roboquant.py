@@ -38,15 +38,16 @@ class MetricsJournal(Journal):
 
         self._history.append((event.time, result))
 
-    def get_metric(self, metric_name: str) -> TimeSeries:
-        """Return the calculated values of a metric as tuple of date-times and float values"""
+    def get_metric(self, metric_name: str, timeseries_name: str | None = None) -> TimeSeries:
+        """Return the calculated values of a metric univariate TimeSeries"""
         timeline: list[datetime] = []
         values: list[float] = []
         for time, metrics in self._history:
             if metric_name in metrics:
                 timeline.append(time)
                 values.append(metrics[metric_name])
-        return TimeSeries.univariate(metric_name, timeline, values)
+        name = timeseries_name or metric_name
+        return TimeSeries.univariate(name, timeline, values)
 
     def get_metric_names(self) -> list[str]:
         """Return a list of the recorded metric names"""
