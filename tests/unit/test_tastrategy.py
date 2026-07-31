@@ -1,7 +1,8 @@
 import unittest
 
 from roboquant.common.signal import Signal
-from roboquant.strategies import IndicatorStrategy, OHLCVBuffer
+from roboquant.strategies import IndicatorStrategy
+from roboquant.util import OHLCVBuffer
 from tests.common import run_strategy
 
 

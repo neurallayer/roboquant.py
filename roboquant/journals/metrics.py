@@ -13,7 +13,7 @@ from roboquant.common.event import Bar, Event
 from roboquant.common.monetary import USD, Amount, Wallet
 from roboquant.common.order import Order
 from roboquant.common.signal import Signal
-from roboquant.strategies.buffer import OHLCVBuffer
+from roboquant.util.buffer import OHLCVBuffer
 
 
 class Metric(ABC):
@@ -107,6 +107,7 @@ class IndicatorMetric(Metric):
 
     def __init__(self, asset: Asset, timeperiod: int):
         self.asset = asset
+        self.timeperiod = timeperiod
         self.buffer = OHLCVBuffer(timeperiod)
 
     @override

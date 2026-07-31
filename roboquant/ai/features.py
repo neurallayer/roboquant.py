@@ -9,7 +9,7 @@ from numpy.typing import NDArray, ArrayLike
 from roboquant.common.account import Account
 from roboquant.common.asset import Asset
 from roboquant.common.event import Event, Bar, Quote
-from roboquant.strategies.buffer import OHLCVBuffer
+from roboquant.util.buffer import OHLCVBuffer
 
 T = TypeVar("T")
 NPFloatArray = NDArray[np.float32]

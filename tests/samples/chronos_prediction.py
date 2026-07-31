@@ -14,7 +14,7 @@ import roboquant as rq
 import numpy as np
 from chronos import ChronosBoltPipeline
 
-from roboquant.strategies.buffer import OHLCVBuffer
+from roboquant.util.buffer import OHLCVBuffer
 
 # %%
 pipeline = ChronosBoltPipeline.from_pretrained(

@@ -2,7 +2,7 @@ from array import array
 import unittest
 import numpy as np
 
-from roboquant.strategies.buffer import NumpyBuffer, OHLCVBuffer
+from roboquant.util.buffer import NumpyBuffer, OHLCVBuffer
 
 
 class TestBuffer(unittest.TestCase):

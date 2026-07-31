@@ -22,21 +22,18 @@ asset = feed.get_asset("TSLA")
 
 # %%
 class BBandsMetric(IndicatorMetric):
-    def __init__(self, asset: rq.Asset):
-        super().__init__(asset, 11)
 
     def _calc(self, buffer):
-        upper, _, lower = BBANDS(buffer.close(), timeperiod=10)
+        upper, _, lower = BBANDS(buffer.close(), timeperiod=self.timeperiod-1)
         return {"lower": lower, "upper": upper}
-
 
 # %%
 strategy = rq.strategies.EMACrossover()
-journal = rq.journals.MetricsJournal(BBandsMetric(asset))
+journal = rq.journals.MetricsJournal(BBandsMetric(asset, 10))
 rq.run(feed, strategy, journal=journal)
 
 # %%
 ax = feed.plot(asset, plot_volume=False, label="price")
 bbands = journal.get_metrics("lower", "upper")
 ax.fill_between(bbands.timeline, bbands.data["lower"], bbands.data["upper"], alpha=0.4, color="grey", label="bbands")  # type: ignore
-ax.legend()
+ax.legend();

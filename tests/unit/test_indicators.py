@@ -1,7 +1,7 @@
 import unittest
 
 from roboquant.common.signal import Signal
-from roboquant.strategies.buffer import OHLCVBuffer
+from roboquant.util.buffer import OHLCVBuffer
 from roboquant.strategies.indicator_strategy import IndicatorStrategy
 from roboquant.util.indicators import SMA
 import numpy as np
