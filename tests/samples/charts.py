@@ -91,19 +91,9 @@ for timeframe in timeframes:
 # %% [markdown]
 # ## Correlation
 # Sometimes it is useful to inspect the correlation between assets.
-# There is a special plot that makes this visibe, although you could also
-# just show the correlation matrix:
-# ```
-# import pandas as pd
-# prices = feed.to_dict()
-# df = pd.DataFrame.from_dict(prices)
-# df.corr()
-# ```
+# There is a special plot that makes this visibe.
 
 # %%
 # Mix in some ETF's to have a more diverse set of assets.
 feed = rq.feeds.YahooFeed("MSFT", "JPM", "XOM", "F", "GLD", "GSG", "BND", "LQD", "TIP", "IBIT", "VIXY")
 feed.to_timeseries().plot_corr(fontsize=7);
-
-# %%
-

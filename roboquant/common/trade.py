@@ -18,8 +18,9 @@ class Trade:
         size (Decimal): The size of the trade, positive for buy trades, negative for sell trades.
         price (float): The price at which the trade was executed, in the currency of the asset.
             So for a BUY, this is typically the asking price .
-        pnl (float): The total profit and loss of the trade, calculated as the difference between the
-        execute price and the average paid price. This include any fee or commission.
+        pnl (float): The total realized profit and loss of the trade, calculated as the
+        difference between the execute price and the average paid price. This include
+        any fee or commission.
     """
 
     asset: Asset

@@ -15,7 +15,7 @@ Timeline = list[datetime]
 
 @dataclass(slots=True)
 class TimeSeries:
-    """A multivariate time series a timeline an named values. It
+    """A multivariate time-series that contains a timeline and named values. It
     is used in several places in roboquant, for example prices and metrics.
 
     It contains convenience methods to plot the time series or to convert it to a Pandas dataframe.
@@ -115,10 +115,9 @@ class TimeSeries:
         return TimeSeries(timeline, data)
 
     def corr(self):
+        """Return a Pandas DataFrame containing the correlation matric"""
         df = self.to_dataframe()
         return df.corr()
-
-
 
     def plot_corr(
         self, ax=None, timeframe: Timeframe | None = None, fontsize : int | None = None
@@ -130,12 +129,12 @@ class TimeSeries:
         if not ax:
             _, ax = plt.subplots()
 
-        corr =self.corr()
+        corr = self.corr()
+        columns = corr.columns
 
         c_axes = ax.matshow(corr, vmin=-1, vmax=1, cmap="RdYlGn")
         ax.figure.colorbar(c_axes)
 
-        columns = corr.columns
         plt.xticks(range(len(columns)), columns, fontsize = fontsize)  # type: ignore
         plt.yticks(range(len(columns)), columns, fontsize = fontsize)  # type: ignore
 
