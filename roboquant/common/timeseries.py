@@ -47,8 +47,8 @@ class TimeSeries:
     def empty(name: str):
         return TimeSeries.univariate(name, [], [])
 
-    def names(self):
-        return list(self.data.values())
+    def names(self) -> list[str]:
+        return list(self.data.keys())
 
     def append(self, time: datetime, values: dict[str, float]):
         """Add new values to this time-series.

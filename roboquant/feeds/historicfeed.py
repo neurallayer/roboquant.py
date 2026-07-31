@@ -42,9 +42,8 @@ class HistoricFeed(Feed, ABC):
             raise ValueError(f"no asset found with symbol={symbol}")
 
     def get_ohlcv(self, asset: Asset | str, timeframe: Timeframe | None = None) -> TimeSeries:
-        """Get the OHLCV values for an asset in this feed.
-        The returned value is a `dict` with the key being the `datetime` and the value being an `array`
-        of the OHLCV values.
+        """Get the OHLCV values for a single asset in this feed.
+        The returned value is a TimeSeries.
         """
 
         if isinstance(asset, str):
@@ -116,27 +115,6 @@ class HistoricFeed(Feed, ABC):
                     else:
                         result[asset.symbol].append(float("nan"))
             return TimeSeries(timeline, result)
-
-    def to_dict(
-        self, *assets: Asset, timeframe: Timeframe | None = None, price_type: str = "DEFAULT"
-    ) -> dict[str, list[float]]:
-        """Return the prices of one or more assets as a dict with the key being the symbol name.
-        If at a moment in time for an asset there is no known price, NaN will be stored.
-
-        If no assets are provided, all assets in the feed will be used.
-        """
-        if not assets:
-            assets = tuple(self.assets())
-
-        result: dict[str, list[float]] = {asset.symbol: [] for asset in assets}
-        for evt in self.play(timeframe):
-            for asset in assets:
-                price = evt.get_price(asset, price_type)
-                if price is not None:
-                    result[asset.symbol].append(price)
-                else:
-                    result[asset.symbol].append(float("nan"))
-        return result
 
     def plot(
         self,
@@ -211,31 +189,3 @@ class HistoricFeed(Feed, ABC):
                 ax.scatter(x, y, marker="v", color="red", zorder=10)  # type: ignore
 
         return ax
-
-    def get_prices(self, asset: Asset | str, price_type: str = "DEFAULT", timeframe: Timeframe | None = None) -> TimeSeries:
-        """
-        Retrieve the prices for a given asset, optional over a specified timeframe and return the result
-        as a `TimeSeries`.
-
-        Args:
-            asset (Asset): The asset for which to retrieve prices.
-            price_type (str, optional): The type of price to retrieve (e.g., "DEFAULT", "CLOSE", "OPEN").
-            Defaults to "DEFAULT".
-            timeframe (Timeframe | None, optional): The timeframe over which to retrieve prices.
-            If None, the entire available timeframe is used. Defaults to None.
-
-        Returns:
-            TimeSeries with the name being the symbol name of the asset.
-        """
-        x: list[datetime] = []
-        y: list[float] = []
-
-        if isinstance(asset, str):
-            asset = self.get_asset(asset)
-
-        for event in self.play(timeframe):
-            price = event.get_price(asset, price_type)
-            if price:
-                x.append(event.time)
-                y.append(price)
-        return TimeSeries.univariate(asset.symbol, x, y)
