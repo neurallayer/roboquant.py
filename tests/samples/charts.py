@@ -70,27 +70,6 @@ for timeframe in timeframes:
     ax = equity.plot(ax=ax, linewidth=0.5)
 
 # %% [markdown]
-# Very similar to previous example, but now we
-# plot a single equity curve.
-
-# %%
-timeframes = feed.timeframe().split(4)
-ax = None
-overlap = "35 days"
-
-equities = []
-
-for timeframe in timeframes:
-    strategy = rq.strategies.EMACrossover()
-    journal = rq.journals.MetricsJournal.pnl()
-    rq.run(feed, strategy, journal=journal, timeframe=timeframe.prepend(overlap))
-    equity = journal.get_metric("pnl/equity")
-    equities.append(equity.pct_change())
-
-single_ts = rq.TimeSeries.concat(*equities).inverse_pct_change()
-single_ts.plot();
-
-# %% [markdown]
 # Run randomly sampled 1-year back tests and plot the equity curve
 # for each run on the same chart. This provides visual insights
 # how the equity results are distributed.

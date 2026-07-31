@@ -46,7 +46,7 @@ class MetricsJournal(Journal):
             if metric_name in metrics:
                 timeline.append(time)
                 values.append(metrics[metric_name])
-        return TimeSeries(metric_name, timeline, values)
+        return TimeSeries.univariate(metric_name, timeline, values)
 
     def get_metric_names(self) -> list[str]:
         """Return a list of the recorded metric names"""

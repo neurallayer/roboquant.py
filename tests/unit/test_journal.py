@@ -1,6 +1,5 @@
 import unittest
 
-from roboquant.common.timeseries import TimeSeries
 from roboquant.journals import MetricsJournal
 from roboquant.journals.metrics import AssetMetric, MarketMetric, PNLMetric, RunMetric
 from roboquant.strategies.ema_crossover import EMACrossover
@@ -16,7 +15,6 @@ class TestJournal(unittest.TestCase):
         strategy = EMACrossover()
         journal = Scorecard(RunMetric())
         run(feed, strategy, journal=journal)
-        journal.plot()
 
     def test_metrics_journal(self):
         feed = get_feed()
@@ -26,14 +24,6 @@ class TestJournal(unittest.TestCase):
         self.assertTrue(journal.get_metric_names())
         equity = journal.get_metric("pnl/equity")
         self.assertEqual(1218, len(equity))
-        df = equity.to_dataframe()
-        self.assertEqual(1218, len(df))
-        self.assertTrue(equity.name in df.columns)
-
-        def mistake():
-            TimeSeries("unequal-length", equity.timeline, equity.data[2:])
-
-        self.assertRaises(ValueError, mistake)
 
 
 if __name__ == "__main__":

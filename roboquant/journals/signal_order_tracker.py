@@ -38,7 +38,7 @@ class SignalOrderTracker(Journal):
                 if tmp:
                     timeline.append(time)
                     data.append(tmp[0])
-        return TimeSeries(asset.symbol + "-order-limits", timeline, data)
+        return TimeSeries.univariate(asset.symbol + "-order-limits", timeline, data)
 
     def get_order_sizes(self, asset: Asset, timeframe: Timeframe | None = None) -> TimeSeries:
         """Get the order size for an asset within the given timeframe. Cancel or modify
@@ -52,7 +52,7 @@ class SignalOrderTracker(Journal):
                 if tmp:
                     timeline.append(time)
                     data.append(tmp[0])
-        return TimeSeries(asset.symbol + "-order-sizes", timeline, data)
+        return TimeSeries.univariate(asset.symbol + "-order-sizes", timeline, data)
 
     def get_signal_ratings(self, asset: Asset, timeframe: Timeframe | None = None) -> TimeSeries:
         """Get the signal ratings for an asset within the given timeframe.
@@ -67,5 +67,5 @@ class SignalOrderTracker(Journal):
                 if tmp:
                     timeline.append(time)
                     data.append(tmp[0])
-        return TimeSeries(asset.symbol + "-signal-ratings", timeline, data)
+        return TimeSeries.univariate(asset.symbol + "-signal-ratings", timeline, data)
 

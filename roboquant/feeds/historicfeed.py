@@ -222,7 +222,7 @@ class HistoricFeed(Feed, ABC):
             if price:
                 x.append(event.time)
                 y.append(price)
-        return TimeSeries(asset.symbol, x, y)
+        return TimeSeries.univariate(asset.symbol, x, y)
 
     def plot_corr(
         self, *assets: Asset, ax=None, timeframe: Timeframe | None = None, price_type: str = "DEFAULT",
