@@ -6,6 +6,7 @@ scratch/
 dist/
 roboquant.egg-info/
 build/
+scratch/
 .venv/
 .ipynb_checkpoints/
 *.ipynb
