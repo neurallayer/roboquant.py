@@ -5,15 +5,13 @@ import roboquant as rq
 pd.set_option('display.width', 1000)
 # %%
 feed = rq.feeds.YahooFeed("IBM", start_date="2020-01-01")
-df = feed.to_dataframe(rq.Stock("IBM"))
+df = feed.to_timeseries(rq.Stock("IBM")).to_dataframe()
 print("IBM Stock prices", df, sep="\n")
 
 # %%
-feed = rq.feeds.YahooFeed("IBM", "JPM", "MSFT", "BTC-USD", "TSLA", "INTC", start_date="2020-01-01")
-data = feed.to_dict(*feed.assets())
-df = pd.DataFrame(data)
-df.bfill(inplace=True)
-print("Asset correlations", df.corr(), sep="\n")
+feed = rq.feeds.YahooFeed("IBM", "JPM", "MSFT", "TSLA", "INTC", start_date="2020-01-01")
+data = feed.to_timeseries(*feed.assets())
+print("Asset correlations:\n", data.corr())
 
 
 # %%

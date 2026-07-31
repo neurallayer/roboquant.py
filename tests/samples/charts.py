@@ -103,7 +103,7 @@ for timeframe in timeframes:
 # %%
 # Mix in some ETF's to have a more diverse set of assets.
 feed = rq.feeds.YahooFeed("MSFT", "JPM", "XOM", "F", "GLD", "GSG", "BND", "LQD", "TIP", "IBIT", "VIXY")
-feed.plot_corr(fontsize=7);
+feed.to_timeseries().plot_corr(fontsize=7);
 
 # %%
 

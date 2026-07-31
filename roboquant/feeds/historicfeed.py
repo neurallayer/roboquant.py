@@ -1,6 +1,6 @@
 from abc import ABC, abstractmethod
 from datetime import datetime
-from typing import Any, Iterable, Sequence
+from typing import Any, Iterable
 
 from roboquant.common.trade import Trade
 from roboquant.common.asset import Asset
@@ -9,10 +9,7 @@ from roboquant.common.timeframe import Timeframe
 from roboquant.common.timeseries import TimeSeries
 from .feed import Feed
 
-
-import pandas as pd
 import matplotlib.pyplot as plt
-import numpy as np
 
 
 class HistoricFeed(Feed, ABC):
@@ -44,7 +41,7 @@ class HistoricFeed(Feed, ABC):
         except StopIteration:
             raise ValueError(f"no asset found with symbol={symbol}")
 
-    def get_ohlcv(self, asset: Asset | str, timeframe: Timeframe | None = None) -> dict[datetime, Sequence[float]]:
+    def get_ohlcv(self, asset: Asset | str, timeframe: Timeframe | None = None) -> TimeSeries:
         """Get the OHLCV values for an asset in this feed.
         The returned value is a `dict` with the key being the `datetime` and the value being an `array`
         of the OHLCV values.
@@ -53,13 +50,20 @@ class HistoricFeed(Feed, ABC):
         if isinstance(asset, str):
             asset = self.get_asset(asset)
 
-        result: dict[datetime, Sequence[float]] = {}
+        timeline = []
+        data: dict[str, list[float]] = {}
+        keys = ["open", "high", "low", "close", "volume"]
+        for key in keys:
+            data[key] = []
+
         for event in self.play(timeframe):
             item = event.price_items.get(asset)
             if item and isinstance(item, Bar):
-                result[event.time] = item.ohlcv
+                timeline.append(event.time)
+                for idx, key in enumerate(keys):
+                    data[key].append(item.ohlcv[idx])
 
-        return result
+        return TimeSeries(timeline, data)
 
     def print_items(self, timeframe: Timeframe | None = None) -> None:
         """Print the items in a feed to the console.
@@ -133,18 +137,6 @@ class HistoricFeed(Feed, ABC):
                 else:
                     result[asset.symbol].append(float("nan"))
         return result
-
-    def to_dataframe(self, asset: Asset | str, timeframe: Timeframe | None = None):
-        """Return the bars for the asset as a Pandas dataframe, with the index being the event time
-        and the columns being "Open", "High", "Low", "Close", "Volume".
-
-        This will throw an exception if the Pandas library isn't installed.
-        """
-        import pandas as pd
-
-        ohlcv = self.get_ohlcv(asset, timeframe)
-        columns = ["open", "high", "low", "close", "volume"]
-        return pd.DataFrame.from_dict(ohlcv, orient="index", columns=columns)  # type: ignore
 
     def plot(
         self,
@@ -247,39 +239,3 @@ class HistoricFeed(Feed, ABC):
                 x.append(event.time)
                 y.append(price)
         return TimeSeries.univariate(asset.symbol, x, y)
-
-    def plot_corr(
-        self, *assets: Asset, ax=None, timeframe: Timeframe | None = None, price_type: str = "DEFAULT",
-        fontsize : int | None = None
-    ):
-        """Plot the correlation matrix of various assets in a feed. If no assets are provided,
-        all feed assets are used. Returns the main ax.
-        """
-
-        if not ax:
-            _, ax = plt.subplots()
-
-        d = self.to_dict(*assets, timeframe=timeframe, price_type=price_type)
-        df = pd.DataFrame.from_dict(d)
-        corr = df.corr()
-
-        c_axes = ax.matshow(corr, vmin=-1, vmax=1, cmap="RdYlGn")
-        ax.figure.colorbar(c_axes)
-
-        columns = corr.columns
-        plt.xticks(range(len(columns)), columns, fontsize = fontsize)  # type: ignore
-        plt.yticks(range(len(columns)), columns, fontsize = fontsize)  # type: ignore
-
-        for (i, j), z in np.ndenumerate(corr.to_numpy()):
-            ax.text(
-                j,
-                i,
-                "{:0.2f}".format(z),
-                ha="center",
-                va="center",
-                color="w",
-                fontsize = fontsize,
-                bbox=dict(boxstyle="round", facecolor='#222', edgecolor='#333', alpha=0.2),
-            )
-
-        return ax

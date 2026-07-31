@@ -4,6 +4,7 @@ from datetime import datetime
 from typing import Any
 from array import array
 
+import numpy as np
 import pandas as pd
 from matplotlib import pyplot as plt
 
@@ -112,6 +113,45 @@ class TimeSeries:
             timeline = [timeline]
 
         return TimeSeries(timeline, data)
+
+    def corr(self):
+        df = self.to_dataframe()
+        return df.corr()
+
+
+
+    def plot_corr(
+        self, ax=None, timeframe: Timeframe | None = None, fontsize : int | None = None
+    ):
+        """Plot the correlation matrix of various assets in a feed. If no assets are provided,
+        all feed assets are used. Returns the main ax.
+        """
+
+        if not ax:
+            _, ax = plt.subplots()
+
+        corr =self.corr()
+
+        c_axes = ax.matshow(corr, vmin=-1, vmax=1, cmap="RdYlGn")
+        ax.figure.colorbar(c_axes)
+
+        columns = corr.columns
+        plt.xticks(range(len(columns)), columns, fontsize = fontsize)  # type: ignore
+        plt.yticks(range(len(columns)), columns, fontsize = fontsize)  # type: ignore
+
+        for (i, j), z in np.ndenumerate(corr.to_numpy()):
+            ax.text(
+                j,
+                i,
+                "{:0.2f}".format(z),
+                ha="center",
+                va="center",
+                color="w",
+                fontsize = fontsize,
+                bbox=dict(boxstyle="round", facecolor='#222', edgecolor='#333', alpha=0.2),
+            )
+
+        return ax
 
     def __repr__(self) -> str:
         return f"TimeSeries(series={self.data.keys()} len={len(self)} timeframe={self.timeframe()})"

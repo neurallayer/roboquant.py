@@ -34,8 +34,9 @@ prediction_days = 10  # predict 10 trading days in the future
 context_window = 250  # use the previous 250 trading days as context
 
 feed = rq.feeds.YahooFeed("SPY", start_date="2015-01-01")
-df = feed.to_dataframe(feed.assets()[0])
-close = df["Close"].values
+ts = feed.to_timeseries(price_type="close")
+
+close = ts.data["SPY"]
 close = perc_change(close)  # make the data stationary
 close = close[-context_window - prediction_days :-prediction_days]  # use the last 250 trading days as context
 
