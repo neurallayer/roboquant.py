@@ -9,10 +9,11 @@ import numpy as np
 from roboquant.common.account import Account
 from roboquant.common.portfolio import Position
 from roboquant.common.asset import Asset
-from roboquant.common.event import Event
+from roboquant.common.event import Bar, Event
 from roboquant.common.monetary import USD, Amount, Wallet
 from roboquant.common.order import Order
 from roboquant.common.signal import Signal
+from roboquant.strategies.buffer import OHLCVBuffer
 
 
 class Metric(ABC):
@@ -100,6 +101,25 @@ class PNLMetric(Metric):
         gain = equity / self.min_equity - 1.0
         self.max_gain = max(gain, self.max_gain)
         return self.max_gain
+
+
+class IndicatorMetric(Metric):
+
+    def __init__(self, asset: Asset, timeperiod: int):
+        self.asset = asset
+        self.buffer = OHLCVBuffer(timeperiod)
+
+    @override
+    def calc(self, event: Event, account: Account, signals: list[Signal], orders: list[Order]) -> dict[str, float]:
+        item = event.price_items.get(self.asset)
+        if isinstance(item, Bar):
+            if self.buffer.append(item.ohlcv):
+                return self._calc(self.buffer)
+        return {}
+
+    @abstractmethod
+    def _calc(self, buffer: OHLCVBuffer) -> dict[str, float]:
+        ...
 
 
 class PriceMetric(Metric):

@@ -22,7 +22,7 @@ class TestJournal(unittest.TestCase):
         journal = MetricsJournal(RunMetric(), AssetMetric(), MarketMetric(), PNLMetric())
         run(feed, strategy, journal=journal)
         self.assertTrue(journal.get_metric_names())
-        equity = journal.get_metric("pnl/equity")
+        equity = journal.get_metrics("pnl/equity")
         self.assertEqual(1218, len(equity))
 
 

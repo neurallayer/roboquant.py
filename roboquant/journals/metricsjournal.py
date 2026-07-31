@@ -36,18 +36,20 @@ class MetricsJournal(Journal):
             new_result = metric.calc(event, account, signals, orders)
             result.update(new_result)
 
-        self._history.append((event.time, result))
+        if result:
+            self._history.append((event.time, result))
 
-    def get_metric(self, metric_name: str, timeseries_name: str | None = None) -> TimeSeries:
-        """Return the calculated values of a metric univariate TimeSeries"""
+    def get_metrics(self, *metric_names: str) -> TimeSeries:
+        """Return the ccaptured metrics of oen or more metrics as a TimeSeries"""
         timeline: list[datetime] = []
-        values: list[float] = []
+        values = {name: [] for name in metric_names}
         for time, metrics in self._history:
-            if metric_name in metrics:
-                timeline.append(time)
-                values.append(metrics[metric_name])
-        name = timeseries_name or metric_name
-        return TimeSeries.univariate(name, timeline, values)
+            for name in metric_names:
+                value = metrics.get(name, float("nan"))
+                values[name].append(value)
+            timeline.append(time)
+
+        return TimeSeries(timeline, values)
 
     def get_metric_names(self) -> list[str]:
         """Return a list of the recorded metric names"""
@@ -60,7 +62,7 @@ class MetricsJournal(Journal):
         """Plot the metric. Optional a `matplotlib.axes.Axes` can be provided
         This method requires matplotlib to be installed."""
 
-        ts = self.get_metric(metric_name)
+        ts = self.get_metrics(metric_name)
         return ts.plot(plot_timeline=plot_timeline,ax=ax, **kwargs)
 
 

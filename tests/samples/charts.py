@@ -1,6 +1,6 @@
 # %%
 # uncomment the following line if you didn't install roboquant yet on your environment.
-# %pip install roboquant
+# %pip install --quiet roboquant
 
 # %% [markdown]
 # This example shows how to draw certain charts using `roboquant`.
@@ -34,7 +34,7 @@ account = rq.run(feed, strategy, journal=journal)
 # You can customize many of the plots by providing parameter arguments that will be passed on
 # to matplotlib.
 # %%
-equity = journal.get_metric("pnl/equity")
+equity = journal.get_metrics("pnl/equity")
 ax = equity.plot(color="green", linewidth=1)
 ax.set_title("My Custom Title");
 
@@ -66,10 +66,12 @@ for timeframe in timeframes:
     strategy = rq.strategies.EMACrossover()
     journal = rq.journals.MetricsJournal.pnl()
     rq.run(feed, strategy, journal=journal, timeframe=timeframe)
-    name = f"{timeframe.strftime('%Y-%m')}"
-    equity = journal.get_metric("pnl/equity", name)
-    ax = equity.plot(ax=ax, linewidth=0.5)
-    ax.legend(prop={'size': 5})
+    equity = journal.get_metrics("pnl/equity")
+    label = f"{timeframe.strftime('%Y-%m')}"
+    ax = equity.plot(ax=ax, linewidth=0.5, label=label)
+
+assert ax is not None
+ax.legend(prop={'size': 5})
 
 # %% [markdown]
 # Run randomly sampled 1-year back tests and plot the equity curve
@@ -84,7 +86,7 @@ for timeframe in timeframes:
     strategy = rq.strategies.EMACrossover()
     journal = rq.journals.MetricsJournal.pnl()
     rq.run(feed, strategy, journal=journal, timeframe=timeframe)
-    equity = journal.get_metric("pnl/equity")[26:]
+    equity = journal.get_metrics("pnl/equity")[26:]
     ax = equity.plot(plot_timeline=False, ax=ax, linewidth=0.5, color="grey", alpha=0.5)
 
 
