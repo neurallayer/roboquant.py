@@ -1,9 +1,7 @@
 from roboquant.common.asset import Asset
 from roboquant.common.monetary import Amount, Wallet
 
-
 import pandas as pd
-
 
 from collections import UserDict
 from dataclasses import asdict, dataclass
@@ -38,7 +36,6 @@ class Position:
     def is_long(self):
         """Return True if this is a long position, False otherwise"""
         return self.size > 0
-
 
 
 class Portfolio(UserDict[Asset, Position]):
@@ -102,29 +99,29 @@ class Portfolio(UserDict[Asset, Position]):
             result += asset.amount(position.size, position.mkt_price)
         return result
 
-    def close_positions(self, ndigits:int = 2) -> list[Order]:
-         """Create the orders required to close the current open positions.
-         The limit price of the orders is equal to the last known market price.
+    def close_positions(self, ndigits: int = 2) -> list[Order]:
+        """Create the orders required to close the current open positions.
+        The limit price of the orders is equal to the last known market price.
 
-         Attributes:
-            ndigits: how many digits to use for the limit price
-         """
-         orders = [Order(asset, -pos.size, round(pos.mkt_price, ndigits)) for asset, pos in self.items()]
-         return orders
+        Attributes:
+           ndigits: how many digits to use for the limit price
+        """
+        orders = [Order(asset, -pos.size, round(pos.mkt_price, ndigits)) for asset, pos in self.items()]
+        return orders
 
-    def to_dataframe(self)-> pd.DataFrame:
-            """Return the positions as a dataframe"""
-            return  pd.json_normalize([asdict(asset) | asdict(pos) for asset, pos in self.items()])
+    def to_dataframe(self) -> pd.DataFrame:
+        """Return the positions as a dataframe"""
+        return pd.json_normalize([asdict(asset) | asdict(pos) for asset, pos in self.items()])
 
     def size(self, asset: Asset) -> Decimal:
-            """
-            Return the position size for an asset, or zero if there is no open position for that asset.
+        """
+        Return the position size for an asset, or zero if there is no open position for that asset.
 
-            Args:
-                asset (Asset): The asset for which to get the position size.
+        Args:
+            asset (Asset): The asset for which to get the position size.
 
-            Returns:
-                Decimal: The position size as a Decimal.
-            """
-            pos = self.get(asset)
-            return pos.size if pos else Decimal()
+        Returns:
+            Decimal: The position size as a Decimal.
+        """
+        pos = self.get(asset)
+        return pos.size if pos else Decimal()

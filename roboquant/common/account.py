@@ -1,7 +1,10 @@
 from dataclasses import dataclass, asdict
 from datetime import datetime
 from decimal import Decimal
+from typing import Any
 
+from matplotlib import pyplot as plt
+from matplotlib.axes import Axes
 import pandas as pd
 
 from roboquant.common.portfolio import Portfolio
@@ -165,6 +168,46 @@ class Account:
         """Return the trades as a dataframe"""
         return pd.json_normalize([asdict(trade) for trade in self.trades])
 
-    def orders_to_dataframe(self)-> pd.DataFrame:
+    def orders_to_dataframe(self) -> pd.DataFrame:
         """Return the orders as a dataframe"""
         return pd.json_normalize([asdict(order) for order in self.orders])
+
+    def plot_allocation(self, ax: Axes | None=None, include_cash: bool = False, **kwargs: Any) -> Axes:
+        """Plot the exposure of the assets in the portfolio as a pie chart.
+        The allocation is based on the market value of the positions.
+
+        Args:
+            ax: The matplotlib axes to plot on.
+            include_cash: Whether to include cash in the allocation pie chart.
+            **kwargs: Additional keyword arguments to pass to the pie chart plotting function.
+
+        Returns:
+            matplotlib.axes.Axes: The axes object with the pie chart.
+        """
+        if not ax:
+            _, ax = plt.subplots()
+
+        if include_cash:
+            labels = ["cash"]
+            sizes = [self.convert(self.cash)]
+        else:
+            labels = []
+            sizes = []
+
+        labels = labels + [asset.symbol for asset in self.portfolio.keys()]
+        sizes = sizes + [
+            self.convert(asset.amount(abs(pos.size), abs(pos.mkt_price)))
+            for asset, pos in self.portfolio.items()
+        ]
+
+        if len(labels) == 0:
+            return ax
+
+        kwargs = {
+            "autopct": "%1.1f%%",
+            "labels": labels,
+        } | kwargs
+
+        ax.pie(sizes, **kwargs)
+        # ax.axis("equal")  # Equal aspect ratio ensures that pie is drawn as a circle.
+        return ax

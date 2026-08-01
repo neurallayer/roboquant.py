@@ -27,6 +27,10 @@ feed.plot("MSFT");
 strategy = rq.strategies.EMACrossover()
 journal = rq.journals.MetricsJournal.pnl()
 account = rq.run(feed, strategy, journal=journal)
+print(account)
+
+# %%
+account.plot_allocation(include_cash=True);
 
 
 # %% [markdown]
