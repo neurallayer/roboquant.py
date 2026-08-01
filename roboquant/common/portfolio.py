@@ -1,13 +1,12 @@
-from roboquant.common.asset import Asset
-from roboquant.common.monetary import Amount, Wallet
-
-import pandas as pd
-
 from collections import UserDict
 from dataclasses import asdict, dataclass
 from decimal import Decimal
 
+from roboquant.common.asset import Asset
+from roboquant.common.monetary import Amount, Wallet
 from roboquant.common.order import Order
+
+import pandas as pd
 
 
 @dataclass(slots=True, frozen=True)

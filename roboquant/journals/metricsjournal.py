@@ -1,8 +1,9 @@
 from typing import Self, override
 from datetime import datetime
 
+from roboquant.common.metric import Metric
 from roboquant.journals.journal import Journal
-from roboquant.journals.metrics import Metric, PNLMetric
+from roboquant.journals.metrics import PNLMetric
 from roboquant.common.account import Account
 from roboquant.common.signal import Signal
 from roboquant.common.event import Event

@@ -7,6 +7,7 @@ from roboquant.common.asset import Asset
 from roboquant.common.event import Bar
 from roboquant.common.timeframe import Timeframe
 from roboquant.common.timeseries import TimeSeries
+from roboquant.common.metric import Metric
 from .feed import Feed
 
 import matplotlib.pyplot as plt
@@ -189,3 +190,23 @@ class HistoricFeed(Feed, ABC):
                 ax.scatter(x, y, marker="v", color="red", zorder=10)  # type: ignore
 
         return ax
+
+    def track(self, metric: Metric, timeframe: Timeframe | None = None) -> TimeSeries:
+        """Track a metric over time and return the results as a TimeSeries.
+        """
+        from roboquant.common.account import Account
+
+        timeline: list[datetime] = []
+        account = Account()
+        data = {}
+
+        for event in self.play(timeframe):
+            result = metric.calc(event, account, [], [])
+            if result:
+                for key, value in result.items():
+                    if key not in data:
+                        data[key] = []
+                    data[key].append(value)
+                timeline.append(event.time)
+
+        return TimeSeries(timeline, data)

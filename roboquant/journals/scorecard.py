@@ -1,6 +1,6 @@
 from roboquant.feeds.in_memory_feed import InMemoryFeed
 from roboquant.journals.journal import Journal
-from roboquant.journals.metrics import Metric
+from roboquant.common.metric import Metric
 from roboquant.common.event import Event
 from roboquant.common.account import Account
 from roboquant.journals.metricsjournal import MetricsJournal
