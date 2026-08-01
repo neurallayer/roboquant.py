@@ -16,7 +16,8 @@ from roboquant.common.trade import Trade
 
 @dataclass
 class Account:
-    """Represents a trading account. The account maintains the following state during a run:
+    """Represents a trading account and is managed by the broker.
+    It keeps track of the cash, positions, orders and trades.
 
     Attributes:
         buying_power (Amount): Available buying power for orders in the base currency of the account.
