@@ -15,7 +15,7 @@
 import roboquant as rq
 import matplotlib.pyplot as plt
 
-from roboquant.journals.metrics import IndicatorMetric
+from roboquant.util.metrics import IndicatorMetric
 from roboquant.util.indicators import BBANDS
 
 # Setup some defaults for matplotlib

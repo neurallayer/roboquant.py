@@ -6,7 +6,7 @@ from tensorboard.summary import Writer
 
 import roboquant as rq
 from roboquant.journals import TensorboardJournal
-from roboquant.journals.metrics import PNLMetric, RunMetric
+from roboquant.util.metrics import PNLMetric, RunMetric
 from tests.common import get_feed
 
 
