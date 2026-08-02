@@ -118,7 +118,8 @@ class Order:
 
     def amount(self) -> Amount:
         """
-        The total market value of this order as a single Amount denoted in the currency of the asset.
+        The total order amount of this order as a single Amount denoted in
+        the currency of the asset.
 
         Returns:
             Amount: The total value of the order.
