@@ -14,7 +14,8 @@ def run_and_plot(strategy):
     journal = MetricsJournal.pnl()
     account = rq.run(feed, strategy, journal = journal, trader=trader)
     print(account)
-    journal.plot("pnl/equity")
+    ax = journal.plot("pnl/equity")
+    ax.set_title(type(strategy).__name__ + " Equity")
 
 
 # %%
