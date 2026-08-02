@@ -1,5 +1,6 @@
 from .trader import Trader
 from .flextrader import FlexTrader
-from .fixedtrader import FixedTrader
+from .buyholdtrader import BuyHoldTrader
+from .simpletrader import SimpleTrader
 
-__all__ = ["Trader", "FlexTrader", "FixedTrader"]
+__all__ = ["Trader", "FlexTrader", "BuyHoldTrader", "SimpleTrader"]

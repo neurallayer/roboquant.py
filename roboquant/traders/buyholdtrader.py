@@ -9,13 +9,17 @@ from roboquant.common.signal import Signal
 from roboquant.traders.trader import Trader
 
 
-class FixedTrader(Trader):
-    """FixedTrader is a trader tries allocates teh available buying power
-    to a long only positions for each of the provided assets.
+class BuyHoldTrader(Trader):
+    """Trader that allocates the available buying power to a long positions
+    for each of the provided assets and keep this forever in the portfolio.
+
+    It completely ignores any signal it receives. It is useful to compare
+    custom strategies to a buy-hold approach and see the differences.
     """
 
-    def __init__(self, assets: list[Asset]):
+    def __init__(self, assets: list[Asset], price_type: str = "DEFAULT"):
         self.assets = set(assets)
+        self.price_type = price_type
 
     @override
     def create_orders(self, signals: list[Signal], event: Event, account: Account) -> list[Order]:
@@ -34,7 +38,7 @@ class FixedTrader(Trader):
         budget = account.buying_power / len(remaining_assets)
         result = []
         for asset in remaining_assets:
-            if price := event.get_price(asset):
+            if price := event.get_price(asset, self.price_type):
                 asset_budget = budget.convert_to(asset.currency, event.time)
                 asset_cost = asset.value(Decimal(1), price)
                 size = int(asset_budget / asset_cost)

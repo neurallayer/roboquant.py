@@ -3,7 +3,7 @@ import unittest
 from roboquant.common.account import Account
 from roboquant.common.monetary import Amount, USD, Wallet
 from roboquant.common.signal import Signal
-from roboquant.traders.fixedtrader import FixedTrader
+from roboquant.traders.buyholdtrader import BuyHoldTrader
 from roboquant.traders.flextrader import FlexTrader
 from tests.common import get_feed
 
@@ -31,7 +31,7 @@ class TestTrader(unittest.TestCase):
             self.assertEqual(signals[0].is_buy, orders[0].is_buy)
 
     def test_fixed_trader(self):
-        trader = FixedTrader(self.feed.assets())
+        trader = BuyHoldTrader(self.feed.assets())
         for evt in self.feed.play():
             orders = trader.create_orders([], evt, self.account)
             self.assertSetEqual(set(evt.price_items.keys()) , set(o.asset for o in orders))
