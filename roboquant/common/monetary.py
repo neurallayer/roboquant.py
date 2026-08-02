@@ -375,8 +375,11 @@ class Amount:
         dt = datetime.now(tz=timezone.utc)
         return Amount(other, self.convert_to(other, dt))
 
-    def __truediv__(self, other):
+    def __truediv__(self, other: float) -> "Amount":
         return Amount(self.currency, self.value / other)
+
+    def __mul__(self, other: float) -> "Amount":
+        return Amount(self.currency, self.value * other)
 
     def convert_to(self, currency: Currency, dt: datetime) -> float:
         """Convert this amount to another currency and return the monetary value.
