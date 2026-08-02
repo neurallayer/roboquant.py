@@ -8,7 +8,7 @@ from roboquant.common.portfolio import Position
 from roboquant.common.account import Account
 from roboquant.common.asset import Asset
 from roboquant.brokers.broker import Broker
-from roboquant.common.event import Event, Quote, PriceItem
+from roboquant.common.event import Event, Quote, PriceItem, TradePrice
 from roboquant.common.order import Order
 from roboquant.common.monetary import Amount, Wallet, USD
 from roboquant.common.trade import Trade
@@ -227,6 +227,25 @@ class SimBroker(Broker):
             short_value = asset.amount(-position.size, position.mkt_price)
             reserved += short_value
         return reserved
+
+    def close_positions(self) -> Account:
+        """Close the open positions in the account using last known market price.
+        Existing open orders will be disgarded.
+        """
+
+        orders = []
+        items = []
+        for asset, pos in self._account.portfolio.items():
+            limit = pos.mkt_price * 1.1 if pos.size > 0 else pos.mkt_price * 0.9
+            order = Order(asset, - pos.size, limit, "GTC")
+            orders.append(order)
+            item = TradePrice(asset, pos.mkt_price, float("nan"))
+            items.append(item)
+
+        self._orders = {}
+        self.place_orders(orders)
+        return self.sync(Event(self._account.last_update, items))
+
 
     def _calculate_buyingpower(self) -> Amount:
         """Calculate the buying power.
