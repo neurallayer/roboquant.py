@@ -42,9 +42,9 @@ class TimeSeries(pd.DataFrame):
         if len(self) == 0:
             return Timeframe.EMPTY
 
-        start = self.index[0]
-        end = self.index[-1]
-        return Timeframe(start, end, True) # type: ignore
+        start = self.index[0].to_pydatetime(warn=False) # type: ignore
+        end = self.index[-1].to_pydatetime(warn=False) # type: ignore
+        return Timeframe(start, end, True)
 
     def plot_nice(self, plot_timeline: bool = True, ax=None, **kwargs: Any):
         """Plot the data in time series.
