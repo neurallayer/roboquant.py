@@ -63,7 +63,7 @@ class HistoricFeed(Feed, ABC):
                 for idx, key in enumerate(keys):
                     data[key].append(item.ohlcv[idx])
 
-        return TimeSeries(timeline, data)
+        return TimeSeries.from_data(timeline, data)
 
     def print_items(self, timeframe: Timeframe | None = None) -> None:
         """Print the items in a feed to the console.
@@ -115,7 +115,7 @@ class HistoricFeed(Feed, ABC):
                         result[asset.symbol].append(price)
                     else:
                         result[asset.symbol].append(float("nan"))
-            return TimeSeries(timeline, result)
+            return TimeSeries.from_data(timeline, result)
 
     def plot(
         self,
@@ -209,4 +209,4 @@ class HistoricFeed(Feed, ABC):
                     data[key].append(value)
                 timeline.append(event.time)
 
-        return TimeSeries(timeline, data)
+        return TimeSeries.from_data(timeline, data)

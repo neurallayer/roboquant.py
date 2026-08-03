@@ -50,7 +50,7 @@ class MetricsJournal(Journal):
                 values[name].append(value)
             timeline.append(time)
 
-        return TimeSeries(timeline, values)
+        return TimeSeries.from_data(timeline, values)
 
     def get_metric_names(self) -> list[str]:
         """Return a list of the recorded metric names"""
