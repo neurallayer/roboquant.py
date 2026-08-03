@@ -16,6 +16,9 @@ class TimeSeries(pd.DataFrame):
     is used in several places in roboquant, for example prices and metrics.
 
     It contains convenience methods to plot the time series or to convert it to a Pandas dataframe.
+
+    Under the hood it is a Pandas DataFrame with the timeline as an index. So regular DataFrame
+    methods also work on TimeSeries objects.
     """
 
     @property
@@ -24,9 +27,9 @@ class TimeSeries(pd.DataFrame):
 
     @staticmethod
     def from_data(timeline: Timeline, data: dict[str, Data]) -> "TimeSeries":
-        result = TimeSeries.from_dict(data)
+        result : TimeSeries = TimeSeries.from_dict(data) # type: ignore
         result.index = timeline
-        return result # type: ignore
+        return result
 
     @staticmethod
     def univariate(name: str, timeline: Timeline, data: Data) -> "TimeSeries":
