@@ -3,7 +3,7 @@ import logging
 import threading
 from array import array
 from datetime import datetime, timedelta
-from typing import Any, Literal
+from typing import Any, Literal, override
 
 from alpaca.trading.client import TradingClient
 from alpaca.trading.models import Order as AOrder, Position as APosition, TradeAccount
@@ -116,6 +116,10 @@ class AlpacaLiveFeed(LiveFeed):
         asset = _get_asset(data.symbol, self.asset_class)
         item = Quote(asset, array("f", [data.ask_price, data.ask_size, data.bid_price, data.bid_size]))
         self.__put_item(data.timestamp, item)
+
+    @override
+    def assets(self) -> list[Asset]:
+        return []
 
     def subscribe_trades(self, *symbols: str):
         """Subscribe to trade data for the given symbols.

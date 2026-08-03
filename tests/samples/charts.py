@@ -72,10 +72,8 @@ for timeframe in timeframes:
     rq.run(feed, strategy, journal=journal, timeframe=timeframe)
     equity = journal.get_metrics("pnl/equity")
     label = f"{timeframe.strftime('%Y-%m')}"
-    ax = equity.plot(ax=ax, linewidth=0.5, label=label)
+    ax = equity.plot_nice(ax=ax, linewidth=0.5, label=label)
 
-assert ax is not None
-ax.legend(prop={'size': 5})
 
 # %% [markdown]
 # Run randomly sampled 1-year back tests and plot the equity curve
@@ -91,8 +89,7 @@ for timeframe in timeframes:
     journal = rq.journals.MetricsJournal.pnl()
     rq.run(feed, strategy, journal=journal, timeframe=timeframe)
     equity = journal.get_metrics("pnl/equity")[26:]
-    ax = equity.plot(plot_timeline=False, ax=ax, linewidth=0.5, color="grey", alpha=0.5)
-
+    ax = equity.reset_index(drop=True).plot(ax=ax, linewidth=0.5, color="grey", alpha=0.5, legend=False)
 
 # %% [markdown]
 # ## Correlation
