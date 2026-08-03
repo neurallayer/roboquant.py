@@ -61,6 +61,12 @@ class Order:
         if self.size.is_zero():
             assert id != ""
 
+    @staticmethod
+    def market_order(asset: Asset, size: Decimal, price: float, margin: float = 0.05) -> "Order":
+        """Simulate a market order by using a generous margin on the limit price"""
+        limit = price * (1 + margin) if size > 0 else price * (1 - margin)
+        return Order(asset, size, limit)
+
     def cancel(self) -> "Order":
         """
         Create a cancellation order. You can only cancel an order that has already an `id` assigned to it.

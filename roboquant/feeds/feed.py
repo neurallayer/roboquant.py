@@ -1,6 +1,7 @@
 from abc import ABC, abstractmethod
 from typing import Iterator
 
+from roboquant.common.asset import Asset
 from roboquant.common.event import Event
 from roboquant.common.timeframe import Timeframe
 
@@ -26,4 +27,8 @@ class Feed(ABC):
         Returns:
             An iterator of the events.
         """
+        ...
+
+    @abstractmethod
+    def assets(self) -> list[Asset]:
         ...

@@ -3,6 +3,7 @@ import time
 import unittest
 
 import roboquant as rq
+from roboquant.traders.simpletrader import SimpleTrader
 
 
 class TestBigFeed(unittest.TestCase):
@@ -28,7 +29,8 @@ class TestBigFeed(unittest.TestCase):
     def _run(self, feed, journal: rq.journals.BasicJournal):
         strategy = rq.strategies.EMACrossover(13, 26)
         start = time.time()
-        account = rq.run(feed, strategy, journal=journal)
+        trader = SimpleTrader(50)
+        account = rq.run(feed, strategy, trader = trader, journal=journal)
         self.assertTrue(journal.items > 1_000_000)
         self.assertTrue(journal.events > 1_000)
         return account, time.time() - start

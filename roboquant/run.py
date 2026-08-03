@@ -1,4 +1,5 @@
 from roboquant.common.account import Account
+from roboquant.common.asset import Asset, Crypto, Forex
 from roboquant.common.timeframe import Timeframe
 from roboquant.brokers.broker import Broker
 from roboquant.brokers.simbroker import SimBroker
@@ -6,6 +7,7 @@ from roboquant.feeds.feed import Feed
 from roboquant.journals.journal import Journal
 from roboquant.strategies.strategy import Strategy
 from roboquant.traders.flextrader import FlexTrader
+from roboquant.traders.simpletrader import SimpleTrader
 from roboquant.traders.trader import Trader
 
 
@@ -32,7 +34,7 @@ def run(
     """
 
     broker = broker or SimBroker()
-    trader = trader or FlexTrader()
+    trader = trader or _derive_simple_trader(feed.assets(), broker.sync())
 
     for event in feed.play(timeframe):
         account = broker.sync(event)
@@ -44,3 +46,50 @@ def run(
 
     return broker.sync()
 
+
+
+
+def _derive_simple_trader(assets: list[Asset], account: Account) -> SimpleTrader:
+    """Derive FkexTrader settings from provided list of assets
+    and broker account
+    """
+
+    if not assets:
+        return SimpleTrader()
+
+    n = len(assets)
+    max_positions = min(100, n)
+    return SimpleTrader(max_positions)
+
+
+
+def _derive_trader(assets: list[Asset], account: Account) -> "FlexTrader":
+    """Derive FkexTrader settings from provided list of assets
+    and broker account
+    """
+
+    if not assets:
+        return FlexTrader()
+
+    n = len(assets)
+    min_order_pct = max(0.01, 1.0/(n * 4))
+    max_order_pct = max(0.02, 1.0/(n * 2))
+    max_position_pct = max(0.04, 1.0 / n)
+
+    if isinstance(assets[0], Crypto) or isinstance(assets[0], Forex):
+        shorting = True
+        size_fractions = 6
+        limit_rounding = 8
+    else:
+        shorting = False
+        size_fractions = 0
+        limit_rounding = 2
+
+    return FlexTrader(
+        min_order_pct=min_order_pct,
+        max_order_pct=max_order_pct,
+        max_position_pct=max_position_pct,
+        shorting=shorting,
+        size_fractions=size_fractions,
+        limit_rounding=limit_rounding
+    )

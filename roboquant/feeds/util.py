@@ -88,6 +88,10 @@ class BarAggregatorFeed(Feed):
             evt = Event(next_time, items)
             yield evt
 
+    @override
+    def assets(self) -> list[Asset]:
+        return self.feed.assets()
+
 
 class TimeGroupingFeed(Feed):
     """Group events that occur closely after each other into a single event. It uses the time of the events to
@@ -122,3 +126,8 @@ class TimeGroupingFeed(Feed):
         if time:
             new_event = Event(time, items)
             yield new_event
+
+
+    @override
+    def assets(self) -> list[Asset]:
+        return self.feed.assets()
