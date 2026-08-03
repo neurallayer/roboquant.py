@@ -142,8 +142,9 @@ class Crypto(Asset):
 
     @staticmethod
     def from_symbol(symbol: str) -> "Crypto":
-        """Create a Crypto asset from a symbol string. It will automatically extract the quote currency from the symbol,
-        which is assumed to be the last part of the symbol.
+        """Create a Crypto asset from a symbol string. It will automatically extract
+        the quote currency from the symbol, which is assumed to be the
+        last part of the symbol.
 
         Args:
             symbol (str): The symbol string of the crypto asset.

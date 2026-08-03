@@ -16,6 +16,9 @@ class YahooFeed(InMemoryFeed):
 
     By default, the feed will retrieve daily data, but you can
     specify a different interval.
+
+    The quality of the data is not guaranteed and various a lot depending
+    on the region. It is recommended to verify the data before using it.
     """
 
     def __init__(

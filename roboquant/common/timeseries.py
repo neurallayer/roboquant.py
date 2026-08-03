@@ -25,8 +25,6 @@ class TimeSeries:
     data: dict[str, array[float]]
 
     def __init__(self, timeline: Timeline, data: dict[str, Data] ):
-
-
         self.timeline = timeline
 
         self.data = { k : array("f", v) for k, v in data.items()}
@@ -98,6 +96,7 @@ class TimeSeries:
         df.index = self.timeline
         return df
 
+
     def __getitem__(self, key: Any) -> "TimeSeries":
         data = {}
 
@@ -115,7 +114,7 @@ class TimeSeries:
         return TimeSeries(timeline, data)
 
     def corr(self):
-        """Return a Pandas DataFrame containing the correlation matric"""
+        """Return a Pandas DataFrame containing the correlation matrix"""
         df = self.to_dataframe()
         return df.corr()
 
@@ -135,7 +134,7 @@ class TimeSeries:
         c_axes = ax.matshow(corr, vmin=-1, vmax=1, cmap="RdYlGn")
         ax.figure.colorbar(c_axes)
 
-        ax.set_xticks(range(len(columns)), columns, fontsize = fontsize)
+        ax.set_xticks(range(len(columns)), columns, fontsize = fontsize, rotation=45, rotation_mode="xtick")
         ax.set_yticks(range(len(columns)), columns, fontsize = fontsize)
 
         for (i, j), z in np.ndenumerate(corr.to_numpy()):

@@ -31,4 +31,6 @@ class Feed(ABC):
 
     @abstractmethod
     def assets(self) -> list[Asset]:
+        """Returns the list of assets that are contained in the feed. Most feeds will contain events
+        for multiple assets, and this method can be used to retrieve the list of those assets."""
         ...
