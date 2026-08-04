@@ -56,6 +56,7 @@ class TimeSeries(pd.DataFrame):
 
         c_axes = ax.matshow(corr, vmin=-1, vmax=1, cmap="RdYlGn")
         ax.figure.colorbar(c_axes)
+        ax.grid(False)
 
         ax.set_xticks(range(len(columns)), columns, fontsize=fontsize, rotation=45, rotation_mode="xtick")
         ax.set_yticks(range(len(columns)), columns, fontsize=fontsize)

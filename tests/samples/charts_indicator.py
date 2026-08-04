@@ -20,9 +20,7 @@ from roboquant.util.metrics import IndicatorMetric
 from roboquant.util.indicators import BBANDS, RSI
 
 # Setup some defaults for matplotlib
-plt.style.use("dark_background")
-plt.rcParams["figure.figsize"] = [10.0, 5.0]
-plt.rcParams["figure.dpi"] = 150
+rq.set_dark_style()
 
 
 # %% [markdown]
@@ -47,22 +45,21 @@ asset = feed.get_asset("TSLA")
 # Subplot ax1 is for the price and BBands and
 # subplot ax2 is for the RSI.
 fig, (ax1, ax2) = plt.subplots(nrows=2, sharex=True, height_ratios=[4,1])
-ax1.grid(True, color="grey", linestyle="--", linewidth=0.5)
-ax2.grid(True, color="grey", linestyle="--", linewidth=0.5, axis="x")
-ax2.axhline(70, color="red", linestyle="--", linewidth=0.5)
-ax2.axhline(30, color="green", linestyle="--", linewidth=0.5)
 
 
 # Plot price chart with bbands
 feed.plot(asset, ax = ax1 , plot_volume=False, label="price")
 metric = BBandsMetric(asset, timeperiod=10)
 bbands = feed.track(metric)
-ax1.fill_between(bbands.timeline, bbands.data["lower"], bbands.data["upper"], alpha=0.4, color="grey")  # type: ignore
+ax1.fill_between(bbands.index, bbands["lower"], bbands["upper"], alpha=0.4, color="grey")  # type: ignore
 ax1.set_title(asset.symbol);
 
 # Plot rsi chart
 rsi = feed.track(RSIMetric(asset, timeperiod=10))
 rsi.plot(ax=ax2)
+ax2.axhline(70, color="red", linestyle="--", linewidth=0.5)
+ax2.axhline(30, color="green", linestyle="--", linewidth=0.5)
+ax2.grid(axis='y')
 ax2.legend();
 
 fig.tight_layout(h_pad=0);

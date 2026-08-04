@@ -5,7 +5,7 @@ import roboquant as rq
 pd.set_option('display.width', 1000)
 # %%
 feed = rq.feeds.YahooFeed("IBM", start_date="2020-01-01")
-df = feed.to_timeseries(rq.Stock("IBM")).to_dataframe()
+df = feed.to_timeseries(rq.Stock("IBM"))
 print("IBM Stock prices", df, sep="\n")
 
 # %%
@@ -28,5 +28,4 @@ strategy = rq.strategies.EMACrossover()
 journal = rq.journals.MetricsJournal.pnl()
 account = rq.run(feed, strategy, journal=journal)
 equity = journal.get_metrics("pnl/equity")
-df = equity.to_dataframe()
-print("Equity", df, sep="\n")
+print("Equity", equity, sep="\n")

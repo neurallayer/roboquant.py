@@ -161,16 +161,14 @@ class HistoricFeed(Feed, ABC):
 
         if not ax:
             _, ax = plt.subplots()
-            ax.grid(True, linestyle="--", linewidth=0.5, alpha=0.5)
             ax.set_title(asset.symbol)
 
-        if not kwargs:
-            kwargs = {"linewidth": 1}
 
         ax.plot(t, p, **kwargs)  # type: ignore
 
         if plot_volume:
             ax2 = ax.twinx()
+            ax2.grid(False)
             ax2.bar(t, v, alpha=0.3)  # type: ignore
 
         if trades and t:

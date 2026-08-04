@@ -12,9 +12,7 @@ import roboquant as rq
 import matplotlib.pyplot as plt
 
 # Setup some defaults for matplotlib
-plt.style.use("dark_background")
-plt.rcParams['figure.figsize'] = [10.0, 5.0]
-plt.rcParams['figure.dpi'] = 150
+rq.set_dark_style()
 
 # %%
 feed = rq.feeds.YahooFeed.us_stocks_10()
@@ -72,7 +70,7 @@ for timeframe in timeframes:
     rq.run(feed, strategy, journal=journal, timeframe=timeframe)
     equity = journal.get_metrics("pnl/equity")
     label = f"{timeframe.strftime('%Y-%m')}"
-    ax = equity.plot_nice(ax=ax, linewidth=0.5, label=label)
+    ax = equity.plot(ax=ax, linewidth=0.5, label=label)
 
 
 # %% [markdown]

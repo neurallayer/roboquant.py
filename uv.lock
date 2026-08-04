@@ -2471,7 +2471,7 @@ wheels = [
 
 [[package]]
 name = "roboquant"
-version = "2.8.0.dev2"
+version = "2.8.0.dev3"
 source = { editable = "." }
 dependencies = [
     { name = "matplotlib" },

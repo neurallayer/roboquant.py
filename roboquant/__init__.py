@@ -15,6 +15,7 @@ from roboquant.common.timeframe import Timeframe, utcnow
 from roboquant.common.timeseries import TimeSeries
 
 
+
 from roboquant import brokers
 from roboquant import feeds
 from roboquant import journals
@@ -23,7 +24,7 @@ from roboquant import traders
 from roboquant import common
 from roboquant import util
 
-from roboquant.util import indicators, Report
+from roboquant.util import indicators, Report, set_dark_style
 from roboquant.run import run
 
 from importlib.metadata import version
@@ -86,6 +87,7 @@ __all__ = [
     "indicators",
     "util",
     "common",
+    "set_dark_style",
     "Report",
     "Timeframe",
     "TimeSeries",
