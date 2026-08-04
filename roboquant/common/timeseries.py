@@ -1,5 +1,4 @@
 from datetime import datetime
-from typing import Any
 
 import numpy as np
 import pandas as pd
@@ -45,22 +44,6 @@ class TimeSeries(pd.DataFrame):
         start = self.index[0].to_pydatetime(warn=False) # type: ignore
         end = self.index[-1].to_pydatetime(warn=False) # type: ignore
         return Timeframe(start, end, True)
-
-    def plot_nice(self, plot_timeline: bool = True, ax=None, **kwargs: Any):
-        """Plot the data in time series.
-        Optional a `matplotlib.axes.Axes` can be provided. If no ax or kwargs are
-        provided, some sensible defaults will be used."""
-        if ax is None:
-            _, ax = plt.subplots()
-            ax.grid(True, linestyle="--", linewidth=0.5, alpha=0.5)
-
-        _kwargs = {"linewidth": 1, "grid" : True} | kwargs
-        if plot_timeline:
-            self.plot(ax=ax, **_kwargs)  # type: ignore
-        else:
-            self.reset_index(drop=True).plot(ax=ax, **_kwargs)  # type: ignore
-
-        return ax
 
     def plot_corr(self, ax=None, timeframe: Timeframe | None = None, fontsize: int | None = None):
         """Plot the correlation matrix of the series."""

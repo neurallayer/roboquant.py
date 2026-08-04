@@ -59,11 +59,15 @@ class MetricsJournal(Journal):
             result.update(m.keys())
         return list(result)
 
-    def plot(self, metric_name: str, plot_timeline: bool = True, ax = None, **kwargs):
-        """Plot the metric. Optional a `matplotlib.axes.Axes` can be provided
+    def plot(self, *metric_names: str, plot_timeline: bool = True, ax = None, **kwargs):
+        """Plot one or more metrics. Optional a `matplotlib.axes.Axes` can be provided
         This method requires matplotlib to be installed."""
 
-        ts = self.get_metrics(metric_name)
-        return ts.plot(plot_timeline=plot_timeline,ax=ax, **kwargs)
+        ts = self.get_metrics(*metric_names)
+        if plot_timeline:
+            return ts.plot(ax=ax, **kwargs)
+        else:
+            return ts.reset_index(drop=True).plot(ax=ax, **kwargs)
+
 
 
