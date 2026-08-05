@@ -20,7 +20,7 @@ class Account:
     It keeps track of the cash, positions, orders and trades.
 
     Attributes:
-        buying_power (Amount): Available buying power for orders in the base currency of the account.
+        buying_power (Amount): Available buying power for orders in denoted in the base currency of the account.
         cash (Wallet): The cash available in the account.
         positions (Dict[Asset, Position]): the open positions, each denoted in the currency of the asset.
         orders (list[Order]): the open orders, each denoted in the currency of the asset. Each order in
@@ -134,7 +134,8 @@ class Account:
         return f"{self:,.0f}"
 
     def __format__(self, format_spec: str) -> str:
-        """Return a float formatted string representation of the wallet.
+        """Return a float formatted string representation of the wallets
+        in the account.
 
         Args:
             format_spec (str): The format specification.
@@ -173,9 +174,9 @@ class Account:
         """Return the orders as a dataframe"""
         return pd.json_normalize([asdict(order) for order in self.orders])
 
-    def plot_allocation(self, ax: Axes | None=None, include_cash: bool = False, **kwargs: Any) -> Axes:
+    def plot_allocation(self, ax: Axes | None = None, include_cash: bool = False, **kwargs: Any) -> Axes:
         """Plot the exposure of the assets in the portfolio as a pie chart.
-        The allocation is based on the market value of the positions.
+        The allocation is based on the latest market value of the positions.
 
         Args:
             ax: The matplotlib axes to plot on.
@@ -197,8 +198,7 @@ class Account:
 
         labels = labels + [asset.symbol for asset in self.portfolio.keys()]
         sizes = sizes + [
-            self.convert(asset.amount(abs(pos.size), abs(pos.mkt_price)))
-            for asset, pos in self.portfolio.items()
+            self.convert(asset.amount(abs(pos.size), abs(pos.mkt_price))) for asset, pos in self.portfolio.items()
         ]
 
         if len(labels) == 0:
@@ -210,5 +210,5 @@ class Account:
         } | kwargs
 
         ax.pie(sizes, **kwargs)
-        # ax.axis("equal")  # Equal aspect ratio ensures that pie is drawn as a circle.
+        ax.axis("equal")  # Equal aspect ratio ensures that pie is drawn as a circle.
         return ax

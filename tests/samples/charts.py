@@ -69,25 +69,28 @@ for timeframe in timeframes:
     journal = rq.journals.MetricsJournal.pnl()
     rq.run(feed, strategy, journal=journal, timeframe=timeframe)
     equity = journal.get_metrics("pnl/equity")
-    label = f"{timeframe.strftime('%Y-%m')}"
-    ax = equity.plot(ax=ax, linewidth=0.5, label=label)
+    ax = equity.plot(ax=ax)
 
 
 # %% [markdown]
 # Run randomly sampled 1-year back tests and plot the equity curve
 # for each run on the same chart. This provides visual insights
-# how the equity results are distributed.
+# how the equity curves are distributed.
 
 # %%
-timeframes = feed.timeframe().sample(200, "365 days")
+timeframes = feed.timeframe().sample(100, "365 days")
 ax = None
 
 for timeframe in timeframes:
-    strategy = rq.strategies.EMACrossover()
+    strategy = rq.strategies.EMACrossover(5, 13)
     journal = rq.journals.MetricsJournal.pnl()
     rq.run(feed, strategy, journal=journal, timeframe=timeframe)
-    equity = journal.get_metrics("pnl/equity")[26:]
-    ax = equity.reset_index(drop=True).plot(ax=ax, linewidth=0.5, color="grey", alpha=0.5, legend=False)
+
+    # Skip the first 13 trading days since the strategy is still
+    # warming up and the equity curve is flat during this period.
+    equity = journal.get_metrics("pnl/equity")[13:]
+
+    ax = equity.plot_without_timeline(ax=ax, linewidth=2, color="grey", alpha=0.2, legend=False)
 
 # %% [markdown]
 # ## Correlation

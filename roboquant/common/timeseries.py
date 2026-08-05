@@ -12,8 +12,10 @@ Timeline = list[datetime]
 
 
 class TimeSeries(pd.DataFrame):
-    """A multivariate time-series that contains a timeline and named values. It
-    is used in several places in roboquant, for example prices and metrics.
+    """A multivariate time-series that contains a timeline and named values.
+    Values are always of the type float.
+
+    It is used in several places in roboquant, for example prices and metrics.
 
     It contains convenience methods to plot the time series or to convert it to a Pandas dataframe.
 
