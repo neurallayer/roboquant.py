@@ -1,5 +1,6 @@
 from datetime import datetime
 
+from matplotlib.axes import Axes
 import numpy as np
 import pandas as pd
 from matplotlib import pyplot as plt
@@ -22,10 +23,14 @@ class TimeSeries(pd.DataFrame):
 
     @property
     def _constructor(self):
+        """Override the constructor to return a TimeSeries instead of a plain DataFrame."""
         return TimeSeries
 
     @staticmethod
     def from_data(timeline: Timeline, data: dict[str, Data]) -> "TimeSeries":
+        """Create a TimeSeries from a timeline and a dictionary of named data.
+        The keys of the dictionary are used as column names and the values are used
+        as the data for each column."""
         result : TimeSeries = TimeSeries.from_dict(data) # type: ignore
         result.index = timeline
         return result
@@ -45,7 +50,27 @@ class TimeSeries(pd.DataFrame):
         end = self.index[-1].to_pydatetime(warn=False) # type: ignore
         return Timeframe(start, end, True)
 
-    def plot_corr(self, ax=None, timeframe: Timeframe | None = None, fontsize: int | None = None):
+    def plot_without_timeline(self, *args, **kwargs) -> Axes:
+        """Plot the time series without the timeline. This is useful for plotting
+        charts when only the values are important and not the absolute timeline.
+        """
+        return self.reset_index(drop=True).plot(*args, **kwargs)
+
+    def timeline(self) -> list[datetime]:
+        """Return the timeline of the time series as a list of datetime objects."""
+        return [t.to_pydatetime(warn=False) for t in self.index]
+
+    def limit_timeline(self, timeframe: Timeframe) -> "TimeSeries":
+        """Limit the time series to a certain timeframe. If the timeframe is empty,
+        an empty time series will be returned."""
+        result = self[self.index >= timeframe.start]
+        if timeframe.inclusive:
+            result = result[result.index <= timeframe.end]
+        else:
+            result = result[result.index < timeframe.end]
+        return result # type: ignore
+
+    def plot_corr(self, ax=None, plot_colorbar: bool = True, fontsize: int | None = None) -> Axes:
         """Plot the correlation matrix of the series."""
 
         if not ax:
@@ -55,10 +80,11 @@ class TimeSeries(pd.DataFrame):
         columns = corr.columns
 
         c_axes = ax.matshow(corr, vmin=-1, vmax=1, cmap="RdYlGn")
-        ax.figure.colorbar(c_axes)
-        ax.grid(False)
+        if plot_colorbar:
+            ax.figure.colorbar(c_axes)
 
-        ax.set_xticks(range(len(columns)), columns, fontsize=fontsize, rotation=45, rotation_mode="xtick")
+        ax.grid(False)
+        ax.set_xticks(range(len(columns)), columns, fontsize=fontsize, rotation=45)
         ax.set_yticks(range(len(columns)), columns, fontsize=fontsize)
 
         for (i, j), z in np.ndenumerate(corr.to_numpy()):
