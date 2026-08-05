@@ -13,6 +13,7 @@ if not feed.exists():
     print("Starting CSV feed...")
     path = os.path.expanduser("~/data/daily/us/nasdaq stocks/")
     csv_feed = rq.feeds.CSVFeed.stooq_us_daily(path)
+    print(f"Finished parsing CSV files {csv_feed}")
     print("Recording feed...")
     feed.record(csv_feed, row_group_size=100_000)
 

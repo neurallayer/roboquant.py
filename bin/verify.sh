@@ -12,7 +12,7 @@ echo "Running ty"
 uvx ty check roboquant tests 
 
 echo "Running pyright" 
-uv run pyright tests roboquant || exit 1
+uv run pyright tests roboquant tests/samples || exit 1
 
 echo "Running unittest" 
 uv run python -m unittest discover -q -s tests/unit || exit 1

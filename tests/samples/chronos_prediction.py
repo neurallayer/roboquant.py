@@ -24,7 +24,7 @@ pipeline = ChronosBoltPipeline.from_pretrained(
 )
 
 # %%
-def perc_change(arr):
+def pct_change(arr):
     """Calculate the percentage change of a numpy array to make the data stationary."""
     return np.diff(arr) / arr[:-1]
 
@@ -36,8 +36,9 @@ context_window = 250  # use the previous 250 trading days as context
 feed = rq.feeds.YahooFeed("SPY", start_date="2015-01-01")
 ts = feed.to_timeseries(price_type="close")
 
-close = ts.data["SPY"]
-close = perc_change(close)  # make the data stationary
+
+close = ts["SPY"].to_numpy()
+close = pct_change(close)  # make the data stationary
 close = close[-context_window - prediction_days :-prediction_days]  # use the last 250 trading days as context
 
 # %%
@@ -69,7 +70,7 @@ class ChronosStrategy(rq.strategies.IndicatorStrategy):
         self.prediction_length = prediction_length
 
     def _create_signal(self, asset: rq.Asset, ohlcv: OHLCVBuffer) -> rq.Signal | None:
-        close = perc_change(ohlcv.close())
+        close = pct_change(ohlcv.close())
         result = self.pipeline.predict(
             inputs=torch.tensor(close),
             prediction_length=self.prediction_length,

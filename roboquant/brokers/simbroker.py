@@ -216,7 +216,7 @@ class SimBroker(Broker):
     def _calculate_open_orders(self) -> Wallet:
         """Calculate the buying power required for the open orders"""
         result = Wallet()
-        for order in self._account.orders:
+        for order in self._orders.values():
             if order.is_buy and order.remaining:
                 result += order.asset.amount(order.remaining, order.limit)
         return result
