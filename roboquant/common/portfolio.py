@@ -72,30 +72,34 @@ class Portfolio(UserDict[Asset, Position]):
         """
         return Portfolio({asset: position for (asset, position) in self.items() if position.is_long})
 
-    def unrealized_pnl(self) -> Wallet:
+    def unrealized_pnl(self, *assets: Asset) -> Wallet:
         """
         Return the sum of the unrealized profit and loss for the open positions.
         This includes both long- and short-positions.
+        If one or more asset is provided, limit it to those assets, otherwise include all assets.
 
         Returns:
             Wallet: The unrealized profit and loss.
         """
         result = Wallet()
         for asset, position in self.items():
-            result += asset.amount(position.size, position.mkt_price - position.avg_price)
+            if not assets or asset in assets:
+                result += asset.amount(position.size, position.mkt_price - position.avg_price)
         return result
 
-    def mkt_value(self) -> Wallet:
+    def mkt_value(self, *assets: Asset) -> Wallet:
         """
         Return the sum of the market values of the open positions in the account. Short
         positions have a negative market value.
+        If one or more asset is provided, limit it to those assets, otherwise include all assets.
 
         Returns:
             Wallet: The total market value of all open positions.
         """
         result = Wallet()
         for asset, position in self.items():
-            result += asset.amount(position.size, position.mkt_price)
+            if not assets or asset in assets:
+                result += asset.amount(position.size, position.mkt_price)
         return result
 
     def close_positions(self, ndigits: int = 2) -> list[Order]:

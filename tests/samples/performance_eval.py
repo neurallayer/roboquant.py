@@ -1,4 +1,5 @@
 # %% [markdown]
+# # Strategy Performance
 # This example shows to compare a strategy against a common Buy & Hold strategy.
 # %%
 import roboquant as rq

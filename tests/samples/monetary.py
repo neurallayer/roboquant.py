@@ -1,40 +1,73 @@
 # %% [markdown]
-# This example shows how to use the `roboquant` library to handle monetary amounts and wallets.
+# # Monetary
+# This example shows how to use the *roboquant* library to handle monetary amounts and wallets.
 # It demonstrates how to create amounts in different currencies, manage wallets, and convert between currencies using
 # the European Central Bank (ECB) conversion rates.
 
-# %%
+
+# %% tags=["input-hide"]
 from datetime import datetime, timedelta
 from roboquant import utcnow
-from roboquant.common.monetary import EUR, USD, JPY, ECBConversion, Amount, Wallet
+from roboquant.common.monetary import Currency, EUR, USD, JPY, ECBConversion, Amount, Wallet
+
+
+# %% [markdown]
+# ## Currency
+# A currency in roboquant can present any type of currency. So
+# it is not not limited to fiat currencies and also supports crypto currencies.
+#
+# Under the hood a currency is a subclass of str with a few
+# convenience methods added. It also makes the API stronger typed and
+# reduces the change off errors.
+#
+# There are several predefined ones included, but introducing a new
+# currency is straitforward.
 
 # %%
-# Different ways to create an amount.
+DOGE = Currency("DOGE")
+
+
+# %% [markdown]
+# ## Amount
+# There are different ways to create an amount.
 amt1 = 20@USD
 amt2 = USD(20)
 amt3 = Amount(USD, 20.0)
 assert amt1 == amt2 == amt3
 
-# %%
-# A wallet can contain amounts of different currencies. A wallet
+# let's create 1000 Dodge coins
+amt4 = 1000@DOGE
+
+# %% [markdown]
+# ## Wallet
+# A wallet contains amounts of different currencies. A wallet
 # is also mutable. It behaves very much like a `dict[Currency, float]`
 #
-# The are different ways to create a new instance of `Wallet`
+# A wallet will not automatically convert between currencies, but has
+# methods to invoke a conversion explicitly.
+#
+# The are several ways to create a new instance of a `Wallet`
+
+# %%
 wallet1 = 20@EUR + 10@USD + 1000@JPY + 10@USD
 wallet2 = Wallet(20@EUR, 10@USD, 1000@JPY, 10@USD)
 assert wallet1 == wallet2
 assert wallet1[JPY] == 1000
 
 #%% [markdown]
-# It might come as bit of a suprise, but adding two amounts will
+# It might come as a bit of a suprise, but adding two amounts will
 # always return a `Wallet`, even if the amounts are denoted
 # in the same currency.
+
+# %%
 wallet3 = 20@EUR + 30@EUR
 assert isinstance(wallet3, Wallet)
 
-#%% [mrkdown]
+#%% [markdown]
 # There are several ways you can add or subtract amounts
 # from an existing wallet.
+
+# %%
 wallet1 += EUR(10.0)
 wallet1 += Amount(EUR, 10)
 wallet1 -= 50@USD
@@ -44,6 +77,7 @@ assert wallet1[EUR] == 30.0
 print("The wallet contains", wallet1)
 
 # %% [markdown]
+# ## Conversion
 # Roboquant supports trading of assets in different currencies.
 # But for this to work correctly, a currency converter needs to registered.
 #
@@ -67,7 +101,7 @@ ECBConversion().register()
 print("The total value of the wallet today is", wallet1@EUR)
 print("The total value of the wallet today is", wallet1@USD)
 
-# %%
+# %% [markdown]
 # Or convert an amount from one currency to another one:
 amt = 100@USD
 print(amt, "=", amt@JPY)
@@ -80,7 +114,7 @@ print(amt, "=", amt@JPY)
 yesterday = utcnow() - timedelta(days=1)
 print(amt,"in JYP yesterday is", amt.convert_to(JPY, yesterday))
 
-# %%
+# %% [markdown]
 # Convert a wallet to a single currency at different dates
 dt1 = datetime.fromisoformat("2010-01-01")
 print("Value of wallet in USD in 2010 is", wallet1.convert_to(USD, dt1))

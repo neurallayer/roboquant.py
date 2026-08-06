@@ -98,27 +98,30 @@ class Account:
         """
         return self.convert(self.equity())
 
-    def realized_pnl(self) -> Wallet:
+    def realized_pnl(self, *assets: Asset) -> Wallet:
         """
         Return the sum of the realized profit and loss for trades executed in the account.
+        If one or more asset is provided, limit it to those assets, otherwise include all assets.
 
         Returns:
             Wallet: The realized profit and loss.
         """
         result = Wallet()
         for trade in self.trades:
-            result += Amount(trade.asset.currency, trade.pnl)
+            if not assets or trade.asset in assets:
+                result += Amount(trade.asset.currency, trade.pnl)
         return result
 
-    def pnl(self) -> Wallet:
+    def pnl(self, *assets: Asset) -> Wallet:
         """
         Return the total profit and loss of the account, which is
         the sum of realized- and unrealized-PnL.
+        If one or more asset is provided, limit it to those assets, otherwise include all assets.
 
         Returns:
             Wallet: The total profit and loss.
         """
-        return self.realized_pnl() + self.portfolio.unrealized_pnl()
+        return self.realized_pnl(*assets) + self.portfolio.unrealized_pnl(*assets)
 
     def get_order(self, order_id: str) -> Order | None:
         """Return an order by its id, or None if no matching order can be found"""

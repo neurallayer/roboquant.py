@@ -4,9 +4,8 @@ from torch import nn
 import torch.nn.functional as F
 
 import roboquant as rq
-from roboquant.common.asset import Stock
 from roboquant.journals.basicjournal import BasicJournal
-from roboquant.ai.features import BarFeature, CombinedFeature, MaxReturnFeature, PriceFeature, SMAFeature
+from roboquant.ai.features import BarFeature, CombinedFeature, MaxReturnFeature, PriceFeature, SMAFeature, VolumeFeature
 from roboquant.ai.strategies import TimeSeriesStrategy, logger
 
 
@@ -29,10 +28,11 @@ class TimeSeriesLSTM(nn.Module):
 
 # %%
 # Config
-apple = Stock("AAPL")
 prediction_steps = 5 # predict 5 steps in the future
-start_date = "2000-01-01"
-feed = rq.feeds.YahooFeed(apple.symbol, start_date=start_date)
+feed = rq.feeds.YahooFeed("AAPL", start_date="2000-01-01")
+apple = feed.get_asset("AAPL")
+train_tf = rq.Timeframe.fromisoformat("2000-01-01", "2020-01-01")
+test_tf = rq.Timeframe.fromisoformat("2020-01-01", "2030-01-01")
 
 # %%
 # Define the strategy
@@ -40,8 +40,9 @@ feed = rq.feeds.YahooFeed(apple.symbol, start_date=start_date)
 # What are the input features
 input_feature = CombinedFeature(
     BarFeature(apple).returns(),
-    SMAFeature(BarFeature(apple), 10).returns(),
-    SMAFeature(BarFeature(apple), 20).returns(),
+    SMAFeature(PriceFeature(apple), 10).returns(),
+    SMAFeature(PriceFeature(apple), 20).returns(),
+    SMAFeature(VolumeFeature(apple), 25).returns(),
 ).normalize(20)
 
 model = TimeSeriesLSTM(input_feature.size())
@@ -57,15 +58,13 @@ strategy = TimeSeriesStrategy(input_feature, label_feature, model, apple, sequen
 
 # %%
 # Train the model from 2010 to 20202
-tf = rq.Timeframe.fromisoformat(start_date, "2020-01-01")
-strategy.fit(feed, timeframe=tf, epochs=20, validation_split=0.25, prediction=prediction_steps)
+strategy.fit(feed, timeframe=train_tf, epochs=20, validation_split=0.25, prediction=prediction_steps)
 
 # %%
 # Run the trained model with the last years of data
 # logger.setLevel("WARNING")
-tf = rq.Timeframe.fromisoformat("2020-01-01", "2025-01-01")
 journal = BasicJournal()
-account = rq.run(feed, strategy, timeframe=tf, journal=journal)
+account = rq.run(feed, strategy, timeframe=test_tf, journal=journal)
 
 # %%
 # Print some results

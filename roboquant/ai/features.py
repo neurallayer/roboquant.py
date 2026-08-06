@@ -553,10 +553,10 @@ class IndicatorFeature(Feature[Event]):
     technical analysis features.
     """
 
-    def __init__(self, *assets: Asset, period: int) -> None:
+    def __init__(self, *assets: Asset, timeperiod: int) -> None:
         super().__init__()
         self._data: dict[Asset, OHLCVBuffer] = {}
-        self.period = period
+        self.timeperiod = timeperiod
         self.assets = list(assets)
 
     def calc(self, value: Event) -> NPFloatArray:
@@ -567,7 +567,7 @@ class IndicatorFeature(Feature[Event]):
             item = value.price_items.get(asset)
             if isinstance(item, Bar):
                 if asset not in self._data:
-                    self._data[asset] = OHLCVBuffer(self.period)
+                    self._data[asset] = OHLCVBuffer(self.timeperiod)
                 ohlcv = self._data[asset]
                 if ohlcv.append(item.ohlcv):
                     v = self._calc(asset, ohlcv)
