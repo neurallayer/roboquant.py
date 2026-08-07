@@ -12,15 +12,6 @@ It uses the `YahooFeed` to fetch historical data for several assets and then run
 simple EMA Crossover strategy. The results are visualized using the `matplotlib` library
 and the `roboquant` plotting capabilities.
 
-:::{note}
-Roboquant isn't designed to be a pure visual algo-trading tool. Charts are included to provide
-insights into what is happening during a run but are not the basis for strategies.
-
-There is no out-of-the-box support for candle stick charts and things like the drawing of support lines.
-Although these can be easily added using third party packages like mplfinance, they are not the
-focus area for roboquant.
-:::
-
 We start with importing the required packages and setting some defaults.
 
 ```{code-cell} python

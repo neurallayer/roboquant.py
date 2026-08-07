@@ -27,23 +27,22 @@ jobs:
       url: ${{ steps.deployment.outputs.page_url }}
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
+      - name: Checkout
+        uses: actions/checkout@v7
+
       - name: Setup Pages
         uses: actions/configure-pages@v3
-      - uses: actions/setup-node@v4
-        with:
-          node-version: 18.x
-
+  
       - name: Install uv
         uses: astral-sh/setup-uv@v7
         with:
           ignore-nothing-to-cache: true
           python-version: 3.12
 
-      - name: Install the project
+      - name: Install the project dependencies
         run: uv sync --all-extras --dev
 
-      - name: Run unit tests
+      - name: Build the HTML pages
         working-directory: ./docs
         run: uv run --with jupyter jupyter book build --html --execute
 

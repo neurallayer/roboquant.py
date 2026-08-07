@@ -18,9 +18,10 @@ rq.set_dark_style()
 ```
 
 :::{note}
-Charting support is included to gain a better understanding what is happening during a run. 
-However it is not the basis for strategies and therefor there is no out-of-the-box support
-for things like candlestick charts and support lines.
+Roboquant isn't designed to be a pure visual algo-trading tool. Charts are included to provide
+insights into what is happening during a run but are not the basis for strategies.
 
-However if desired, this can be easily added by using third party libraries like mpl finance.
+There is no out-of-the-box support for candlestick charts and things like the drawing of support lines.
+Although these can be added using third party packages like mplfinance, they are not the
+focus area for roboquant.
 :::
