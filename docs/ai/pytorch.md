@@ -33,8 +33,15 @@ test_tf = rq.Timeframe.fromisoformat("2020-01-01", "2030-01-01")
 ```
 
 ## Model
-We start with defining the LSTM model we want to use. This is just an example and likely to overfit with the 
-limited amount of data we'll use in this example.
+We start with defining a LSTM model we want to use. LSTM (Long Short-Term Memory) is a type of
+recurrent neural network (RNN) well-suited for  time-series and sequential data.
+
+Unlike standard RNNs, LSTMs can learn long-term dependencies 
+by using a gating mechanism that controls the flow of information, making them effective for 
+financial time-series prediction where patterns may span many time steps.
+
+Please note this is just an example and likely to overfit with the limited amount of
+data we have in this example.
 
 ```{code-cell} python
 class TimeSeriesLSTM(nn.Module):
