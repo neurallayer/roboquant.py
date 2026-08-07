@@ -5,10 +5,10 @@
 # %% [markdown]
 # # Basic Charts
 #
-# This example shows how to draw certain charts using `roboquant`.
+# This example shows how to draw certain charts using *roboquant*.
 # It uses the `YahooFeed` to fetch historical data for several assets and then runs a
 # simple EMA Crossover strategy. The results are visualized using the `matplotlib` library
-# and the `roboquant` plotting capabilities.
+# and the *roboquant* plotting capabilities.
 # %%
 import roboquant as rq
 import matplotlib.pyplot as plt
