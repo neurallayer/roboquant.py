@@ -21,15 +21,10 @@ import matplotlib.pyplot as plt
 
 from roboquant.util.metrics import IndicatorMetric, SignalRatingMetric
 from roboquant.util.indicators import BBANDS, RSI
-```
 
-Roboquant has a dark style for the charts, which can be enabled by calling the `set_dark_style` function.
-Besides the dark background, it also sets some default parameters for the charts, like the figure size, dpi and grids.
-
-```{code-cell} python
+# set a dark default style
 rq.set_dark_style()
 ```
-
 
 Like always, we need to create a feed to get the data for the chart. In this case we use the YahooFeed to get the data for Tesla for the year 2025.
 

@@ -17,6 +17,15 @@ import roboquant as rq
 rq.set_dark_style()
 ```
 
+The following chart shows these default values in action:
+
+```{code-cell} python
+:tags: [remove-input]
+import roboquant as rq
+rq.feed.YahooFeed("MSFT").plot()
+```
+
+
 :::{note}
 Roboquant isn't designed to be a pure visual algo-trading tool. Charts are included to provide
 insights into what is happening during a run but are not the basis for strategies.
