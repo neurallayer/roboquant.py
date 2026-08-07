@@ -1,0 +1,17 @@
+# See docs at: https://mystmd.org/guide/frontmatter
+version: 1
+project:
+  id: c15ad5e3-dd5e-46ea-b652-044dd1aba723
+  title: roboquant documentation
+  description: Documentation for the roboquant Python framework 
+  keywords: [roboqutant, trading, backtesting, algorithmic trading, finance]
+  # authors: []
+  # github:
+  # To autogenerate a Table of Contents, run "jupyter book init --write-toc"
+  toc:
+   
+site:
+  template: book-theme
+  # options:
+  #   favicon: favicon.ico
+  #   logo: site_logo.png

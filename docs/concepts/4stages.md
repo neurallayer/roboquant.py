@@ -1,26 +1,28 @@
-# The 4 Stages of Developing Algo-Trading Strategies
+# The 4 stages
 
 ## Overview
 
 When developing, testing, and running a new trading strategy, you typically go through 4 distinct stages. The diagram below illustrates these stages and their ideal sequence:
 
 ```mermaid
-flowchart TD
-    A["Stage 1: Back Testing<br>Broker: SimBroker<br>Feed: Historical Data"]
-    B["Stage 2: Forward Testing<br>Broker: SimBroker<br>Feed: Live Data"]
-    C["Stage 3: Paper Trading<br>Broker: Real (paper account)<br>Feed: Live Data"]
-    D["Stage 4: Live Trading<br>Broker: Real (live account)<br>Feed: Real-time Data"]
-
+flowchart LR
+ 
+    A["Stage 1 <br> Back Testing"]
+    B["Stage 2 <br> Forward Testing"]
+    C["Stage 3 <br> Paper Trading"]
+    D["Stage 4 <br> Live Trading"]
+    
     A --> B --> C --> D
 ```
 
+:::{important}
 Each stage has its own specific purpose and advantages. However, before diving into the details, there are two golden rules to follow:
-
-1. **Do not skip any stage if possible**. Each stage has its own raison d'être. Only by going through all of them will you eventually end up with a well-performing and robust strategy.
-   
+1. **Do not skip a stage**. Each stage has its own raison d'être. Only by going through all of them will you eventually end up with a well-performing and robust strategy.
 2. **If performance is unsatisfactory in a later stage, go back to stage 1**. Usually, small changes in code can have a big impact on results, so thorough testing at every stage is essential.
+:::
 
-Roboquant supports all 4 stages, requiring only minimal configuration changes when moving from one stage to the next. Your `Strategy` and `Trader` should **not** change between stages; only the **Feed** and **Broker** configurations differ.
+
+Roboquant supports all 4 stages, requiring only minimal configuration changes when moving from one stage to the next. Your `Strategy` and `Trader` should not change between stages; only the `Feed` and `Broker` configurations differ.
 
 The mapping of Brokers and Feeds per stage is as follows:
 
@@ -28,7 +30,7 @@ The mapping of Brokers and Feeds per stage is as follows:
 |---|---|---|
 | Back Testing | SimBroker | Historical Data |
 | Forward Testing | SimBroker | Real-time Data |
-| Paper Trading | Real Broker (using simulated account) | Real-time Data |
+| Paper Trading | Real Broker (using simulated/paper account) | Real-time Data |
 | Live Trading | Real Broker (using real account) | Real-time Data |
 
 ---

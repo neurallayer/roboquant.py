@@ -7,7 +7,7 @@ build-backend = "uv_build"
 
 [tool.ruff.lint]
 select = ["E", "F", "W"]
-ignore = ["E703"]  # use ; in notebook Python file
+ignore = ["E703", "E402"]  # use ; in notebook Python file
 
 [tool.ty.rules]
 unused-type-ignore-comment = "ignore"
@@ -94,5 +94,7 @@ dev = [
   "chronos-forecasting>=2.3.1",
   "ty>=0.0.62",
   "tensorboard>=2.21.0",
-  "pdoc3>=0.11.6"
+  "pdoc3>=0.11.6",
+  "jupyter-book>=2.1.6",
+  "jupytext>=1.19.5",
 ]
