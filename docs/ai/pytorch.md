@@ -5,6 +5,7 @@ kernelspec:
 ---
 
 # PyTorch
+This page provides an example how to develop a strategy that uses PyTorch model to make predictions.
 
 ```{code-cell} python
 :tags: [remove-input]
@@ -18,9 +19,7 @@ from roboquant.ai.features import BarFeature, CombinedFeature, MaxReturnFeature,
 from roboquant.ai.strategies import TimeSeriesStrategy, logger
 ```
 
-Roboquant uses the excellent PyTorch framework as a basis for the included deep learning based strategies. 
-
-## Data and Config
+## Data and Configuration
 Here we define some configuration variables, the feed we'll be using,
 and the timeframes for training and testing.
 
@@ -60,8 +59,8 @@ class TimeSeriesLSTM(nn.Module):
 ```
 
 ## Features
-
-Now we define the input and label features we want to use.
+Now we define the input and label features we want to use. This is just a small
+sample of the available features and custom features can also be added.
 
 ```{code-cell} python
 input_feature = CombinedFeature(
