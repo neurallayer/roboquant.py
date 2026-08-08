@@ -81,7 +81,7 @@ extra = [
 ]
 
 [project.urls]
-Homepage = "https://roboquant.org"
+Homepage = "https://neurallayer.github.io/roboquant.py/"
 Repository = "https://github.com/neurallayer/roboquant.py.git"
 Issues = "https://github.com/neurallayer/roboquant.py/issues"
 
@@ -90,11 +90,8 @@ dev = [
   "python-dotenv>=1.1.0",
   "pyright>=1.1.411",
   "ipykernel>=7.3.0",
-  "ipywidgets>=8.1.6",
   "chronos-forecasting>=2.3.1",
   "ty>=0.0.62",
   "tensorboard>=2.21.0",
-  "pdoc3>=0.11.6",
   "jupyter-book>=2.1.6",
-  "jupytext>=1.19.5",
 ]

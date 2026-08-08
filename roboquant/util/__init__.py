@@ -2,7 +2,7 @@ from .report import Report
 import roboquant.util.indicators as indicators
 import roboquant.util.metrics as metrics
 from .buffer import OHLCVBuffer, NumpyBuffer, AssetBuffers
-from .style import set_dark_style
+from .style import set_dark_style, set_light_style
 
 __all__ = [
     "Report",
@@ -11,6 +11,8 @@ __all__ = [
     "OHLCVBuffer",
     "NumpyBuffer",
     "AssetBuffers",
-    "set_dark_style"
+    "set_dark_style",
+    "set_light_style"
+
 ]
 

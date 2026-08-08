@@ -19,7 +19,7 @@ import roboquant as rq
 import matplotlib.pyplot as plt
 
 # Setup some defaults for matplotlib
-rq.set_dark_style()
+rq.set_light_style()
 ```
 
 Then we load the prices of 8 very different assets to make the results a bit

@@ -22,8 +22,8 @@ import matplotlib.pyplot as plt
 from roboquant.util.metrics import IndicatorMetric, SignalRatingMetric
 from roboquant.util.indicators import BBANDS, RSI
 
-# set a dark default style
-rq.set_dark_style()
+# set a default style
+rq.set_light_style()
 ```
 
 Like always, we need to create a feed to get the data for the chart. In this case we use the YahooFeed to get the data for Tesla for the year 2025.

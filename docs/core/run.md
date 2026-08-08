@@ -99,7 +99,7 @@ of two of the components selected.
 Instead of a the `SimBroker` a real broker is selected and instead of a historic
 data feed, a live datafeed is used.
 
-```{code} python
+```python
 import os
 from dotenv import load_dotenv
 from roboquant.third_party.alpaca import AlpacaLiveFeed, AlpacaBroker

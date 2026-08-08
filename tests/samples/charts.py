@@ -15,7 +15,11 @@ import matplotlib.pyplot as plt
 
 # %% [markdown]
 # Configure matplotlib with some defaults
-rq.set_dark_style()
+rq.set_light_style()
+bg_color = "#F8FFF8"
+plt.rcParams["figure.facecolor"] = bg_color
+plt.rcParams["axes.facecolor"] = bg_color
+plt.rcParams["savefig.facecolor"] = bg_color
 
 
 # %% [markdown]

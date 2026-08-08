@@ -26,7 +26,7 @@ flowchart LR
     
     Feed -- event --> Strategy -- signals --> Trader -- orders --> Broker -- account --> Journal 
 
-    style Strategy fill:#666
+    style Strategy fill:#888
 ```
 
 Because a strategy has no access to the account, the same strategy instance can be used unchanged

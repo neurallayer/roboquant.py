@@ -21,7 +21,7 @@ flowchart LR
     
     Feed -- event --> Strategy -- signals --> Trader -- orders --> Broker -- account --> Journal 
 
-    style Broker fill:#666
+    style Broker fill:#888
 ```
 
 ## API

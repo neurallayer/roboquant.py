@@ -1,0 +1,8 @@
+.__bg-white {
+    background-color: rgb(209, 224, 218);
+}
+
+.border-l-blue-400 {
+    --tw-border-opacity: 1;
+    border-left-color: rgba(60, 156, 37, 1);
+}

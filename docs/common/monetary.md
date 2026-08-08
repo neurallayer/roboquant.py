@@ -14,18 +14,20 @@ A `Currency` represents a single currency (e.g. USD, EUR, JPY). Predefined curre
 instances are available as module-level constants and can be used directly.
 Currencies are not limited to fiat currencies and can be used for crypto currencies as well.
 
-Currencies are callable and then create an `Amount`.
+Currencies are callable and then create an `Amount`. Or you can use the '@' operator to
+achieve the same.
 
 
 ```{code-cell} python
 from roboquant.common.monetary import USD, EUR, JPY, Currency
 
-print(USD)
-
 # Create a custom currency
 DOGE = Currency("DOGE")
 
 amount = DOGE(1000.0)
+print(amount)
+
+amount = 1000.0@DOGE
 print(amount)
 ```
 
@@ -46,6 +48,8 @@ amt3 = USD(20)
 assert amt1 == amt2 == amt3 
 
 print(amt3)
+
+# Amounts can be formatted like floats
 print(f"{amt3:.0f}")
 ```
 
@@ -63,7 +67,11 @@ wallet.deposit(100@EUR)
 wallet.withdraw(200@JPY)
 
 print(wallet)
+
+# Wallets can be formatted like floats
 print(f"{wallet:.0f}")
+
+# Access wallet amounts by currency
 print(wallet[USD], wallet[EUR], wallet[JPY])
 ```
 

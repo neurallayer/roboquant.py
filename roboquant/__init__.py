@@ -24,7 +24,7 @@ from roboquant import traders
 from roboquant import common
 from roboquant import util
 
-from roboquant.util import indicators, Report, set_dark_style
+from roboquant.util import indicators, Report, set_dark_style, set_light_style
 from roboquant.run import run
 
 from importlib.metadata import version
@@ -88,6 +88,7 @@ __all__ = [
     "util",
     "common",
     "set_dark_style",
+    "set_light_style",
     "Report",
     "Timeframe",
     "TimeSeries",

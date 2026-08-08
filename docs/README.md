@@ -1,8 +1,9 @@
-# Home
+
+# Welcome
 
 ![roboquant logo](https://github.com/neurallayer/roboquant.py/raw/main/docs/roboquant_header.png)
 
-Roboquant is an open-source algorithmic trading platform written in Python. It is flexible, user-friendly and free to use. It is designed for anyone serious about algo-trading. 
+Roboquant is an open-source algorithmic trading platform written in Python. It is flexible, user-friendly and free to use. It is designed for anyone serious about algo-trading.
 
 So whether you are a beginning retail trader or an established trading firm, roboquant can help you to develop robust and fully automated trading strategies.
 
@@ -43,3 +44,12 @@ Below are some of the key features of *roboquant*:
 - **Strategy composition** — `MultiStrategy` combines multiple strategies with configurable conflict resolution (`first`, `last`, `mean`, `none`).
 - **Pluggable pricing** — Price type strings (`"OPEN"`, `"CLOSE"`, `"HIGH"`, `"LOW"`, `"DEFAULT"`) allow strategies and traders to choose which price to use for evaluation.
 - **Multi-currency** — Built-in support via `Amount`, `Wallet`, and pluggable `CurrencyConverter` (ECB, static, one-to-one).
+
+## License
+Roboquant is made available under the Apache 2.0 license. You can read more about the Apache 2.0 license on this page: https://www.apache.org/licenses/LICENSE-2.0.html
+
+## Disclaimer
+Absolutely no warranty is implied with this product. Use at your own risk. I provide no guarantee that it will be profitable, or that it won't lose all your money very quickly or does not contain bugs.
+
+All financial trading offers the possibility of loss. Leveraged trading, may result in you losing all your money, and still owing more. Back tested results are no guarantee of future performance. I can take no responsibility for any losses caused by live trading using roboquant. Use at your own risk. I am not registered or authorised by any financial regulator.
+
