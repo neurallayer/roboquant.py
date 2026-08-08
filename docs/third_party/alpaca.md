@@ -6,7 +6,8 @@ kernelspec:
 
 # Alpaca
 
-[Alpaca Markets](https://alpaca.markets/) provides a commission-free trading API for US equities and crypto. `roboquant.py` integrates with Alpaca for both **live/paper trading** (broker) and **real-time/historical market data** (feed).
+[Alpaca Markets](https://alpaca.markets/) provides a commission-free trading API for US equities and crypto.
+*Roboquant* integrates with Alpaca for both **live/paper trading** (broker) and **real-time/historical market data** (feed).
 
 ## Prerequisites
 
@@ -16,13 +17,12 @@ Install the Alpaca dependencies alongside roboquant:
 pip install roboquant[extra]
 ```
 
-Set your API credentials as environment variables (or put them in a .env file that you don't put into version control):
+Set your API credentials as environment variables (or put them in a .env file that you don't put under version control):
 
 ```bash
 export ALPACA_API_KEY="your-api-key"
 export ALPACA_SECRET_KEY="your-secret-key"
 ```
-
 
 ---
 

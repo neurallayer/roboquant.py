@@ -19,7 +19,7 @@ import roboquant as rq
 
 ```{code-cell} python
 :tags: [remove-input]
-rq.set_dark_style()
+rq.set_light_style()
 ```
 
 You can check the version and other information about the installed *roboquant* package by running the following command:

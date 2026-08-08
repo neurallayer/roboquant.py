@@ -57,7 +57,7 @@ site:
   parts:
     banner: Documentation is still in alpha
   options:
-      style: style.css
+      style: static/css/style.css
       folders: true
   #   favicon: favicon.ico
       logo: static/images/logo.png
