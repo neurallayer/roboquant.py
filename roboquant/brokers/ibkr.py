@@ -8,7 +8,7 @@ from roboquant.common.monetary import Currency
 import roboquant.common.portfolio
 from roboquant.brokers.livebroker import LiveBroker
 import roboquant as rq
-from roboquant.third_party._ibkr_types import AccountInfo, ContractInfo, PositionInfo, OrderInfo
+from roboquant.brokers._ibkr_types import AccountInfo, ContractInfo, PositionInfo, OrderInfo
 
 
 from ibind import IbkrClient, StockQuery, OrderRequest, QuestionType  # noqa: E402

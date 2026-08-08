@@ -4,7 +4,7 @@
 # %%
 import ccxt
 import roboquant as rq
-from roboquant.third_party.crypto import CryptoFeed
+from roboquant.feeds.crypto import CryptoFeed
 from roboquant.common.monetary import USDT
 
 # %%

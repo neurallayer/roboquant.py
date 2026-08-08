@@ -69,9 +69,8 @@ buy_order = Order(asset, size = Decimal(10), limit = 200.0, tif="DAY")
 sell_order = Order(asset, size = -Decimal(10), limit = 200.0, tif="GTC")
 ```
 
-Existing orders are orders with a non empty `id`. This `id` is assigned by the broker. Only these orders
-can be cancelled or modified.
-
+Existing orders are orders with a non empty `id`. This `id` is assigned by the broker. These orders
+can be found in `account.orders` and contain the open orders only. Only these orders can be cancelled or modified. 
 
 ```{code-cell} python
 :tags: [remove-input]
@@ -79,9 +78,15 @@ order = Order(rq.Stock("ABC"), Decimal(100), limit=50.0, id="1234")
 ```
 
 ```{code-cell} python
+assert order.id
 modified_order = order.modify(limit=51.0)
 cancelled_order = order.cancel()
 ```
+
+:::{tip}
+If you want to track all orders during a run, use the `SignalOrderTracker` journal.
+:::
+
 
 ## Out of the box
 

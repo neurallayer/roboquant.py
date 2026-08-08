@@ -37,7 +37,7 @@ import os
 from dotenv import load_dotenv
 
 from datetime import datetime, timedelta
-from roboquant.third_party.alpaca import *
+from roboquant.feeds.alpaca import AlpacaHistoricStockFeed, AlpacaHistoricCryptoFeed
 
 load_dotenv()
 
@@ -64,6 +64,8 @@ It can be used standalone or passed into `run` for live or paper trading executi
 
 
 ```{code-cell} python
+from roboquant.brokers.alpaca import AlpacaBroker
+
 broker = AlpacaBroker(
     api_key=api_key,
     secret_key=secret_key

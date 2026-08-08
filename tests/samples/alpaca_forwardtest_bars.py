@@ -2,7 +2,7 @@
 import os
 import logging
 import roboquant as rq
-from roboquant.third_party.alpaca import AlpacaLiveFeed
+from roboquant.feeds.alpaca import AlpacaLiveFeed
 from dotenv import load_dotenv
 load_dotenv()
 

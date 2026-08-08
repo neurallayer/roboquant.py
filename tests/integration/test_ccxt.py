@@ -4,8 +4,8 @@ import ccxt
 from datetime import datetime
 
 from roboquant.common.asset import Crypto
-from roboquant.third_party.crypto import CryptoFeed
-from roboquant.third_party.crypto import CryptoBroker
+from roboquant.feeds.crypto import CryptoFeed
+from roboquant.brokers.crypto import CryptoBroker
 from tests.common import run_price_item_feed
 
 from dotenv import load_dotenv
