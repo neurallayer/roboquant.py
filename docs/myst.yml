@@ -6,14 +6,14 @@ project:
   description: Documentation for the roboquant Python framework 
   keywords: [roboqutant, trading, backtesting, algorithmic trading, finance]
   # authors: []
-  # github:
+  # github: https://github.com/neurallayer/roboquant.py
   toc:
     - file: README.md
       title: roboquant guide
     - title: Getting Started
       children:
         - file: introduction/installation.md
-        - file: introduction/backtest.md
+        - file: introduction/firststeps.md
     - file: core/index.md
       title: Core
       children:
@@ -22,23 +22,22 @@ project:
         - file: core/strategy.md
         - file: core/trader.md
         - file: core/broker.md
-        - file: core/journal.md    
-    - title: Common
+        - file: core/journal.md
+    - file: common/index.md    
+      title: Common Classes
       children:
         - file: common/monetary.md
         - file: common/time.md
-    - file: ai/index.md
-      title: AI
-      children:
-        - file: ai/pytorch.md
-        - file: ai/rl.md
     - file: charts/index.md 
       title: Charts
       children:
         - file: charts/basic_charts.md
         - file: charts/custom_charts.md
-        
-
+    - file: ai/index.md
+      title: AI
+      children:
+        - file: ai/pytorch.md
+        - file: ai/rl.md        
     - title: Concepts
       children:
         - file: concepts/4stages.md
@@ -48,13 +47,10 @@ project:
         - file: third_party/alpaca.md
         - file: third_party/crypto.md
         - file: third_party/ibkr.md 
-
     - title: Performance
       children:
         - file: performance/multiprocess.md
 
-    
-   
 site:
   title: roboquant guide
   template: book-theme
@@ -64,4 +60,4 @@ site:
       style: style.css
       folders: true
   #   favicon: favicon.ico
-  #   logo: site_logo.png
+      logo: static/images/logo.png

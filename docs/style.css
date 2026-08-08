@@ -6,3 +6,11 @@
     --tw-border-opacity: 1;
     border-left-color: rgba(60, 156, 37, 1);
 }
+
+.myst-top-nav {
+    background-color: rgb(209, 224, 218);
+}
+
+.myst-primary-sidebar-footer {
+    size: 50%;
+}

@@ -61,6 +61,8 @@ account = rq.run(feed, strategy, journal=journal)
 ```
 
 ### Trade Chart
+A trade chart is a price chart with added markers for when trades for that asset took place.
+A red up-pointing triangle for a SELL trade and a green down-pointing triangle for a BUY trade.
 
 ```{code-cell} python
 tf = rq.Timeframe.previous("365 days")
@@ -90,15 +92,18 @@ account.plot_allocation(include_cash=True, ax = ax);
 
 ### Custom layouts
 You can customize many of the plots by providing parameter arguments that will be passed on
-to matplotlib.
+to matplotlib. You can also add some more lines to the plot.
 
 ```{code-cell} python
 equity = journal.get_metrics("pnl/equity")
 ax = equity.plot(color="green")
+
+ax.axhline(equity["pnl/equity"].mean(), linestyle="--")
+equity.rolling(50).mean().plot(ax=ax, color="red")
 ax.set_title("My Custom Title");
 ```
 
-Or you can take full control of the layout and make more advanced chart figures.
+Or you can take full control of the layout and create more advanced chart figures.
 Below we create a figure with 8 subplots. We also create a more informative title.
 
 ```{code-cell} python
