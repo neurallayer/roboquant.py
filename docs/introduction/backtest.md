@@ -4,11 +4,12 @@ kernelspec:
   display_name: Python 3
 ---
 
-# Getting started
+# First steps
 This page shows how to run a simple back test using *roboquant*. A back test is a simulation of a trading strategy using historical data. It allows you to see how the strategy would have performed in the past, and can help you to identify any potential issues with the strategy before you start trading with real money.
 
 There are many more advanced features in *roboquant*, like live trading, paper trading, multi-asset trading, multi-currency trading, and more. But this page is meant to be a simple introduction to the basic concepts of back testing.
 
+---
 ## Import
 We always start with the import of the roboquant package. This package contains all the classes and functions that we need to run a back test.
 
@@ -26,7 +27,7 @@ You can check the version and other information about the installed *roboquant* 
 ```{code-cell} python
 rq.info()
 ```
-
+---
 ## Feed
 For a back test we'll need historic data. *Roboquant* uses the concept of a `Feed` to provide this data.
 There are several `Feed` providers included, like the Yahoo Finance one used in this example.
@@ -42,7 +43,7 @@ When we have the feed we can plot the data to see what it looks like. The `plot`
 ```{code-cell} python
 feed.plot("TSLA");
 ```
-
+---
 ## Strategy
 A strategy is the core of any back test. It defines the rules for when to buy and sell an asset. 
 In this example we use a Exponential Moving Average Crossover strategy, which is included in *roboquant* out of the box.
@@ -53,7 +54,7 @@ But normally you would create your own strategy by subclassing the `Strategy` cl
 ```{code-cell} python
 strategy = rq.strategies.EMACrossover()
 ```
-
+---
 ## Run
 Now we can run the back test using the feed and strategy we just created. The `run` function takes many different parameters, making it suitable from back testing all the way to live trading. In this example we only provide the `feed` and `strategy` and leave the other parameters to their default values.   
 
@@ -69,7 +70,7 @@ We can now also plot the trades that were executed during the back test. This is
 ```{code-cell} python
 feed.plot("TSLA", trades = account.trades);
 ```
-
+---
 ## Next steps
 This page showed how to run a simple back test using *roboquant*. For each of the core components of a back test, there are more advanced features available. 
 

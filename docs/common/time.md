@@ -45,6 +45,6 @@ Timeline is not its own type but just defined as `list[datatime]`.
 
 
 ## TimeSeries
-TimeSeries represents a multi-variate timeseries. It extends Pandas DataFrame
+TimeSeries implements a multi-variate timeseries. It extends Pandas DataFrame
 with the index always being a timeline and the columns are always float values.
 

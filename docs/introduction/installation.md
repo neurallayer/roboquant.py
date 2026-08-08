@@ -33,7 +33,6 @@ The core installation keeps the dependency footprint small. If you need specific
 | `ai`       | AI/ML strategies using PyTorch and Stable-Baselines3   | `pip install --upgrade "roboquant[ai]"` |
 | `extra`    | IBKR, Alpaca and Crypto support                        | `pip install --upgrade "roboquant[extra]"` |
 
-### All-in-One Installation
 
 To install roboquant with **all** optional dependencies at once:
 
@@ -43,9 +42,11 @@ pip install --upgrade "roboquant[ai,extra]"
 
 ## Install with uv
 
-[uv](https://github.com/astral-sh/uv) is a fast Python package and project manager. If you are using `uv`, installation is straightforward:
+[uv](https://github.com/astral-sh/uv) is a fast Python package and project manager. If you are using `uv`, getting started is straightforward:
 
 ```bash
+mkdir my-project
+cd my-project
 uv init
 uv add roboquant
 uv run python -c "import roboquant;roboquant.info()"

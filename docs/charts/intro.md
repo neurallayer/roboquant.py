@@ -22,7 +22,7 @@ The following chart shows these default values in action:
 ```{code-cell} python
 :tags: [remove-input]
 import roboquant as rq
-rq.feeds.YahooFeed("MSFT").plot()
+rq.feeds.YahooFeed("MSFT").plot("MSFT");
 ```
 
 

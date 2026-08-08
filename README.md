@@ -9,7 +9,7 @@
 
 Roboquant is an open-source algorithmic trading platform written in Python. It is flexible, user-friendly and completely free to use. It is designed for anyone serious about algo-trading. 
 
-So whether you are a beginning retail trader or an established trading firm, roboquant can help you to develop robust and fully automated trading strategies. You can find out more at [roboquant.org](https://roboquant.org).
+So whether you are a beginning retail trader or an established trading firm, roboquant can help you to develop robust and fully automated trading strategies. You can find out more at [roboquant](https://neurallayer.github.io/roboquant.py/).
 
 ## Usage
 The following code snippet shows the required steps to run a back-test on a number of stocks.
