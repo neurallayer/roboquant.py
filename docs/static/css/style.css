@@ -1,12 +1,8 @@
 .bg-white {
-    background-color: rgb(245, 246, 245);
+    background-color: rgb(240, 240, 245);
 }
 
-.border-l-blue-400 {
-    --tw-border-opacity: 1;
-    border-left-color: rgba(60, 156, 37, 1);
-}
 
 .myst-top-nav {
-    background-color: rgb(209, 224, 218);
+    background-color: rgb(0, 161, 255);
 }

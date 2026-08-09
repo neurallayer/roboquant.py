@@ -2,7 +2,8 @@
 version: 1
 project:
   id: c15ad5e3-dd5e-46ea-b652-044dd1aba723
-  title: roboquant documentation
+  title: roboquant
+  language: en
   description: Documentation for the roboquant Python framework 
   keywords: [roboqutant, trading, backtesting, algorithmic trading, finance]
   # authors: []
@@ -14,6 +15,7 @@ project:
       children:
         - file: introduction/installation.md
         - file: introduction/firststeps.md
+        - file: introduction/development.md
     - file: core/index.md
       title: Core
       children:
@@ -26,6 +28,7 @@ project:
     - file: common/index.md    
       title: Common Classes
       children:
+        - file: common/asset.md
         - file: common/monetary.md
         - file: common/time.md
     - file: charts/index.md 
@@ -38,9 +41,6 @@ project:
       children:
         - file: ai/pytorch.md
         - file: ai/rl.md        
-    - title: Concepts
-      children:
-        - file: concepts/4stages.md
     - file: third_party/index.md
       title: Third Party
       children:
@@ -52,12 +52,12 @@ project:
         - file: performance/multiprocess.md
 
 site:
-  title: roboquant guide
+  title: roboquant
   template: book-theme
   parts:
-    banner: Documentation is still in alpha
+    banner: Documentation is still in beta
   options:
       style: static/css/style.css
       folders: true
-  #   favicon: favicon.ico
+      favicon: static/images/favicon.png
       logo: static/images/logo.png
