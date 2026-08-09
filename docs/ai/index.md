@@ -8,6 +8,15 @@ kernelspec:
 One of the compelling arguments to use Python for algo-trading, is the relative ease of using AI and machine learning as part of your solution.
 That being said, if you are new to Python development, it might still seem a bit daunting at first.
 
+The required dependencies can be installed: 
+
+```bash
+pip install roboquant[ai]
+```
+
+Please note that these dependencies are large, so it can take some time before
+they are downloaded and installed.
+
 
 ## Feature
 A feature can work on an event or the account and serves as both input and labels for ML models. 

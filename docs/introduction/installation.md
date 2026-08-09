@@ -90,10 +90,7 @@ You can also run a quick smoke test:
 
 ```{code-cell} python
 import roboquant as rq
-
-feed = rq.feeds.YahooFeed("AAPL", "IBM")
-strategy = rq.strategies.EMACrossover()
-account = rq.run(feed, strategy)
+account = rq.demo_run()
 print(account)
 ```
 

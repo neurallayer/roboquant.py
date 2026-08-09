@@ -1,3 +1,6 @@
+from typing import NoReturn
+import logging
+
 from roboquant.common.account import Account
 from roboquant.common.asset import Asset, Crypto, Forex
 from roboquant.common.timeframe import Timeframe
@@ -9,7 +12,10 @@ from roboquant.strategies.strategy import Strategy
 from roboquant.traders.flextrader import FlexTrader
 from roboquant.traders.simpletrader import SimpleTrader
 from roboquant.traders.trader import Trader
+from roboquant.feeds.yahoofeed import YahooFeed
+from roboquant.strategies.ema_crossover import EMACrossover
 
+logger = logging.getLogger(__name__)
 
 def run(
     feed: Feed,
@@ -36,21 +42,39 @@ def run(
     broker = broker or SimBroker()
     trader = trader or _derive_simple_trader(feed.assets(), broker.sync())
 
-    for event in feed.play(timeframe):
-        account = broker.sync(event)
-        signals = strategy.create_signals(event) if strategy else []
-        orders = trader.create_orders(signals, event, account)
-        broker.place_orders(orders)
-        if journal:
-            journal.track(event, account, signals, orders)
+    try:
+        for event in feed.play(timeframe):
+            account = broker.sync(event)
+            signals = strategy.create_signals(event) if strategy else []
+            orders = trader.create_orders(signals, event, account)
+            broker.place_orders(orders)
+            if journal:
+                journal.track(event, account, signals, orders)
+    except __StopRun as e:
+        logger.info("early stop of the run", e.message)
+        pass
 
     return broker.sync()
 
 
 
+class __StopRun(Exception):
+
+    def __init__(self, message: str) -> None:
+        super().__init__()
+        self.message = message
+
+def stop_run(message: str = "") -> NoReturn:
+    """Raised an exception that causes the run to be stopped while
+    still regulary returning the account object.
+
+    Optionally provide a message that will be part of the logging.
+    """
+    raise __StopRun(message)
+
 
 def _derive_simple_trader(assets: list[Asset], account: Account) -> SimpleTrader:
-    """Derive FkexTrader settings from provided list of assets
+    """Derive SimpleTrader settings from provided list of assets
     and broker account
     """
 
@@ -63,8 +87,8 @@ def _derive_simple_trader(assets: list[Asset], account: Account) -> SimpleTrader
 
 
 
-def _derive_trader(assets: list[Asset], account: Account) -> "FlexTrader":
-    """Derive FkexTrader settings from provided list of assets
+def _derive_flex_trader(assets: list[Asset], account: Account) -> "FlexTrader":
+    """Derive FlexTrader settings from provided list of assets
     and broker account
     """
 
@@ -93,3 +117,10 @@ def _derive_trader(assets: list[Asset], account: Account) -> "FlexTrader":
         size_fractions=size_fractions,
         limit_rounding=limit_rounding
     )
+
+
+def demo_run() -> Account:
+    """Small demo run for testing purposes"""
+    feed = YahooFeed.us_stocks_10()
+    strategy = EMACrossover()
+    return run(feed, strategy)

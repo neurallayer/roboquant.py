@@ -9,16 +9,16 @@ The library is built around a clean separation of five orthogonal concerns:
 
 | Component | Responsibility |
 |-----------|---------------|
-| **Feed** | Provides (market) data events |
-| **Strategy** | Generates trading signals from events |
-| **Trader** | Converts signals into orders (risk/sizing) |
-| **Broker** | Executes orders, maintains account state |
-| **Journal** | Logs/tracks every step (read-only) |
+| **[Feed](feed.md)** | Provides (market) data events |
+| **[Strategy](strategy.md)** | Generates trading signals from events |
+| **[Trader](trader.md)** | Converts signals into orders (risk/sizing) |
+| **[Broker](broker.md)** | Executes orders, maintains account state |
+| **[Journal](journal.md)** | Logs/tracks every step (read-only) |
 
 Each component is an abstract base class with pluggable implementations, making every part of the pipeline independently swappable.
 
 ## The Run Loop
-The core of the system is the `roboquant.run()` function, which connects all components in a streaming event loop. At a high level, the run loop looks like this:
+The core of the system is the [run()](run.md) function, which connects all components in a streaming event loop. At a high level, the run loop looks like this:
 
 ```mermaid
 flowchart LR

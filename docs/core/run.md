@@ -5,12 +5,13 @@ kernelspec:
 ---
 
 # Run
+The `run()` function implements the main event loop used for everything from back testing to live trading.
 
-It is good to understand some of the details of the run loop.
+It is helpful to understand some of the details of the run loop.
 
 ```python
 for event in feed.play(...):
-    account = broker.sync(event)                # execute fills and update the account
+    account = broker.sync(event)                # syncs and updates the account
     singals = strategy.create_signals(event)    # generate signals from market data
     orders = trader.create_orders(signals, ...) # apply risk rules, create orders
     broker.place_orders(orders)                 # place orders at broker
@@ -19,9 +20,7 @@ for event in feed.play(...):
 
 ## Step-by-step
 
-1. **`broker.sync(event)`** — Open orders from previous steps are tested against prices and executed if conditions are met. No look-ahead bias: orders placed at time `t` only execute at time `t+1`. Returns an updated `Account` object which reflects the latest market data.
-
-    Orders and positions that are closed, are not included in the returned account object.   
+1. **`broker.sync(event)`** — Sync with the state of the underlying real broker. Returns an updated `Account` object which reflects the latest state and market data. Orders and positions that are closed, are not included in the returned account object.   
 
 2. **`strategy.create_signals(event)`** — The strategy examines the event's price data and returns a list of `Signal` objects. Each signal has an asset, a rating (typically -1.0 to 1.0), and a type (`ENTRY`, `EXIT`, or `ENTRY_EXIT`). Strategies are **pure decision-makers** — they know nothing about cash, positions, or risk.
 
@@ -31,7 +30,10 @@ for event in feed.play(...):
 
 5. **`journal.track(...)`** — Optional logging and metrics collection. Journals are passive observers that never modify state.
 
-
+:::{tip}
+Any exception thrown during the execution of the run loop, will stop the run. However if you call the `stop_run()` function, the run is stopped early while still
+regulary returning the latest account object.
+:::
 
 ## Basic Backtest
 A simple back test that iterates over all the historic data in the feed,
@@ -46,7 +48,7 @@ account = rq.run(feed, strategy)
 print(account)
 ```
 
-This works because `run()` provides sensible defaults: `SimBroker` (USD 1M deposit, 0% slippage) and `FlexTrader` (conservative position sizing).
+This works because `run()` provides sensible defaults: `SimBroker` (USD 1M deposit, 0% slippage) and `SimpleTrader`.
 
 ## Custom Backtest
 
@@ -65,7 +67,7 @@ account = rq.run(feed, strategy, trader=trader, broker=broker, journal=journal)
 
 ## Walk Forward
 Walk-forward analysis is a backtesting technique that mimics real-world trading by splitting historical data into successive periods. 
-
+Below is very simple example of a walk forward that provides some insights into the performance in different timeframes.
 
 ```{code-cell} python
 timeframes = feed.timeframe().split(5)
@@ -76,9 +78,53 @@ for timeframe in timeframes:
     print(f"{timeframe.strftime('%Y-%m-%d')} equity={account.equity():.0f}")
 ```
 
+But typically a walk forward is used in combination with hyper-parameter tuning.
+This is known as **Walk-Forward Optimization (WFO)**. The idea is:
+
+1. Split the historical data into a sequence of time windows (e.g. 5 periods).
+2. For each window, use the *current* window as the **in-sample (training)** period to find the best parameters.
+3. Test those parameters on the *next* window, the **out-of-sample (testing)** period.
+4. Move forward one window and repeat.
+
+This approach helps detect **overfitting**: if a parameter set performs well in-sample but poorly out-of-sample,
+the strategy likely doesn't generalise. By measuring performance only on unseen data, you get a more
+realistic estimate of how the strategy would have performed in production.
+
+:::{note}
+A common pitfall is peeking into the future — ensure the training window always ends before the testing window begins.
+The example below respects this by using `timeframes[idx]` for training and `timeframes[idx+1]` for testing.
+:::
+
+In practice you might also track metrics across all out-of-sample periods (e.g. average Sharpe ratio, win rate)
+rather than just the final equity value, giving a fuller picture of robustness.
+
+
+```{code-cell} python
+timeframes = feed.timeframe().split(5)
+params = [(3,5), (13,26), (20, 31)]
+
+for idx in range(len(timeframes) - 1):
+    best = None
+
+    # Find the best parameter
+    for param in params:
+        strategy = rq.strategies.EMACrossover(*param)
+        account = rq.run(feed, strategy, timeframe=timeframes[idx])
+        equity = account.equity_value()
+        if not best or equity > best[0]:
+            best = (equity, param)
+
+    # Validate 
+    strategy = rq.strategies.EMACrossover(*best[1])
+    account = rq.run(feed, strategy, timeframe=timeframes[idx+1])
+    equity = account.equity_value()
+    print(f"param={best[1]} training={best[0]:,.0f} testing={equity:,.0f}")
+```
+
 
 ## Multi-run
-A Multi-run samples a number of random time frames and then runs a back test on each of them.
+A Multi-run samples a number of random timeframes and then runs a
+back test on each of them.
 
 ```{code-cell} python
 timeframes = feed.timeframe().sample(100, "365 days")
@@ -122,5 +168,10 @@ timeframe = rq.Timeframe.next("120 min")
 account = rq.run(feed, strategy, broker=broker, timeframe=timeframe)
 ```
 
+## Early stopping
+It is possible to stop a run before all the events are handled. You do so
+by having one of the components invoke the `stop_run()` function.
 
+For example a custom Journal could track some metrics and based on the results
+invoke the `stop_run()` function. See also [journal](journal.md#guard-journal)
 

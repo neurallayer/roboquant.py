@@ -25,7 +25,8 @@ from roboquant import common
 from roboquant import util
 
 from roboquant.util import indicators, Report, set_dark_style, set_light_style
-from roboquant.run import run
+from roboquant.run import run, stop_run, demo_run
+from roboquant.brokers import SimBroker
 
 from importlib.metadata import version
 import platform
@@ -84,12 +85,15 @@ __all__ = [
     "Option",
     "Trade",
     "run",
+    "stop_run",
+    "demo_run",
     "indicators",
     "util",
     "common",
     "set_dark_style",
     "set_light_style",
     "Report",
+    "SimBroker",
     "Timeframe",
     "TimeSeries",
     "Currency",
