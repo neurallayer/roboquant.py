@@ -1,5 +1,5 @@
-.__bg-white {
-    background-color: rgb(209, 224, 218);
+.bg-white {
+    background-color: rgb(245, 246, 245);
 }
 
 .border-l-blue-400 {
@@ -9,8 +9,4 @@
 
 .myst-top-nav {
     background-color: rgb(209, 224, 218);
-}
-
-.myst-primary-sidebar-footer {
-    size: 50%;
 }

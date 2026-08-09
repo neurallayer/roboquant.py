@@ -25,7 +25,37 @@ flowchart LR
 
 ## API
 
+The `Broker` base class defines the interface that all broker implementations must follow. The two core methods are:
 
+- **`place_orders(orders: list[Order])`** — submit one or more orders to the broker. These orders are placed at the real broker which will likely sent them to an exchange.
+- **`sync(event: Event) -> Account`** — synchronise the broker state with the latest market event and the real trading account state. Returns the updated `Account` reflecting cash, positions, open orders, and trades.
+
+
+```{code-cell} python
+:tags: [remove-input]
+import roboquant as rq
+from decimal import Decimal
+from roboquant.common.event import Event, TradePrice
+
+asset = rq.Stock("ABC")
+broker = rq.brokers.SimBroker()
+item = TradePrice(asset, 49.0, 1000)
+event = Event(rq.utcnow(), [item])
+```
+
+```{code-cell} python
+asset = rq.Stock("ABC")
+order = rq.Order(asset, size=Decimal(100), limit=50.0)
+
+broker.place_orders([order])
+
+account = broker.sync(event)
+
+print("trading price:", event.get_price(asset), "\n")
+print(account)
+```
+
+Most users will not implement `Broker` directly but instead use `SimBroker` for back-testing or a third-party live broker.
 
 ## Account
 Account is the main object owned by the Broker and returned when the `sync()` method is invoked. It reflects the state of the real trading account of the underlying broker. 
@@ -39,6 +69,7 @@ print(account)
 
 It contains available cash, open positions in the portfolio, open orders, available buying power and excuted trades. It doesn't contain closed orders and closed positions. 
 
+When using in a `Trader` it is important to use `buying_power` and not `cash` to determine the available budget for orders.
 
 ## SimBroker
 The default broker for back-testing is the SimBroker (short for Simulated Broker). It has several configuration parameters and can be subclassed to change even more of its behavior.
@@ -48,11 +79,11 @@ from datetime import timezone
 from roboquant import SimBroker, USD
 
 broker = SimBroker(
-        deposit = 1_000_000@USD, # initial available cash for trading
-        price_type = "OPEN",     # what price type to use, fe. OPEN, ASK, CLOSE
-        slippage= 0.0,           # what price slippage to apply, 0.01 is 1% 
-        timezone = timezone.utc, # what timezone to use for validating DAY orders
-        fee = 0@USD              # what additional fee/commision to apply per trade
+  deposit = 1_000_000@USD, # initial available cash for trading
+  price_type = "OPEN",     # what price type to use, fe. OPEN, ASK, CLOSE
+  slippage= 0.0,           # what price slippage to apply, 0.01 is 1% 
+  timezone = timezone.utc, # what timezone to use for validating DAY orders
+  fee = 0@USD              # what additional fee/commision to apply per trade
 )
 ```
 
@@ -63,7 +94,7 @@ Some of the implemented logic that might not be obvious at first:
   of the run when the `sync()` methd is invoked. So orders places at time{sup}`t`, will be earliest executed at time{sup}`t+1`.
 - If there is no available price for an asset in the event, the corresponding orders will not be executed. They will stay in open state until
   a price becoes available.
-- Only once there is an available price, the DAY time-in-force policy is started.
+- Only once there is a price available, the DAY time-in-force policy is started.
 
   :::{note} Example
   Suppose you place a `DAY` order on Saturday. No market events arrive on Saturday or Sunday, so the order stays open (the DAY timer hasn't started yet).
@@ -74,4 +105,7 @@ Some of the implemented logic that might not be obvious at first:
   In other words, the clock starts ticking only when the market is actually open and a price is available, not when the order was placed. 
   :::
 
+## Third party Brokers
 
+Looks at [](../third_party/alpaca.md), [](../third_party/ibkr.md) and [](../third_party/crypto.md) for more details about
+third party bokers.
