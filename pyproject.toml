@@ -77,7 +77,8 @@ ai = [
 extra = [
   "ibind[oauth]>=0.1.22",
   "alpaca-py>=0.43.5",
-  "ccxt>=4.5.65"
+  "ccxt>=4.5.65",
+  "tickerall>=0.1.16"
 ]
 
 [project.urls]
