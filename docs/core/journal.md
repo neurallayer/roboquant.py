@@ -43,7 +43,7 @@ class MyJournal(Journal):
 ```
 
 (guard-journal)=
-Another example is journal that guards some condition and possible stops the run.
+Another example is journal that guards some condition and stops the run if the condition is met.
 
 ```{code-cell} python
 class GuardJournal(Journal):
@@ -55,7 +55,6 @@ class GuardJournal(Journal):
 
 ## BasicJournal
 The BasicJournal has low overhead and tracks a number of basic statistics.
-
 
 
 ## MetricsJournal
@@ -95,7 +94,11 @@ class PositionCount(Metric):
 
 ```
 
-## TensorBoard
+## TensorBoardJournal
+This journal is simular to the MetricsJournal, but rather than keeping the results in
+memory it will write them to a TensorBoard compatible file.
+
+So already during a run, the metrics can be inspected using a TensorBoard viewer.
 
 ```{code} python
 from tensorboard.summary import Writer
@@ -118,3 +121,8 @@ for p1, p2 in hyper_params:
     account = rq.run(feed, strategy, journal=journal)
     writer.close()
 ```
+
+:::tip
+Microsoft ships a free Tensorboard plugin for Visual Studio Code that makes it
+possible to run the viewer from within the IDE.
+:::

@@ -44,6 +44,7 @@ project:
     - file: ai/index.md
       title: AI
       children:
+        - file: ai/feature.md
         - file: ai/pytorch.md
         - file: ai/rl.md        
     - file: third_party/index.md

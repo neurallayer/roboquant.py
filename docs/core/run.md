@@ -22,7 +22,7 @@ for event in feed.play(...):
 
 ## Step-by-step
 
-1. **`broker.sync(event)`** — Sync with the state of the underlying real broker. Returns an updated {cl}`Account` object which reflects the latest state and market data. Orders and positions that are closed, are not included in the returned account object.   
+1. **`broker.sync(event)`** — Sync with the state of the underlying broker. Returns an updated {cl}`Account` object which reflects the latest state and market data. Orders and positions that are closed, are not included in the returned account object.   
 
 2. **`strategy.create_signals(event)`** — The strategy examines the event's price data and returns a list of {cl}`Signal` objects. Each signal has an asset, a rating (typically -1.0 to 1.0), and a type (`ENTRY`, `EXIT`, or `ENTRY_EXIT`). Strategies are **pure decision-makers** — they know nothing about cash, positions, or risk.
 

@@ -57,7 +57,26 @@ class MyTrader(Trader):
 
 
 ## SimpleTrader
+(simpletrader_def)=
+The `SimpleTrader` is the default trader implementation in roboquant. 
 
+As the name suggests, it implements a simple set of rules. This makes
+is easier to understand what is going on, although not suitable for all
+use cases.
+
+Key characteristics:
+- Configurable number of max open positions.
+- The buying power is equally allocated over 
+  the remaining free positions.
+  
+  :::{note} Example
+  We configured 20 max positions. There is still 10,000 USD buying-power remaining
+  and so far only 15 of the 20 max positions are allocted.
+
+  An open order gets {math}`10,000/(20-15) = 2,000` USD allocated.
+  ::: 
+- A position will only be opened or closed, never increased or decreased.
+   
 
 ## FlexTrader
 

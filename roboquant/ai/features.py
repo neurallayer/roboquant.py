@@ -143,7 +143,7 @@ class RandomFeature(Feature[Any]):
         np.random.seed(self._seed)
 
 
-class CombinedFeature(Feature[T]):
+class FeatureSet(Feature[T]):
     """Combine multiple features into one single feature by horizontal stacking them.
     So if feature1 has size 3 and feature2 has size 5, the combined feature will have size 8.
     """
