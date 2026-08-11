@@ -55,8 +55,25 @@ python3 -m pip install --upgrade "roboquant[ibkr]"
 # Integration with Alpaca broker
 python3 -m pip install --upgrade "roboquant[alpaca]"
 
+# Integration with MetaTrader (MT4/MT5) accounts via the hosted TickerAll API
+python3 -m pip install --upgrade "roboquant[tickerall]"
+
 # Integration many crypto exchanges via CCXT package
 python3 -m pip install --upgrade "roboquant[crypto]"
+```
+
+Connect a MetaTrader account straight from its credentials — `TickerAllBroker.connect` opens the broker
+session for you (no separate `sessions.start` call), and feeds reuse it via `broker.account_id`:
+
+```python
+from roboquant.tickerall import TickerAllBroker, TickerAllLiveFeed
+
+broker = TickerAllBroker.connect(api_key, broker="mt5", server="Exness-MT5Trial", account=12345678, password="...")
+feed = TickerAllLiveFeed(api_key, broker.account_id)  # reuses the session the broker opened
+feed.subscribe("EURUSDm")
+...
+feed.close()
+broker.close()  # ends the session connect() opened
 ```
 
 ## License

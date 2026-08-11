@@ -5,14 +5,25 @@ These run only when `TICKERALL_API_KEY` and `TICKERALL_ACCOUNT_ID` are set in th
 every test is skipped so the normal CI build stays green without any credentials. The connected account must
 be a demo account. A free TickerAll account can connect a broker demo and run this whole suite.
 
+The credential `connect(...)` path is exercised by `TestTickerAllConnectIT`, gated separately on
+`TICKERALL_BROKER` / `TICKERALL_SERVER` / `TICKERALL_ACCOUNT` / `TICKERALL_PASSWORD` (the MetaTrader login),
+so it runs even without a pre-connected `TICKERALL_ACCOUNT_ID`.
+
     TICKERALL_API_KEY=...  TICKERALL_ACCOUNT_ID=...  [TICKERALL_SYMBOL=EURUSDm]  [TICKERALL_TEST_TRADE=1] \
         python -m unittest tests.unit.test_tickerall_it -v
+
+    TICKERALL_API_KEY=...  TICKERALL_BROKER=mt5  TICKERALL_SERVER=Exness-MT5Trial \
+        TICKERALL_ACCOUNT=12345678  TICKERALL_PASSWORD=...  [TICKERALL_SYMBOL=EURUSDm] \
+        python -m unittest tests.unit.test_tickerall_it.TestTickerAllConnectIT -v
 """
 import os
 import time
 import unittest
 from datetime import timedelta
 from decimal import Decimal
+from typing import cast
+
+from tickerall.types import BrokerName
 
 from roboquant.common.event import Bar, Quote
 from roboquant.common.order import Order
@@ -23,6 +34,10 @@ from roboquant.tickerall.tickerall_feed import _to_asset
 KEY = os.environ.get("TICKERALL_API_KEY", "")
 ACCOUNT_ID = os.environ.get("TICKERALL_ACCOUNT_ID", "")
 SYMBOL = os.environ.get("TICKERALL_SYMBOL", "EURUSDm")
+BROKER = os.environ.get("TICKERALL_BROKER", "")
+SERVER = os.environ.get("TICKERALL_SERVER", "")
+ACCOUNT = os.environ.get("TICKERALL_ACCOUNT", "")
+PASSWORD = os.environ.get("TICKERALL_PASSWORD", "")
 
 
 @unittest.skipUnless(KEY and ACCOUNT_ID, "set TICKERALL_API_KEY and TICKERALL_ACCOUNT_ID to run")
@@ -122,6 +137,53 @@ class TestTickerAllIT(unittest.TestCase):
         broker.place_orders([resting.cancel()])
         time.sleep(3)
         self.assertNotIn(ticket, pending_by_ticket(), "the pending order should be cancelled")
+
+
+@unittest.skipUnless(
+    KEY and BROKER and SERVER and ACCOUNT and PASSWORD,
+    "set TICKERALL_API_KEY + TICKERALL_BROKER/SERVER/ACCOUNT/PASSWORD to run the credential connect path",
+)
+class TestTickerAllConnectIT(unittest.TestCase):
+    """The credential `connect(...)` path: MetaTrader login in, a working broker/feed out (read-only)."""
+
+    def test_broker_connect_from_credentials(self):
+        # connect opens the session for us (no separate sessions.start) and binds the account_id
+        broker = TickerAllBroker.connect(
+            KEY, broker=cast(BrokerName, BROKER), server=SERVER, account=ACCOUNT, password=PASSWORD
+        )
+        self.addCleanup(broker.close)  # close ends the session connect() opened
+        self.assertTrue(broker.account_id, "connect must bind a TickerAll account_id")
+        account = broker.sync()
+        # a 0.0 balance is a valid state; only require it be readable and non-negative
+        self.assertGreaterEqual(account.buying_power.value, 0.0)
+
+        # feeds reuse the broker's session cheaply via broker.account_id (no second session opened)
+        feed = TickerAllHistoricFeed(KEY, broker.account_id)
+        self.addCleanup(feed.close)
+        feed.retrieve(SYMBOL, timeframe="H1", hours=24)
+        if not feed.assets():
+            self.skipTest("no candles returned (market closed or symbol unavailable)")
+        bars = [item for event in feed.play() for item in event.items if isinstance(item, Bar)]
+        self.assertTrue(bars, "expected at least one Bar from the reused session")
+
+    def test_live_feed_connect_from_credentials(self):
+        # a data-only setup: no broker, connect the feed straight from credentials
+        feed = TickerAllLiveFeed.connect(
+            KEY, broker=cast(BrokerName, BROKER), server=SERVER, account=ACCOUNT, password=PASSWORD
+        )
+        self.assertTrue(feed.account_id, "connect must bind a TickerAll account_id")
+        feed.subscribe(SYMBOL)
+        quotes = []
+        try:
+            for event in feed.play(Timeframe.next(timedelta(seconds=25))):
+                quotes.extend(i for i in event.items if isinstance(i, Quote))
+                if len(quotes) >= 3:
+                    break
+        finally:
+            feed.close()  # ends the session connect() opened
+        if not quotes:
+            self.skipTest("no ticks received (market closed?)")
+        self.assertEqual(quotes[0].asset.symbol, SYMBOL)
 
 
 if __name__ == "__main__":

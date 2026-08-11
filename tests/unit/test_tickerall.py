@@ -1,12 +1,14 @@
 import unittest
 from decimal import Decimal
 from types import SimpleNamespace
+from typing import cast
+from unittest import mock
 
 from roboquant.common.asset import Forex
 from roboquant.common.monetary import USD, Currency
 from roboquant.common.order import Order
 from roboquant.tickerall.tickerall_broker import TickerAllBroker
-from roboquant.tickerall.tickerall_feed import _to_asset
+from roboquant.tickerall.tickerall_feed import TickerAllHistoricFeed, TickerAllLiveFeed, _to_asset
 
 
 class _FakeOrders:
@@ -50,6 +52,37 @@ def _broker(client: _FakeClient) -> TickerAllBroker:
     broker = TickerAllBroker("dummy-key", "acc-test")
     broker._client = client  # type: ignore[assignment]
     return broker
+
+
+class _FakeSessions:
+    """Records the session-lifecycle calls the credential `connect(...)` path makes."""
+
+    def __init__(self) -> None:
+        self.keep_alive_calls: list[dict] = []
+        self.ended: list[str] = []
+
+    def keep_alive(self, *, broker, server, account, password, terminal_type=None, **kw):
+        self.keep_alive_calls.append(
+            {"broker": broker, "server": server, "account": account, "password": password, "terminal_type": terminal_type}
+        )
+        return SimpleNamespace(account_id="acc-from-session")
+
+    def end(self, account_id, **kw):
+        self.ended.append(account_id)
+
+
+class _FakeSessionClient:
+    """Stand-in for the `tickerall` SDK client used by the `connect(...)` factory path."""
+
+    def __init__(self, *args, **kwargs) -> None:
+        self.sessions = _FakeSessions()
+        self.closed = False
+        # also satisfies a broker sync(), so the same fake works if a test calls _get_account()
+        self.accounts = SimpleNamespace(get=lambda account_id: _detail(_fin()))
+        self.orders = _FakeOrders([])
+
+    def close(self) -> None:
+        self.closed = True
 
 
 class TestTickerAll(unittest.TestCase):
@@ -115,6 +148,59 @@ class TestTickerAll(unittest.TestCase):
         self.assertEqual(len(account.orders), 1)
         self.assertEqual(account.orders[0].id, "42")
         self.assertTrue(account.orders[0].is_buy)
+
+    def test_connect_starts_session_and_binds_account_id(self):
+        # connect() must call sessions.keep_alive with the MT5 credentials and bind the returned account_id
+        with mock.patch("roboquant.tickerall.tickerall_broker.Tickerall", _FakeSessionClient):
+            broker = TickerAllBroker.connect("k", broker="mt5", server="Exness-MT5Trial", account=12345, password="pw")
+        self.assertEqual(broker.account_id, "acc-from-session")
+        fake = cast(_FakeSessionClient, broker.client)
+        self.assertEqual(len(fake.sessions.keep_alive_calls), 1)
+        self.assertEqual(
+            fake.sessions.keep_alive_calls[0],
+            {"broker": "mt5", "server": "Exness-MT5Trial", "account": 12345, "password": "pw", "terminal_type": None},
+        )
+        # closing a connect()-created broker ends the session it opened
+        broker.close()
+        self.assertEqual(fake.sessions.ended, ["acc-from-session"])
+        self.assertTrue(fake.closed)
+
+    def test_connect_passes_terminal_type(self):
+        with mock.patch("roboquant.tickerall.tickerall_broker.Tickerall", _FakeSessionClient):
+            broker = TickerAllBroker.connect(
+                "k", broker="mt5", server="s", account="a", password="p", terminal_type="CLIENT"
+            )
+        fake = cast(_FakeSessionClient, broker.client)
+        self.assertEqual(fake.sessions.keep_alive_calls[0]["terminal_type"], "CLIENT")
+        broker.close()
+
+    def test_account_id_constructor_does_not_end_session(self):
+        # a caller-supplied account_id belongs to the caller; close must NOT end that session
+        broker = TickerAllBroker("k", "acc-passed")
+        fake = _FakeSessionClient()
+        broker._client = fake  # type: ignore[assignment]
+        broker.close()
+        self.assertEqual(fake.sessions.ended, [])
+        self.assertTrue(fake.closed)
+
+    def test_live_feed_connect_binds_and_close_ends_session(self):
+        with mock.patch("roboquant.tickerall.tickerall_feed.Tickerall", _FakeSessionClient):
+            feed = TickerAllLiveFeed.connect("k", broker="mt5", server="s", account="a", password="p")
+            self.assertEqual(feed.account_id, "acc-from-session")
+            fake = cast(_FakeSessionClient, feed._client)
+            self.assertEqual(fake.sessions.keep_alive_calls[0]["account"], "a")
+            feed.close()
+            self.assertEqual(fake.sessions.ended, ["acc-from-session"])
+            self.assertTrue(fake.closed)
+
+    def test_historic_feed_connect_binds_and_close_ends_session(self):
+        with mock.patch("roboquant.tickerall.tickerall_feed.Tickerall", _FakeSessionClient):
+            feed = TickerAllHistoricFeed.connect("k", broker="mt5", server="s", account=777, password="p")
+            self.assertEqual(feed.account_id, "acc-from-session")
+            fake = cast(_FakeSessionClient, feed._client)
+            self.assertEqual(fake.sessions.keep_alive_calls[0]["broker"], "mt5")
+            feed.close()
+            self.assertEqual(fake.sessions.ended, ["acc-from-session"])
 
 
 if __name__ == "__main__":
