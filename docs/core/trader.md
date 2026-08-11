@@ -5,7 +5,8 @@ kernelspec:
 ---
 
 # Trader
-A trader is responsible for generating orders. It can do this based on the signals it receives, but also based on the event and latest version of the account.
+(trader_def)=
+A trader is responsible for creating orders. It can do this based on the signals it receives, but also based on the latest version of the account.
 
 
 ```mermaid

@@ -9,7 +9,7 @@ Roboquant comes with several monetary classes that makes dealing with
 multi-currency situatins a lot easier.
 
 ## Currency
-
+(currency_def)=
 A `Currency` represents a single currency (e.g. USD, EUR, JPY). Predefined currency
 instances are available as module-level constants and can be used directly.
 Currencies are not limited to fiat currencies and can be used for crypto currencies as well.
@@ -32,6 +32,8 @@ print(amount)
 ```
 
 ## Amount
+(amount_def)=
+
 An amount hold a monetary value of a single currency. Amounts are immutable.
 Iternally amount values are stored as floats since that is precise enough for
 trading and it doesn't has the overhead of some other types.
@@ -55,6 +57,7 @@ print(f"{amt3:.0f}")
 
 
 ## Wallet
+(wallet_def)=
 A wallet can contain monetary values of different currencies. A wallet is mutable and 
 acts very much like a `dict[Currency, float]` 
 
@@ -76,6 +79,7 @@ print(wallet[USD], wallet[EUR], wallet[JPY])
 ```
 
 ## Conversion
+(conversion_def)=
 If trading in more than one currency, a conversion is required 
 between amounts in the different currencies. 
 

@@ -5,9 +5,10 @@ kernelspec:
 ---
 
 # Broker
+(broker_def)=
 The broker is the component that handles the placed orders, either real or simulated during a back-test.
 
-It is also the component owns the `Account` object. 
+It is also the component owns the {cl}`Account` object. 
 
 ```mermaid
 flowchart LR
@@ -28,7 +29,7 @@ flowchart LR
 The `Broker` base class defines the interface that all broker implementations must follow. The two core methods are:
 
 - **`place_orders(orders: list[Order])`** — submit one or more orders to the broker. These orders are placed at the real broker which will likely sent them to an exchange.
-- **`sync(event: Event) -> Account`** — synchronise the broker state with the latest market event and the real trading account state. Returns the updated `Account` reflecting cash, positions, open orders, and trades.
+- **`sync(event: Event) -> Account`** — synchronise the broker state with the latest market event and the real trading account state. Returns the updated {cl}`Account` reflecting cash, positions, open orders, and trades.
 
 
 ```{code-cell} python

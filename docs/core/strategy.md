@@ -5,6 +5,7 @@ kernelspec:
 ---
 
 # Strategy
+(strategy_def)=
 A `Strategy` is responsible for creating signals based on incoming events. So a strategy doesn't generate
 the orders, that is the responsibility of a `Trader`.
 
@@ -106,41 +107,6 @@ class MovingAverageStrategy(rq.strategies.Strategy):
                     result.append(rq.Signal.sell(asset))
         return result
 ```
-
-## Signal
-The output of a strategy is a list of `Signal` objects. Each signal contains three pieces of
-information:
-
-- **`asset`** — the asset the signal applies to.
-- **`rating`** — a float, normally between -1.0 (strong sell) and 1.0 (strong buy). This range is
-  not enforced; it is up to the used `Trader` to interpret the value when sizing orders.
-- **`type`** — a `SignalType` flag indicating how the signal may be used: `ENTRY` (open or increase a
-  position), `EXIT` (close or reduce a position), or `ENTRY_EXIT` (both, the default).
-
-There are several ways to create a signal:
-
-| Constructor | rating | type | Use |
-|---|---|---|---|
-| `Signal.buy(asset)` | 1.0 | `ENTRY_EXIT` | Strong buy |
-| `Signal.sell(asset)` | -1.0 | `ENTRY_EXIT` | Strong sell |
-| `Signal.buy(asset, SignalType.ENTRY)` | 1.0 | `ENTRY` | Only open/increase a position |
-| `Signal.sell(asset, SignalType.EXIT)` | -1.0 | `EXIT` | Only close/reduce a position |
-| `Signal(asset, rating, type)` | custom | custom | Full control |
-
-```{code-cell} python
-apple = rq.Stock("AAPL")
-
-buy = rq.Signal.buy(apple)
-print("buy:", buy, "| is_buy:", buy.is_buy, "| is_entry:", buy.is_entry)
-
-sell = rq.Signal.sell(apple, rq.SignalType.EXIT)
-print("sell:", sell, "| is_sell:", sell.is_sell, "| is_exit:", sell.is_exit)
-
-custom = rq.Signal(apple, 0.5, rq.SignalType.ENTRY)
-print("custom:", custom)
-```
-
-Convenience properties on a signal: `is_buy`, `is_sell`, `is_entry`, and `is_exit`.
 
 ## Base classes
 In order to make it quicker to develop and test custom strategies, there are several base classes

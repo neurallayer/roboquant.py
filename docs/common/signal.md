@@ -3,8 +3,8 @@ kernelspec:
   name: python3
   display_name: Python 3
 ---
-
 # Signal
+(signal_def)=
 The output of a `Strategy` is a list of `Signal` objects. Each signal contains three pieces of
 information:
 

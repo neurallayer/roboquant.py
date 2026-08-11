@@ -5,7 +5,8 @@ kernelspec:
 ---
 
 # Journal
-A journal allows you to capture information at each step of a run. It is completely optional and if you
+(journal_def)=
+A journal captures and/or logs information at each step of a {cl}`run`. It is optional and if you
 don't provide one during a run, there is only the account to see what happened during the run. 
 
 ```mermaid

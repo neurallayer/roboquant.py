@@ -11,10 +11,12 @@ For example `event.time` is always in timezone UTC, even if the event orginates
 from an exchange in another timezone. 
 
 ## Timeframe
-A timeframe represents a period in time with a certain start- and end-time. Like most
-time variables, these are Python `datetime` objects using the UTC timezone.
+(timeframe_def)=
+A timeframe represents a period in time with a certain start- and end-time. Like other
+time variables in *roboquant*, these are Python `datetime` objects using the UTC timezone.
 
-The start-time is always inclusive, but the end-time can be either inclusive or exclusive.
+The start-time of a timeframe is always inclusive, but the end-time can be either
+inclusive or exclusive.
 
 ```{code-cell} python
 import roboquant as rq
@@ -45,6 +47,7 @@ Timeline is not its own type but just defined as `list[datatime]`.
 
 
 ## TimeSeries
+(timeseries_def)=
 TimeSeries implements a multi-variate timeseries. It extends Pandas DataFrame
 with the index always being a timeline and the columns are always float values.
 

@@ -3,13 +3,13 @@ kernelspec:
   name: python3
   display_name: Python 3
 ---
-
 # Feed
-A `Feed` represents a source of (financial) events that can be (re-)played to feed a `run` with data.
+(feed_def)=
+A `Feed` represents a source of (financial) events that can be (re-)played to feed a {cl}`run()` with data.
 Although the most common type of events are those containing market data, other types of events are also possible.
 For example, events containing news items or social media posts could also be represented as a feed.
 
-The feed is the driver of the run-loop: it produces the `Event` objects that all the other components
+The feed is the driver of the run-loop: it produces the {cl}`Event` objects that all the other components
 react to.
 
 ```mermaid
@@ -33,7 +33,6 @@ import roboquant as rq
 rq.set_dark_style()
 ```
 
-
 A `Feed` is also one of the main components that you swap when moving through the
 [4 stages](../../concepts/4stages.md) of strategy development:
 
@@ -47,10 +46,10 @@ A `Feed` is also one of the main components that you swap when moving through th
 ## Feed API
 The `Feed` interface itself is deliberately small and consists of just two abstract methods.
 
-- **`play(timeframe=None)`** — Returns an iterator of `Event` objects. Optionally, a `Timeframe` can be
+- **`play(timeframe=None)`** — Returns an iterator of {cl}`Event` objects. Optionally, a {cl}`Timeframe` can be
   provided to only replay the events within that period. This is used for walk-forward and multi-run
   back tests.
-- **`assets()`** — Returns the list of `Asset` objects that are contained in the feed.
+- **`assets()`** — Returns the list of {cl}`Asset` objects that are contained in the feed.
 
 ```{code-cell} python
 feed = rq.feeds.YahooFeed("MSFT", "AAPL", start_date="2020-01-01")
@@ -68,7 +67,7 @@ for event in feed.play():
 
 :::{note}
 A `Feed` is only a source of data. It does not know anything about orders, positions, or cash.
-Those are the responsibilities of the `Broker` and `Trader`.
+Those are the responsibilities of the {cl}`Broker` and {cl}`Trader`.
 :::
 
 ### Convenience methods

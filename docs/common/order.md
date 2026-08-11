@@ -5,6 +5,7 @@ kernelspec:
 ---
 
 # Order
+(order_def)=
 All orders are limit orders in roboquant. If you want them to behave more like a market order,
 you can set a generous `limit` price.
 

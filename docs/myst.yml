@@ -7,6 +7,8 @@ project:
   keywords: [roboquant, trading, backtesting, algorithmic trading, finance, crypto, stocks, forex]
   # authors: []
   # github: https://github.com/neurallayer/roboquant.py
+  plugins:
+    - src/plugin.mjs
   toc:
     - file: index.md
       title: roboquant guide
@@ -65,7 +67,8 @@ site:
   parts:
     banner: Documentation is still in beta
   options:
-      style: static/css/style.css
-      folders: true
-      favicon: static/images/favicon.png
-      logo: static/images/logo.png
+    style: static/css/style.css
+    folders: true
+    favicon: static/images/favicon.png
+    logo: static/images/logo.png
+
