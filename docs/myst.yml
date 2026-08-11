@@ -3,7 +3,6 @@ version: 1
 project:
   id: c15ad5e3-dd5e-46ea-b652-044dd1aba723
   title: roboquant
-  language: en
   description: Documentation for the roboquant Python framework 
   keywords: [roboqutant, trading, backtesting, algorithmic trading, finance]
   # authors: []
@@ -31,6 +30,10 @@ project:
         - file: common/asset.md
         - file: common/monetary.md
         - file: common/time.md
+        - file: common/signal.md
+        - file: common/order.md
+        - file: common/event.md
+        - file: common/account.md
     - file: charts/index.md 
       title: Charts
       children:

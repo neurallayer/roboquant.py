@@ -57,20 +57,6 @@ print(account)
 
 Most users will not implement `Broker` directly but instead use `SimBroker` for back-testing or a third-party live broker.
 
-## Account
-Account is the main object owned by the Broker and returned when the `sync()` method is invoked. It reflects the state of the real trading account of the underlying broker. 
-It is also the object returned from the `run()` function.
-
-```{code-cell} python
-import roboquant as rq
-account = rq.demo_run()
-print(account)
-```
-
-It contains available cash, open positions in the portfolio, open orders, available buying power and excuted trades. It doesn't contain closed orders and closed positions. 
-
-When using in a `Trader` it is important to use `buying_power` and not `cash` to determine the available budget for orders.
-
 ## SimBroker
 The default broker for back-testing is the SimBroker (short for Simulated Broker). It has several configuration parameters and can be subclassed to change even more of its behavior.
 

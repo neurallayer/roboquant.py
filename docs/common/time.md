@@ -69,7 +69,9 @@ print("Equity", equity, sep="\n")
 ```
 
 :::{note}
-There is also support for plain Pandas DataFrames in few places.
+There is also support for plain Pandas DataFrames in a few places. These
+don't return timeseries but a dataframe representing a list of Python
+objects like orders, trades and positions.
 
 ```{code-cell} python
 :tags: [hide-output]
