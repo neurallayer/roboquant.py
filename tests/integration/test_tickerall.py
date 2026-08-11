@@ -21,8 +21,8 @@ from roboquant.feeds.tickerall import TickerAllHistoricFeed, TickerAllLiveFeed, 
 from roboquant.brokers.tickerall import TickerAllBroker
 
 load_dotenv()
-KEY = os.environ.get("TICKERALL_API_KEY")
-ACCOUNT_ID = os.environ.get("TICKERALL_ACCOUNT_ID")
+KEY = os.environ.get("TICKERALL_API_KEY", "")
+ACCOUNT_ID = os.environ.get("TICKERALL_ACCOUNT_ID", "")
 SYMBOL = "BTCUSD"
 
 MT5_SERVER = os.environ.get("MT5_SERVER")
@@ -33,6 +33,7 @@ MT5_PASSWORD = os.environ.get("MT5_PASSWORD")
 class TestTickerAllIT(unittest.TestCase):
 
     def __connect(self, client):
+        assert MT5_ACCOUNT and MT5_PASSWORD and MT5_SERVER
         return client.sessions.start(
             broker="mt5",
             server=MT5_SERVER,
@@ -41,7 +42,6 @@ class TestTickerAllIT(unittest.TestCase):
         )
 
     def test_live_ticks(self):
-        assert KEY and ACCOUNT_ID
         feed = TickerAllLiveFeed(KEY, ACCOUNT_ID)
         self.__connect(feed._client)
         feed.subscribe(SYMBOL)
@@ -58,7 +58,6 @@ class TestTickerAllIT(unittest.TestCase):
         self.assertGreater(quotes[0].ask_price, 0.0)
 
     def test_sync_account(self):
-        assert KEY and ACCOUNT_ID and MT5_ACCOUNT and MT5_PASSWORD and MT5_SERVER
         broker = TickerAllBroker(KEY, ACCOUNT_ID)
         self.__connect(broker.client)
 
@@ -72,7 +71,6 @@ class TestTickerAllIT(unittest.TestCase):
         self.assertGreaterEqual(broker.sync().buying_power.value, 0.0)
 
     def test_historic_candles(self):
-        assert KEY and ACCOUNT_ID
         feed = TickerAllHistoricFeed(KEY, ACCOUNT_ID)
         self.addCleanup(feed.close)
         feed.retrieve(SYMBOL, timeframe="H1", hours=168)
@@ -86,7 +84,6 @@ class TestTickerAllIT(unittest.TestCase):
 
     @unittest.skipUnless(os.environ.get("TICKERALL_TEST_TRADE"), "set TICKERALL_TEST_TRADE=1 to run live trades")
     def test_trade_round_trip(self):
-        assert KEY and ACCOUNT_ID
         broker = TickerAllBroker(KEY, ACCOUNT_ID)
         self.addCleanup(broker.close)
         client = broker.client
