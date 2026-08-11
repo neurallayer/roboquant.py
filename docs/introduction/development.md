@@ -10,14 +10,14 @@ kernelspec:
 You can develop your roboquant based trading solution in different types of environments:
 
 1. Plain text editors like VIM. If you are already used to this, no need to change that.
-2. IDE's like VSCode, PyCharm and Zed. Nice balanced between ease of use and features. 
+2. IDE's like VSCode, PyCharm and Zed. Nice balance between ease of use and features. 
 3. Jupyter Labs, Notebooks and Marimo. This is great for fast and iterative development.
 4. AI based terminal agents like Claud Code that can help with a lot of the nessecary code.  
 
 It all depends on your personal preference and all of them can result in solid strategies.
 
-But regardless of the tooling, if you plan to go live with your solution, it is
-recommended to follow the *4 stage approach* as outlined in the next sections.
+But regardless of the tooling, if you plan to go *live* with your solution, it is
+recommended to follow the *4 stage approach* as outlined in the next section.
 
 ## 4 Stage Approach
 When developing, testing, and running a new trading strategy, you go through 4 distinct stages. The diagram below illustrates these stages and their ideal sequence:

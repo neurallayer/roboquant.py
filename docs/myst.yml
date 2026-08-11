@@ -4,11 +4,11 @@ project:
   id: c15ad5e3-dd5e-46ea-b652-044dd1aba723
   title: roboquant
   description: Documentation for the roboquant Python framework 
-  keywords: [roboqutant, trading, backtesting, algorithmic trading, finance]
+  keywords: [roboquant, trading, backtesting, algorithmic trading, finance, crypto, stocks, forex]
   # authors: []
   # github: https://github.com/neurallayer/roboquant.py
   toc:
-    - file: README.md
+    - file: index.md
       title: roboquant guide
     - title: Getting Started
       children:
@@ -56,6 +56,11 @@ project:
 
 site:
   title: roboquant
+  nav:
+    - title: GitHub
+      url: https://github.com/neurallayer/roboquant.py
+    - title: Discord
+      url: https://discord.com/channels/954650958300856340/954650958300856343
   template: book-theme
   parts:
     banner: Documentation is still in beta

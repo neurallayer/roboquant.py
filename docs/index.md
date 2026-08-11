@@ -1,7 +1,7 @@
 
 # Welcome
 
-![roboquant logo](https://github.com/neurallayer/roboquant.py/raw/main/docs/roboquant_header.png)
+![roboquant logo](static/images/roboquant_header.png)
 
 Roboquant is an open-source algorithmic trading platform written in Python. It is flexible, user-friendly and free to use. It is designed for anyone serious about algo-trading.
 

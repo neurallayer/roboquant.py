@@ -52,7 +52,7 @@ uv add roboquant
 uv run python -c "import roboquant;roboquant.info()"
 ```
 
-With extras:
+With all the extras:
 
 ```bash
 uv add "roboquant[ai,extra]"

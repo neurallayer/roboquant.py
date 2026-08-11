@@ -30,7 +30,7 @@ flowchart LR
 ```
 
 Because a strategy has no access to the account, the same strategy instance can be used unchanged
-across all [4 stages](../../concepts/4stages.md) of development. Only the `Feed` and `Broker` change
+across all [4 stages](../introduction/development.md) of development. Only the `Feed` and `Broker` change
 when moving from back testing to live trading.
 
 ## API
