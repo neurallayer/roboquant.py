@@ -5,6 +5,8 @@ kernelspec:
 ---
 
 # Development
+
+## Tooling
 You can develop your roboquant based trading solution in different types of environments:
 
 1. Plain text editors like VIM. If you are already used to this, no need to change that.
@@ -50,7 +52,7 @@ The mapping of Brokers and Feeds per stage is as follows:
 
 ---
 
-## Stage 1: Back Testing
+### Stage 1: Back Testing
 
 In this stage, you will test your `Strategy` and `Trader` against historical data using the `SimBroker`.
 
@@ -68,7 +70,7 @@ You can run a single backtest over a complete historical timeline, but Roboquant
 
 ---
 
-## Stage 2: Forward Testing
+### Stage 2: Forward Testing
 
 In this stage, you will test your `Strategy` and `Trader` using **real-time data** and the `SimBroker`.
 
@@ -84,7 +86,7 @@ In this stage, you will test your `Strategy` and `Trader` using **real-time data
 
 ---
 
-## Stage 3: Paper Trading
+### Stage 3: Paper Trading
 
 In this stage, you will run your strategy with **real-time data** and a **real broker**, but using a **simulated (paper) account**.
 
@@ -100,7 +102,7 @@ In this stage, you will run your strategy with **real-time data** and a **real b
 
 ---
 
-## Stage 4: Live Trading
+### Stage 4: Live Trading
 
 This is the final stage, where you run your strategy with **real-time data** and a **real broker** using a **real money account**.
 

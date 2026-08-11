@@ -48,3 +48,34 @@ Timeline is not its own type but just defined as `list[datatime]`.
 TimeSeries implements a multi-variate timeseries. It extends Pandas DataFrame
 with the index always being a timeline and the columns are always float values.
 
+```{code-cell} python
+:tags: [hide-output]
+import pandas as pd
+import roboquant as rq
+
+feed = rq.feeds.YahooFeed("IBM", start_date="2020-01-01")
+df = feed.to_timeseries(rq.Stock("IBM"))
+print("IBM Stock prices", df, sep="\n")
+
+feed = rq.feeds.YahooFeed("IBM", "JPM", "MSFT", "TSLA", "INTC", start_date="2020-01-01")
+data = feed.to_timeseries(*feed.assets())
+print("Asset correlations:\n", data.corr())
+
+strategy = rq.strategies.EMACrossover()
+journal = rq.journals.MetricsJournal.pnl()
+account = rq.run(feed, strategy, journal=journal)
+equity = journal.get_metrics("pnl/equity")
+print("Equity", equity, sep="\n")
+```
+
+:::{note}
+There is also support for plain Pandas DataFrames in few places.
+
+```{code-cell} python
+:tags: [hide-output]
+print(account.portfolio.to_dataframe())
+print(account.orders_to_dataframe())
+print(account.trades_to_dataframe())
+```
+
+:::
