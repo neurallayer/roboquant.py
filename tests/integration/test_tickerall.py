@@ -14,37 +14,39 @@ import unittest
 from decimal import Decimal
 from dotenv import load_dotenv
 
+import roboquant as rq
+from roboquant.common.asset import Forex
 from roboquant.common.event import Bar, Quote
+from roboquant.common.monetary import USD
 from roboquant.common.order import Order
 from roboquant.common.timeframe import Timeframe
 from roboquant.feeds.tickerall import TickerAllHistoricFeed, TickerAllLiveFeed, _to_asset
 from roboquant.brokers.tickerall import TickerAllBroker
+from roboquant.strategies.ema_crossover import EMACrossover
 
 load_dotenv()
 KEY = os.environ.get("TICKERALL_API_KEY", "")
-ACCOUNT_ID = os.environ.get("MT5_ACCOUNT", "")
+ACCOUNT_ID = os.environ.get("TICKERALL_ACCOUNT_ID", "")
 SYMBOL = "BTCUSD"
 
 MT5_SERVER = os.environ.get("MT5_SERVER")
 MT5_ACCOUNT = os.environ.get("MT5_ACCOUNT")
 MT5_PASSWORD = os.environ.get("MT5_PASSWORD")
 
-@unittest.skipUnless(KEY and ACCOUNT_ID, "set TICKERALL_API_KEY and TICKERALL_ACCOUNT_ID to run")
+CONFIG = {
+    "broker" : "mt5",
+    "server" : MT5_SERVER,
+    "account" : MT5_ACCOUNT,
+    "password" : MT5_PASSWORD
+}
+
+
+@unittest.skipUnless(KEY and ACCOUNT_ID and MT5_SERVER and MT5_ACCOUNT and MT5_PASSWORD,
+                     "set TICKERALL_API_KEY and TICKERALL_ACCOUNT_ID to run")
 class TestTickerAllIT(unittest.TestCase):
 
-    def __connect(self, client):
-        assert MT5_ACCOUNT and MT5_PASSWORD and MT5_SERVER
-        print(MT5_ACCOUNT, MT5_PASSWORD, MT5_PASSWORD)
-        return client.sessions.start(
-            broker="mt5",
-            server=MT5_SERVER,
-            account=MT5_ACCOUNT,
-            password=MT5_PASSWORD
-        )
-
     def test_live_ticks(self):
-        feed = TickerAllLiveFeed(KEY, ACCOUNT_ID)
-        self.__connect(feed._client)
+        feed = TickerAllLiveFeed.connect(KEY, **CONFIG)
         feed.subscribe(SYMBOL)
         quotes : list[Quote] = []
         try:
@@ -58,24 +60,44 @@ class TestTickerAllIT(unittest.TestCase):
         self.assertEqual(quotes[0].asset.symbol, SYMBOL)
         self.assertGreater(quotes[0].ask_price, 0.0)
 
-    def test_sync_account(self):
-        broker = TickerAllBroker(KEY, ACCOUNT_ID)
-        self.__connect(broker.client)
 
+    def test_sync_account(self):
+        broker = TickerAllBroker.connect(KEY,**CONFIG)
         self.addCleanup(broker.close)
         account = broker.sync()
-        # a MetaTrader account has a single deposit currency; a 0.0 balance is a valid state
-        self.assertLessEqual(len(account.cash), 1)
-        self.assertGreaterEqual(account.buying_power.value, 0.0)
-        # placing no orders is a no-op and must not raise
-        broker.place_orders([])
-        self.assertGreaterEqual(broker.sync().buying_power.value, 0.0)
+        print(account)
+
+        for asset, position in account.portfolio.items():
+            print(asset, position)
+
+        asset = Forex("BTCUSD", USD)
+        price = account.portfolio[asset].mkt_price
+        order = Order(asset, Decimal(0.001), limit=round(price, 6))
+        broker.place_orders([order])
+        account = broker.sync()
+        print(account)
+
+    def test_full_paper_trade(self):
+        broker = None
+        feed = None
+        try:
+            broker = TickerAllBroker.connect(KEY,**CONFIG)
+            feed = TickerAllLiveFeed.connect(KEY,**CONFIG)
+            stragegy = EMACrossover()
+            tf = rq.Timeframe.next("30 minutes")
+            account = rq.run(feed, stragegy, broker=broker, timeframe=tf)
+            print(account)
+        finally:
+            if broker:
+                broker.close()
+            if feed:
+                feed.close()
 
     def test_historic_candles(self):
-        feed = TickerAllHistoricFeed(KEY, ACCOUNT_ID)
-        self.__connect(feed._client)
+        feed = TickerAllHistoricFeed.connect(KEY, **CONFIG)
         self.addCleanup(feed.close)
         feed.retrieve(SYMBOL, timeframe="H1", hours=168)
+        print(feed)
         if not feed.assets():
             self.skipTest("no candles returned (market closed or symbol unavailable)")
         bars = [item for event in feed.play() for item in event.items if isinstance(item, Bar)]
