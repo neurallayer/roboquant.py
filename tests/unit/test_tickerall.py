@@ -173,6 +173,15 @@ class TestTickerAll(unittest.TestCase):
         self.assertEqual(account.orders[0].id, "42")
         self.assertTrue(account.orders[0].is_buy)
 
+    def test_order_size_is_exact_not_float(self):
+        # A rebuilt pending-order size must be an exact Decimal, not Decimal(float).
+        pending = [SimpleNamespace(symbol="BTCUSDm", volume=0.001, side="BUY", ticket="7", limit_price=50000.0, price=50000.0)]
+        account = _broker(_FakeClient(_detail(_fin(balance=1000.0), []), pending))._get_account()
+        self.assertEqual(len(account.orders), 1)
+        self.assertEqual(account.orders[0].size, Decimal("0.001"))
+        # the exact bug: a float-constructed Decimal must NOT be what we return
+        self.assertNotEqual(account.orders[0].size, Decimal(0.001))
+
     def test_connect_starts_session_and_binds_account_id(self):
         # connect() must call sessions.keep_alive with the MT5 credentials and bind the returned account_id
         with mock.patch("roboquant.tickerall.tickerall_broker.Tickerall", _FakeSessionClient):

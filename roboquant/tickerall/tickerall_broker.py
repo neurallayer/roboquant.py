@@ -175,7 +175,8 @@ class TickerAllBroker(LiveBroker):
             if limit is None:
                 limit = float("nan")
             asset = _to_asset(o.symbol, currency)
-            size = abs(float(o.volume))
+            # Decimal via str(), not float, keeps the size exact (see _sync_positions).
+            size = abs(Decimal(str(o.volume)))
             if str(o.side).upper() == "SELL":
                 orders.append(self._sell_order(o.ticket, asset, size, limit, 0))
             else:
