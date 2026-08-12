@@ -14,11 +14,18 @@ It is helpful to understand some of the details of the run loop.
 ```python
 for event in feed.play(...):
     account = broker.sync(event)                # syncs and updates the account
-    singals = strategy.create_signals(event)    # generate signals from market data
+    signals = strategy.create_signals(event)    # generate signals from market data
     orders = trader.create_orders(signals, ...) # apply risk rules, create orders
     broker.place_orders(orders)                 # place orders at broker
     journal.track(...)                          # record metrics (optional)
 ```
+
+- if no broker is provider, the SimBroker is used
+- if no trader is provided, the SimpleTrader is used
+- if no journal is provided, this step is skipped
+- if None is provided as a strategy, this step is skipped
+  and the trader is provided with an empty list of signals 
+
 
 ## Step-by-step
 
@@ -66,7 +73,6 @@ journal = rq.journals.MetricsJournal()
 
 account = rq.run(feed, strategy, trader=trader, broker=broker, journal=journal)
 ```
-
 
 ## Walk Forward
 Walk-forward analysis is a backtesting technique that mimics real-world trading by splitting historical data into successive periods. 
@@ -177,8 +183,13 @@ account = rq.run(feed, strategy, broker=broker, timeframe=timeframe)
 
 ## Early stopping
 It is possible to stop a run before all the events are handled. You do so
-by having one of the components invoke the `stop_run()` function.
+by having one of the components call the `stop_run()` function.
 
 For example a custom Journal could track some metrics and based on the results
 invoke the `stop_run()` function. See also [journal](journal.md#guard-journal)
 
+Under the hood it will throw a special type of exception that is handled gracefully within
+the run loop. 
+
+All other types of exceptions thrown during the execution of the run loop,
+will stop the run but will propagate that exception.

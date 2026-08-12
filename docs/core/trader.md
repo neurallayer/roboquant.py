@@ -8,7 +8,6 @@ kernelspec:
 (trader_def)=
 A trader is responsible for creating orders. It can do this based on the signals it receives, but also based on the latest version of the account.
 
-
 ```mermaid
 flowchart LR
  
@@ -24,10 +23,6 @@ flowchart LR
 ```
 
 
-## API
-
-A very basic and naive implementation would look something like this:
-
 ```{code-cell} python
 :tags: [remove-input]
 from decimal import Decimal
@@ -39,22 +34,26 @@ from roboquant.common.signal import Signal
 from roboquant.traders.trader import Trader
 ```
 
+
+## API
+The Trader API has 1 single method called `create_orders` that needs to be implemented:
+
 ```{code-cell} python
+
 class MyTrader(Trader):
 
     def create_orders(self, signals: list[Signal], event: Event, account: Account) -> list[Order]:
-        orders = []
-        for signal in signals:
-            asset = signal.asset
-            if price := event.get_price(asset):
-                if signal.is_buy:
-                    order = Order(signal.asset, 1, price)
-                else: 
-                    order = Order(signal.asset, -1, price)
-                orders.append(order)
-        return orders
+        ...
 ```
 
+Some of the typical logic:
+
+- looks at the incoming signals to see what potential orders to create
+- looks at open positions to see what to size for exit orders
+- looks at buying power to see how much to allocate for an entry order
+- looks at open orders to see if there is no conflict
+- look at open positions to manage bad performing assets (risk mngt)
+  
 
 ## SimpleTrader
 (simpletrader_def)=
@@ -79,7 +78,52 @@ Key characteristics:
    
 
 ## FlexTrader
+FlexTrader uses a percentage of the equity to determine the desired order sizes. 
+So if your equity grows during a back test, so does the average order size.
 
+Some of the features:
+
+- support for fractional order sizes
+- support for min and max order values
+- support for limiting position sizes
+- support for position increase and decrease 
+- extensive logging of decision making
+
+## Custom Trader
+If you have custom risk policies, you'll have to implement a custom trader. 
+It requires a lot of testing to see if all edge cases are handled.
+
+A very basic and naive implementation would look something like this:
+
+```{code-cell} python
+class MyTrader(Trader):
+
+    def create_orders(self, signals: list[Signal], event: Event, account: Account) -> list[Order]:
+        orders = []
+        for signal in signals:
+            asset = signal.asset
+            if price := event.get_price(asset):
+                if signal.is_buy:
+                    order = Order(signal.asset, 1, price)
+                else: 
+                    order = Order(signal.asset, -1, price)
+                orders.append(order)
+        return orders
+```
+
+But this handles none of the challenges:
+
+- How much can I allocate to new orders
+- What to do with signals if there is already an open order for that signal
+- What to do with open positions that have a lot of unrealized loss (or profit) 
+- Am I not generating too many orders (especialy true for higer frequency trading)
+
+
+
+:::{note}
+When using the account in a custom {cl}`Trader` it is important to use `buying_power` and not `cash` 
+to determine the available budget for orders.
+:::
 
 
 
