@@ -8,7 +8,12 @@ from roboquant.common.asset import Forex
 from roboquant.common.monetary import USD, Currency
 from roboquant.common.order import Order
 from roboquant.tickerall.tickerall_broker import TickerAllBroker
-from roboquant.tickerall.tickerall_feed import TickerAllHistoricFeed, TickerAllLiveFeed, _to_asset
+from roboquant.tickerall.tickerall_feed import (
+    TickerAllHistoricFeed,
+    TickerAllLiveFeed,
+    _require_tickerall_account_id,
+    _to_asset,
+)
 
 
 class _FakeOrders:
@@ -42,6 +47,25 @@ class _FakeClient:
 
 def _detail(account=None, positions=None):
     return SimpleNamespace(account=account, positions=positions or [])
+
+
+class TestAccountIdGuard(unittest.TestCase):
+    """A broker account NUMBER (all digits) is a common mix-up for the TickerAll account_id; it must be
+    rejected up-front with a helpful error, not surface later as an opaque 'Broker account not found'."""
+
+    def test_guard_rejects_broker_number(self):
+        with self.assertRaises(ValueError):
+            _require_tickerall_account_id("12345678")
+
+    def test_guard_allows_tickerall_id_and_empty(self):
+        _require_tickerall_account_id("cexampleaccountid00000000")  # a TickerAll-style cuid: ok
+        _require_tickerall_account_id("")  # connect() passes "" before binding the id: ok
+
+    def test_constructors_reject_broker_number(self):
+        for factory in (TickerAllBroker, TickerAllLiveFeed, TickerAllHistoricFeed):
+            with self.subTest(factory=factory.__name__):
+                with self.assertRaises(ValueError):
+                    factory("key", "12345678")
 
 
 def _fin(balance=100.0, currency="USD", free_margin=None):

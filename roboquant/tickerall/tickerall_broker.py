@@ -11,7 +11,7 @@ from roboquant.common.account import Account
 from roboquant.common.monetary import Amount, Currency, USD, Wallet
 from roboquant.common.order import Order
 from roboquant.common.portfolio import Portfolio, Position
-from roboquant.tickerall.tickerall_feed import _to_asset
+from roboquant.tickerall.tickerall_feed import _require_tickerall_account_id, _to_asset
 
 logger = logging.getLogger(__name__)
 
@@ -61,6 +61,7 @@ class TickerAllBroker(LiveBroker):
 
     def __init__(self, api_key: str, account_id: str, base_url: str = "https://api.tickerall.com") -> None:
         super().__init__()
+        _require_tickerall_account_id(account_id)
         self._account_id = account_id
         self._client = Tickerall(api_key=api_key, base_url=base_url)
         # True only when this broker opened the session itself (via `connect`); a session passed in by

@@ -42,6 +42,19 @@ def _parse_tick_time(value) -> datetime:
     return utcnow()
 
 
+def _require_tickerall_account_id(account_id: str) -> None:
+    """Guard the common mix-up of passing a broker account NUMBER where a TickerAll account id is
+    expected. A TickerAll id is a cuid (a 'c' followed by letters and digits); a broker login is all
+    digits — fail fast with the fix instead of a later, opaque "Broker account not found"."""
+    if account_id and account_id.isdigit():
+        raise ValueError(
+            f"account_id={account_id!r} looks like a broker account NUMBER, not a TickerAll account id "
+            "(a TickerAll id is a cuid, not a number). Connect by MetaTrader credentials with "
+            ".connect(api_key, broker=..., server=..., account=..., password=...), or pass the id from "
+            "client.sessions.start(...).account_id."
+        )
+
+
 class TickerAllLiveFeed(LiveFeed):
     """Stream live bid/ask ticks for a TickerAll broker account as roboquant `Quote` price-items.
 
@@ -61,6 +74,7 @@ class TickerAllLiveFeed(LiveFeed):
 
     def __init__(self, api_key: str, account_id: str, base_url: str = "https://api.tickerall.com") -> None:
         super().__init__()
+        _require_tickerall_account_id(account_id)
         self._account_id = account_id
         self._client = Tickerall(api_key=api_key, base_url=base_url)
         self._stream = None
@@ -156,6 +170,7 @@ class TickerAllHistoricFeed(InMemoryFeed):
 
     def __init__(self, api_key: str, account_id: str, base_url: str = "https://api.tickerall.com") -> None:
         super().__init__()
+        _require_tickerall_account_id(account_id)
         self._account_id = account_id
         self._client = Tickerall(api_key=api_key, base_url=base_url)
         # True only when this feed opened the session itself (via `connect`); a session passed in by

@@ -1,20 +1,23 @@
 """
 Live integration tests for the TickerAll broker and feeds.
 
-These run only when `TICKERALL_API_KEY` and `TICKERALL_ACCOUNT_ID` are set in the environment; otherwise
-every test is skipped so the normal CI build stays green without any credentials. The connected account must
-be a demo account. A free TickerAll account can connect a broker demo and run this whole suite.
+Runs when `TICKERALL_API_KEY` is set together with EITHER a MetaTrader login (`TICKERALL_SERVER` /
+`TICKERALL_ACCOUNT` / `TICKERALL_PASSWORD`) or a pre-connected `TICKERALL_ACCOUNT_ID`; otherwise every
+test is skipped so the normal CI build stays green without credentials. Given only the login, the suite
+opens a session and derives the TickerAll `account_id` itself — so you never look up the internal id (a
+broker account NUMBER is not it). The connected account must be a demo account; a free TickerAll account
+can connect a broker demo and run this whole suite.
 
-The credential `connect(...)` path is exercised by `TestTickerAllConnectIT`, gated separately on
-`TICKERALL_BROKER` / `TICKERALL_SERVER` / `TICKERALL_ACCOUNT` / `TICKERALL_PASSWORD` (the MetaTrader login),
-so it runs even without a pre-connected `TICKERALL_ACCOUNT_ID`.
+`TestTickerAllConnectIT` additionally exercises the credential `connect(...)` path directly.
 
-    TICKERALL_API_KEY=...  TICKERALL_ACCOUNT_ID=...  [TICKERALL_SYMBOL=EURUSDm]  [TICKERALL_TEST_TRADE=1] \
+    # from a MetaTrader login (recommended — no internal account_id needed):
+    TICKERALL_API_KEY=...  TICKERALL_BROKER=mt5  TICKERALL_SERVER=Exness-MT5Trial \
+        TICKERALL_ACCOUNT=12345678  TICKERALL_PASSWORD=...  [TICKERALL_SYMBOL=EURUSDm]  [TICKERALL_TEST_TRADE=1] \
         python -m unittest tests.unit.test_tickerall_it -v
 
-    TICKERALL_API_KEY=...  TICKERALL_BROKER=mt5  TICKERALL_SERVER=Exness-MT5Trial \
-        TICKERALL_ACCOUNT=12345678  TICKERALL_PASSWORD=...  [TICKERALL_SYMBOL=EURUSDm] \
-        python -m unittest tests.unit.test_tickerall_it.TestTickerAllConnectIT -v
+    # or from an already-connected TickerAll account_id:
+    TICKERALL_API_KEY=...  TICKERALL_ACCOUNT_ID=<your-tickerall-account-id>  [TICKERALL_SYMBOL=EURUSDm] \
+        python -m unittest tests.unit.test_tickerall_it -v
 """
 import os
 import time
@@ -40,11 +43,37 @@ ACCOUNT = os.environ.get("TICKERALL_ACCOUNT", "")
 PASSWORD = os.environ.get("TICKERALL_PASSWORD", "")
 
 
-@unittest.skipUnless(KEY and ACCOUNT_ID, "set TICKERALL_API_KEY and TICKERALL_ACCOUNT_ID to run")
+@unittest.skipUnless(
+    KEY and (ACCOUNT_ID or (SERVER and ACCOUNT and PASSWORD)),
+    "set TICKERALL_API_KEY and either the MetaTrader login "
+    "(TICKERALL_SERVER/TICKERALL_ACCOUNT/TICKERALL_PASSWORD) or a pre-connected TICKERALL_ACCOUNT_ID",
+)
 class TestTickerAllIT(unittest.TestCase):
+    # The TickerAll account_id every test reads/trades. Resolved ONCE here so the suite runs from a
+    # MetaTrader login alone — you never look up the internal id. A non-numeric TICKERALL_ACCOUNT_ID
+    # (an already-connected id) is used as-is; otherwise the login opens a session and we reuse its id.
+    account_id: str = ""
+    _owner: "TickerAllBroker | None" = None
+
+    @classmethod
+    def setUpClass(cls) -> None:
+        if ACCOUNT_ID and not ACCOUNT_ID.isdigit():
+            cls.account_id = ACCOUNT_ID
+        elif SERVER and ACCOUNT and PASSWORD:
+            cls._owner = TickerAllBroker.connect(
+                KEY, broker=cast(BrokerName, BROKER or "mt5"), server=SERVER, account=ACCOUNT, password=PASSWORD
+            )
+            cls.account_id = cls._owner.account_id
+        else:
+            cls.account_id = ACCOUNT_ID  # numeric-only id, no login → the constructor guard explains
+
+    @classmethod
+    def tearDownClass(cls) -> None:
+        if cls._owner is not None:
+            cls._owner.close()  # ends the session setUpClass opened
 
     def test_sync_account(self):
-        broker = TickerAllBroker(KEY, ACCOUNT_ID)
+        broker = TickerAllBroker(KEY, self.account_id)
         self.addCleanup(broker.close)
         account = broker.sync()
         # a MetaTrader account has a single deposit currency; a 0.0 balance is a valid state
@@ -55,7 +84,7 @@ class TestTickerAllIT(unittest.TestCase):
         self.assertGreaterEqual(broker.sync().buying_power.value, 0.0)
 
     def test_historic_candles(self):
-        feed = TickerAllHistoricFeed(KEY, ACCOUNT_ID)
+        feed = TickerAllHistoricFeed(KEY, self.account_id)
         self.addCleanup(feed.close)
         feed.retrieve(SYMBOL, timeframe="H1", hours=168)
         if not feed.assets():
@@ -67,7 +96,7 @@ class TestTickerAllIT(unittest.TestCase):
         self.assertEqual(times, sorted(times), "bars must be time-ordered")
 
     def test_live_ticks(self):
-        feed = TickerAllLiveFeed(KEY, ACCOUNT_ID)
+        feed = TickerAllLiveFeed(KEY, self.account_id)
         feed.subscribe(SYMBOL)
         quotes = []
         try:
@@ -84,7 +113,7 @@ class TestTickerAllIT(unittest.TestCase):
 
     @unittest.skipUnless(os.environ.get("TICKERALL_TEST_TRADE"), "set TICKERALL_TEST_TRADE=1 to run live trades")
     def test_trade_round_trip(self):
-        broker = TickerAllBroker(KEY, ACCOUNT_ID)
+        broker = TickerAllBroker(KEY, self.account_id)
         self.addCleanup(broker.close)
         client = broker.client
         aid = broker.account_id
