@@ -78,16 +78,19 @@ Key characteristics:
    
 
 ## FlexTrader
+(fextrader_def)=
 FlexTrader uses a percentage of the equity to determine the desired order sizes. 
 So if your equity grows during a back test, so does the average order size.
 
 Some of the features:
 
 - support for fractional order sizes
-- support for min and max order values
-- support for limiting position sizes
-- support for position increase and decrease 
-- extensive logging of decision making
+- support for minimum and maximum order values (% of equity)
+- support for limiting position sizes (% of equity)
+- support for increase and decrease of position sizes
+- extensive logging of the applied rules 
+- can be subclasses to change behavior
+- configurable order limit calculation 
 
 ## Custom Trader
 If you have custom risk policies, you'll have to implement a custom trader. 
@@ -113,12 +116,10 @@ class MyTrader(Trader):
 
 But this handles none of the challenges:
 
-- How much can I allocate to new orders
+- How much should I allocate to a new order
 - What to do with signals if there is already an open order for that signal
-- What to do with open positions that have a lot of unrealized loss (or profit) 
-- Am I not generating too many orders (especialy true for higer frequency trading)
-
-
+- What to do with open positions that have increasing unrealized losses (or profit) 
+- Am I not generating too many orders (especialy a concern for higer frequency price-data)
 
 :::{note}
 When using the account in a custom {cl}`Trader` it is important to use `buying_power` and not `cash` 

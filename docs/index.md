@@ -38,11 +38,9 @@ Below are some of the key features of *roboquant*:
 
 ## Key Principles
 - **Event-driven streaming** — Everything is built around `Event` objects produced lazily by feeds, supporting both backtesting and live trading with the same pipeline.
-- **Broker owns the Account** — The Account is never modified directly by user code; it is always the broker's canonical view returned by `sync()`.
-- **Default-everywhere** — `roboquant.run(feed, strategy)` works out of the box with sensible defaults, making the simplest case a one-liner.
-- **Immutable core types** — `Asset`, `Position` and `Signal` are immutable; `Order` uses `cancel()`/`modify()` returning new objects.
-- **Strategy composition** — `MultiStrategy` combines multiple strategies with configurable conflict resolution (`first`, `last`, `mean`, `none`).
-- **Pluggable pricing** — Price type strings (`"OPEN"`, `"CLOSE"`, `"HIGH"`, `"LOW"`, `"DEFAULT"`) allow strategies and traders to choose which price to use for evaluation.
+- **Pluggible Core** - All the core components can be replaced with different implementations
+- **Good Develop Experience** — `run(feed, strategy)` works out of the box with sensible defaults, making the simplest back-test just a one-liner.
+- **Immutable common types** — `Asset`, `Position`, `Order`, `Amount`, `Timeframe` and `Signal` are all immutable, reducing the risk of subtle bugs.
 - **Multi-currency** — Built-in support via `Amount`, `Wallet`, and pluggable `CurrencyConverter` (ECB, static, one-to-one).
 
 ## License
