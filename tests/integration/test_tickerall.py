@@ -22,7 +22,7 @@ from roboquant.brokers.tickerall import TickerAllBroker
 
 load_dotenv()
 KEY = os.environ.get("TICKERALL_API_KEY", "")
-ACCOUNT_ID = os.environ.get("TICKERALL_ACCOUNT_ID", "")
+ACCOUNT_ID = os.environ.get("MT5_ACCOUNT", "")
 SYMBOL = "BTCUSD"
 
 MT5_SERVER = os.environ.get("MT5_SERVER")
@@ -34,6 +34,7 @@ class TestTickerAllIT(unittest.TestCase):
 
     def __connect(self, client):
         assert MT5_ACCOUNT and MT5_PASSWORD and MT5_SERVER
+        print(MT5_ACCOUNT, MT5_PASSWORD, MT5_PASSWORD)
         return client.sessions.start(
             broker="mt5",
             server=MT5_SERVER,
@@ -72,6 +73,7 @@ class TestTickerAllIT(unittest.TestCase):
 
     def test_historic_candles(self):
         feed = TickerAllHistoricFeed(KEY, ACCOUNT_ID)
+        self.__connect(feed._client)
         self.addCleanup(feed.close)
         feed.retrieve(SYMBOL, timeframe="H1", hours=168)
         if not feed.assets():
