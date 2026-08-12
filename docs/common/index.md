@@ -9,7 +9,7 @@ Roboquant comes with a number of common classes that are used throughout the cod
 They for example deal with monetary values or time.
 
 Besides ensuring consistency across the API, once you understand these classes they also help to
-expedite development.
+expedite your development.
 
 
 

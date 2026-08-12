@@ -30,7 +30,7 @@ A journal should NOT modify any of the passed parameters.
 ## API
 The API of the Journal is a single `track(...)` method with all signals and orders generated during this step.
 
-Below is a custom Journal that prints all the available info to the console.
+Below is a custom Journal that prints all the available info to the console at each step of the run.
 
 ```{code-cell} python
 from roboquant.journals import Journal
@@ -46,11 +46,13 @@ class MyJournal(Journal):
 Another example is journal that guards some condition and stops the run if the condition is met.
 
 ```{code-cell} python
+from roboquant import stop_run
+
 class GuardJournal(Journal):
   
     def track(self, event: Event, account: Account, signals: list[Signal], orders: list[Order]) -> None:
         if account.cash[rq.USD] < 1_000:
-            rq.stop_run()
+            stop_run()
 ```
 
 ## BasicJournal
@@ -74,12 +76,13 @@ strategy = rq.strategies.EMACrossover(12, 25)
 journal = MetricsJournal(PNLMetric(), RunMetric())
 account = rq.run(feed, strategy, journal=journal)
 
-# Inspect recorded metrics as a pandas DataFrame
+# Inspect recorded metrics as a time-series (DataFrame)
 df = journal.get_metrics("pnl/equity")
 print(df.tail())
 ```
 
-You can also develop custom metrics by subclassing `Metric`:
+You can also develop custom metrics by subclassing `Metric` and
+implement the `calc()` method.
 
 ```{code-cell} python
 from roboquant.common.metric import Metric
