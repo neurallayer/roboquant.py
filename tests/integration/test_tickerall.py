@@ -8,6 +8,7 @@ be a demo account. A free TickerAll account can connect a broker demo and run th
     TICKERALL_API_KEY=...  TICKERALL_ACCOUNT_ID=...  [TICKERALL_SYMBOL=EURUSDm]  [TICKERALL_TEST_TRADE=1] \
         python -m unittest tests.unit.test_tickerall_it -v
 """
+
 import os
 import time
 import unittest
@@ -23,6 +24,7 @@ from roboquant.common.timeframe import Timeframe
 from roboquant.feeds.tickerall import TickerAllHistoricFeed, TickerAllLiveFeed, _to_asset
 from roboquant.brokers.tickerall import TickerAllBroker
 from roboquant.strategies.ema_crossover import EMACrossover
+from roboquant.traders.flextrader import FlexTrader
 
 load_dotenv()
 KEY = os.environ.get("TICKERALL_API_KEY", "")
@@ -33,26 +35,22 @@ MT5_SERVER = os.environ.get("MT5_SERVER")
 MT5_ACCOUNT = os.environ.get("MT5_ACCOUNT")
 MT5_PASSWORD = os.environ.get("MT5_PASSWORD")
 
-CONFIG = {
-    "broker" : "mt5",
-    "server" : MT5_SERVER,
-    "account" : MT5_ACCOUNT,
-    "password" : MT5_PASSWORD
-}
+CONFIG = {"broker": "mt5", "server": MT5_SERVER, "account": MT5_ACCOUNT, "password": MT5_PASSWORD}
 
 
-@unittest.skipUnless(KEY and ACCOUNT_ID and MT5_SERVER and MT5_ACCOUNT and MT5_PASSWORD,
-                     "set TICKERALL_API_KEY and TICKERALL_ACCOUNT_ID to run")
+@unittest.skipUnless(
+    KEY and ACCOUNT_ID and MT5_SERVER and MT5_ACCOUNT and MT5_PASSWORD, "set TICKERALL_API_KEY and TICKERALL_ACCOUNT_ID to run"
+)
 class TestTickerAllIT(unittest.TestCase):
 
     def test_live_ticks(self):
         feed = TickerAllLiveFeed.connect(KEY, **CONFIG)
         feed.subscribe(SYMBOL)
-        quotes : list[Quote] = []
+        quotes: list[Quote] = []
         try:
             for event in feed.play(Timeframe.next("60 seconds")):
                 quotes.extend(i for i in event.items if isinstance(i, Quote))
-                print(event.items)
+                print(event.items, flush=True)
         finally:
             feed.close()
         if not quotes:
@@ -60,9 +58,8 @@ class TestTickerAllIT(unittest.TestCase):
         self.assertEqual(quotes[0].asset.symbol, SYMBOL)
         self.assertGreater(quotes[0].ask_price, 0.0)
 
-
     def test_sync_account(self):
-        broker = TickerAllBroker.connect(KEY,**CONFIG)
+        broker = TickerAllBroker.connect(KEY, **CONFIG)
         self.addCleanup(broker.close)
         account = broker.sync()
         print(account)
@@ -81,11 +78,15 @@ class TestTickerAllIT(unittest.TestCase):
         broker = None
         feed = None
         try:
-            broker = TickerAllBroker.connect(KEY,**CONFIG)
-            feed = TickerAllLiveFeed.connect(KEY,**CONFIG)
-            stragegy = EMACrossover()
+            broker = TickerAllBroker.connect(KEY, **CONFIG)
+            feed = TickerAllLiveFeed(KEY, broker.account_id)
+            feed.subscribe(SYMBOL)
+            stragegy = EMACrossover(2, 5)
+            trader = FlexTrader(
+                size_fractions=4, shorting=True, max_order_pct=0.02, min_order_pct=0.01, max_position_pct=0.2, limit_rounding=6
+            )
             tf = rq.Timeframe.next("30 minutes")
-            account = rq.run(feed, stragegy, broker=broker, timeframe=tf)
+            account = rq.run(feed, stragegy, trader, broker=broker, timeframe=tf)
             print(account)
         finally:
             if broker:
