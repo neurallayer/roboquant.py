@@ -128,6 +128,7 @@ class Account:
         for order in self.orders:
             if order.id == order_id:
                 return order
+        return None
 
     def __repr__(self) -> str:
         """Condensed representation of this account. It by default won't

@@ -10,6 +10,7 @@ from roboquant.common.asset import Asset
 from roboquant.common.event import Event
 from roboquant.common.order import Order
 from roboquant.common.signal import Signal
+from roboquant.traders._util import round_down
 from .trader import Trader
 from ..common.account import Account
 from ..common.event import PriceItem
@@ -138,8 +139,7 @@ class FlexTrader(Trader):
     def _get_order_size(self, rating: float, contract_price: float, max_order_value: float) -> Decimal:
         """Return the order size"""
         size = Decimal(rating * max_order_value / contract_price)
-        rounded_size = round(size, self.size_fractions)
-        return rounded_size
+        return round_down(size, self.size_fractions)
 
     @override
     def create_orders(self, signals: list[Signal], event: Event, account: Account) -> list[Order]:

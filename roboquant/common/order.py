@@ -56,15 +56,20 @@ class Order:
     """When was the order placed at the exchange, so typically the first trading day after the order was submitted
     to the broker."""
 
-
     def __post_init__(self):
         if self.size.is_zero():
             assert id != ""
 
     @staticmethod
-    def market_order(asset: Asset, size: Decimal, price: float, margin: float = 0.05) -> "Order":
-        """Simulate a market order by using a generous margin on the limit price"""
-        limit = price * (1 + margin) if size > 0 else price * (1 - margin)
+    def market_order(asset: Asset, size: Decimal, price: float, margin_pct: float = 0.02, ndigits: int = 2) -> "Order":
+        """Create a limit order that will behave almost like a market order by setting a
+        generous margin on the limit price.
+
+        Default is a 2% margin. So the limit for BUY orders is 2% above the price and SELL
+        orders 2% below the price ensuring that they will very likely execute.
+        """
+        limit = price * (1 + margin_pct) if size > 0 else price * (1 - margin_pct)
+        limit = round(limit, ndigits)
         return Order(asset, size, limit)
 
     def cancel(self) -> "Order":
@@ -78,7 +83,7 @@ class Order:
         assert self.id, "Can only cancel orders with an already assigned id"
         assert self.size, "Cannot cancel a cancellation order, size has to be non-zero"
 
-        return replace(self, size = Decimal())
+        return replace(self, size=Decimal())
 
     def modify(self, size: Decimal | None = None, limit: float | None = None) -> "Order":
         """
@@ -102,7 +107,7 @@ class Order:
 
         size = size if size is not None else self.size
         limit = limit if limit is not None else self.limit
-        return replace(self, size=size, limit = limit)
+        return replace(self, size=size, limit=limit)
 
     def value(self) -> float:
         """

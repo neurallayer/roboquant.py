@@ -36,6 +36,11 @@ class Position:
         """Return True if this is a long position, False otherwise"""
         return self.size > 0
 
+    @property
+    def is_closed(self):
+        """Return True if this is a closed position, False otherwise"""
+        return self.size.is_zero()
+
 
 class Portfolio(UserDict[Asset, Position]):
     """Contains all the open postions with the corresponding asset"""

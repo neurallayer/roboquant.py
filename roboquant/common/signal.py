@@ -123,19 +123,28 @@ class Signal:
         """
         return SignalType.EXIT in self.type
 
-    def is_exit_position(self, pos: Position) -> bool:
-        """Return True if this is an exit of a position, False otherwise
+    def is_close_position(self, pos: Position) -> bool:
+        """Return True if this is close of a position, False otherwise
         """
-        if SignalType.EXIT not in self.type or pos.size.is_zero():
+        if not self.is_exit or pos.is_closed:
             return False
-        return self.rating > 0 if pos.size < 0 else self.rating < 0
+        return self.is_buy if pos.is_short else self.is_sell
 
-    def is_entry_position(self, pos: Position) -> bool:
-        """Return True if this an entry into a position, False otherwise.
+    def is_open_position(self, pos: Position) -> bool:
+        """Return True if this an opening of a position, False otherwise.
         """
-        return SignalType.ENTRY in self.type and pos.size.is_zero()
+        return self.is_entry and pos.is_closed
+
+    def is_increase_position(self, pos: Position) -> bool:
+        """Return True if this an increase into a position, False otherwise.
+        """
+        if not self.is_entry:
+            return False
+        if pos.is_closed:
+            return True
+        return self.is_buy if pos.is_long else self.is_sell
 
     def is_shorting(self, pos: Position) -> bool:
         """Return True if this an entry into a position, False otherwise.
         """
-        return SignalType.ENTRY in self.type and pos.size <= 0 and self.is_sell
+        return self.is_entry and pos.size <= 0 and self.is_sell

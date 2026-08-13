@@ -10,22 +10,32 @@ from roboquant.common.order import Order
 from roboquant.common.portfolio import Position
 from roboquant.common.signal import Signal
 from roboquant.traders.trader import Trader
+from roboquant.traders._util import round_down
 
 
 logger = logging.getLogger(__name__)
 
 
-class SimpleTrader(Trader):
-    """Trader only opens and close positions based on the received signals.
-    It will not increase or decrease position sizes. If there is already an open order for
-    an asset, it will not create another one. But the open orders don't count for positions.
+class BudgetTrader(Trader):
+    """Trader will create orders based on a set amount per order and per position.
+    All budgets are expressed in absolute values and are expected in the same
+    currency as the account.
     """
-    def __init__(self, max_positions: int = 10, shorting: bool = False, price_type: str = "DEFAULT") -> None:
+
+    def __init__(
+        self,
+        order_value: float,
+        position_value: float,
+        shorting: bool = False,
+        price_type: str = "DEFAULT",
+        ndigits: int = 0
+    ) -> None:
         super().__init__()
         self.shorting = shorting
         self.price_type = price_type
-        self.max_positions: int = max_positions
-        self.limit_ndigits: int = 2
+        self.order_value: float = order_value
+        self.position_value: float = position_value
+        self.ndigits = ndigits
 
     @override
     def create_orders(self, signals: list[Signal], event: Event, account: Account) -> list[Order]:
@@ -39,13 +49,10 @@ class SimpleTrader(Trader):
         if not signals:
             return []
 
-        remaining_positions = self.max_positions - len(account.portfolio)
+        buying_power: float = account.buying_power.value
+        base_currency = account.base_currency
+        order_budget: Amount = Amount(base_currency, self.order_value)
         order_assets = {o.asset for o in account.orders}
-
-        if remaining_positions > 0:
-            order_budget = account.buying_power / remaining_positions
-        else:
-            order_budget = Amount(account.buying_power.currency, 0.0)
 
         result: dict[Asset, Order] = {}
 
@@ -66,23 +73,30 @@ class SimpleTrader(Trader):
                 continue
 
             pos = account.portfolio.get(asset, Position())
-            if signal.is_open_position(pos):
-
-                if remaining_positions <= 0:
-                    logger.info("no remaining positions")
+            if signal.is_increase_position(pos):
+                if buying_power < self.order_value:
+                    logger.info("not enough buying_power remaining")
                     continue
 
-                if not self.shorting and signal.is_sell:
+                if pos.size.is_zero() and signal.is_sell and not self.shorting:
                     logger.info("shorting not allowed")
+                    continue
+
+                pos_value = account.contract_value(asset, pos.size, price)
+                if pos_value >= self.position_value:
+                    logger.info("max position value reached")
                     continue
 
                 asset_budget = order_budget.convert_to(asset.currency, event.time)
                 asset_cost = asset.value(Decimal(1), price)
-                size = int((asset_budget / asset_cost) * signal.rating)
-                if size:
-                    result[asset] = Order.market_order(asset, Decimal(size), price, self.limit_ndigits)
-                    remaining_positions -= 1
-            elif signal.is_close_position(pos):
-                result[asset] = Order.market_order(asset, -pos.size, price, self.limit_ndigits)
+                order_size = round_down((asset_budget / asset_cost) * signal.rating, self.ndigits)
+                if order_size:
+                    order = Order(asset, order_size, price)
+                    result[asset] = order
+                    value = order.amount().convert_to(base_currency, event.time)
+                    buying_power -= abs(value)
+            else:
+                assert pos.size, "position size should be non-zero"
+                result[asset] = Order(asset, -pos.size, price)
 
         return list(result.values())

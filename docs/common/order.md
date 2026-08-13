@@ -130,3 +130,13 @@ cancellations = [order.cancel() for order in account.orders]
 broker.place_orders(cancellations)
 ```
 
+## Decimals
+When creating an order, it is important two realize two things regarding decimal places:
+
+1. What are the number of decimals (sometimes referred to as ndigits in Python) for the **order size**
+   that is allowed by the broker. For example Forex, Crypto or fractional equity trading all allow for
+   fractional sizes.
+2. What is the number of decimals allowed for setting the **limit price**.
+
+Most traders that ome with roboquant out of the box allow you to configure this behavior and if you
+want to use them in Forex or Crypto, you likely will have to change the defaults.
