@@ -32,12 +32,15 @@ class Order:
     """The limit price of the order, denoted in the currency of the asset.
     The limit price is the maximum price you are willing to pay for a buy order,
     or the minimum price you are willing to accept for a sell order.
-    Make sure to set the limit price in the currency of the asset and not include more decimal places than
-    supported by the broker.
+    Make sure to set the limit price in the currency of the asset and not
+    to include more decimal places than supported by the broker.
     """
 
     tif: Literal["GTC", "DAY"] = "DAY"
-    """The time in force of the order. `GTC` = Good Till Cancelled, `DAY` = valid for a day only."""
+    """The time in force of the order.
+    - `GTC` = Good Till Cancelled,
+    - `DAY` = valid for a day only.
+    """
 
     info: dict[str, Any] | None = None
     """Any additional information about the order"""
@@ -88,9 +91,11 @@ class Order:
     def modify(self, size: Decimal | None = None, limit: float | None = None) -> "Order":
         """
         Create an modify-order. You can update the size and/or the limit of an order.
-        The returned order has the same id as the original order. You can only update existing orders that have an id assigned.
+        The returned order has the same id as the original order.
+        You can only update existing orders that have an id assigned.
 
-        If you want to cancel an order, use the `cancel` method instead. The size of an order cannot be modified to zero.
+        If you want to cancel an order, use the `cancel` method instead.
+        The size of an order cannot be modified to zero.
 
         Args:
             size: The new size of the order.
@@ -111,10 +116,11 @@ class Order:
 
     def value(self) -> float:
         """
-        The total contract value of this order, it ignores the already filled part of the order.
+        The total contract value of this order.
+        It ignores the already filled part of the order.
 
         Returns:
-            float: The total contract value of the order.
+            The total contract value of the order.
         """
         return self.asset.value(self.size, self.limit)
 
@@ -155,6 +161,8 @@ class Order:
     def remaining(self) -> Decimal:
         """
         The remaining order size that still needs to be filled.
+        For SELL orders this will return a negative value if
+        the order is not yet completely filled.
         """
         return self.size - self.fill
 
