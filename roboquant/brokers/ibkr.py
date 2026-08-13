@@ -174,12 +174,13 @@ class IBKRBroker(LiveBroker):
             size = info["totalSize"]
             fill = info["filledQuantity"]
             order_id = info["orderId"]
+            limit = info["price"]
             tif = "DAY" if info["timeInForce"] == "CLOSE" else "GTC"
 
             if info["side"] == "SELL":
-                return self._sell_order(order_id, asset, size, info["price"], fill, tif)
+                return self._sell_order(order_id, asset, size, limit, fill, tif)
             else:
-                return self._buy_order(order_id, asset, size, info["price"], fill, tif)
+                return self._buy_order(order_id, asset, size, limit, fill, tif)
 
         logger.warning("ignoring order %s because couldn't map conid to asset", info)
 
