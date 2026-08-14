@@ -57,7 +57,7 @@ class Order:
 
     time: datetime | None = None
     """When was the order placed at the exchange, so typically the first trading day after the order was submitted
-    to the broker."""
+    to the broker. This is also used to determine when a DAY order has expired."""
 
     def __post_init__(self):
         if self.size.is_zero():
