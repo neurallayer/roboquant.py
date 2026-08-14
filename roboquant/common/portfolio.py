@@ -129,7 +129,7 @@ class Portfolio(UserDict[Asset, Position]):
         Attributes:
            ndigits: how many digits to use for the limit price
         """
-        orders = [Order(asset, -pos.size, round(pos.mkt_price, ndigits)) for asset, pos in self.items()]
+        orders = [Order.market_order(asset, -pos.size, pos.mkt_price, ndigits=ndigits) for asset, pos in self.items()]
         return orders
 
     def to_dataframe(self) -> pd.DataFrame:

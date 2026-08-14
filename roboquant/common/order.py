@@ -64,14 +64,14 @@ class Order:
             assert id != ""
 
     @staticmethod
-    def market_order(asset: Asset, size: Decimal, price: float, margin_pct: float = 0.02, ndigits: int = 2) -> "Order":
+    def market_order(asset: Asset, size: Decimal, mkt_price: float, margin_pct: float = 0.02, ndigits: int = 2) -> "Order":
         """Create a limit order that will behave almost like a market order by setting a
         generous margin on the limit price.
 
         Default is a 2% margin. So the limit for BUY orders is 2% above the price and SELL
         orders 2% below the price ensuring that they will very likely execute.
         """
-        limit = price * (1 + margin_pct) if size > 0 else price * (1 - margin_pct)
+        limit = mkt_price * (1 + margin_pct) if size > 0 else mkt_price * (1 - margin_pct)
         limit = round(limit, ndigits)
         return Order(asset, size, limit)
 

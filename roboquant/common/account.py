@@ -123,6 +123,13 @@ class Account:
         """
         return self.realized_pnl(*assets) + self.portfolio.unrealized_pnl(*assets)
 
+    def pnl_value(self, *assets: Asset) -> float:
+        """Return the total profit and loss of the account, which is
+            the sum of realized- and unrealized-PnL expressed in the
+            base currency of the account.
+        """
+        return self.convert(self.pnl())
+
     def get_order(self, order_id: str) -> Order | None:
         """Return an order by its id, or None if no matching order can be found"""
         for order in self.orders:

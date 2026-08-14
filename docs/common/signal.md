@@ -5,8 +5,9 @@ kernelspec:
 ---
 # Signal
 (signal_def)=
-The output of a {cl}`Strategy` is a list of {cl}`Signal` objects. Each signal contains three pieces of
-information:
+A signal is a quantifiable trigger that instructs to enter, exit, or adjust a {cl}`Position` in an {cl}`Asset`.
+
+Each signal contains three pieces of information:
 
 - **`asset`** — the asset the signal applies to.
 - **`rating`** — a float, normally between -1.0 (strong sell) and 1.0 (strong buy). This range is
