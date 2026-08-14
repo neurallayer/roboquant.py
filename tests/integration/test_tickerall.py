@@ -11,6 +11,7 @@ be a demo account. A free TickerAll account can connect a broker demo and run th
 
 import os
 import time
+from typing import Any
 import unittest
 from decimal import Decimal
 from dotenv import load_dotenv
@@ -36,7 +37,7 @@ MT5_SERVER = os.environ.get("MT5_SERVER")
 MT5_ACCOUNT = os.environ.get("MT5_ACCOUNT")
 MT5_PASSWORD = os.environ.get("MT5_PASSWORD")
 
-CONFIG = {"broker": "mt5", "server": MT5_SERVER, "account": MT5_ACCOUNT, "password": MT5_PASSWORD}
+CONFIG: dict[str, Any] = {"broker": "mt5", "server": MT5_SERVER, "account": MT5_ACCOUNT, "password": MT5_PASSWORD}
 
 
 @unittest.skipUnless(
@@ -45,7 +46,7 @@ CONFIG = {"broker": "mt5", "server": MT5_SERVER, "account": MT5_ACCOUNT, "passwo
 class TestTickerAllIT(unittest.TestCase):
 
     def test_live_ticks(self):
-        feed = TickerAllLiveFeed.connect(KEY, **CONFIG) # type: ignore
+        feed = TickerAllLiveFeed.connect(KEY, **CONFIG)
         feed.subscribe(SYMBOL)
         quotes: list[Quote] = []
         try:
