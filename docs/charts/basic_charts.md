@@ -40,7 +40,7 @@ feed.plot("MSFT");
 
 ### Correlation Chart
 Sometimes it is useful to inspect the correlation between the assets we want to trade in.
-There is a special plot method available that makes this visibe.
+There is a special plot method available that makes this visible.
 
 ```{code-cell} python
 feed.to_timeseries().plot_corr(fontsize=7);

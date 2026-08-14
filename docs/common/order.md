@@ -92,7 +92,7 @@ class Order:
 
 
 ## Initial Orders
-Creating a new intial order is simple. One thing to be aware of is that order sizes
+Creating a new initial order is simple. One thing to be aware of is that order sizes
 are of the type `Decimal`.
 
 ```{code-cell} python

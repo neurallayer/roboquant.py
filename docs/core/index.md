@@ -19,7 +19,7 @@ flowchart LR
     Feed -- event --> Strategy -- signals --> Trader -- orders --> Broker -- account --> Journal 
 ```
 
-Each of these five components has a clean separation of concerns:
+Each of these five components has its own responsibilities (clean separation of concerns):
 
 | Component | Responsibility |
 |-----------|---------------|

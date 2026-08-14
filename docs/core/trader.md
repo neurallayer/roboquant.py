@@ -52,7 +52,7 @@ Some of the typical logic:
 - looks at open positions to see what to size for exit orders
 - looks at buying power to see how much to allocate for an entry order
 - looks at open orders to see if there is no conflict
-- look at open positions to manage bad performing assets (risk mngt)
+- look at open positions to manage bad performing assets (risk management)
   
 
 ## SimpleTrader
@@ -70,7 +70,7 @@ Key characteristics:
   
   :::{note} Example
   We configured 20 max positions. There is still 10,000 USD buying-power remaining
-  and so far only 15 of the 20 max positions are allocted.
+  and so far only 15 of the 20 max positions are allocated.
 
   An open order gets {math}`10,000/(20-15) = 2,000` USD allocated.
   ::: 
@@ -119,7 +119,7 @@ But this handles none of the challenges:
 - How much should I allocate to a new order
 - What to do with signals if there is already an open order for that signal
 - What to do with open positions that have increasing unrealized losses (or profit) 
-- Am I not generating too many orders (especialy a concern for higer frequency price-data)
+- Am I not generating too many orders (especially a concern for higher frequency price-data)
 
 :::{note}
 When using the account in a custom {cl}`Trader` it is important to use `buying_power` and not `cash` 

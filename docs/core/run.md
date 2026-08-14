@@ -40,8 +40,7 @@ for event in feed.play(...):
 5. **`journal.track(...)`** — Optional logging and metrics collection. Journals are passive observers that never modify state.
 
 :::{tip}
-Any exception thrown during the execution of the run loop, will stop the run. However if you call the `stop_run()` function, the run is stopped early while still
-regulary returning the latest account object.
+Any exception thrown during the execution of the run loop, will stop the run. However if you call the `stop_run()` function, the run is stopped early while still exiting normally and returning the latest account object.
 :::
 
 ## Basic Backtest
@@ -96,7 +95,7 @@ This is known as **Walk-Forward Optimization (WFO)**. The idea is:
 4. Move forward one window and repeat.
 
 This approach helps detect **overfitting**: if a parameter set performs well in-sample but poorly out-of-sample,
-the strategy likely doesn't generalise. By measuring performance only on unseen data, you get a more
+the strategy likely doesn't generalize. By measuring performance only on unseen data, you get a more
 realistic estimate of how the strategy would have performed in production.
 
 :::{note}

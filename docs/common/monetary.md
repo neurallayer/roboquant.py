@@ -5,8 +5,8 @@ kernelspec:
 ---
 
 # Monetary
-Roboquant comes with several monetary classes that makes dealing with 
-multi-currency situatins a lot easier.
+Roboquant comes with several monetary classes that makes trading with 
+multi-currency situations a lot easier.
 
 ## Currency
 (currency_def)=
@@ -35,7 +35,7 @@ print(amount)
 (amount_def)=
 
 An amount hold a monetary value of a single currency. Amounts are immutable.
-Iternally amount values are stored as floats since that is precise enough for
+Internally amount values are stored as floats since that is precise enough for
 trading and it doesn't has the overhead of some other types.
 
 Roboquant is not a ledger and for trading it doesn't need to be.
@@ -84,7 +84,7 @@ If trading in more than one currency, a conversion is required
 between amounts in the different currencies. 
 
 Roboquant comes out of the box with a conversion using the exchange 
-reates as published by the ECB. 
+rates as published by the ECB. 
 
 ```{code-cell} python
 from roboquant.common.monetary import ECBConversion

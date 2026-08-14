@@ -29,7 +29,7 @@ flowchart LR
 The `Broker` base class defines the interface that all broker implementations must follow. The two core methods are:
 
 - **`place_orders(orders: list[Order])`** — submit one or more orders to the broker. These orders are placed at the real broker which will likely sent them to an exchange.
-- **`sync(event: Event) -> Account`** — synchronise the broker state with the latest market event and the real trading account state. Returns the updated {cl}`Account` reflecting cash, positions, open orders, and trades.
+- **`sync(event: Event) -> Account`** — synchronize the broker state with the latest market event and the real trading account state. Returns the updated {cl}`Account` reflecting cash, positions, open orders, and trades.
 
 
 ```{code-cell} python
@@ -70,7 +70,7 @@ broker = SimBroker(
   price_type = "OPEN",     # what price type to use, fe. OPEN, ASK, CLOSE
   slippage= 0.0,           # what price slippage to apply, 0.01 is 1% 
   timezone = timezone.utc, # what timezone to use for validating DAY orders
-  fee = 0@USD              # what additional fee/commision to apply per trade
+  fee = 0@USD              # what additional fee/commission to apply per trade
 )
 ```
 
@@ -78,9 +78,9 @@ Some of the implemented logic that might not be obvious at first:
 
 
 - When `place_orders()` is invoked, orders are given an `id`. However the orders are NOT yet executed. That happens earliest in the next step
-  of the run when the `sync()` methd is invoked. So orders places at time{sup}`t`, will be earliest executed at time{sup}`t+1`.
+  of the run when the `sync()` method is invoked. So orders places at time{sup}`t`, will be earliest executed at time{sup}`t+1`.
 - If there is no available price for an asset in the event, the corresponding orders will not be executed. They will stay in open state until
-  a price becoes available.
+  a price becomes available.
 - Only once there is a price available, the DAY time-in-force policy is started.
 
   :::{note} Example
@@ -95,4 +95,4 @@ Some of the implemented logic that might not be obvious at first:
 ## Third party Brokers
 
 Looks at [](../third_party/alpaca.md), [](../third_party/ibkr.md) and [](../third_party/crypto.md) for more details about
-third party bokers.
+third party brokers.

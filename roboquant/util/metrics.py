@@ -134,7 +134,7 @@ class RelativePNLMetric(Metric):
      - the position exposure for the unrealized PNL
      - the absolute trade value for the realized PNL
 
-     This is a useful metric as it shows the performance independed
+     This is a useful metric as it shows the performance independent
      of position/order sizing.
     """
 

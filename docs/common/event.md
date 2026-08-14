@@ -40,7 +40,7 @@ from roboquant.common.event import Bar, Quote, TradePrice
 
 asset = Stock("ABC")
 
-item1 = Bar(asset, [10.0, 11.0, 9.0, 10.0, 10_000]) # OVLCV
+item1 = Bar(asset, [10.0, 11.0, 9.0, 10.0, 10_000]) # OHLCV
 item2 = Quote(asset, [11.0, 1_000, 10.0, 1_000]) # [ask-price, ask-volume, bid-price, bid-volume]
 item3 = TradePrice(asset, 100.0, 10_000) # price, volume
 

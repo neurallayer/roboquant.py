@@ -23,7 +23,7 @@ flowchart LR
     style Journal fill:#888
 ```
 
-A journal is one of the optional pameters of the `run()` function and if provided will be invoked at every step of the run.
+A journal is one of the optional parameters of the `run()` function and if provided will be invoked at every step of the run.
 A journal should NOT modify any of the passed parameters.
 
 
@@ -98,7 +98,7 @@ class PositionCount(Metric):
 ```
 
 ## TensorBoardJournal
-This journal is simular to the MetricsJournal, but rather than keeping the results in
+This journal is similar to the MetricsJournal, but rather than keeping the results in
 memory it will write them to a TensorBoard compatible file.
 
 So already during a run, the metrics can be inspected using a TensorBoard viewer.
