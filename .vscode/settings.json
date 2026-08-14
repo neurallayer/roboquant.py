@@ -7,6 +7,7 @@
         "dotenv",
         "dtype",
         "eurofxref",
+        "financials",
         "Forex",
         "hstack",
         "ibind",

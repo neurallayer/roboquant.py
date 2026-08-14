@@ -18,11 +18,12 @@ from dotenv import load_dotenv
 import roboquant as rq
 from roboquant.common.asset import Forex
 from roboquant.common.event import Bar, Quote
-from roboquant.common.monetary import USD
+from roboquant.common.monetary import USD, ECBConversion
 from roboquant.common.order import Order
 from roboquant.common.timeframe import Timeframe
 from roboquant.feeds.tickerall import TickerAllHistoricFeed, TickerAllLiveFeed, _to_asset
 from roboquant.brokers.tickerall import TickerAllBroker
+from roboquant.journals.basicjournal import BasicJournal
 from roboquant.strategies.ema_crossover import EMACrossover
 from roboquant.traders.flextrader import FlexTrader
 
@@ -44,7 +45,7 @@ CONFIG = {"broker": "mt5", "server": MT5_SERVER, "account": MT5_ACCOUNT, "passwo
 class TestTickerAllIT(unittest.TestCase):
 
     def test_live_ticks(self):
-        feed = TickerAllLiveFeed.connect(KEY, **CONFIG)
+        feed = TickerAllLiveFeed.connect(KEY, **CONFIG) # type: ignore
         feed.subscribe(SYMBOL)
         quotes: list[Quote] = []
         try:
@@ -81,12 +82,14 @@ class TestTickerAllIT(unittest.TestCase):
             broker = TickerAllBroker.connect(KEY, **CONFIG)
             feed = TickerAllLiveFeed(KEY, broker.account_id)
             feed.subscribe(SYMBOL)
-            stragegy = EMACrossover(2, 5)
+            strategy = EMACrossover(2, 5)
             trader = FlexTrader(
                 size_fractions=4, shorting=True, max_order_pct=0.02, min_order_pct=0.01, max_position_pct=0.2, limit_rounding=6
             )
-            tf = rq.Timeframe.next("30 minutes")
-            account = rq.run(feed, stragegy, trader, broker=broker, timeframe=tf)
+            tf = rq.Timeframe.next("60 minutes")
+            journal = BasicJournal()
+            ECBConversion().register()
+            account = rq.run(feed, strategy, trader, broker=broker, journal=journal, timeframe=tf)
             print(account)
         finally:
             if broker:
