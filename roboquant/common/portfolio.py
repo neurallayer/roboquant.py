@@ -107,6 +107,21 @@ class Portfolio(UserDict[Asset, Position]):
                 result += asset.amount(position.size, position.mkt_price)
         return result
 
+    def exposure(self, *assets: Asset) -> Wallet:
+        """
+        Return the sum of the exposure of the open positions in the account. Short
+        positions have a positive exposure.
+        If one or more asset is provided, limit it to those assets, otherwise include all assets.
+
+        Returns:
+            Wallet: The total exposure of all open positions.
+        """
+        result = Wallet()
+        for asset, position in self.items():
+            if not assets or asset in assets:
+                result += abs(asset.amount(position.size, position.mkt_price))
+        return result
+
     def close_positions(self, ndigits: int = 2) -> list[Order]:
         """Create the orders required to close the current open positions.
         The limit price of the orders is equal to the last known market price.

@@ -381,6 +381,9 @@ class Amount:
     def __mul__(self, other: float) -> "Amount":
         return Amount(self.currency, self.value * other)
 
+    def __abs__(self) -> "Amount":
+        return Amount(self.currency, abs(self.value))
+
     def convert_to(self, currency: Currency, dt: datetime) -> float:
         """Convert this amount to another currency and return the monetary value.
         If an exchange rate is required, it will invoke the registered `Amount.converter` under the hood.
