@@ -65,8 +65,6 @@ site:
     - title: Discord
       url: https://discord.com/channels/954650958300856340/954650958300856343
   template: book-theme
-  parts:
-    banner: Documentation is still in beta
   options:
     style: static/css/style.css
     folders: true

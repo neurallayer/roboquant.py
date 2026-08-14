@@ -78,7 +78,7 @@ Key characteristics:
    
 
 ## FlexTrader
-(fextrader_def)=
+(flextrader_def)=
 FlexTrader uses a percentage of the equity to determine the desired order sizes. 
 So if your equity grows during a back test, so does the average order size.
 
