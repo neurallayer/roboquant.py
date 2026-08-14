@@ -35,7 +35,7 @@ for event in feed.play(...):
 
 3. **`trader.create_orders(signals, event, account)`** — The trader applies risk management rules (position sizing, shorting constraints, order limits) and converts signals into concrete `Order` objects. Unlike strategies, traders **have full access to the Account** (cash, positions, buying power).
 
-4. **`broker.place_orders(orders)`** — New orders are submitted to the broker. In `SimBroker`, they are stored and only evaluated for execution when the next event arrives.
+4. **`broker.place_orders(orders)`** — New orders are submitted to the broker. In {cl}`SimBroker`, they are stored and only evaluated for execution when the next event arrives.
 
 5. **`journal.track(...)`** — Optional logging and metrics collection. Journals are passive observers that never modify state.
 
@@ -56,7 +56,7 @@ account = rq.run(feed, strategy)
 print(account)
 ```
 
-This works because `run()` provides sensible defaults: `SimBroker` (USD 1M deposit, 0% slippage) and `SimpleTrader`.
+This works because `run()` provides sensible defaults: {cl}`SimBroker` (USD 1M deposit, 0% slippage) and `SimpleTrader`.
 
 ## Custom Backtest
 The following snippets shows how to override many of the default settings. 
@@ -154,7 +154,7 @@ print(f"min={min(equities):.0f}, max={max(equities):.0f}")
 A live or paper-trade run is only different from a back test in the implementation
 of two of the components selected.
 
-Instead of a the `SimBroker` a real broker is selected and instead of a historic
+Instead of a the {cl}`SimBroker` a real broker is selected and instead of a historic
 data feed, a live datafeed is used.
 
 ```python

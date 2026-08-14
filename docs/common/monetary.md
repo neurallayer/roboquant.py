@@ -14,7 +14,7 @@ A `Currency` represents a single currency (e.g. USD, EUR, JPY). Predefined curre
 instances are available as module-level constants and can be used directly.
 Currencies are not limited to fiat currencies and can be used for crypto currencies as well.
 
-Currencies are callable and then create an `Amount`. Or you can use the '@' operator to
+Currencies are callable and then create an {cl}`Amount`. Or you can use the '@' operator to
 achieve the same.
 
 

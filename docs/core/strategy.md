@@ -6,15 +6,15 @@ kernelspec:
 
 # Strategy
 (strategy_def)=
-A `Strategy` is responsible for creating signals based on incoming events. So a strategy doesn't generate
-the orders, that is the responsibility of a `Trader`.
+A {cl}`Strategy` is responsible for creating signals based on incoming events. So a strategy doesn't generate
+the orders, that is the responsibility of a {cl}`Trader`.
 
 Often the items in the event represent market data and the strategy uses this to perform (technical)
 analysis. But it is also possible for events to contain different data and, for example, perform
 fundamental analysis.
 
-Strategies are **pure decision-makers**. They only look at the `Event` and produce a list of `Signal`
-objects. They have no knowledge of cash, positions, or risk — that is the domain of the `Trader`.
+Strategies are **pure decision-makers**. They only look at the {cl}`Event` and produce a list of {cl}`Signal`
+objects. They have no knowledge of cash, positions, or risk — that is the domain of the {cl}`Trader`.
 
 ```mermaid
 flowchart LR
@@ -31,13 +31,13 @@ flowchart LR
 ```
 
 Because a strategy has no access to the account, the same strategy instance can be used unchanged
-across all [4 stages](../introduction/development.md) of development. Only the `Feed` and `Broker` change
+across all [4 stages](../introduction/development.md) of development. Only the {cl}`Feed` and {cl}`Broker` change
 when moving from back testing to live trading.
 
 ## API
-The `Strategy` base class has a single abstract method that you must implement:
+The {cl}`Strategy` base class has a single abstract method that you must implement:
 
-- **`create_signals(event)`** — Create zero or more `Signal` objects based on the provided event.
+- **`create_signals(event)`** — Create zero or more {cl}`Signal` objects based on the provided event.
   Return an empty list if no signals should be created.
 
 The simplest possible strategy buys every asset that has a price in the event:
@@ -54,10 +54,10 @@ strategy = MyStrategy()
 ```
 
 ### Accessing prices
-The most common thing a strategy does is inspect the prices in an event. The `Event` class provides
+The most common thing a strategy does is inspect the prices in an event. The {cl}`Event` class provides
 several helpers to make this easy:
 
-- `event.price_items` — a dictionary mapping each `Asset` to its `PriceItem`.
+- `event.price_items` — a dictionary mapping each {cl}`Asset` to its `PriceItem`.
 - `event.get_prices(price_type)` — a dictionary of all prices of a given type (e.g. `"CLOSE"`).
 - `event.get_price(asset, price_type)` — the price of a single asset, or `None` if not present.
 
@@ -197,8 +197,8 @@ Verify any strategy yourself with thorough back testing before risking real capi
 | `IBSStrategy(buy_threshold=0.2, sell_threshold=0.8)` | A mean-reversion strategy based on the Internal Bar Strength (IBS) indicator. Buys when the asset is oversold, sells when it is overbought. |
 
 ### Running a strategy
-A strategy is used by passing it to the `run` function, together with a `Feed`. The other components
-(`Trader`, `Broker`, `Journal`) use sensible defaults when not specified.
+A strategy is used by passing it to the {cl}`run` function, together with a {cl}`Feed`. The other components
+(`Trader`, {cl}`Broker`, {cl}`Journal`) use sensible defaults when not specified.
 
 ```{code-cell} python
 feed = rq.feeds.RandomWalk(n_symbols=5, n_prices=1_000)

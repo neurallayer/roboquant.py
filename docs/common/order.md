@@ -43,7 +43,7 @@ class Order:
     The `gtd` (good till date) is optional, and if not set implies the order is valid
     for the DAY. The `info` can hold any arbitrary properties set on the order.
 
-    The `id`, `fill` and `time` properties are managed by the `Broker`.
+    The `id`, `fill` and `time` properties are managed by the {cl}`Broker`.
     """
 
     asset: Asset
@@ -131,12 +131,13 @@ broker.place_orders(cancellations)
 ```
 
 ## Decimals
-When creating an order, it is important two realize two things regarding decimal places:
+When creating an order, it is important two realize two things regarding
+the number of decimal places:
 
-1. What are the number of decimals (sometimes referred to as ndigits in Python) for the **order size**
+1. Number of decimals (sometimes referred to as ndigits in Python) for the **order size**
    that is allowed by the broker. For example Forex, Crypto or fractional equity trading all allow for
    fractional sizes.
-2. What is the number of decimals allowed for setting the **limit price**.
+2. Number of decimals allowed for setting the **limit price**.
 
-Most traders that ome with roboquant out of the box allow you to configure this behavior and if you
+Most {cl}`Trader` implementations that come with *roboquant* allow you to configure this behavior and if you
 want to use them in Forex or Crypto, you likely will have to change the defaults.

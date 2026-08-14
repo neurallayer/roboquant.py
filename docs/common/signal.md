@@ -5,7 +5,7 @@ kernelspec:
 ---
 # Signal
 (signal_def)=
-The output of a `Strategy` is a list of `Signal` objects. Each signal contains three pieces of
+The output of a {cl}`Strategy` is a list of {cl}`Signal` objects. Each signal contains three pieces of
 information:
 
 - **`asset`** — the asset the signal applies to.
@@ -42,7 +42,7 @@ print(custom)
 Some of the convenience properties on a signal: `is_buy`, `is_sell`, `is_entry`, and `is_exit`.
 
 :::{note}
-It is up the `Trader` to use the signal and its properties. For example, the 
+It is up the {cl}`Trader` to use the signal and its properties. For example, the 
 `FlexTrader` uses the `rating`  to determine the order sizing and respects the 
 `SignalType` when it comes to position sizing.
 :::

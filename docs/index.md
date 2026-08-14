@@ -37,11 +37,11 @@ Below are some of the key features of *roboquant*:
 - [x] modular and extensible 
 
 ## Key Principles
-- **Event-driven streaming** — Everything is built around `Event` objects produced lazily by feeds, supporting both backtesting and live trading with the same pipeline.
+- **Event-driven streaming** — Everything is built around {cl}`Event` objects produced lazily by feeds, supporting both backtesting and live trading with the same pipeline.
 - **Pluggable Core** - All the core components can be replaced with different implementations
 - **Good Develop Experience** — `run(feed, strategy)` works out of the box with sensible defaults, making the simplest back-test just a one-liner.
-- **Immutable common types** — `Asset`, `Position`, `Order`, `Amount`, `Timeframe` and `Signal` are all immutable, reducing the risk of subtle bugs.
-- **Multi-currency** — Built-in support via `Amount`, `Wallet`, and pluggable `CurrencyConverter` (ECB, static, one-to-one).
+- **Immutable common types** — {cl}`Asset`, `Position`, `Order`, {cl}`Amount`, {cl}`Timeframe` and {cl}`Signal` are all immutable, reducing the risk of subtle bugs.
+- **Multi-currency** — Built-in support via {cl}`Amount`, {cl}`Wallet`, and pluggable `CurrencyConverter` (ECB, static, one-to-one).
 
 ## License
 Roboquant software itself is made available under the Apache 2.0 license. You can read more about the Apache 2.0 license on this page: https://www.apache.org/licenses/LICENSE-2.0.html

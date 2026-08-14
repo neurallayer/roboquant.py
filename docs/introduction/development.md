@@ -39,7 +39,7 @@ Each stage has its own specific purpose and advantages. However, before diving i
 2. **If performance is unsatisfactory in a later stage, go back to stage 1**. Usually, small changes in code can have a big impact on results, so thorough testing at every stage is essential.
 :::
 
-Roboquant supports all 4 stages, requiring only minimal configuration changes when moving from one stage to the next. Your `Strategy` and `Trader` should not change between stages; only the `Feed` and `Broker` configurations differ.
+Roboquant supports all 4 stages, requiring only minimal configuration changes when moving from one stage to the next. Your {cl}`Strategy` and {cl}`Trader` should not change between stages; only the {cl}`Feed` and {cl}`Broker` configurations differ.
 
 The mapping of Brokers and Feeds per stage is as follows:
 
@@ -54,7 +54,7 @@ The mapping of Brokers and Feeds per stage is as follows:
 
 ### Stage 1: Back Testing
 
-In this stage, you will test your `Strategy` and `Trader` against historical data using the `SimBroker`.
+In this stage, you will test your {cl}`Strategy` and {cl}`Trader` against historical data using the {cl}`SimBroker`.
 
 You can run a single backtest over a complete historical timeline, but Roboquant also makes it easy to perform **walk-forward analysis** and **Monte Carlo simulations**. These types of backtests give you a better understanding of how your strategy performs under different market regimes.
 
@@ -63,7 +63,7 @@ You can run a single backtest over a complete historical timeline, but Roboquant
 **Important principle**: This is the **only** stage where you should develop and modify your strategy and rules. If performance in a later stage is disappointing, you should return to this stage to make adjustments. For example, if you want to use a circuit breaker to add peace of mind during live trading, you should include this logic during backtesting, not introduce it only during live execution.
 
 :::{note} Configuration
-- Configure your `SimBroker` to be as similar as possible to the real trading account and broker you plan to use.
+- Configure your {cl}`SimBroker` to be as similar as possible to the real trading account and broker you plan to use.
 - Set realistic costs and initial deposits to avoid overly optimistic expectations about total costs.
 - As a general rule, it is better to overestimate your cost structure than to underestimate it.
 :::
@@ -72,16 +72,16 @@ You can run a single backtest over a complete historical timeline, but Roboquant
 
 ### Stage 2: Forward Testing
 
-In this stage, you will test your `Strategy` and `Trader` using **real-time data** and the `SimBroker`.
+In this stage, you will test your {cl}`Strategy` and {cl}`Trader` using **real-time data** and the {cl}`SimBroker`.
 
 **The main purpose** of this stage is to validate that your strategy still performs well on **unseen data**. It is easy to overfit during backtesting, and forward testing provides a crucial sanity check before risking any real capital.
 
 **Why it matters**: While historical data provides a broad view, it does not reflect the current market microstructure, liquidity, or latency. Forward testing exposes your strategy to the live market environment in a risk-free manner, allowing you to observe how it reacts to real-world events like sudden news spikes or market opens/closes.
 
 :::{note} Configuration
-- Use the exact same `Strategy` and `Trader` code as in Stage 1.
-- Switch your `Feed` from historical to a real-time source (e.g., WebSocket or REST API).
-- Keep the `SimBroker` to simulate fills, slippage, and commissions in real-time without financial risk.
+- Use the exact same {cl}`Strategy` and {cl}`Trader` code as in Stage 1.
+- Switch your {cl}`Feed` from historical to a real-time source (e.g., WebSocket or REST API).
+- Keep the {cl}`SimBroker` to simulate fills, slippage, and commissions in real-time without financial risk.
 :::
 
 ---
@@ -95,7 +95,7 @@ In this stage, you will run your strategy with **real-time data** and a **real b
 **Why it matters**: The interface between your trading system and the broker is a common point of failure. Issues such as authentication errors, rate limits, order type mismatches, or position synchronization bugs can be safely identified and resolved here without losing real money.
 
 :::{note} Configuration
-- Switch your `Broker` from `SimBroker` to the real broker's implementation (e.g., IBKR, Alpaca).
+- Switch your {cl}`Broker` from {cl}`SimBroker` to the real broker's implementation (e.g., IBKR, Alpaca).
 - Ensure your broker account is set to "paper" or "simulated" mode.
 - Monitor the system for API latency, disconnections, and reconnection logic.
 :::

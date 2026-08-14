@@ -60,7 +60,7 @@ print(feed)
 ## AlpacaBroker — Live & Paper Trading
 
 The `AlpacaBroker` allows you to execute orders against an Alpaca live or paper trading account. 
-It can be used standalone or passed into `run` for live or paper trading execution.
+It can be used standalone or passed into {cl}`run` for live or paper trading execution.
 
 
 ```{code-cell} python

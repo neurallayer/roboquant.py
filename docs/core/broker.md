@@ -26,7 +26,7 @@ flowchart LR
 
 ## API
 
-The `Broker` base class defines the interface that all broker implementations must follow. The two core methods are:
+The {cl}`Broker` base class defines the interface that all broker implementations must follow. The two core methods are:
 
 - **`place_orders(orders: list[Order])`** — submit one or more orders to the broker. These orders are placed at the real broker which will likely sent them to an exchange.
 - **`sync(event: Event) -> Account`** — synchronize the broker state with the latest market event and the real trading account state. Returns the updated {cl}`Account` reflecting cash, positions, open orders, and trades.
@@ -56,9 +56,10 @@ print("trading price:", event.get_price(asset), "\n")
 print(account)
 ```
 
-Most users will not implement `Broker` directly but instead use `SimBroker` for back-testing or a third-party live broker.
+Most users will not implement {cl}`Broker` directly but instead use {cl}`SimBroker` for back-testing or a third-party live broker.
 
 ## SimBroker
+(simbroker_def)=
 The default broker for back-testing is the SimBroker (short for Simulated Broker). It has several configuration parameters and can be subclassed to change even more of its behavior.
 
 ```{code-cell} python

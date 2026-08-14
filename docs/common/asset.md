@@ -6,12 +6,12 @@ kernelspec:
 
 # Asset
 (asset_def)=
-The `Asset` class is the fundamental building block for representing financial instruments in *roboquant*.
+The {cl}`Asset` class is the fundamental building block for representing financial instruments in *roboquant*.
 Every tradable instrument — whether a stock, option, forex pair, or cryptocurrency —
-is modelled as a specialized subclass of `Asset`.
+is modelled as a specialized subclass of {cl}`Asset`.
 
 ## Overview
-All asset types extend the common base class, `Asset`, which provides:
+All asset types extend the common base class, {cl}`Asset`, which provides:
 
 - A **symbol** (ticker)
 - The currency the asset is denoted in
@@ -46,7 +46,7 @@ roboquant support the folowing asset types out of the box:
 | `CRYPTO`        | `Crypto`       | Crypto spot (BTC/USDT)          |
 
 
-But you easily add your own asset classes by extending `Asset` class.
+But you easily add your own asset classes by extending {cl}`Asset` class.
 
 ## Instantiation
 

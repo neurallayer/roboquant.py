@@ -5,7 +5,7 @@ kernelspec:
 ---
 # Feed
 (feed_def)=
-A `Feed` represents a source of (financial) events that can be (re-)played to feed a {cl}`run()` with data.
+A {cl}`Feed` represents a source of (financial) events that can be (re-)played to feed a {cl}`run()` with data.
 Although the most common type of events are those containing market data, other types of events are also possible.
 For example, events containing news items or social media posts could also be represented as a feed.
 
@@ -33,7 +33,7 @@ import roboquant as rq
 rq.set_dark_style()
 ```
 
-A `Feed` is also one of the main components that you swap when moving through the
+A {cl}`Feed` is also one of the main components that you swap when moving through the
 [4 stages](../../concepts/4stages.md) of strategy development:
 
 | Stage | Broker | Feed |
@@ -44,7 +44,7 @@ A `Feed` is also one of the main components that you swap when moving through th
 | Live Trading | Real broker (real account) | Real-time data |
 
 ## Feed API
-The `Feed` interface itself is deliberately small and consists of just two abstract methods.
+The {cl}`Feed` interface itself is deliberately small and consists of just two abstract methods.
 
 - **`play(timeframe=None)`** — Returns an iterator of {cl}`Event` objects. Optionally, a {cl}`Timeframe` can be
   provided to only replay the events within that period. This is used for walk-forward and multi-run
@@ -66,27 +66,27 @@ for event in feed.play():
 ```
 
 :::{note}
-A `Feed` is only a source of data. It does not know anything about orders, positions, or cash.
+A {cl}`Feed` is only a source of data. It does not know anything about orders, positions, or cash.
 Those are the responsibilities of the {cl}`Broker` and {cl}`Trader`.
 :::
 
 ### Convenience methods
 Most built-in feeds extend `HistoricFeed`, which adds a number of convenient helper methods on top of
-the `Feed` interface:
+the {cl}`Feed` interface:
 
 - `symbols()` — the list of unique symbols in the feed.
-- `get_asset(symbol)` — retrieve an `Asset` by its symbol.
-- `get_ohlcv(asset)` — the OHLCV values of an asset as a `TimeSeries`.
-- `to_timeseries(*assets)` — prices of one or more assets as a multivariate `TimeSeries`.
+- `get_asset(symbol)` — retrieve an {cl}`Asset` by its symbol.
+- `get_ohlcv(asset)` — the OHLCV values of an asset as a {cl}`TimeSeries`.
+- `to_timeseries(*assets)` — prices of one or more assets as a multivariate {cl}`TimeSeries`.
 - `plot(asset)` — plot the prices (and optionally trades) of an asset, requires `matplotlib`.
 - `count_events()` / `count_items()` — quick statistics about the contents of the feed.
-- `track(metric)` — track a `Metric` over time and return the result as a `TimeSeries`.
+- `track(metric)` — track a `Metric` over time and return the result as a {cl}`TimeSeries`.
 
 Feeds that keep everything in memory (like `YahooFeed` and `CSVFeed`) extend `InMemoryFeed` and
 additionally provide:
 
 - `timeline()` — all unique timestamps in the feed.
-- `timeframe()` — the `Timeframe` covered by the feed.
+- `timeframe()` — the {cl}`Timeframe` covered by the feed.
 - `get_first_event()` / `get_last_event()` — the first and last event.
 
 ```{code-cell} python
