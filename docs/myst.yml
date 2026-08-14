@@ -64,6 +64,8 @@ site:
       url: https://github.com/neurallayer/roboquant.py
     - title: Discord
       url: https://discord.com/channels/954650958300856340/954650958300856343
+    - title: PyPI
+      url: https://pypi.org/project/roboquant/
   template: book-theme
   options:
     style: static/css/style.css

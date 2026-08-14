@@ -26,7 +26,7 @@ infer-with-first-use = false
 
 [project]
 name = "roboquant"
-version = "2.8.0.dev7"
+version = "2.8.0"
 authors = [{ name = "roboquant team", email = "info@roboquant.org" }]
 description = "A fast algorithmic trading platform with support for AI based strategies"
 readme = "README.md"
