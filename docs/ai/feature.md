@@ -24,7 +24,7 @@ class Feature(Generic[T]):
 
 ```
 As can seen in the above snippet, a feature calculation always returns an Numpy array of the type float32.
-In fact it is aways a 1-dimensional float32 array and missing values are represented as float "NaN" values in
+In fact it is always a 1-dimensional float32 array and missing values are represented as float "NaN" values in
 that array. Every invocation should always return the same length array.
 
 In *roboquant* there are three types of feature implementations included:
@@ -76,7 +76,7 @@ class RSIFeature(IndicatorFeature):
 | Feature | Description |
 |---|---|
 | `EquityFeature` | Total Equity |
-| `UnrealizedPNLFeature` | Unrelaized Profit & Loss|
+| `UnrealizedPNLFeature` | Unrealized Profit & Loss|
 
 
 ## Generic Features
@@ -88,7 +88,7 @@ class RSIFeature(IndicatorFeature):
 | `RandomFeature` | Feature that generates random values |
 | `FeatureSet` | Combine other features into a new feature |
 | `NormalizeFeature` | Normalize data over a certain period |
-| `FillFeature` | Fill in missing ("nan") values iwht last known value|
+| `FillFeature` | Fill in missing ("nan") values with last known value|
 | `FillWithConstantFeature` | Fill missing values with a constant float value |
 | `ReturnFeature` | Calculate the next step return |
 | `LongReturnsFeature` | Calculate the return over a longer period |

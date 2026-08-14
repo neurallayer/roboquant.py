@@ -27,7 +27,7 @@ There are many commonly used features already provided out of the box.
 
 ## PyTorch
 Roboquant uses the excellent PyTorch framework as a basis for the included neural-networks based strategies. 
-It comes with many popular network archtecture layers out of the box and has a Pythonic API, making it
+It comes with many popular network architecture layers out of the box and has a Pythonic API, making it
 easier to get started. 
 
 
@@ -44,7 +44,7 @@ based on P&L, Sharpe ratio, or risk-adjusted returns. This makes RL a natural fi
   profitable strategies through trial and error.
 - **Handles sequential decision-making.** Trading is inherently sequential — today's action affects
   tomorrow's position, capital, and risk exposure. RL explicitly models this temporal dependency.
-- **Optimises for long-term objectives.** Unlike supervised learning which minimises prediction error
+- **Optimizes for long-term objectives.** Unlike supervised learning which minimizes prediction error
   on individual samples, RL can be tuned to maximise cumulative returns, a more direct proxy for
   trading success.
 - **Adapts to non-stationary environments.** Markets evolve; RL agents can be designed to continuously
