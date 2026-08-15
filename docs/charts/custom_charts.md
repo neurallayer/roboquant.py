@@ -9,8 +9,8 @@ kernelspec:
 ## Background
 Often you want to visualize some metrics to are specific to your strategy and approach to developing algo-trading solutions.
 
-This example shows how to approach such a use-case. It is more meant as inspiration than a ready-to-use solution,
-but it should give you a good idea of how to use the *roboquant* framework to create your own custom charts.
+This example shows how to approach such a scenario. It is more meant as inspiration than a ready-to-use solution,
+but it should give you a good idea of how to use the *roboquant* framework to create your own highly customized charts.
 
 ## Example
 This example shows how to use the `IndicatorMetric` and `SignalRatingMetric` to track indicators and signals on a chart.
@@ -36,9 +36,7 @@ feed = rq.feeds.YahooFeed("TSLA", start_date="2025-01-01", end_date="2026-01-01"
 asset = feed.get_asset("TSLA")
 ```
 
-
 ## Custom Metrics
-
 We define the custom metrics we want to use. In both cases we subclass the `IndicatorMetric` and implement the `_calc` method. This method is called for each new bar in the feed, and is passed a `BarSeries` object that contains the last `n` bars, where `n` is the timeperiod of the indicator.
 
 The indicators we use are the Bollinger Bands and the Relative Strength Index (RSI). The Bollinger Bands are calculated using the `BBANDS` function, which returns the upper, middle and lower bands. The RSI is calculated using the `RSI` function, which returns a single value.
@@ -69,7 +67,7 @@ We now define the figure and axes for the chart. We use a 3 row layout, with the
 fig, (ax1, ax2, ax3) = plt.subplots(nrows=3, sharex=True, height_ratios=[4,1,1])
 ```
 
-### Price Chart and Bollinger Bands
+### Price Chart with Bollinger Bands
 
 Lets plot the price and Bollinger Bands on the first axis. We use the `track` method of the feed to track the Bollinger Bands metric, which returns a TimeSeries DataFrame with the lower and upper bands.
 
@@ -131,7 +129,5 @@ fig
 # Next Steps
 
 Based on this example you can create your own custom charts to visualize any metrics you want. 
-
 You can also use the `plot` method of the feed to plot multiple assets on the same chart, or use the `plot` method of the metric to plot the metric values directly. 
-
 You can then combine these plots to create more complex charts and package them into a Chart class that can be reused in your own strategies and backtests.

@@ -120,8 +120,10 @@ def _derive_flex_trader(assets: list[Asset], account: Account) -> Trader:
     )
 
 
-def demo_run() -> Account:
-    """Small demo run for testing purposes"""
-    feed = YahooFeed.us_stocks_10()
+def demo_run(journal: Journal | None = None) -> Account:
+    """Small demo run for testing purposes.
+    Optional a journal can be provided.
+    """
+    feed = YahooFeed.us_stocks_10(start_date="2022-01-01", end_date="2026-01-01")
     strategy = EMACrossover()
-    return run(feed, strategy)
+    return run(feed, strategy, journal=journal)

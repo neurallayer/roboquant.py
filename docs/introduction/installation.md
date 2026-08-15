@@ -44,7 +44,9 @@ pip install --upgrade "roboquant[ai,extra]"
 
 ## Install with uv
 
-[uv](https://github.com/astral-sh/uv) is a fast Python package and project manager. If you are using `uv`, getting started is straightforward:
+[uv](https://github.com/astral-sh/uv) is a fast Python package and project manager. It is also the package manager used to develop *roboquant*.
+
+If you are using `uv`, starting a new project is straightforward:
 
 ```bash
 mkdir my-project

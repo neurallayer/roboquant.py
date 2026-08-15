@@ -4,7 +4,7 @@ import re
 from abc import ABC
 from dataclasses import dataclass
 from decimal import Decimal
-from typing import Type, override
+from typing import Any, Type, override
 
 from roboquant.common.monetary import USD, Amount, Currency
 
@@ -206,7 +206,7 @@ class Option(Asset):
         """
         return float(size) * price * 100.0
 
-    def decode_occ_symbol(self) -> dict:
+    def decode_occ_symbol(self) -> dict[str, Any]:
         """
         Decode the symbol into its components.
 

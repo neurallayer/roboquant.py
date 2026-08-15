@@ -22,7 +22,7 @@ import torch.nn.functional as F
 
 import roboquant as rq
 from roboquant.journals.basicjournal import BasicJournal
-from roboquant.ai.features import BarFeature, CombinedFeature, MaxReturnFeature, PriceFeature, SMAFeature, VolumeFeature
+from roboquant.ai.features import BarFeature, FeatureSet, MaxReturnFeature, PriceFeature, SMAFeature, VolumeFeature
 from roboquant.ai.strategies import TimeSeriesStrategy, logger
 ```
 
@@ -70,7 +70,7 @@ Now we define the input and label features we want to use. This is just a small
 sample of the available features and custom features can also be added.
 
 ```{code-cell} python
-input_feature = CombinedFeature(
+input_feature = FeatureSet(
     BarFeature(apple).returns(),
     SMAFeature(PriceFeature(apple), 10).returns(),
     SMAFeature(PriceFeature(apple), 20).returns(),

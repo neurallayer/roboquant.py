@@ -39,7 +39,7 @@ from sb3_contrib import RecurrentPPO
 from sb3_contrib.common.recurrent.policies import RecurrentActorCriticPolicy
 from roboquant import run
 from roboquant.feeds.yahoofeed import YahooFeed
-from roboquant.ai.features import BarFeature, EquityFeature, CombinedFeature, SMAFeature, PriceFeature
+from roboquant.ai.features import BarFeature, EquityFeature, FeatureSet, SMAFeature, PriceFeature
 from roboquant.ai.rl import TradingEnv, SB3PolicyStrategy
 
 # Create the feed
@@ -48,7 +48,7 @@ feed = YahooFeed(*symbols, start_date="2000-01-01", end_date="2020-12-31")
 assets = feed.assets()
 
 # Create the features
-obs_feature = CombinedFeature(
+obs_feature = FeatureSet(
     BarFeature(*assets),
     SMAFeature(PriceFeature(*assets), period=20),
     SMAFeature(PriceFeature(*assets), period=10)

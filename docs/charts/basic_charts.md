@@ -78,7 +78,6 @@ more interesting.
 feed = rq.feeds.YahooFeed("MSFT", "F", "GLD", "GSG", "BND", "LQD", "IBIT", "VIXY")
 ```
 
-## Feed Chart
 
 ### Price Chart
 Plot a price and optionally the volume for one of the assets in the feed.
@@ -95,7 +94,6 @@ There is a special plot method available that makes this visible.
 feed.to_timeseries().plot_corr(fontsize=7);
 ```
 
-## Backtest Charts
 
 Once we run a backtest we can plot the account related charts and charts 
 for any metrics we captured.
@@ -118,7 +116,7 @@ tf = rq.Timeframe.previous("365 days")
 feed.plot("MSFT", timeframe=tf, trades=account.trades);
 ```
 
-### Equity Chart
+### Metric Chart
 Equity is a good example of a metric that is usefull to capture during a run.
 It provides insights how the total equity is evolving during a run and shows 
 also the volatility of our strategy when it comes to returns.
@@ -128,7 +126,7 @@ equity = journal.get_metrics("pnl/equity")
 equity.plot();
 ```
 
-### Allocation Chart
+### Asset Allocation Chart
 For larger portfolios it is useful to see which percentage is allocated to which asset.
 
 Since assets can be denoted in different currencies, roboquant takes care of converting them to a single
@@ -139,7 +137,7 @@ _, ax = plt.subplots(figsize=(3, 3))
 account.plot_allocation(include_cash=True, ax = ax);
 ```
 
-### Custom layouts
+### Custom Chart
 You can customize many of the plots by providing parameter arguments that will be passed on
 to matplotlib. You can also add some more lines to the plot.
 
@@ -152,6 +150,7 @@ equity.rolling(50).mean().plot(ax=ax, color="red")
 ax.set_title("My Custom Title");
 ```
 
+### Custom Layout
 Or you can take full control of the layout and create more advanced chart figures.
 Below we create a figure with 8 subplots. We also create a more informative title.
 
