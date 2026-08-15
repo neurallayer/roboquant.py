@@ -44,7 +44,6 @@ CONFIG: dict[str, Any] = {"broker": "mt5", "server": MT5_SERVER, "account": MT5_
     KEY and ACCOUNT_ID and MT5_SERVER and MT5_ACCOUNT and MT5_PASSWORD, "set TICKERALL_API_KEY and TICKERALL_ACCOUNT_ID to run"
 )
 class TestTickerAllIT(unittest.TestCase):
-
     def test_live_ticks(self):
         feed = TickerAllLiveFeed.connect(KEY, **CONFIG)
         feed.subscribe(SYMBOL)
@@ -85,7 +84,12 @@ class TestTickerAllIT(unittest.TestCase):
             feed.subscribe(SYMBOL)
             strategy = EMACrossover(2, 5)
             trader = FlexTrader(
-                size_fractions=4, shorting=True, max_order_pct=0.02, min_order_pct=0.01, max_position_pct=0.2, limit_rounding=6
+                size_fractions=4,
+                shorting=True,
+                max_order_pct=0.01,
+                min_order_pct=0.001,
+                max_position_pct=0.2,
+                limit_rounding=6
             )
             tf = rq.Timeframe.next("60 minutes")
             journal = BasicJournal()

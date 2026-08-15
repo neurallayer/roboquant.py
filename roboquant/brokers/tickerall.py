@@ -1,9 +1,8 @@
 import logging
-import math
 from decimal import Decimal
 from typing import Self
 
-from tickerall import Tickerall
+from tickerall import Tickerall, TickerallValidationError
 from tickerall.types import BrokerName, TerminalType
 
 from roboquant.brokers.livebroker import LiveBroker
@@ -184,16 +183,19 @@ class TickerAllBroker(LiveBroker):
         return orders
 
     def _place_order(self, order: Order) -> None:
-        is_market = math.isnan(order.limit)
-        result = self._client.orders.place(
-            self._account_id,
-            type="market" if is_market else "limit",
-            symbol=order.asset.symbol,
-            side="BUY" if order.is_buy else "SELL",
-            volume=abs(float(order.size)),
-            price=None if is_market else order.limit,
-        )
-        logger.info("placed order symbol=%s ticket=%s", order.asset.symbol, result.ticket)
+        try:
+            result = self._client.orders.place(
+                self._account_id,
+                type="limit",
+                symbol=order.asset.symbol,
+                side="BUY" if order.is_buy else "SELL",
+                volume=abs(float(order.size)),
+                price=order.limit,
+            )
+            logger.info("placed order order=%s ticket=%s", order, result.ticket)
+        except TickerallValidationError:
+            logger.exception("failed to place order=%s", order)
+
 
     def _update_order(self, order: Order) -> None:
         self._client.orders.modify_pending(self._account_id, int(order.id), price=order.limit)
