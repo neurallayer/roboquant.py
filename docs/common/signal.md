@@ -43,7 +43,7 @@ print(custom)
 Some of the convenience properties on a signal: `is_buy`, `is_sell`, `is_entry`, and `is_exit`.
 
 :::{note}
-It is up the {cl}`Trader` to use the signal and its properties. For example, the 
-`FlexTrader` uses the `rating`  to determine the order sizing and respects the 
+It is up the {cl}`Trader` to interperter the signal and its properties. For example, the 
+`FlexTrader` uses the `rating` to adjust the order sizing and respects the 
 `SignalType` when it comes to position sizing.
 :::
