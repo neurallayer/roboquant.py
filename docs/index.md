@@ -41,7 +41,7 @@ Below are some of the key features of *roboquant*:
 - **Pluggable Core** - All the core components can be replaced with different implementations
 - **Good Develop Experience** — {cl}`run(feed, strategy)` works out of the box with sensible defaults, making the simplest back-test just a one-liner.
 - **Immutable common types** — {cl}`Asset`, {cl}`Position`, {cl}`Order`, {cl}`Amount`, {cl}`Timeframe` and {cl}`Signal` are all immutable, reducing the risk of subtle bugs.
-- **Multi-currency** — Built-in support via {cl}`Amount`, {cl}`Wallet`, and pluggable `CurrencyConverter` (ECB, static, one-to-one).
+- **Multi-currency** — Built-in support via {cl}`Amount`, {cl}`Wallet`, and pluggable {cl}`CurrencyConverter` (ECB, static, one-to-one).
 
 ## License
 Roboquant software itself is made available under the Apache 2.0 license. You can read more about the Apache 2.0 license on this page: https://www.apache.org/licenses/LICENSE-2.0.html

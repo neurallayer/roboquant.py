@@ -78,8 +78,8 @@ print(f"{wallet:.0f}")
 print(wallet[USD], wallet[EUR], wallet[JPY])
 ```
 
-## Conversion
-(conversion_def)=
+## CurrencyConverter
+(currencyconverter_def)=
 If trading in more than one currency, a conversion is required 
 between amounts in the different currencies. 
 
