@@ -2,7 +2,8 @@ from datetime import datetime
 import logging
 import os.path
 from array import array
-from typing import Iterable, Iterator
+from pathlib import Path
+from typing import Iterable, Iterator, override
 
 import pyarrow as pa
 import pyarrow.parquet as pq
@@ -35,7 +36,7 @@ class ParquetFeed(HistoricFeed):
         ]
     )
 
-    def __init__(self, parquet_path) -> None:
+    def __init__(self, parquet_path: str | Path) -> None:
         super().__init__()
         self.parquet_path = parquet_path
         logger.info("parquet feed path=%s", parquet_path)
@@ -53,6 +54,7 @@ class ParquetFeed(HistoricFeed):
         """Check if the parquet file exists"""
         return os.path.exists(self.parquet_path)
 
+    @override
     def play(self, timeframe: Timeframe | None = None) -> Iterator[Event]:
         # pylint: disable=too-many-locals
         with pq.ParquetFile(self.parquet_path) as dataset:
@@ -141,6 +143,7 @@ class ParquetFeed(HistoricFeed):
             return tf
         return Timeframe.EMPTY
 
+    @override
     def assets(self) -> list[Asset]:
         """return the list of unique assets available in this feed"""
         if not self.exists():

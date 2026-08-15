@@ -1,5 +1,7 @@
-from typing import Self, override
+from typing import Any, Self, override
 from datetime import datetime
+
+from matplotlib.axes import Axes
 
 from roboquant.common.metric import Metric
 from roboquant.journals.journal import Journal
@@ -43,7 +45,7 @@ class MetricsJournal(Journal):
     def get_metrics(self, *metric_names: str) -> TimeSeries:
         """Return the ccaptured metrics of oen or more metrics as a TimeSeries"""
         timeline: list[datetime] = []
-        values = {name: [] for name in metric_names}
+        values: dict[str, list[float]] = {name: [] for name in metric_names}
         for time, metrics in self._history:
             for name in metric_names:
                 value = metrics.get(name, float("nan"))
@@ -59,7 +61,7 @@ class MetricsJournal(Journal):
             result.update(m.keys())
         return list(result)
 
-    def plot(self, *metric_names: str, plot_timeline: bool = True, ax = None, **kwargs):
+    def plot(self, *metric_names: str, plot_timeline: bool = True, ax: Axes | None = None, **kwargs: Any) -> Axes:
         """Plot one or more metrics. Optional a `matplotlib.axes.Axes` can be provided
         This method requires matplotlib to be installed."""
 

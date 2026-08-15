@@ -5,7 +5,7 @@ kernelspec:
 ---
 # Signal
 (signal_def)=
-A signal is a quantifiable trigger that instructs to enter, exit, or adjust a {cl}`Position` in an {cl}`Asset`.
+A signal is a quantifiable trigger that instructs to enter, exit, or adjust a {cl}`Position` for an {cl}`Asset`.
 
 Each signal contains three pieces of information:
 

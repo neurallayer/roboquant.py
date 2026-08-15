@@ -1,6 +1,6 @@
 from roboquant.brokers.livebroker import LiveBroker
 from roboquant.common.account import Account
-from roboquant.common.asset import Asset, Crypto
+from roboquant.common.asset import Crypto
 from roboquant.common.event import Event
 from roboquant.common.monetary import Amount, Wallet
 from roboquant.common.order import Order
@@ -88,7 +88,7 @@ class CryptoBroker(LiveBroker):
         orders = self.__client.fetch_open_orders()
         result = []
         for order in orders:
-            asset = Asset(order['symbol'])
+            asset = Crypto.from_symbol(order['symbol'])
             size = order['amount']
             limit = order['price']
             size = size if order['side'] == 'buy' else -size

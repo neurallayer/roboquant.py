@@ -118,7 +118,7 @@ class SignalRatingMetric(Metric):
     def calc(self, event: Event, account: Account, signals: list[Signal], orders: list[Order]) -> dict[str, float]:
         signals = self.strategy.create_signals(event)
         d = {s.asset: s for s in signals}
-        result = {}
+        result:dict[str, float] = {}
         for asset in self.assets:
             metric_name = f"rating/{asset.symbol.lower()}"
             if signal := d.get(asset):

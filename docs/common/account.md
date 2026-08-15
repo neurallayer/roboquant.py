@@ -13,7 +13,7 @@ and executed trades.
 The account doesn't contain closed orders and closed positions.
 
 :::{tip}
-If you want to track all orders during a run, use the `SignalOrderTracker` journal.
+If you want to track all orders during a run, use the {cl}`SignalOrderTracker` journal.
 :::
 
 

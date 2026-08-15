@@ -26,7 +26,7 @@ class YahooFeed(InMemoryFeed):
         *symbols: str,
         start_date: str | date | datetime = "2020-01-01",
         end_date: str | date | datetime | None = None,
-        interval="1d",
+        interval: str ="1d",
     ):
         """
         Create a new YahooFeed instance
@@ -96,7 +96,7 @@ class YahooFeed(InMemoryFeed):
 
     @staticmethod
     def us_stocks_10(
-        start_date: str | date | datetime = "2020-01-01", end_date: str | date | datetime | None = None, interval="1d"
+        start_date: str | date | datetime = "2020-01-01", end_date: str | date | datetime | None = None, interval : str = "1d"
     ) -> "YahooFeed":
         """Returns a YahooFeed with 10 large us stocks: MSFT,NVDA,AAPL,AMZN,META,GOOGL,AVGO,JPM,XOM,TSLA
         Can be used for quick testing, but this selection has a strong survivor bias.

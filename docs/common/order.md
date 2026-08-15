@@ -90,7 +90,6 @@ class Order:
 
 ```
 
-
 ## Initial Orders
 Creating a new initial order is simple. One thing to be aware of is that order sizes
 are of the type `Decimal`.
@@ -103,7 +102,6 @@ asset = Stock("AAPL")
 buy_order = Order(asset, size = Decimal(10), limit = 200.0, tif="DAY")
 sell_order = Order(asset, size = -Decimal(10), limit = 200.0, tif="GTC")
 ```
-
 
 ## Cancel & Modify orders
 Existing orders are orders with a non empty `id`. This `id` is assigned by the broker when placed at that broker.
@@ -141,3 +139,18 @@ the number of decimal places:
 
 Most {cl}`Trader` implementations that come with *roboquant* allow you to configure this behavior and if you
 want to use them in Forex or Crypto, you likely will have to change the defaults.
+
+:::{tip} Avoid Market Orders
+Roboquant doesn't support market orders and it might be tempting to
+extend the Order class to do so. But in algo-trading, market
+orders introduce more risk. 
+
+For example if there is any data quality issue in the {cl}`Feed` and prices
+might be way off, there is no protection when placing the corresponding orders.
+
+Imagine what happens to the order-size when the {cl}`Trader` thinks BTC is worth
+500 USD while the real market value is 50_000 USD. And if this is a market-order,
+there is nothing stopping this order from being filled (if enough buying power)
+
+So better to use limit orders and get at least some extra safety. 
+:::

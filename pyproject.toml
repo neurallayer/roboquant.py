@@ -23,6 +23,9 @@ module-name = "roboquant"
 
 [tool.pyrefly]
 infer-with-first-use = false
+min-severity = "info"
+project-excludes = ["tests"]
+preset = "strict"
 
 [project]
 name = "roboquant"
@@ -94,4 +97,5 @@ dev = [
   "ty>=0.0.62",
   "tensorboard>=2.21.0",
   "jupyter-book>=2.1.6",
+  "pyrefly>=1.2.0",
 ]

@@ -39,8 +39,8 @@ Below are some of the key features of *roboquant*:
 ## Key Principles
 - **Event-driven streaming** — Everything is built around {cl}`Event` objects produced lazily by feeds, supporting both backtesting and live trading with the same pipeline.
 - **Pluggable Core** - All the core components can be replaced with different implementations
-- **Good Develop Experience** — `run(feed, strategy)` works out of the box with sensible defaults, making the simplest back-test just a one-liner.
-- **Immutable common types** — {cl}`Asset`, `Position`, `Order`, {cl}`Amount`, {cl}`Timeframe` and {cl}`Signal` are all immutable, reducing the risk of subtle bugs.
+- **Good Develop Experience** — {cl}`run(feed, strategy)` works out of the box with sensible defaults, making the simplest back-test just a one-liner.
+- **Immutable common types** — {cl}`Asset`, {cl}`Position`, {cl}`Order`, {cl}`Amount`, {cl}`Timeframe` and {cl}`Signal` are all immutable, reducing the risk of subtle bugs.
 - **Multi-currency** — Built-in support via {cl}`Amount`, {cl}`Wallet`, and pluggable `CurrencyConverter` (ECB, static, one-to-one).
 
 ## License

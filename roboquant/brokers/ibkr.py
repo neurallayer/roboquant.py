@@ -69,7 +69,7 @@ class _AssetMapper:
         If the conid is not mapped, it will make an API call to retrieve the asset.
         If the asset is not found, it will return None.
         """
-        if asset := self._conid_2_asset.get(int(conid)):
+        if asset := self._conid_2_asset.get(conid):
             return asset
 
         contract: ContractInfo = self.client.contract_information_by_conid(conid).data  # type: ignore
@@ -221,11 +221,11 @@ class IBKRBroker(LiveBroker):
         side = "BUY" if order.size > 0 else "SELL"
         info = order.info or {}
         return OrderRequest(
-            conid=int(conid),
+            conid=conid,
             side=side,
             quantity=qty,
             order_type="LMT",
-            acct_id=str(self.client.account_id),
+            acct_id=self.client.account_id or "",
             price=order.limit,
             tif=order.tif,
             **info

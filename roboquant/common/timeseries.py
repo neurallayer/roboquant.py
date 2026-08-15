@@ -1,4 +1,5 @@
 from datetime import datetime
+from typing import Any
 
 from matplotlib.axes import Axes
 import numpy as np
@@ -52,7 +53,7 @@ class TimeSeries(pd.DataFrame):
         end = self.index[-1].to_pydatetime(warn=False) # type: ignore
         return Timeframe(start, end, True)
 
-    def plot_without_timeline(self, *args, **kwargs) -> Axes:
+    def plot_without_timeline(self, *args: Any, **kwargs: Any) -> Axes:
         """Plot the time series without the timeline. This is useful for plotting
         charts when only the values are important and not the absolute timeline.
         """
@@ -72,7 +73,7 @@ class TimeSeries(pd.DataFrame):
             result = result[result.index < timeframe.end]
         return result # type: ignore
 
-    def plot_corr(self, ax=None, plot_colorbar: bool = True, fontsize: int | None = None) -> Axes:
+    def plot_corr(self, ax : Axes | None =None, plot_colorbar: bool = True, fontsize: int | None = None) -> Axes:
         """Plot the correlation matrix of the series."""
 
         if not ax:

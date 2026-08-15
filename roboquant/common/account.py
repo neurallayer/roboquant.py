@@ -192,7 +192,7 @@ class Account:
         Args:
             ax: The matplotlib axes to plot on.
             include_cash: Whether to include cash in the allocation pie chart.
-            **kwargs: Additional keyword arguments to pass to the pie chart plotting function.
+            **kwargs: Additional keyword arguments to pass to the `pie()` plotting function.
 
         Returns:
             matplotlib.axes.Axes: The axes object with the pie chart.
@@ -220,6 +220,6 @@ class Account:
             "labels": labels,
         } | kwargs
 
-        ax.pie(sizes, **kwargs)
+        ax.pie(sizes, **kwargs) # type: ignore
         ax.axis("equal")  # Equal aspect ratio ensures that pie is drawn as a circle.
         return ax

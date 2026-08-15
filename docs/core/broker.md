@@ -6,9 +6,9 @@ kernelspec:
 
 # Broker
 (broker_def)=
-The broker is the component that handles the placed orders, either real or simulated during a back-test.
+The broker handles the placed orders, either real or simulated during a back-test.
 
-It is also the component owns the {cl}`Account` object. 
+It is also the component that owns the {cl}`Account` object. 
 
 ```mermaid
 flowchart LR
@@ -29,7 +29,7 @@ flowchart LR
 The {cl}`Broker` base class defines the interface that all broker implementations must follow. The two core methods are:
 
 - **`place_orders(orders: list[Order])`** — submit one or more orders to the broker. These orders are placed at the real broker which will likely sent them to an exchange.
-- **`sync(event: Event) -> Account`** — synchronize the broker state with the latest market event and the real trading account state. Returns the updated {cl}`Account` reflecting cash, positions, open orders, and trades.
+- **`sync(event: Event) -> Account`** — synchronize the roboquant broker state with the real trading account state. Returns the updated {cl}`Account` reflecting cash, positions, open orders, and trades.
 
 
 ```{code-cell} python
@@ -94,6 +94,10 @@ Some of the implemented logic that might not be obvious at first:
   :::
 
 ## Third party Brokers
-
 Looks at [](../third_party/alpaca.md), [](../third_party/ibkr.md) and [](../third_party/crypto.md) for more details about
 third party brokers.
+
+
+## Live Broker
+If developing your own Broker implementation, you can use the `LiveBroker` as a base-class.
+To get started, best to look at some existing implementations like the `AlpacaBroker`. 
