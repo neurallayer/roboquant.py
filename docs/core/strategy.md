@@ -5,16 +5,6 @@ kernelspec:
 ---
 
 # Strategy
-(strategy_def)=
-A {cl}`Strategy` is responsible for creating signals based on incoming events. So a strategy doesn't generate
-the orders, that is the responsibility of a {cl}`Trader`.
-
-Often the items in the event represent market data and the strategy uses this to perform (technical)
-analysis. But it is also possible for events to contain different data and, for example, perform
-fundamental analysis.
-
-Strategies are **pure decision-makers**. They only look at the {cl}`Event` and produce a list of {cl}`Signal`
-objects. They have no knowledge of cash, positions, or risk — that is the domain of the {cl}`Trader`.
 
 ```mermaid
 flowchart LR
@@ -29,6 +19,19 @@ flowchart LR
 
     style Strategy fill:#888
 ```
+
+(strategy_def)=
+## Overview
+The {cl}`Strategy` is responsible for creating signals based on incoming events from the feed. 
+So a strategy doesn't generate the orders, that is the responsibility of a {cl}`Trader`.
+
+Often the items in the event represent market data and the strategy uses this to perform some
+type of (technical) analysis. But it is also possible for events to contain different data and,
+for example, perform fundamental analysis.
+
+Strategies are **pure decision-makers**. They only look at the {cl}`Event` and produce a list of {cl}`Signal`
+objects. They have no knowledge of cash, positions, or risk — that is the domain of the {cl}`Trader`.
+
 
 Because a strategy has no access to the account, the same strategy instance can be used unchanged
 across all [4 stages](../introduction/development.md) of development. Only the {cl}`Feed` and {cl}`Broker` change

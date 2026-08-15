@@ -5,10 +5,18 @@ kernelspec:
 ---
 
 # Feature 
-(feature_def)=
-Feature classes in *roboquant* transform data into structured input features and target labels for AI/ML models.
-They serve as the bridge between the time-series domain of financial data and the tabular world of machine learning algorithms.
 
+## Overview
+(feature_def)=
+One of the compelling arguments to use Python for algo-trading, is the relative ease of using AI and machine learning
+as part of your solution. That being said, if you are new to Python development, it might still seem a bit daunting at first.
+
+Feature classes in *roboquant* transform data into structured input features and target labels for AI/ML models.
+They serve as the bridge between the time-series domain of financial data and the tabular world of machine learning algorithms
+and help to lower the learning curve.
+
+
+## API
 The following code snippet shows the essence of the Feature abstract base class:
 
 ```python
@@ -27,6 +35,7 @@ As can seen in the above snippet, a feature calculation always returns an Numpy 
 In fact it is always a 1-dimensional float32 array and missing values are represented as float "NaN" values in
 that array. Every invocation should always return the same length array.
 
+## Feature Types
 In *roboquant* there are three types of feature implementations included:
 
 1. Features that calculate based on an event 
@@ -35,7 +44,7 @@ In *roboquant* there are three types of feature implementations included:
    rely on input data at all.
 
 
-## Event-Based Features
+### Event-Based Features
 
 | Feature | Description |
 |---|---|
@@ -71,7 +80,7 @@ class RSIFeature(IndicatorFeature):
 ```
 
 
-## Account-Based Features
+### Account-Based Features
 
 | Feature | Description |
 |---|---|
@@ -79,7 +88,7 @@ class RSIFeature(IndicatorFeature):
 | `UnrealizedPNLFeature` | Unrealized Profit & Loss|
 
 
-## Generic Features
+### Generic Features
 
 | Feature | Description |
 |---|---|

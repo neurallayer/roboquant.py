@@ -5,10 +5,6 @@ kernelspec:
 ---
 
 # Journal
-(journal_def)=
-A journal captures and/or logs information at each step of a {cl}`run`. It is optional and if you
-don't provide one during a run, there is only the account to see what happened during the run. 
-
 ```mermaid
 flowchart LR
  
@@ -22,6 +18,13 @@ flowchart LR
 
     style Journal fill:#888
 ```
+
+(journal_def)=
+## Overview
+A journal captures and/or logs information at each step of a {cl}`run`. It is optional and if you
+don't provide one during a run, there is only the account to see what happened during the run. 
+
+
 
 A journal is one of the optional parameters of the `run()` function and if provided will be invoked at every step of the run.
 A journal should NOT modify any of the passed parameters.

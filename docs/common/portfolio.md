@@ -14,8 +14,10 @@ account = rq.demo_run()
 
 
 # Portfolio
+
 (portfolio_def)=
-A portfolio holds the open positions and is one of the attributes of the {cl}`Account` object.
+## Overview
+The portfolio holds the open positions and is one of the attributes of the {cl}`Account` object.
 
 It behaves very much like a `dict[Asset, Position]`. So there is at most only one `Position` 
 per asset. If a Position is zero, it will be removed from the Portfolio.

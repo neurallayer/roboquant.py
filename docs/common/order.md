@@ -5,7 +5,9 @@ kernelspec:
 ---
 
 # Order
+
 (order_def)=
+## Overview
 All orders are limit orders in roboquant. If you want them to behave more like a market order,
 you can set a generous `limit` price.
 
@@ -29,7 +31,7 @@ can still be implemented as:
 - subclass of Order and handled by a custom Broker implementation.
 :::
 
-
+## API
 All the attributes of an order are:
 
 ```python

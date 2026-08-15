@@ -5,29 +5,49 @@ kernelspec:
 ---
 
 # Run
+
+```mermaid
+flowchart LR
+ 
+    Feed["Feed"]
+    Strategy["Strategy"]
+    Trader["Trader"]
+    Broker["Broker"]
+    Journal["Journal"]
+    
+    Feed -- event --> Strategy -- signals --> Trader -- orders --> Broker -- account --> Journal 
+```
+
 (run_def)=
-The `run()` function implements the main event loop in *roboquant*. It is used for everything
-from back testing to live trading.
+## Overview
+The core of the system is the `run()` function, which connects all components in a streaming event loop. 
+The run is used for every stage in the 4 stages, from back-testing to live-trading. 
+
+Each of these five components in the run has its own responsibilities:
+
+| Component | Responsibility |
+|-----------|---------------|
+| **{cl}`Feed`** | Provides (market) data events |
+| **{cl}`Strategy`** | Generates trading signals from events |
+| **{cl}`Trader`** | Converts signals into orders (risk/sizing) |
+| **{cl}`Broker`** | Executes orders, maintains account state |
+| **{cl}`Journal`** | Logs/tracks every step (read-only) |
+
+Each component is implemented an abstract base class with pluggable implementations, making every part of the pipeline independently swappable.
+
+
+## Step-by-step
 
 It is helpful to understand some of the details of the run loop.
 
 ```python
 for event in feed.play(...):
-    account = broker.sync(event)                # syncs and updates the account
-    signals = strategy.create_signals(event)    # generate signals from market data
-    orders = trader.create_orders(signals, ...) # apply risk rules, create orders
-    broker.place_orders(orders)                 # place orders at broker
-    journal.track(...)                          # record metrics (optional)
+    account = broker.sync(event)                # 1 syncs and updates the account
+    signals = strategy.create_signals(event)    # 2 generate signals from market data
+    orders = trader.create_orders(signals, ...) # 3 apply risk rules, create orders
+    broker.place_orders(orders)                 # 4 place orders at broker
+    journal.track(...)                          # 5 record metrics (optional)
 ```
-
-- if no broker is provider, the SimBroker is used
-- if no trader is provided, the SimpleTrader is used
-- if no journal is provided, this step is skipped
-- if None is provided as a strategy, this step is skipped
-  and the trader is provided with an empty list of signals 
-
-
-## Step-by-step
 
 1. **`broker.sync(event)`** — Sync with the state of the underlying broker. Returns an updated {cl}`Account` object which reflects the latest state and market data. Orders and positions that are closed, are not included in the returned account object.   
 
@@ -38,6 +58,16 @@ for event in feed.play(...):
 4. **`broker.place_orders(orders)`** — New orders are submitted to the broker. In {cl}`SimBroker`, they are stored and only evaluated for execution when the next event arrives.
 
 5. **`journal.track(...)`** — Optional logging and metrics collection. Journals are passive observers that never modify state.
+
+
+The run function also has many defaults for its parameters in case they are not provided:
+
+- if no broker is provider, the SimBroker is used
+- if no trader is provided, the SimpleTrader is used
+- if no journal is provided, this step is skipped all together
+- if None is provided as a strategy, this step is skipped
+  and the trader is provided with an empty list of signals 
+
 
 :::{tip}
 Any exception thrown during the execution of the run loop, will stop the run. However if you call the `stop_run()` function, the run is stopped early while still exiting normally and returning the latest account object.

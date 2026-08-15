@@ -5,6 +5,8 @@ kernelspec:
 ---
 
 # Crypto
+
+## Overview
 The integration with crypto exchanges is done by using the [CCXT](https://github.com/ccxt/ccxt) package.
 It provides both market data as well as broker functionality from these exchanges.
 

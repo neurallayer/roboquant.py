@@ -5,8 +5,6 @@ kernelspec:
 ---
 
 # Trader
-(trader_def)=
-A trader is responsible for creating orders. It can do this based on the signals it receives, but also based on the latest version of the account.
 
 ```mermaid
 flowchart LR
@@ -21,6 +19,11 @@ flowchart LR
 
     style Trader fill:#888
 ```
+
+
+(trader_def)=
+## Overview
+A trader is responsible for creating orders. It can do this based on the signals it receives, but also based on the latest version of the account.
 
 
 ```{code-cell} python

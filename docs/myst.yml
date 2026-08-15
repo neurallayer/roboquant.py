@@ -17,8 +17,7 @@ project:
         - file: introduction/installation.md
         - file: introduction/firststeps.md
         - file: introduction/development.md
-    - file: core/index.md
-      title: Core
+    - title: Core
       children:
         - file: core/run.md
         - file: core/feed.md
@@ -26,8 +25,7 @@ project:
         - file: core/trader.md
         - file: core/broker.md
         - file: core/journal.md
-    - file: common/index.md    
-      title: Common Classes
+    - title: Common Classes
       children:
         - file: common/asset.md
         - file: common/monetary.md
@@ -37,19 +35,16 @@ project:
         - file: common/event.md
         - file: common/account.md
         - file: common/portfolio.md
-    - file: charts/index.md 
-      title: Charts
+    - title: Charts
       children:
         - file: charts/basic_charts.md
         - file: charts/custom_charts.md
-    - file: ai/index.md
-      title: AI
+    - title: AI
       children:
         - file: ai/feature.md
         - file: ai/pytorch.md
         - file: ai/rl.md        
-    - file: third_party/index.md
-      title: Third Party
+    - title: Third Party
       children:
         - file: third_party/alpaca.md
         - file: third_party/crypto.md

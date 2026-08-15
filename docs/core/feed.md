@@ -4,13 +4,6 @@ kernelspec:
   display_name: Python 3
 ---
 # Feed
-(feed_def)=
-A {cl}`Feed` represents a source of (financial) events that can be (re-)played to feed a {cl}`run()` with data.
-Although the most common type of events are those containing market data, other types of events are also possible.
-For example, events containing news items or social media posts could also be represented as a feed.
-
-The feed is the driver of the run-loop: it produces the {cl}`Event` objects that all the other components
-react to.
 
 ```mermaid
 flowchart LR
@@ -25,6 +18,16 @@ flowchart LR
 
     style Feed fill:#888
 ```
+
+
+(feed_def)=
+## Overview
+A {cl}`Feed` represents a source of (financial) events that can be (re-)played to feed a {cl}`run()` with data.
+Although the most common type of events are those containing market data, other types of events are also possible.
+For example, events containing news items or social media posts could also be represented as a feed.
+
+The feed is the driver of the run-loop: it produces the {cl}`Event` objects that all the other components
+react to.
 
 
 ```{code-cell} python

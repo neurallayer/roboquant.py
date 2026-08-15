@@ -5,7 +5,14 @@ kernelspec:
 ---
 
 # PyTorch
-This page provides an example how to develop a strategy that uses PyTorch model to make predictions.
+
+## Overview
+Roboquant uses the excellent PyTorch framework as a basis for the included neural-networks based strategies. 
+It comes with many popular network architecture layers out of the box and has a Pythonic API, making it
+easier to get started. 
+
+## Example
+This section provides an example how to develop a strategy that uses PyTorch model to make predictions.
 
 ```{code-cell} python
 :tags: [remove-input]

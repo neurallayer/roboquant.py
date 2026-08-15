@@ -5,10 +5,6 @@ kernelspec:
 ---
 
 # Broker
-(broker_def)=
-The broker handles the placed orders, either real or simulated during a back-test.
-
-It is also the component that owns the {cl}`Account` object. 
 
 ```mermaid
 flowchart LR
@@ -23,6 +19,11 @@ flowchart LR
 
     style Broker fill:#888
 ```
+
+(broker_def)=
+## Overview
+The broker handles the placed orders, either real or simulated during a back-test.
+It is also the component that owns the {cl}`Account` object. 
 
 ## API
 

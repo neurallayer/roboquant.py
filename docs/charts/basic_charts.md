@@ -6,11 +6,60 @@ kernelspec:
 
 # Basic Charts
 
-This page shows how to draw certain type of charts using *roboquant*.
+## Intro
+Charts in *roboquant* are all based on `matplotlib`. Either by directly invoking methods or via the Pandas DateFrame `df.plot()` method. 
 
-It uses the `YahooFeed` to fetch historical data for several assets and then runs a
-simple EMA Crossover strategy. The results are visualized using the `matplotlib` library
-and the `roboquant` plotting capabilities.
+This page shows how to use the included and customize the included charts that come with *roboquant*. 
+
+
+:::{note}
+Roboquant isn't designed to be a pure visual algo-trading tool. Charts are included to provide
+insights into what is happening during a run but are not the basis for strategies.
+
+There is no out-of-the-box support for candlestick charts and things like the drawing of support lines.
+Although these can be added using third party packages like `mplfinance`, they are not the
+focus area for roboquant.
+:::
+
+
+## Styles
+Roboquant has a light and dark style for the charts, which can be enabled by calling the `set_dark_style()` and `set_light_style()` function.
+Besides the dark background, it also sets some other parameters for the charts, like the figure size, dpi and grids.
+
+```{code} python
+import roboquant as rq
+
+rq.set_light_style()
+rq.set_dark_style()
+```
+
+The following charts shows these two styles in action.
+
+### Light style
+Great for exporting to PDF and printing.
+
+```{code-cell} python
+:tags: [remove-input]
+import roboquant as rq
+
+rq.set_light_style()
+feed = rq.feeds.YahooFeed("MSFT")
+feed.plot("MSFT");
+```
+
+### Dark style
+Great for developing late at night or in a dark mode editor.
+
+```{code-cell} python
+:tags: [remove-input]
+rq.set_dark_style()
+feed.plot("MSFT");
+```
+
+## Examples
+
+The following charts use the `YahooFeed` to fetch historical data for several assets and then runs a
+simple EMA Crossover strategy. 
 
 We start with importing the required packages and setting some defaults.
 

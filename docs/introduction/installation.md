@@ -7,7 +7,9 @@ kernelspec:
 
 # Installation
 
-Roboquant can be installed like most other Python packages. Below you'll find instructions for various installation methods and scenarios.
+## Introduction
+Roboquant can be installed like most other Python packages. It is being published on PyPI and
+below you'll find instructions for various installation methods and scenarios.
 
 ## Prerequisites
 

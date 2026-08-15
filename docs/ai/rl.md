@@ -6,9 +6,28 @@ kernelspec:
 
 
 # Reinforcement Learning
-The downside of training a typicall deep neural network is that you need to provide a label that represents the truth. So you need to know given a certain input what the ideal output should look like. 
 
-With so much noise, it is very difficult to come up with good labels that allow the model to generalize well.
+## Overview
+The downside of training a typical deep neural network is that you need a label that represents the truth.
+So you need to know given a certain input what the ideal output should look like. With so much noise, it is
+difficult to come up with good labels.
+
+RL sidesteps the need for explicit labels entirely. Instead of learning from a static dataset of "correct" answers,
+an RL agent learns by interacting with the market environment and receiving a **reward signal** — typically
+based on P&L, Sharpe ratio, or risk-adjusted returns. This makes RL a natural fit for algo-trading because:
+
+- **No ground truth required.** You don't need to know the "right" trade beforehand; the agent discovers
+  profitable strategies through trial and error.
+- **Handles sequential decision-making.** Trading is inherently sequential — today's action affects
+  tomorrow's position, capital, and risk exposure. RL explicitly models this temporal dependency.
+- **Optimizes for long-term objectives.** Unlike supervised learning which minimizes prediction error
+  on individual samples, RL can be tuned to maximise cumulative returns, a more direct proxy for
+  trading success.
+- **Adapts to non-stationary environments.** Markets evolve; RL agents can be designed to continuously
+  learn and adapt as new data arrives, rather than relying on a frozen model trained once.
+
+The downside is that the setup and configuration to have a RL based solution in place is more challenging.
+
 
 ## Stable Baselines
 Stable Baselines has good RL support with widely used, tested and reliable algorithms. This is very important since it is not easy to validate if a particular framework didn't make mistakes while implementing certain RL algorithms.

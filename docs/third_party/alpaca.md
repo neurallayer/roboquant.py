@@ -6,6 +6,7 @@ kernelspec:
 
 # Alpaca
 
+## Overview
 [Alpaca Markets](https://alpaca.markets/) provides a commission-free trading API for US equities and crypto.
 *Roboquant* integrates with Alpaca for both **live/paper trading** (broker) and **real-time/historical market data** (feed).
 

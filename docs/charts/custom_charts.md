@@ -6,11 +6,14 @@ kernelspec:
 
 # Custom Charts
 
+## Background
 Often you want to visualize some metrics to are specific to your strategy and approach to developing algo-trading solutions.
+
 This example shows how to approach such a use-case. It is more meant as inspiration than a ready-to-use solution,
 but it should give you a good idea of how to use the *roboquant* framework to create your own custom charts.
 
-It shows how to use the `IndicatorMetric` and `SignalRatingMetric` to track indicators and signals on a chart.
+## Example
+This example shows how to use the `IndicatorMetric` and `SignalRatingMetric` to track indicators and signals on a chart.
 It uses the YahooFeed to get the data for TSLA and plots the price, Bollinger Bands, RSI, and buy/sell signals on a chart.
 
 We start with importing the required packages and modules.

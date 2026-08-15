@@ -6,12 +6,18 @@ kernelspec:
 ---
 
 # Multi-process
-One of the downsides of Python is that by default most of the computation is single-threaded.
-However by using multiple processes, it is still possible to utilize all the cores available on your
-machine (typically at the cost of higher memory usage).
 
+## Background
+One of the downsides of Python is that by default the runtime is single-threaded. This limits
+the scalability of Python on more powerful multi-core computers. 
+
+However by running multiple processes, it is still possible to utilize the cores that are 
+available on your machine (typically at the cost of higher memory usage).
+
+
+## Example
 This example shows how to perform a walk-forward using the `multiprocessing` package that comes with Python.
-Each run is over acertain timeframe and set of parameters for the EMA Crossover strategy.
+Each run is over a specific timeframe and set of parameters for the EMA Crossover strategy.
 
 ```{code-cell} python
 from multiprocessing import get_context
@@ -24,6 +30,15 @@ import roboquant as rq
 # Feed with over 25 years of data
 feed = rq.feeds.YahooFeed.us_stocks_10(start_date="2000-01-01")
 ```
+
+We now create the function that will be invoked in every process with different
+paramters. 
+
+:::{tip}
+The input en output data of this function needs to be serialized since
+it crosses the Python runtime boundaries. So keep the values to simple types.
+:::
+
 
 ```{code-cell} python
 def walk_forward(params: tuple[rq.Timeframe, tuple[int, int]]) -> str:
