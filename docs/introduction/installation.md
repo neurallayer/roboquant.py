@@ -44,7 +44,7 @@ pip install --upgrade "roboquant[ai,extra]"
 ```
 
 :::{note}
-Part of the `ai` dependency is the PyTorch which is a very large package. So it can take some time before
+Part of the `ai` dependency is PyTorch which is a very large package. So it can take some time before
 it is completely downloaded and installed. 
 :::
 
@@ -52,9 +52,9 @@ it is completely downloaded and installed.
 ## Install with uv
 
 [uv](https://github.com/astral-sh/uv) is a fast Python package and project manager. It is also the package manager
-used to develop *roboquant* and it is highly recommended to check it out if you didn't do so already.
+used to develop *roboquant*. It is highly recommended to check it out if you didn't do so already.
 
-If you are using `uv`, starting a new project is straightforward:
+If you are using `uv`, starting a new project from scratch is straightforward:
 
 ```bash
 mkdir my-project
@@ -64,7 +64,7 @@ uv add roboquant
 uv run python -c "import roboquant;roboquant.info()"
 ```
 
-With all the extras:
+Or with all the extras:
 
 ```bash
 uv add "roboquant[ai,extra]"

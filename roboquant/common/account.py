@@ -98,6 +98,15 @@ class Account:
         """
         return self.convert(self.equity())
 
+    def cash_value(self) -> float:
+        """
+        Return the cash value denoted in the base currency of the account.
+
+        Returns:
+            float: The cash value in the base currency.
+        """
+        return self.convert(self.cash)
+
     def realized_pnl(self, *assets: Asset) -> Wallet:
         """
         Return the sum of the realized profit and loss for trades executed in the account.

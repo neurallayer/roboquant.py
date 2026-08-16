@@ -7,17 +7,19 @@ kernelspec:
 # Strategy
 
 ```mermaid
+---
+config:
+    themeVariables:
+        fontSize: '30px'
+---
 flowchart LR
- 
-    Feed["Feed"]
-    Strategy["Strategy"]
-    Trader["Trader"]
-    Broker["Broker"]
-    Journal["Journal"]
-    
-    Feed -- event --> Strategy -- signals --> Trader -- orders --> Broker -- account --> Journal 
-
-    style Strategy fill:#888
+    Feed["fa:fa-database<br>Feed"]
+    Strategy["fa:fa-calculator<br>Strategy"]:::active
+    Trader["fa:fa-dollar<br>Trader"]
+    Broker["fa:fa-exchange<br>Broker"]
+    Journal["fa:fa-area-chart<br>Journal"]
+    Feed -- event --> Strategy -- signals --> Trader -- orders --> Broker -- account --> Journal
+    classDef active fill:#00A1FF
 ```
 
 (strategy_def)=

@@ -7,15 +7,19 @@ kernelspec:
 # Run
 
 ```mermaid
+---
+config:
+    themeVariables:
+        fontSize: '30px'
+---
 flowchart LR
- 
-    Feed["Feed"]
-    Strategy["Strategy"]
-    Trader["Trader"]
-    Broker["Broker"]
-    Journal["Journal"]
-    
-    Feed -- event --> Strategy -- signals --> Trader -- orders --> Broker -- account --> Journal 
+    Feed["fa:fa-database<br>Feed"]
+    Strategy["fa:fa-calculator<br>Strategy"]
+    Trader["fa:fa-dollar<br>Trader"]
+    Broker["fa:fa-exchange<br>Broker"]
+    Journal["fa:fa-area-chart<br>Journal"]
+    Feed -- event --> Strategy -- signals --> Trader -- orders --> Broker -- account --> Journal
+    classDef active fill:#00A1FF
 ```
 
 (run_def)=
@@ -87,7 +91,7 @@ account = rq.run(feed, strategy)
 print(account)
 ```
 
-This works because `run()` provides sensible defaults: {cl}`SimBroker` (USD 1M deposit, 0% slippage) and `SimpleTrader`.
+This works because `run()` provides sensible defaults: {cl}`SimBroker` (USD 1M deposit, 0% slippage) and {cl}`SimpleTrader`.
 
 ## Custom Backtest
 The following snippets shows how to override many of the default settings. 

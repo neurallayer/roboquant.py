@@ -7,33 +7,30 @@ kernelspec:
 # Trader
 
 ```mermaid
+---
+config:
+    themeVariables:
+        fontSize: '30px'
+---
 flowchart LR
- 
-    Feed["Feed"]
-    Strategy["Strategy"]
-    Trader["Trader"]
-    Broker["Broker"]
-    Journal["Journal"]
-    
-    Feed -- event --> Strategy -- signals --> Trader -- orders --> Broker -- account --> Journal 
-
-    style Trader fill:#888
+    Feed["fa:fa-database<br>Feed"]
+    Strategy["fa:fa-calculator<br>Strategy"]
+    Trader["fa:fa-dollar<br>Trader"]:::active
+    Broker["fa:fa-exchange<br>Broker"]
+    Journal["fa:fa-area-chart<br>Journal"]
+    Feed -- event --> Strategy -- signals --> Trader -- orders --> Broker -- account --> Journal
+    classDef active fill:#00A1FF
 ```
-
 
 (trader_def)=
 ## Overview
 A trader is responsible for creating orders. It can do this based on the signals it receives, but also based on the latest version of the account.
 
-
 ```{code-cell} python
 :tags: [remove-input]
 from decimal import Decimal
 import roboquant as rq
-from roboquant.common.account import Account
-from roboquant.common.event import Event
-from roboquant.common.order import Order
-from roboquant.common.signal import Signal
+from roboquant.common import Account, Event, Order, Signal
 from roboquant.traders.trader import Trader
 ```
 
@@ -49,17 +46,17 @@ class MyTrader(Trader):
         ...
 ```
 
-Some of the typical logic:
+Some of the typical logic found in a trader:
 
 - looks at the incoming signals to see what potential orders to create
-- looks at open positions to see what to size for exit orders
+- looks at open positions to see how to size for exit orders
 - looks at buying power to see how much to allocate for an entry order
-- looks at open orders to see if there is no conflict
+- looks at open orders to see if there is a conflict
 - look at open positions to manage bad performing assets (risk management)
   
 
-## SimpleTrader
 (simpletrader_def)=
+## SimpleTrader
 The `SimpleTrader` is the default trader implementation in roboquant. 
 
 As the name suggests, it implements a simple set of rules. This makes

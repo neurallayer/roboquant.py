@@ -6,27 +6,26 @@ kernelspec:
 
 # Journal
 ```mermaid
+---
+config:
+    themeVariables:
+        fontSize: '30px'
+---
 flowchart LR
- 
-    Feed["Feed"]
-    Strategy["Strategy"]
-    Trader["Trader"]
-    Broker["Broker"]
-    Journal["Journal"]
-    
-    Feed -- event --> Strategy -- signals --> Trader -- orders --> Broker -- account --> Journal 
-
-    style Journal fill:#888
+    Feed["fa:fa-database<br>Feed"]
+    Strategy["fa:fa-calculator<br>Strategy"]
+    Trader["fa:fa-dollar<br>Trader"]
+    Broker["fa:fa-exchange<br>Broker"]
+    Journal["fa:fa-area-chart<br>Journal"]:::active
+    Feed -- event --> Strategy -- signals --> Trader -- orders --> Broker -- account --> Journal
+    classDef active fill:#00A1FF
 ```
 
 (journal_def)=
 ## Overview
 A journal captures and/or logs information at each step of a {cl}`run`. It is optional and if you
-don't provide one during a run, there is only the account to see what happened during the run. 
+don't provide one during a run, there is only the returned account at the end of the run to see what happened. 
 
-
-
-A journal is one of the optional parameters of the `run()` function and if provided will be invoked at every step of the run.
 A journal should NOT modify any of the passed parameters.
 
 
@@ -45,22 +44,17 @@ class MyJournal(Journal):
         print(f"event={event} account={account} singals={signals} orders={orders}")
 ```
 
-(guard-journal)=
-Another example is journal that guards some condition and stops the run if the condition is met.
-
-```{code-cell} python
-from roboquant import stop_run
-
-class GuardJournal(Journal):
-  
-    def track(self, event: Event, account: Account, signals: list[Signal], orders: list[Order]) -> None:
-        if account.cash[rq.USD] < 1_000:
-            stop_run()
-```
 
 ## BasicJournal
-The BasicJournal has low overhead and tracks a number of basic statistics like
-the total number of events, signals and orders.
+The BasicJournal has low overhead and tracks the following information:
+
+- total number of events, and items
+- the total number of signals and orders
+- the maximum open positions
+- the total number of trades
+- the total number of unique assets
+
+It will also log these values at each step in the run at `info` level.
 
 
 ## MetricsJournal
@@ -145,3 +139,20 @@ or if the Orders are already processed by the {cl}`Broker`.
 After the run you can access these orders and signals either directly or through 
 some of the included convenience methods.
 
+## Custom Journals
+There are several reasons you might want to implement a custom Journal. For example you want to
+be notified on a messaging platform if something (like a new order) happens during a live
+trading session.
+
+(guard-journal)=
+Another use case is a journal that guards some condition and stops the run if the condition is met.
+
+```{code-cell} python
+from roboquant import stop_run
+
+class GuardJournal(Journal):
+  
+    def track(self, event: Event, account: Account, signals: list[Signal], orders: list[Order]) -> None:
+        if account.cash_value() < 1_000:
+            stop_run()
+```
