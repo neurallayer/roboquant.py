@@ -11,7 +11,7 @@ ignore = ["E703", "E402"]  # use ; in notebook Python file
 
 [tool.ty.rules]
 unused-type-ignore-comment = "ignore"
-# missing-type-argument = "error"
+missing-type-argument = "error"
 # possibly-unresolved-reference = "warn"
 # unsound-return-statement = "error"
 
@@ -94,11 +94,9 @@ Issues = "https://github.com/neurallayer/roboquant.py/issues"
 [dependency-groups]
 dev = [
   "python-dotenv>=1.1.0",
-  "pyright>=1.1.411",
   "ipykernel>=7.3.0",
   "chronos-forecasting>=2.3.1",
-  "ty>=0.0.62",
+  "ty>=0.0.72",
   "tensorboard>=2.21.0",
   "jupyter-book>=2.1.6",
-  "pyrefly>=1.2.0",
 ]

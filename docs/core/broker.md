@@ -31,7 +31,13 @@ The {cl}`Broker` base class defines the interface that all broker implementation
 
 - **`place_orders(orders: list[Order])`** — submit one or more orders to the broker. These orders are placed at the real broker which will likely sent them to an exchange.
 - **`sync(event: Event) -> Account`** — synchronize the roboquant broker state with the real trading account state. Returns the updated {cl}`Account` reflecting cash, positions, open orders, and trades.
+  
+  :::{note}
+  With higher frequency live trading, *roboquant* might not call the real broker at each step in order to avoid hitting API limits exposed by this broker.  
+  :::
 
+
+## Example
 
 ```{code-cell} python
 :tags: [remove-input]

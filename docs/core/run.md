@@ -33,7 +33,8 @@ Each of these five components in the run has its own responsibilities:
 | **{cl}`Broker`** | Executes orders, maintains account state |
 | **{cl}`Journal`** | Logs/tracks every step (read-only) |
 
-Each component is implemented an abstract base class with pluggable implementations, making every part of the pipeline independently swappable.
+Each component is implemented an Abstract Base Class with pluggable implementations, making every part of
+the pipeline independently swappable.
 
 
 ## Step-by-step

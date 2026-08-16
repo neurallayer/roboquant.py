@@ -37,7 +37,7 @@ class CSVColumns:
     adj_close: str | None = "Adj Close"
     time: str | None = None
 
-    def get_ohlcv(self, row: dict[str, str]) -> array:
+    def get_ohlcv(self, row: dict[str, str]) -> array[float]:
         """Return an array containing the open, high, low, close, and volume from a row in the CSV file"""
 
         if self.volume is None:

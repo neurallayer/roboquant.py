@@ -1,4 +1,4 @@
-from typing import Literal, TypedDict
+from typing import Any, Literal, TypedDict
 
 AccountInfo = TypedDict(
     "AccountInfo",
@@ -25,7 +25,7 @@ AccountInfo = TypedDict(
         "noClientTrading": bool,
         "trackVirtualFXPortfolio": bool,
         "acctCustType": str,
-        "parent": dict,
+        "parent": dict[str, Any],
         "desc": str
     },
     total=True,
@@ -87,7 +87,7 @@ PositionInfo = TypedDict(
         "multiplier": float,
         "strike": str,
         "exerciseStyle": str | None,
-        "conExchMap": list,
+        "conExchMap": list[Any],
         "assetClass": str,
         "undConid": int,
         "model": str,
@@ -97,8 +97,8 @@ PositionInfo = TypedDict(
         "baseAvgPrice": float,
         "baseRealizedPnl": float,
         "baseUnrealizedPnl": float,
-        "incrementRules": list,
-        "displayRule": dict,
+        "incrementRules": list[Any],
+        "displayRule": dict[str, Any],
         "time": int,
         "chineseName": str,
         "allExchanges": str,

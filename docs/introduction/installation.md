@@ -28,7 +28,8 @@ This installs the **core** package with a minimal set of dependencies.
 
 ## Optional Dependencies
 
-The core installation keeps the dependency footprint small. If you need specific functionality, install roboquant with one or more of the following extras:
+The core installation keeps the dependency footprint small.
+If you need specific functionality, install roboquant with one or more of the following optional dependencies:
 
 | Optional   | Description                                            | Install command |
 |------------|--------------------------------------------------------|-----------------|
@@ -42,9 +43,16 @@ To install roboquant with **all** optional dependencies at once:
 pip install --upgrade "roboquant[ai,extra]"
 ```
 
+:::{note}
+Part of the `ai` dependency is the PyTorch which is a very large package. So it can take some time before
+it is completely downloaded and installed. 
+:::
+
+
 ## Install with uv
 
-[uv](https://github.com/astral-sh/uv) is a fast Python package and project manager. It is also the package manager used to develop *roboquant*.
+[uv](https://github.com/astral-sh/uv) is a fast Python package and project manager. It is also the package manager
+used to develop *roboquant* and it is highly recommended to check it out if you didn't do so already.
 
 If you are using `uv`, starting a new project is straightforward:
 

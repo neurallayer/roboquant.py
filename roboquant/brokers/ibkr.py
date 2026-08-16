@@ -204,7 +204,7 @@ class IBKRBroker(LiveBroker):
         summary: dict = self.client.account_summary().data  # type: ignore
         bp = summary["buyingPower"]
         cash = 0.0
-        balances: list = summary["cashBalances"]
+        balances: list[dict[str, Any]] = summary["cashBalances"]
         for balance in balances:
             ccy: str = balance["currency"]
             if ccy.startswith("Total"):
