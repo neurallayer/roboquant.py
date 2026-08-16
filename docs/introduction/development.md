@@ -23,6 +23,11 @@ recommended to follow the *4 stage approach* as outlined in the next section.
 When developing, testing, and running a new trading strategy, you go through 4 distinct stages. The diagram below illustrates these stages and their ideal sequence:
 
 ```mermaid
+---
+config:
+    themeVariables:
+        fontSize: '24px'
+---
 flowchart LR
  
     A["Stage 1 <br> Back Testing"]
@@ -31,9 +36,6 @@ flowchart LR
     D["Stage 4 <br> Live Trading"]
     
     A --> B --> C --> D
-    B --> A
-    C --> A
-    D --> A
 ```
 
 :::{important}
