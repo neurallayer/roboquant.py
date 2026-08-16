@@ -1,6 +1,7 @@
 {
     "cSpell.words": [
         "annualize",
+        "axhline",
         "BBANDS",
         "BTCUSD",
         "bybit",
@@ -16,6 +17,7 @@
         "Forex",
         "hstack",
         "ibind",
+        "IBIT",
         "ibkr",
         "ipykernel",
         "isinstance",
@@ -23,6 +25,7 @@
         "LSTM",
         "mplfinance",
         "ndigits",
+        "nrows",
         "numpy",
         "ohlcv",
         "optim",
@@ -38,7 +41,9 @@
         "Tensorboard",
         "timeframes",
         "twinx",
+        "VIXY",
         "yfinance",
+        "yticks",
         "zorder"
     ],
     "python.testing.unittestArgs": [

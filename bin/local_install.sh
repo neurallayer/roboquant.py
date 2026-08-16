@@ -4,11 +4,8 @@ export PYRIGHT_PYTHON_FORCE_VERSION="latest"
 
 rm -rf ./runs
 
-uv sync --all-extras --dev
+./bin/verify.sh
 
-# QA
-uvx ruff check || exit 1
-uv run python -m unittest discover -s tests/unit || exit 1
 
 # Build the package
 rm -rf dist

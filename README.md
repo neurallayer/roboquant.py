@@ -57,6 +57,9 @@ pip install "roboquant[ai]"
 ## License
 Roboquant is made available under the Apache 2.0 license. You can read more about the Apache 2.0 license on this page: https://www.apache.org/licenses/LICENSE-2.0.html
 
+Unless you explicitly state otherwise, any contribution intentionally submitted for inclusion in roboquant by you, as defined in the Apache 2.0 license,
+shall be licensed as above, without any additional terms or conditions.
+
 ## Disclaimer
 Absolutely no warranty is implied with this product. Use at your own risk. I provide no guarantee that it will be profitable, or that it won't lose all your money very quickly or does not contain bugs.
 
