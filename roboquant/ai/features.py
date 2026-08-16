@@ -71,7 +71,7 @@ class Feature(Generic[T]):
 
     def __getitem__(self, *args) -> "Feature[T]":
         """Return a slice of the feature.
-        For example, if the feature has size 10 and you call `feature[2:5]`, it will return a new feature
+        For example, if the feature has size 10, and you call `feature[2:5]`, it will return a new feature
         that contains the values for indices 2, 3, and 4 of the original feature.
         """
         return SlicedFeature(self, args)
@@ -658,7 +658,7 @@ class BarFeature(Feature[Event]):
 
 class QuoteFeature(Feature[Event]):
     """Extract the values from quotes for one or more assets.
-    So if there are 2 assets, the result will be a 8-element array.
+    So if there are 2 assets, the result will be an 8-element array.
     The order of the values is: ask_price, ask_volume, bid_price, bid_volume,  for each asset.
     """
 

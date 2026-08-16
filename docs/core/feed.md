@@ -114,7 +114,7 @@ data source, speed, and memory usage:
 
 ### YahooFeed
 `YahooFeed` retrieves historic market data from Yahoo Finance. It is free to use and does not require
-an API key. By default it retrieves daily bars, but you can specify a different interval.
+an API key. By default, it retrieves daily bars, but you can specify a different interval.
 
 ```{code-cell} python
 feed = rq.feeds.YahooFeed("TSLA", "MSFT", start_date="2015-01-01", interval="1d")

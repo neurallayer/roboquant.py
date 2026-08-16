@@ -86,7 +86,7 @@ broker = SimBroker(
 Some of the implemented logic that might not be obvious at first:
 
 
-- When `place_orders()` is invoked, orders are given an `id`. However the orders are NOT yet executed. That happens earliest in the next step
+- When `place_orders()` is invoked, orders are given an `id`. However, the orders are NOT yet executed. That happens earliest in the next step
   of the run when the `sync()` method is invoked. So orders places at time{sup}`t`, will be earliest executed at time{sup}`t+1`.
 - If there is no available price for an asset in the event, the corresponding orders will not be executed. They will stay in open state until
   a price becomes available.

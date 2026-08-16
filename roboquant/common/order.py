@@ -90,7 +90,7 @@ class Order:
 
     def modify(self, size: Decimal | None = None, limit: float | None = None) -> "Order":
         """
-        Create an modify-order. You can update the size and/or the limit of an order.
+        Create a modify-order. You can update the size and/or the limit of an order.
         The returned order has the same id as the original order.
         You can only update existing orders that have an id assigned.
 

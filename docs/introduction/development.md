@@ -11,7 +11,7 @@ You can develop your roboquant based trading solution in different types of envi
 
 1. Plain text editors like VIM. If you are already used to this, no need to change that.
 2. IDE's like VSCode, PyCharm and Zed. Nice balance between ease of use and features. 
-3. Jupyter Labs, Notebooks and Marimo. This is great for interactive and visual development.
+3. JupyterLab, Notebooks and Marimo. This is great for interactive and visual development.
 4. AI based terminal agents like Claud Code that can help to speedup development.  
 
 It all depends on your personal preferences and all of them can result in solid strategies.

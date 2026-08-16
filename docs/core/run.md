@@ -75,7 +75,7 @@ The run function also has many defaults for its parameters in case they are not 
 
 
 :::{tip}
-Any exception thrown during the execution of the run loop, will stop the run. However if you call the `stop_run()` function, the run is stopped early while still exiting normally and returning the latest account object.
+Any exception thrown during the execution of the run loop, will stop the run. However, if you call the `stop_run()` function, the run is stopped early while still exiting normally and returning the latest account object.
 :::
 
 ## Basic Backtest
@@ -121,7 +121,7 @@ for timeframe in timeframes:
     print(f"{timeframe.strftime('%Y-%m-%d')} equity={account.equity():.0f}")
 ```
 
-Often a walk forward is used in combination with hyper-parameter tuning.
+Often a walk forward is used in combination with hyperparameter tuning.
 This is known as **Walk-Forward Optimization (WFO)**. The idea is:
 
 1. Split the historical data into a sequence of time windows (e.g. 5 periods).
@@ -138,7 +138,7 @@ A common pitfall is peeking into the future — ensure the training window alway
 The example below respects this by using `timeframes[idx]` for training and `timeframes[idx+1]` for testing.
 :::
 
-In practice you might also track metrics across all out-of-sample periods (e.g. average Sharpe ratio, win rate)
+In practice, you might also track metrics across all out-of-sample periods (e.g. average Sharpe ratio, win rate)
 rather than just the final equity value, giving a fuller picture of robustness.
 
 
@@ -189,7 +189,7 @@ print(f"min={min(equities):.0f}, max={max(equities):.0f}")
 A live or paper-trade run is only different from a back test in the implementation
 of two of the components selected.
 
-Instead of a the {cl}`SimBroker` a real broker is selected and instead of a historic
+Instead of the {cl}`SimBroker` a real broker is selected and instead of a historic
 data feed, a live datafeed is used.
 
 ```python

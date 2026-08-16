@@ -93,7 +93,7 @@ class FlexTrader(Trader):
     """Implementation of a Trader that has configurable rules to determine which signals are converted into orders.
     This implementation will not generate orders if there is not a price in the event for the underlying asset.
 
-    It does support SignalType.ENTRY, SignalType.EXIT and SignalType.ENTRY_EXIT signals. Also the signal rating value
+    It does support SignalType.ENTRY, SignalType.EXIT and SignalType.ENTRY_EXIT signals. Also, the signal rating value
     is used to determine the size of the order. A rating of 1.0 means a full BUY order, a rating of 0.5 means half a BUY order
     and a rating of -1.0 means a full SELL order.
 

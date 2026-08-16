@@ -8,7 +8,7 @@ kernelspec:
 (asset_def)=
 The {cl}`Asset` class is the fundamental building block for representing financial instruments in *roboquant*.
 Every tradable instrument — whether a stock, option, forex pair, or cryptocurrency —
-is modelled as a specialized subclass of {cl}`Asset`.
+is modeled as a specialized subclass of {cl}`Asset`.
 
 ## Overview
 All asset types extend the common base class, {cl}`Asset`, which provides:
@@ -21,9 +21,9 @@ All asset types extend the common base class, {cl}`Asset`, which provides:
 Subclasses can add type-specific attributes and methods.
 
 The combination of **asset class**, **symbol** and **currency** has to be unique.
-If you deal with scenario's where this is not the case, a solution is to extend the symbol name. 
+If you deal with scenarios where this is not the case, a solution is to extend the symbol name. 
 
-For example you want to differentiate between crypto-pairs on different exchanges,
+For example, you want to differentiate between crypto-pairs on different exchanges,
 add the exchange name to the symbol name:
 
 ```{code-cell} python
@@ -36,7 +36,7 @@ assert asset1 != asset2
 ```
 
 ## Asset Classes
-roboquant support the folowing asset types out of the box:
+roboquant support the following asset types out of the box:
 
 | Asset Type      | Subclass       | Typical Use Case                |
 | :-------------- | :------------- | :------------------------------ |

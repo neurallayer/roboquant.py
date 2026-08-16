@@ -31,8 +31,8 @@ class Feature(Generic[T]):
         ...
 
 ```
-As can seen in the above snippet, a feature calculation always returns an Numpy array of the type float32.
-In fact it is always a 1-dimensional float32 array and missing values are represented as float "NaN" values in
+As can be seen in the above snippet, a feature calculation always returns a Numpy array of the type float32.
+In fact, it is always a 1-dimensional float32 array and missing values are represented as float "NaN" values in
 that array. Every invocation should always return the same length array.
 
 ## Feature Types
@@ -40,8 +40,8 @@ In *roboquant* there are three types of feature implementations included:
 
 1. Features that calculate based on an event 
 2. Features that calculate based on an account
-3. Generic Features that wrap other features, for example fill missing values or don't rely 
-   rely on input data at all.
+3. Generic Features that wrap other features, for example fill missing values or don't rely
+   on input data at all.
 
 
 ### Event-Based Features

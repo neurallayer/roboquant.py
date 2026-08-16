@@ -85,7 +85,7 @@ label_feature = MaxReturnFeature(
 
 ## Strategy
 
-Finally we create the actual strategy using the LSTM model we just defined.
+Finally, we create the actual strategy using the LSTM model we just defined.
 
 ```{code-cell} python
 model = TimeSeriesLSTM(input_feature.size())

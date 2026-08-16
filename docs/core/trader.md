@@ -60,7 +60,7 @@ Some of the typical logic found in a trader:
 The `SimpleTrader` is the default trader implementation in roboquant. 
 
 As the name suggests, it implements a simple set of rules. This makes
-is easier to understand what is going on, although not suitable for all
+it easier to understand what is going on, although not suitable for all
 use cases.
 
 Key characteristics:

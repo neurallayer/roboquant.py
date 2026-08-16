@@ -14,7 +14,7 @@ multi-currency situations a lot easier.
 (currency_def)=
 A `Currency` represents a single currency (e.g. USD, EUR, JPY). Predefined currency
 instances are available as module-level constants and can be used directly.
-Currencies are not limited to fiat currencies and can be used for crypto currencies as well.
+Currencies are not limited to fiat currencies and can be used for cryptocurrencies as well.
 
 Currencies are callable and then create an {cl}`Amount`. Or you can use the '@' operator to
 achieve the same.
@@ -38,7 +38,7 @@ print(amount)
 
 An amount hold a monetary value of a single currency. Amounts are immutable.
 Internally amount values are stored as floats since that is precise enough for
-trading and it doesn't has the overhead of some other types.
+trading, and it doesn't have the overhead of some other types.
 
 Roboquant is not a ledger and for trading it doesn't need to be.
 

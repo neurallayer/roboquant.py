@@ -9,7 +9,7 @@ kernelspec:
 
 ## Background
 One of the downsides of Python is that by default the runtime is single-threaded. This limits
-the scalability of Python on more powerful multi-core computers. 
+the scalability of Python on more powerful multicore computers. 
 
 However by running multiple processes, it is still possible to utilize the cores that are 
 available on your machine (typically at the cost of higher memory usage).

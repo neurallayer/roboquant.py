@@ -129,7 +129,7 @@ class HistoricFeed(Feed, ABC):
     ) -> Axes:
         """
         Plots the prices of a single asset. This function requires matplotlib to be installed.
-        It also support plotting trades on the same chart,
+        It also supports plotting trades on the same chart,
 
         Args:
             asset (Asset | str): The asset or symbol for which to plot prices.

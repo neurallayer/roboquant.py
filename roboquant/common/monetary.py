@@ -20,7 +20,7 @@ logger = logging.getLogger(__name__)
 
 class Currency(str):
     """Represents a monetary currency and is a subclass of `str`.
-    It doesn't differentiate between fiat- and crypto-currencies.
+    It doesn't differentiate between fiat- and cryptocurrencies.
 
     It is possible to create an `Amount` using a combination of a `number` and a `Currency`:
     ```
@@ -154,7 +154,7 @@ class ECBConversion(CurrencyConverter):
     """CurrencyConverter that retrieves its exchange rates from the ECB (European Central Bank).
     These exchange rates are based on the Euro and are updated daily by the ECB.
     They don't contain any historical data from before the Euro was introduced in 1999 and also
-    there is not support for crypto-currencies.
+    there is no support for cryptocurrencies.
     """
 
     __file_name = Path.home() / ".roboquant" / "eurofxref-hist.csv"

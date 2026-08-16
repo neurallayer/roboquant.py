@@ -117,7 +117,7 @@ feed.plot("MSFT", timeframe=tf, trades=account.trades);
 ```
 
 ### Metric Chart
-Equity is a good example of a metric that is usefull to capture during a run.
+Equity is a good example of a metric that is useful to capture during a run.
 It provides insights how the total equity is evolving during a run and shows 
 also the volatility of our strategy when it comes to returns.
 

@@ -55,7 +55,7 @@ feed.plot("TSLA");
 ---
 ## Define the Strategy
 A strategy is the core of any back test. It defines the rules for when to buy and sell an asset. 
-In this example we use a Exponential Moving Average Crossover strategy, which is included in *roboquant* out of the box.
+In this example we use an Exponential Moving Average Crossover strategy, which is included in *roboquant* out of the box.
 
 But normally you would create your own strategy by subclassing the {cl}`Strategy` class and implementing the `generate_signals` method. This method creates signals with ratings based on the data provided by the feed. These signals are then used to create orders by a {cl}`Trader`, which are executed by the {cl}`Broker`.
 

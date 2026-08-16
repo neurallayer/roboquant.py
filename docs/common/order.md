@@ -11,18 +11,18 @@ kernelspec:
 All orders are limit orders in roboquant. If you want them to behave more like a market order,
 you can set a generous `limit` price.
 
-Also the only difference between a BUY and a SELL order is the sign of their `size`. So SELL orders
+Also, the only difference between a BUY and a SELL order is the sign of their `size`. So SELL orders
 have a negative `size` and BUY orders a positive `size`.
 
 There are 2 `tif` (time-in-force) values supported, namely "DAY" and "GTC".
 
 :::{note} history
-Originally *roboquant* had support for different order types. However as it turned out the
+Originally *roboquant* had support for different order types. However, as it turned out the
 way brokers and exchanges implement these more advanced order types differs greatly.
 
 So switching from back testing to live trading introduced different behavior in the way orders
-were processed. Also a lot of complex logic was required to map between the broker order types
-and the to roboquant order types.
+were processed. Also, a lot of complex logic was required to map between the broker order types
+and the roboquant order types.
 
 So it was decided to use limit orders throughout. Complex order types
 can still be implemented as: 
@@ -106,8 +106,8 @@ sell_order = Order(asset, size = -Decimal(10), limit = 200.0, tif="GTC")
 ```
 
 ## Cancel & Modify orders
-Existing orders are orders with a non empty `id`. This `id` is assigned by the broker when placed at that broker.
-These are the orders that are found in `account.orders`. Only these type of orders can be cancelled or modified. 
+Existing orders are orders with a non-empty `id`. This `id` is assigned by the broker when placed at that broker.
+These are the orders that are found in `account.orders`. Only these type of orders can be canceled or modified. 
 
 ```{code-cell} python
 :tags: [remove-input]
@@ -143,7 +143,7 @@ Most {cl}`Trader` implementations that come with *roboquant* allow you to config
 want to use them in Forex or Crypto, you likely will have to change the defaults.
 
 :::{tip} Avoid Market Orders
-Roboquant doesn't support market orders and it might be tempting to
+Roboquant doesn't support market orders, and it might be tempting to
 extend the Order class to do so. But in algo-trading, market
 orders introduce more risk. 
 

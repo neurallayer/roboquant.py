@@ -50,8 +50,8 @@ The Position class is immutable and contains 3 attributes:
 :::{note} Avg price logic
 The average price is the average of the execution prices. 
 For example:
-- current position => size is +10 and avg price is 100.00
-- new trade => size is +40 and execution price is110.00
+- current position ⇒ size is +10 and avg price is 100.00
+- new trade ⇒ size is +40 and execution price is110.00
   
 {math}`new\ avg\ price = \frac{(10*100.00) + (40*110.00)}{10 + 40} = 108.00`
 :::
