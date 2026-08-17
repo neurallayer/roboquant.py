@@ -11,6 +11,10 @@ kernelspec:
 Roboquant can be installed like most other Python packages. It is being published on PyPI and
 below you'll find instructions for various installation methods and scenarios.
 
+:::{tip}
+If you don't want to install anything, you can try some Jupyter Notebooks online: [![Binder](https://mybinder.org/badge_logo.svg)](https://mybinder.org/v2/gh/neurallayer/roboquant.py/HEAD?urlpath=%2Fdoc%2Ftree%2Fdocs%2Fnotebooks)
+:::
+
 ## Prerequisites
 
 - **Python 3.12 or higher** — roboquant uses modern Python features and does not support older versions.
