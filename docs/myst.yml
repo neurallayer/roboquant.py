@@ -52,6 +52,10 @@ project:
     - title: Performance
       children:
         - file: performance/multiprocess.md
+    - title: Examples
+      children:
+        - file: notebooks/backtest.ipynb
+        - file: notebooks/charts.ipynb
 
 site:
   title: roboquant

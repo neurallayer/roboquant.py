@@ -22,7 +22,7 @@ class MyStrategy(IndicatorStrategy):
     def _create_signal(self, asset: rq.Asset, ohlcv: OHLCVBuffer) -> rq.Signal | None:
 
         period = self.period - 1
-        close_prices = ohlcv.close()
+        close_prices = ohlcv.close
         rsi = RSI(close_prices, timeperiod=period)
 
         upper, _, lower = BBANDS(close_prices, timeperiod=period, nbdevup=2, nbdevdn=2)
