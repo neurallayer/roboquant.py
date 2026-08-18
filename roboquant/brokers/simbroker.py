@@ -166,11 +166,17 @@ class SimBroker(Broker):
                 assert order.size != 0, "order size of a new order cannot be zero"
                 order = replace(order, id=self.__next_order_id())
 
-            self._orders[order.id] = order
+            if order.is_cancellation:
+                if order.id in self._orders:
+                    del self._orders[order.id]
+                else:
+                    logging.warning("cancelled order doesn't exist %s", order)
+            else:
+                self._orders[order.id] = order
 
 
     def _order_expired(self, order: Order, time: datetime) -> bool:
-        """Check if the order is expired given the provided time"""
+        """Check if the order has expired given the provided time"""
 
         # GTC order never expire
         if order.tif == "GTC" or not order.time:
@@ -209,7 +215,6 @@ class SimBroker(Broker):
 
             if order.remaining:
                 orders[order.id] = order
-
 
         self._orders = orders
 
