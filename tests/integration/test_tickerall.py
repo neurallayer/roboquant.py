@@ -70,6 +70,7 @@ class TestTickerAllIT(unittest.TestCase):
 
         if account.orders:
             cancellations = [order.cancel() for order in account.orders]
+            print(cancellations)
             broker.place_orders(cancellations)
             time.sleep(10)
             account = broker.sync()
@@ -78,12 +79,15 @@ class TestTickerAllIT(unittest.TestCase):
         asset = Forex("BTCUSD", USD)
         price = account.portfolio[asset].mkt_price
         print("market price =", price, flush=True)
-        order = Order(asset, Decimal("0.001"), limit=round(price*1.0001, 2))
+        # order = Order(asset, Decimal("0.001"), limit=round(price*1.01, 0))
+        order = Order(asset, Decimal("0.001"), limit=round(price, 2))
         broker.place_orders([order])
-        for _ in range(5):
+        for _ in range(3):
             account = broker.sync()
             print(account, "\n", flush=True)
             time.sleep(10)
+        for order in account.orders:
+            print(order)
 
     def test_full_paper_trade(self):
         broker = None
