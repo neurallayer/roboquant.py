@@ -5,7 +5,9 @@ kernelspec:
 ---
 
 # Account
+
 (account_def)=
+## Overview
 An account mirrors the state of the trading account of the underlying broker.
 It contains available cash, open positions, open orders, available buying power
 and executed trades.

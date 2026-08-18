@@ -15,14 +15,15 @@ from typing import override
 
 
 class CryptoBroker(LiveBroker):
-    """Broker that supports cryptocurrency exchanges using the ccxt library. Not all exchanges
+    """
+    Broker that supports cryptocurrency exchanges using the ccxt library. Not all exchanges
     support all features, so check the documentation of the exchange you want to use. If a required feature is not supported,
     a `NotSupported` exception will be raised.
     """
 
     def __init__(self, exchange: ccxt.Exchange, *args, **kwargs):
         super().__init__(*args, **kwargs)
-        self.__client = exchange
+        self.__exchange = exchange
 
     def connect(self):
         # Default implementation for connecting to the crypto exchange
@@ -35,19 +36,20 @@ class CryptoBroker(LiveBroker):
     @override
     def _place_order(self, order: Order) -> None:
         # Default implementation for placing an order
-        side = 'buy' if order.is_buy else 'sell'
-        result = self.__client.create_order(
-            symbol = order.asset.symbol,
-            type =  'limit',
-            side = side,
-            amount = float(abs(order.size)),
-            price = order.limit,
+        side = "buy" if order.is_buy else "sell"
+        result = self.__exchange.create_order(
+            symbol=order.asset.symbol,
+            type="limit",
+            side=side,
+            amount=float(abs(order.size)),
+            price=order.limit,
         )
         logger.info("result place order order=%s result=%s", order, result)
 
     @override
     def _get_account(self, event: Event | None = None) -> Account:
-        """Sync the account object from the real broker. It requires that following
+        """
+        Sync the account object from the real broker. It requires that following
         methods are supported by your broker:
         - fetch_balance
         - fetch_open_orders
@@ -65,51 +67,51 @@ class CryptoBroker(LiveBroker):
     def _cancel_order(self, order: Order):
         # Default implementation for cancelling a
         order_id = order.id
-        result = self.__client.cancel_order(order_id)
+        result = self.__exchange.cancel_order(order_id)
         logger.info("Cancelled order order_id=%s result=%s", order_id, result)
         return result
 
     def _get_balance(self) -> Wallet:
         # Default implementation for retrieving account balance
-        result = self.__client.fetch_balance()
+        result = self.__exchange.fetch_balance()
         w = Wallet()
-        for currency, balance in result['free'].items():
+        for currency, balance in result["free"].items():
             if balance > 0:
                 w += Amount(currency, balance)
         return w
 
     def _get_buying_power(self) -> Amount:
         # Default implementation for retrieving account balance
-        info = self.__client.fetch_balance()["info"]  # type: ignore
+        info = self.__exchange.fetch_balance()["info"]  # type: ignore
         return Amount(info["currency"], float(info["buying_power"]))
 
     def _get_open_orders(self) -> list[Order]:
         # Default implementation for retrieving open orders
-        orders = self.__client.fetch_open_orders()
+        orders = self.__exchange.fetch_open_orders()
         result = []
         for order in orders:
-            asset = Crypto.from_symbol(order['symbol'])
-            size = order['amount']
-            limit = order['price']
-            size = size if order['side'] == 'buy' else -size
+            asset = Crypto.from_symbol(order["symbol"])
+            size = order["amount"]
+            limit = order["price"]
+            size = size if order["side"] == "buy" else -size
             id = order["id"]
-            o = Order(asset, size, limit, id = id)
+            o = Order(asset, size, limit, id=id)
             result.append(o)
         return result
 
     def _get_positions(self) -> Portfolio:
         result = Portfolio()
         try:
-            positions = self.__client.fetch_positions()
+            positions = self.__exchange.fetch_positions()
         except ccxt.NotSupported as e:
             logger.error(e)
             return result
 
         for position in positions:
-            size = position['amount']
-            asset = Crypto.from_symbol(position['symbol'])
-            size = position['amount']
-            avg_entry_price = position['entry_price']
+            size = position["amount"]
+            asset = Crypto.from_symbol(position["symbol"])
+            size = position["amount"]
+            avg_entry_price = position["entry_price"]
             p = Position(size, avg_entry_price, float("nan"))
             result[asset] = p
         return result

@@ -5,7 +5,9 @@ kernelspec:
 ---
 
 # Asset
+
 (asset_def)=
+## Overview
 The {cl}`Asset` class is the fundamental building block for representing financial instruments in *roboquant*.
 Every tradable instrument — whether a stock, option, forex pair, or cryptocurrency —
 is modeled as a specialized subclass of {cl}`Asset`.

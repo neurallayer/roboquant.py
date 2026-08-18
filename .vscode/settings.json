@@ -24,6 +24,8 @@
         "itertools",
         "LSTM",
         "mplfinance",
+        "nbdevdn",
+        "nbdevup",
         "ndigits",
         "nrows",
         "numpy",

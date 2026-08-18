@@ -4,7 +4,9 @@ kernelspec:
   display_name: Python 3
 ---
 # Signal
+
 (signal_def)=
+## Overview
 A signal is a quantifiable trigger that instructs to enter, exit, or adjust a {cl}`Position` for an {cl}`Asset`.
 
 Each signal contains three pieces of information:

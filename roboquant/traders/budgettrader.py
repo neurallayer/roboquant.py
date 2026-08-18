@@ -16,7 +16,8 @@ logger = logging.getLogger(__name__)
 
 
 class BudgetTrader(Trader):
-    """Trader will create orders based on a set amount per order and per position.
+    """
+    Trader will create orders based on a set amount per order and per position.
     All budgets are expressed in absolute float values and are expected in the same
     currency as the account.
     """
@@ -38,7 +39,8 @@ class BudgetTrader(Trader):
 
     @override
     def create_orders(self, signals: list[Signal], event: Event, account: Account) -> list[Order]:
-        """Create orders for the given event, account and signals.
+        """
+        Create orders for the given event, account and signals.
 
         Args:
             event (Event): The event to create orders for.

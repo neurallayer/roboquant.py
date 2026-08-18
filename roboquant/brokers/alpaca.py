@@ -16,7 +16,8 @@ from decimal import Decimal
 
 
 class AlpacaBroker(LiveBroker):
-    """Broker implementation for live and paper trading using the Alpaca trading API.
+    """
+    Broker implementation for live and paper trading using the Alpaca trading API.
     This broker supports US equities, options, and crypto trading.
     It requires an Alpaca API key and secret key.
     """

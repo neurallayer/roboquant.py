@@ -25,7 +25,7 @@ class MyStrategy(IndicatorStrategy):
         close_prices = ohlcv.close
         rsi = RSI(close_prices, timeperiod=period)
 
-        upper, _, lower = BBANDS(close_prices, timeperiod=period, nbdevup=2, nbdevdn=2)
+        upper, _, lower = BBANDS(close_prices, timeperiod=period)
 
         close: float = close_prices[-1]
 

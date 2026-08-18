@@ -5,7 +5,9 @@ kernelspec:
 ---
 
 # Event
+
 (event_def)=
+## Overview
 An {cl}`Event` is a snapshot of information occurring at a specific moment in time. It contains a list
 of items, and all items in a single event share the same timestamp. When an event is created, its
 timestamp is always converted to UTC.

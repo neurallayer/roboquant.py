@@ -5,10 +5,13 @@ kernelspec:
 ---
 
 # Time & TimeSeries
-Time in roboquant uses the Python `datetime` object with timezone set to UTC.
+
+## Overview
+Time related data in *roboquant* uses the Python `datetime` object with
+teh timezone set to UTC.
 
 For example `event.time` is always in timezone UTC, even if the event originates
-from an exchange in another timezone. 
+from an exchange in a different timezone. 
 
 ## Timeframe
 (timeframe_def)=

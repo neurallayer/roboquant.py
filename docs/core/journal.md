@@ -56,7 +56,7 @@ The BasicJournal has low overhead and tracks the following information:
 
 It will also log these values at each step in the run at `info` level.
 
-
+(metricsjournal_def)=
 ## MetricsJournal
 
 `MetricsJournal` collects and records metrics throughout a run, making it easy to track performance indicators like P&L, Sharpe ratio, drawdown, and custom metrics.
@@ -95,6 +95,7 @@ class PositionCount(Metric):
 
 ```
 
+(tensorboardjournal_def)=
 ## TensorBoardJournal
 This journal is similar to the MetricsJournal, but rather than keeping the results of
 the metrics in memory it will write them to a TensorBoard compatible file.

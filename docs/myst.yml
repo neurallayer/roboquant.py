@@ -35,6 +35,7 @@ project:
         - file: common/event.md
         - file: common/account.md
         - file: common/portfolio.md
+        - file: common/indicator.md
     - title: Charts
       children:
         - file: charts/basic_charts.md
