@@ -237,7 +237,7 @@ class SimBroker(Broker):
 
     def close_positions(self) -> Account:
         """Close the open positions in the account using last known market price.
-        Existing open orders will be disgarded.
+        Existing open orders will be disguarded.
         """
 
         orders = []

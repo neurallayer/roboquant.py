@@ -12,7 +12,12 @@ Roboquant can be installed like most other Python packages. It is being publishe
 below you'll find instructions for various installation methods and scenarios.
 
 :::{tip}
-If you don't want to install anything, you can try some Jupyter Notebooks online: [![Binder](https://mybinder.org/badge_logo.svg)](https://mybinder.org/v2/gh/neurallayer/roboquant.py/HEAD?urlpath=%2Fdoc%2Ftree%2Fdocs%2Fnotebooks)
+If you don't want to install anything, you can try the included Jupyter Notebooks online: [![Binder](https://mybinder.org/badge_logo.svg)](https://mybinder.org/v2/gh/neurallayer/roboquant.py/HEAD?urlpath=%2Fdoc%2Ftree%2Fdocs%2Fnotebooks)
+
+Or if you have a Google account, you can run the Notebooks on Google Colaboratory, or "Colab" for short. The Colab environments have more compute resources available, making the execution snappier. You can also use Gemini if you want to.
+
+[![Back Test](https://img.shields.io/badge/Backtest_Notebook-00A1FF?logo=google-colab&logoColor=white)](https://colab.research.google.com/github/neurallayer/roboquant.py/blob/main/docs/notebooks/backtest.ipynb)
+[![Charts](https://img.shields.io/badge/Chart_Notebook-00A1FF?logo=google-colab&logoColor=white)](https://colab.research.google.com/github/neurallayer/roboquant.py/blob/main/docs/notebooks/charts.ipynb)
 :::
 
 ## Prerequisites
