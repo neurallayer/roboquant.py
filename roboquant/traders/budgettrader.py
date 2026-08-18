@@ -7,7 +7,6 @@ from roboquant.common.asset import Asset
 from roboquant.common.event import Event
 from roboquant.common.monetary import Amount
 from roboquant.common.order import Order
-from roboquant.common.portfolio import Position
 from roboquant.common.signal import Signal
 from roboquant.traders.trader import Trader
 from roboquant.traders._util import round_down
@@ -72,7 +71,7 @@ class BudgetTrader(Trader):
                 logger.info("no price found")
                 continue
 
-            pos = account.portfolio.get(asset, Position())
+            pos = account.portfolio.get_position(asset)
             if signal.is_increase_position(pos):
                 if buying_power < self.order_value:
                     logger.info("not enough buying_power remaining")

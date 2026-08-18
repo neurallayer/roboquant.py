@@ -124,14 +124,15 @@ class Order:
         """
         return self.asset.value(self.size, self.limit)
 
-    def remaining_value(self) -> float:
+    def remaining_amount(self) -> Amount:
         """
-        The remaining contract value of this order denoted in the currency of the asset.
+        The remaining contract amount of this order denoted in the currency of the asset.
 
         Returns:
-            float: The remaining contract value of the order.
+            Amount: The remaining contract value of the order.
         """
-        return self.asset.value(self.remaining, self.limit)
+        return Amount(self.asset.currency, self.asset.value(self.remaining, self.limit))
+
 
     def amount(self) -> Amount:
         """

@@ -56,7 +56,7 @@ class Portfolio(UserDict[Asset, Position]):
         Returns:
             float: The position value in the base currency.
         """
-        pos = self.get(asset, Position())
+        pos = self.get_position(asset)
         return asset.amount(pos.size, pos.mkt_price)
 
     def short_positions(self) -> "Portfolio":
@@ -148,3 +148,16 @@ class Portfolio(UserDict[Asset, Position]):
         """
         pos = self.get(asset)
         return pos.size if pos else Decimal()
+
+    def get_position(self, asset: Asset) -> Position:
+        """
+        Return the position size for an asset, en empty position if not
+        in the portfolio.
+
+        Args:
+            asset (Asset): The asset for which to get the position size.
+
+        Returns:
+            Decimal: The position size as a Decimal.
+        """
+        return self.get(asset, Position())

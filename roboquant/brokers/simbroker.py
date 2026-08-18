@@ -4,8 +4,8 @@ from dataclasses import replace
 import logging
 from typing import override
 
-from roboquant.common.portfolio import Position
 from roboquant.common.account import Account
+from roboquant.common.portfolio import Position
 from roboquant.common.asset import Asset
 from roboquant.brokers.broker import Broker
 from roboquant.common.event import Event, Quote, PriceItem, TradePrice
@@ -74,7 +74,7 @@ class SimBroker(Broker):
         """update position based on a fill and return the realized pnl"""
         assert fill != 0, "fill cannot be zero"
 
-        pos = self._account.portfolio.get(asset, Position())
+        pos = self._account.portfolio.get_position(asset)
 
         new_size = pos.size + fill
 
@@ -219,11 +219,13 @@ class SimBroker(Broker):
         self._orders = orders
 
     def _calculate_open_orders(self) -> Wallet:
-        """Calculate the buying power required for the open orders"""
+        """Calculate the buying power required for the open orders.
+        Orders that reduce position size don't reserve buying power."""
         result = Wallet()
         for order in self._orders.values():
-            if order.is_buy and order.remaining:
-                result += order.asset.amount(order.remaining, order.limit)
+            assert order.remaining
+            if self.__is_increase_position(order):
+                result += order.remaining_amount()
         return result
 
     def _calculate_short_positions(self) -> Wallet:
@@ -251,6 +253,11 @@ class SimBroker(Broker):
         self.place_orders(orders)
         return self.sync(Event(self._account.last_update, items))
 
+    def __is_increase_position(self, order: Order) -> bool:
+        pos = self._account.portfolio.get_position(order.asset)
+        if pos.is_closed:
+            return True
+        return order.is_buy if pos.is_long else order.is_sell
 
     def _calculate_buyingpower(self) -> Amount:
         """Calculate the buying power.

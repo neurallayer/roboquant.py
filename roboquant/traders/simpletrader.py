@@ -7,7 +7,6 @@ from roboquant.common.asset import Asset
 from roboquant.common.event import Event
 from roboquant.common.monetary import Amount
 from roboquant.common.order import Order
-from roboquant.common.portfolio import Position
 from roboquant.common.signal import Signal
 from roboquant.traders.trader import Trader
 
@@ -65,7 +64,7 @@ class SimpleTrader(Trader):
                 logger.info("no price found")
                 continue
 
-            pos = account.portfolio.get(asset, Position())
+            pos = account.portfolio.get_position(asset)
             if signal.is_open_position(pos):
 
                 if remaining_positions <= 0:
