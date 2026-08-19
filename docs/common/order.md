@@ -23,11 +23,12 @@ So switching from back testing to live trading introduced different behavior in 
 were processed. Also, a lot of complex logic was required to map between the broker order types
 and the roboquant order types.
 
-So it was decided to use limit orders throughout. Complex order types
+So it was decided to use market- and limit-orders only. Complex order types
 can still be implemented as: 
-- part of a Trader implementation. For example, create a SELL order once the PNL in an open position
-  reaches a certain value. 
-- subclass of Order and handled by a custom Broker implementation.
+- part of a Trader implementation. For example, automatically create a SELL order
+  once the PNL of an open position reaches a certain value (simulate STOP-LOSS functionality) 
+- subclass the Order and handled by a custom Broker implementation.
+- add info attributes to an Order instance and handled by a custom Broker implementation.
 :::
 
 ## API
