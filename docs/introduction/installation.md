@@ -43,7 +43,7 @@ If you need specific functionality, install roboquant with one or more of the fo
 | Optional   | Description                                            | Install command |
 |------------|--------------------------------------------------------|-----------------|
 | `ai`       | AI/ML strategies using PyTorch and Stable-Baselines3   | `pip install --upgrade "roboquant[ai]"` |
-| `extra`    | IBKR, Alpaca and Crypto support                        | `pip install --upgrade "roboquant[extra]"` |
+| `extra`    | IBKR, Alpaca, Crypto and MetaTrader (TickerAll) support | `pip install --upgrade "roboquant[extra]"` |
 
 
 To install roboquant with **all** optional dependencies at once:

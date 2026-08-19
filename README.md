@@ -47,11 +47,25 @@ pip install roboquant
 The core installation of roboquant limits the number of dependencies. But you can install roboquant including one or more of the optional dependencies if you require certain additional functionality:
 
 ```shell
-# Integration with IBKR, Alpaca and Crypto exchanges
+# Integration with IBKR, Alpaca, Crypto exchanges and MetaTrader (MT4/MT5) via the hosted TickerAll API
 pip install "roboquant[extra]"
 
 # AI based strategies using PyTorch and SB3
 pip install "roboquant[ai]"
+```
+
+Connect a MetaTrader account straight from its credentials — `TickerAllBroker.connect` opens the broker
+session for you (no separate `sessions.start` call), and feeds reuse it via `broker.account_id`:
+
+```python
+from roboquant.tickerall import TickerAllBroker, TickerAllLiveFeed
+
+broker = TickerAllBroker.connect(api_key, broker="mt5", server="Exness-MT5Trial", account=12345678, password="...")
+feed = TickerAllLiveFeed(api_key, broker.account_id)  # reuses the session the broker opened
+feed.subscribe("EURUSDm")
+...
+feed.close()
+broker.close()  # ends the session connect() opened
 ```
 
 ## License
