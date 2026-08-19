@@ -1,26 +1,23 @@
-from abc import ABC, abstractmethod
+from abc import ABC
 from datetime import datetime
-from typing import Any, Iterable, Sequence
+from typing import Any, Iterable
+
+from matplotlib.axes import Axes
 
 from roboquant.common.trade import Trade
 from roboquant.common.asset import Asset
 from roboquant.common.event import Bar
 from roboquant.common.timeframe import Timeframe
 from roboquant.common.timeseries import TimeSeries
+from roboquant.common.metric import Metric
 from .feed import Feed
 
-
-import pandas as pd
 import matplotlib.pyplot as plt
-import numpy as np
 
 
 class HistoricFeed(Feed, ABC):
     """Base class for most implementations of Historic Feeds. Contains several methods
     to enhance feeds, like plotting prices and conversion to dataframes."""
-
-    @abstractmethod
-    def assets(self) -> list[Asset]: ...
 
     def symbols(self) -> list[str]:
         """Return the list of unique symbols available in this feed"""
@@ -37,33 +34,40 @@ class HistoricFeed(Feed, ABC):
         Returns:
             Asset: The first asset object that matches the provided symbol.
         Raises:
-            ValueError: If no asset is found with the specified symbol.
+            ValueError: If no asset is found matching the symbol.
         """
         try:
             return next(asset for asset in self.assets() if asset.symbol == symbol)
         except StopIteration:
             raise ValueError(f"no asset found with symbol={symbol}")
 
-    def get_ohlcv(self, asset: Asset | str, timeframe: Timeframe | None = None) -> dict[datetime, Sequence[float]]:
-        """Get the OHLCV values for an asset in this feed.
-        The returned value is a `dict` with the key being the `datetime` and the value being an `array`
-        of the OHLCV values.
+    def get_ohlcv(self, asset: Asset | str, timeframe: Timeframe | None = None) -> TimeSeries:
+        """Get the OHLCV values for a single asset in this feed.
+        The returned value is a TimeSeries.
         """
 
         if isinstance(asset, str):
             asset = self.get_asset(asset)
 
-        result: dict[datetime, Sequence[float]] = {}
+        timeline = []
+        data: dict[str, list[float]] = {}
+        keys = ["open", "high", "low", "close", "volume"]
+        for key in keys:
+            data[key] = []
+
         for event in self.play(timeframe):
             item = event.price_items.get(asset)
             if item and isinstance(item, Bar):
-                result[event.time] = item.ohlcv
+                timeline.append(event.time)
+                for idx, key in enumerate(keys):
+                    data[key].append(item.ohlcv[idx])
 
-        return result
+        return TimeSeries.from_data(timeline, data)
 
     def print_items(self, timeframe: Timeframe | None = None) -> None:
         """Print the items in a feed to the console.
-        This is mostly useful for debugging purposes to see what items a feed generates.
+        This is mostly useful for debugging purposes to
+        see what items a feed generates.
         """
 
         for event in self.play(timeframe):
@@ -88,38 +92,29 @@ class HistoricFeed(Feed, ABC):
             items += len(evt.items)
         return items
 
-    def to_dict(
-        self, *assets: Asset, timeframe: Timeframe | None = None, price_type: str = "DEFAULT"
-    ) -> dict[str, list[float | None]]:
-        """Return the prices of one or more assets as a dict with the key being the symbol name.
-        If at a moment in time for an asset there is no known price, NaN will be stored.
+    def to_timeseries(
+            self, *assets: Asset, timeframe: Timeframe | None = None, price_type: str = "DEFAULT"
+        ) -> TimeSeries:
+            """Return the prices of one or more assets as a multivariate TimeSeries.
+            The name of each individual series is the symbol name.
+            If at a moment in time for an asset there is no known price, NaN will be stored.
 
-        If no assets are provided, all assets in the feed will be used.
-        """
-        if not assets:
-            assets = tuple(self.assets())
+            If no assets are provided, all assets in the feed will be used.
+            """
+            if not assets:
+                assets = tuple(self.assets())
 
-        result: dict[str, list[float | None]] = {asset.symbol: [] for asset in assets}
-        for evt in self.play(timeframe):
-            for asset in assets:
-                price = evt.get_price(asset, price_type)
-                if price is not None:
-                    result[asset.symbol].append(price)
-                else:
-                    result[asset.symbol].append(float("nan"))
-        return result
-
-    def to_dataframe(self, asset: Asset | str, timeframe: Timeframe | None = None):
-        """Return the bars for the asset as a Pandas dataframe, with the index being the event time
-        and the columns being "Open", "High", "Low", "Close", "Volume".
-
-        This will throw an exception if the Pandas library isn't installed.
-        """
-        import pandas as pd
-
-        ohlcv = self.get_ohlcv(asset, timeframe)
-        columns = ["open", "high", "low", "close", "volume"]
-        return pd.DataFrame.from_dict(ohlcv, orient="index", columns=columns)  # type: ignore
+            timeline = []
+            result: dict[str, list[float]] = {asset.symbol: [] for asset in assets}
+            for evt in self.play(timeframe):
+                timeline.append(evt.time)
+                for asset in assets:
+                    price = evt.get_price(asset, price_type)
+                    if price is not None:
+                        result[asset.symbol].append(price)
+                    else:
+                        result[asset.symbol].append(float("nan"))
+            return TimeSeries.from_data(timeline, result)
 
     def plot(
         self,
@@ -127,14 +122,14 @@ class HistoricFeed(Feed, ABC):
         price_type: str = "DEFAULT",
         volume_type: str = "DEFAULT",
         timeframe: Timeframe | None = None,
-        ax=None,
+        ax: Axes | None = None,
         trades: Iterable[Trade] | None = None,
         plot_volume: bool = True,
         **kwargs: Any,
-    ):
+    ) -> Axes:
         """
         Plots the prices of a single asset. This function requires matplotlib to be installed.
-        It also support plotting trades on the same chart,
+        It also supports plotting trades on the same chart,
 
         Args:
             asset (Asset | str): The asset or symbol for which to plot prices.
@@ -165,16 +160,14 @@ class HistoricFeed(Feed, ABC):
 
         if not ax:
             _, ax = plt.subplots()
-            ax.grid(True, linestyle="--", linewidth=0.5, alpha=0.5)
             ax.set_title(asset.symbol)
 
-        if not kwargs:
-            kwargs = {"linewidth": 1}
 
         ax.plot(t, p, **kwargs)  # type: ignore
 
         if plot_volume:
             ax2 = ax.twinx()
+            ax2.grid(False)
             ax2.bar(t, v, alpha=0.3)  # type: ignore
 
         if trades and t:
@@ -195,66 +188,22 @@ class HistoricFeed(Feed, ABC):
 
         return ax
 
-    def get_prices(self, asset: Asset | str, price_type: str = "DEFAULT", timeframe: Timeframe | None = None) -> TimeSeries:
+    def track(self, metric: Metric, timeframe: Timeframe | None = None) -> TimeSeries:
+        """Track a metric over time and return the results as a TimeSeries.
         """
-        Retrieve the prices for a given asset, optional over a specified timeframe and return the result
-        as a `TimeSeries`.
+        from roboquant.common.account import Account
 
-        Args:
-            asset (Asset): The asset for which to retrieve prices.
-            price_type (str, optional): The type of price to retrieve (e.g., "DEFAULT", "CLOSE", "OPEN").
-            Defaults to "DEFAULT".
-            timeframe (Timeframe | None, optional): The timeframe over which to retrieve prices.
-            If None, the entire available timeframe is used. Defaults to None.
-
-        Returns:
-            TimeSeries with the name being the symbol name of the asset.
-        """
-        x: list[datetime] = []
-        y: list[float] = []
-
-        if isinstance(asset, str):
-            asset = self.get_asset(asset)
+        timeline: list[datetime] = []
+        account = Account()
+        data: dict[str, list[float]] = {}
 
         for event in self.play(timeframe):
-            price = event.get_price(asset, price_type)
-            if price:
-                x.append(event.time)
-                y.append(price)
-        return TimeSeries(asset.symbol, x, y)
+            result = metric.calc(event, account, [], [])
+            if result:
+                for key, value in result.items():
+                    if key not in data:
+                        data[key] = []
+                    data[key].append(value)
+                timeline.append(event.time)
 
-    def plot_corr(
-        self, *assets: Asset, ax=None, timeframe: Timeframe | None = None, price_type: str = "DEFAULT",
-        fontsize : int | None = None
-    ):
-        """Plot the correlation matrix of various assets in a feed. If no assets are provided, all feed assets are used
-        Returns the main ax.
-        """
-
-        if not ax:
-            _, ax = plt.subplots()
-
-        d = self.to_dict(*assets, timeframe=timeframe, price_type=price_type)
-        df = pd.DataFrame.from_dict(d)
-        corr = df.corr()
-
-        c_axes = ax.matshow(corr, vmin=-1, vmax=1, cmap="RdYlGn")
-        ax.figure.colorbar(c_axes)
-
-        columns = corr.columns
-        plt.xticks(range(len(columns)), columns, fontsize = fontsize)  # type: ignore
-        plt.yticks(range(len(columns)), columns, fontsize = fontsize)  # type: ignore
-
-        for (i, j), z in np.ndenumerate(corr.to_numpy()):
-            ax.text(
-                j,
-                i,
-                "{:0.2f}".format(z),
-                ha="center",
-                va="center",
-                color="w",
-                fontsize = fontsize,
-                bbox=dict(boxstyle="round", facecolor='#222', edgecolor='#333', alpha=0.2),
-            )
-
-        return ax
+        return TimeSeries.from_data(timeline, data)

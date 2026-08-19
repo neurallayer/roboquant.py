@@ -31,8 +31,8 @@ class TestAccount(unittest.TestCase):
         now = utcnow()
         acc.cash = Wallet(Amount(USD, 1_000.0))
         for i in range(5):
-            symbol = Stock(f"AA${i}")
-            acc.portfolio[symbol] = Position(Decimal(10), 10.0, 11.0)
+            asset = Stock(f"AA{i}")
+            acc.portfolio[asset] = Position(Decimal(10), 10.0, 11.0)
 
         self.assertAlmostEqual(acc.portfolio.mkt_value().convert_to(USD, now), 5*10*11.0)
         self.assertAlmostEqual(acc.equity_value(), 1_000.0 + (5*10*11.0))

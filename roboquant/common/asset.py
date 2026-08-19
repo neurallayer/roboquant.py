@@ -4,7 +4,7 @@ import re
 from abc import ABC
 from dataclasses import dataclass
 from decimal import Decimal
-from typing import Type, override
+from typing import Any, Type, override
 
 from roboquant.common.monetary import USD, Amount, Currency
 
@@ -142,8 +142,9 @@ class Crypto(Asset):
 
     @staticmethod
     def from_symbol(symbol: str) -> "Crypto":
-        """Create a Crypto asset from a symbol string. It will automatically extract the quote currency from the symbol,
-        which is assumed to be the last part of the symbol.
+        """Create a Crypto asset from a symbol string. It will automatically extract
+        the quote currency from the symbol, which is assumed to be the
+        last part of the symbol.
 
         Args:
             symbol (str): The symbol string of the crypto asset.
@@ -205,7 +206,7 @@ class Option(Asset):
         """
         return float(size) * price * 100.0
 
-    def decode_occ_symbol(self) -> dict:
+    def decode_occ_symbol(self) -> dict[str, Any]:
         """
         Decode the symbol into its components.
 

@@ -4,12 +4,7 @@ export PYRIGHT_PYTHON_FORCE_VERSION="latest"
 
 rm -rf ./runs
 
-uv sync --all-extras --dev
-
-# QA
-uvx ruff check
-uv run pyright tests roboquant || exit 1
-uv run python -m unittest discover -s tests/unit || exit 1
+./bin/verify.sh
 
 # Build
 rm -rf dist

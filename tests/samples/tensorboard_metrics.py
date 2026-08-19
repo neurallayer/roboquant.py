@@ -2,7 +2,7 @@
 from tensorboard.summary import Writer
 import roboquant as rq
 from roboquant.journals import TensorboardJournal
-from roboquant.journals.metrics import AlphaBeta, PNLMetric, RunMetric
+from roboquant.util.metrics import AlphaBeta, PNLMetric, RunMetric
 
 # %%
 feed = rq.feeds.YahooFeed("JPM", "IBM", "F", "MSFT", "V", "GE", "CSCO", "WMT", "XOM", "INTC", start_date="2010-01-01")

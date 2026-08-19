@@ -4,9 +4,10 @@ import unittest
 import os
 from alpaca.data.timeframe import TimeFrame
 
-from roboquant.alpaca import AlpacaHistoricCryptoFeed, AlpacaHistoricStockFeed, AlpacaBroker
+from roboquant.feeds.alpaca import AlpacaHistoricCryptoFeed, AlpacaHistoricStockFeed
 from roboquant.common.asset import Crypto, Stock
 from roboquant.common.order import Order
+from roboquant.brokers.alpaca import AlpacaBroker
 from tests.common import run_price_item_feed
 from dotenv import load_dotenv
 

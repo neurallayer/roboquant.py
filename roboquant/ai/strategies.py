@@ -47,7 +47,7 @@ class FeatureStrategy(Strategy):
         ...
 
 
-class SequenceDataset(Dataset):
+class SequenceDataset(Dataset[tuple[NDArray, NDArray]]):
     """Dataset for creating input and output sequences for recurrent networks.
     This dataset is designed to create sequences of input data and corresponding target data
     for training recurrent neural networks (RNNs) or similar models.
@@ -87,7 +87,7 @@ class SequenceDataset(Dataset):
         calc_l = len(self.target_data) - self.input_sequences - self.output_sequences - self.gap + 1
         return max(0, calc_l)
 
-    def __getitem__(self, index):
+    def __getitem__(self, index) -> tuple[NDArray, NDArray]:
         """Get a sample from the dataset."""
         end = index + self.input_sequences
         features = self.input_data[index:end]

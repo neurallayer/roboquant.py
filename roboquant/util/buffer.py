@@ -1,0 +1,122 @@
+from collections import UserDict
+from typing import Any, Sequence
+
+import numpy as np
+from numpy.typing import NDArray, DTypeLike
+
+from roboquant.common.asset import Asset
+from roboquant.common.event import Bar, Event
+
+
+class NumpyBuffer:
+    """A FIFO (first-in-first-out) buffer of a fixed capacity.
+    It uses a single Numpy array to store its data in order to optimize
+    memory usage and performance.
+    """
+
+    __slots__ = "__data", "__idx", "rows"
+
+    def __init__(self, rows: int, columns: int, dtype: DTypeLike = "float32", order: str="C") -> None:
+        """Create a new Numpy buffer"""
+        size = int(rows * 1.25 + 3)  # slight overallocation to minimize copying when buffer is full
+        self.__data: NDArray = np.full(shape=(size, columns), fill_value=np.nan, dtype=dtype, order=order)  # type: ignore
+        self.__idx = 0
+        self.rows = rows
+
+    def append(self, data: Sequence[float] | NDArray[Any]) -> bool:
+        """Append data to this buffer. Return True if the buffer is full, False otherwise"""
+
+        # Check if buffer is overflowing
+        if self.__idx >= len(self.__data):
+            self.__data[0 : self.rows] = self.__data[-self.rows :]
+            self.__idx = self.rows
+
+        self.__data[self.__idx] = data
+        self.__idx += 1
+        return self.__idx >= self.rows
+
+    def __array__(self)-> NDArray[Any]:
+        start = max(0, self.__idx - self.rows)
+        return self.__data[start : self.__idx]
+
+    def _get(self, column: int) -> NDArray[Any]:
+        start = max(0, self.__idx - self.rows)
+        return self.__data[start : self.__idx, column]
+
+    def __len__(self):
+        return min(self.__idx, self.rows)
+
+    def is_full(self) -> bool:
+        return self.__idx >= self.rows
+
+    def reset(self):
+        """reset the buffer"""
+        self.__data.fill(np.nan)
+        self.__idx = 0
+
+
+class OHLCVBuffer(NumpyBuffer):
+    """A OHLCV buffer (first-in-first-out) of a fixed capacity.
+    It stores the data in a `NumpyBuffer` with 5 columns (open, high, low, close, volume)
+    and has utility methods to get the OHLCV values.
+    """
+
+    def __init__(self, capacity: int) -> None:
+        """Create a new OHLCV buffer"""
+        super().__init__(capacity, 5, "float64")
+
+    @property
+    def open(self) -> NDArray[np.float64]:
+        """Return the open prices as a Numpy array"""
+        return self._get(0)
+
+    @property
+    def high(self) -> NDArray[np.float64]:
+        """Return the high prices as a Numpy array"""
+        return self._get(1)
+
+    @property
+    def low(self) -> NDArray[np.float64]:
+        """Return the low prices as a Numpy array"""
+        return self._get(2)
+
+    @property
+    def close(self) -> NDArray[np.float64]:
+        """Return the close prices as a Numpy array"""
+        return self._get(3)
+
+    @property
+    def volume(self) -> NDArray[np.float64]:
+        """Return the volumes as a Numpy array"""
+        return self._get(4)
+
+
+class AssetBuffers(UserDict[Asset, OHLCVBuffer]):
+    """Keep track of OHLCV buffers for all assets in an event."""
+
+    def __init__(self, size: int):
+        super().__init__()
+        self.size = size
+
+    def add_event(self, event: Event) -> set[Asset]:
+        """Add a new event and return all the assets that:
+        - had a priceitem of the type `Bar` (so have been added)
+        - and are ready to be processed (so a full buffer)
+
+        Note that `PriceItems` in the event that are not of the type `Bar`
+        are ignored.
+        """
+        assets: set[Asset] = set()
+        for item in event.items:
+            if isinstance(item, Bar):
+                asset = item.asset
+                if asset not in self:
+                    self[asset] = OHLCVBuffer(self.size)
+                ohlcv = self[asset]
+                if ohlcv.append(item.ohlcv):
+                    assets.add(asset)
+        return assets
+
+    def ready_assets(self) -> set[Asset]:
+        """Return the set of assets for which the buffer is already full"""
+        return {asset for asset, ohlcv in self.items() if ohlcv.is_full()}

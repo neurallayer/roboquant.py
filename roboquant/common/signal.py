@@ -2,6 +2,7 @@ from dataclasses import dataclass
 from enum import Flag, auto
 
 from roboquant.common.asset import Asset
+from roboquant.common.portfolio import Position
 
 
 class SignalType(Flag):
@@ -121,3 +122,29 @@ class Signal:
             bool: True if this is an EXIT or ENTRY_EXIT signal, False otherwise.
         """
         return SignalType.EXIT in self.type
+
+    def is_close_position(self, pos: Position) -> bool:
+        """Return True if this is close of a position, False otherwise
+        """
+        if not self.is_exit or pos.is_closed:
+            return False
+        return self.is_buy if pos.is_short else self.is_sell
+
+    def is_open_position(self, pos: Position) -> bool:
+        """Return True if this an opening of a position, False otherwise.
+        """
+        return self.is_entry and pos.is_closed
+
+    def is_increase_position(self, pos: Position) -> bool:
+        """Return True if this an increase into a position, False otherwise.
+        """
+        if not self.is_entry:
+            return False
+        if pos.is_closed:
+            return True
+        return self.is_buy if pos.is_long else self.is_sell
+
+    def is_shorting(self, pos: Position) -> bool:
+        """Return True if this an entry into a position, False otherwise.
+        """
+        return self.is_entry and pos.size <= 0 and self.is_sell

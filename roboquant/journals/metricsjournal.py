@@ -1,8 +1,11 @@
-from typing import Self, override
+from typing import Any, Self, override
 from datetime import datetime
 
+from matplotlib.axes import Axes
+
+from roboquant.common.metric import Metric
 from roboquant.journals.journal import Journal
-from roboquant.journals.metrics import Metric, PNLMetric
+from roboquant.util.metrics import PNLMetric
 from roboquant.common.account import Account
 from roboquant.common.signal import Signal
 from roboquant.common.event import Event
@@ -36,17 +39,20 @@ class MetricsJournal(Journal):
             new_result = metric.calc(event, account, signals, orders)
             result.update(new_result)
 
-        self._history.append((event.time, result))
+        if result:
+            self._history.append((event.time, result))
 
-    def get_metric(self, metric_name: str) -> TimeSeries:
-        """Return the calculated values of a metric as tuple of date-times and float values"""
+    def get_metrics(self, *metric_names: str) -> TimeSeries:
+        """Return the ccaptured metrics of oen or more metrics as a TimeSeries"""
         timeline: list[datetime] = []
-        values: list[float] = []
+        values: dict[str, list[float]] = {name: [] for name in metric_names}
         for time, metrics in self._history:
-            if metric_name in metrics:
-                timeline.append(time)
-                values.append(metrics[metric_name])
-        return TimeSeries(metric_name, timeline, values)
+            for name in metric_names:
+                value = metrics.get(name, float("nan"))
+                values[name].append(value)
+            timeline.append(time)
+
+        return TimeSeries.from_data(timeline, values)
 
     def get_metric_names(self) -> list[str]:
         """Return a list of the recorded metric names"""
@@ -55,11 +61,15 @@ class MetricsJournal(Journal):
             result.update(m.keys())
         return list(result)
 
-    def plot(self, metric_name: str, plot_timeline: bool = True, ax = None, **kwargs):
-        """Plot the metric. Optional a `matplotlib.axes.Axes` can be provided
+    def plot(self, *metric_names: str, plot_timeline: bool = True, ax: Axes | None = None, **kwargs: Any) -> Axes:
+        """Plot one or more metrics. Optional a `matplotlib.axes.Axes` can be provided
         This method requires matplotlib to be installed."""
 
-        ts = self.get_metric(metric_name)
-        return ts.plot(plot_timeline=plot_timeline,ax=ax, **kwargs)
+        ts = self.get_metrics(*metric_names)
+        if plot_timeline:
+            return ts.plot(ax=ax, **kwargs)
+        else:
+            return ts.reset_index(drop=True).plot(ax=ax, **kwargs)
+
 
 

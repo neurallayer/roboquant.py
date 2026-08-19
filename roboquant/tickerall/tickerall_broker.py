@@ -1,5 +1,4 @@
 import logging
-import math
 from decimal import Decimal
 from typing import Self
 
@@ -26,8 +25,8 @@ class TickerAllBroker(LiveBroker):
 
     Following roboquant's order model, an order without an `id` is a new order, an order with an `id` and a
     non-zero size updates that resting pending order, and an order with an `id` and a zero size cancels it.
-    A new order with a finite `limit` is placed as a pending limit order; a new order whose `limit` is
-    `NaN` (`float("nan")`) is placed as a market order.
+    A new order with a `limit` price is placed as a pending limit order; a new order whose `limit` is
+    `None` (`is_mkt_order`) is placed as a market order.
 
     Note that roboquant models one net position per asset, which maps to a MetaTrader **netting** account.
     Stop-loss / take-profit are not expressible in roboquant's order model and are out of scope.
@@ -184,7 +183,7 @@ class TickerAllBroker(LiveBroker):
         return orders
 
     def _place_order(self, order: Order) -> None:
-        is_market = math.isnan(order.limit)
+        is_market = order.is_mkt_order
         result = self._client.orders.place(
             self._account_id,
             type="market" if is_market else "limit",

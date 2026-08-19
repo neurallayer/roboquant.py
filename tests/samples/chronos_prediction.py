@@ -14,7 +14,7 @@ import roboquant as rq
 import numpy as np
 from chronos import ChronosBoltPipeline
 
-from roboquant.strategies.buffer import OHLCVBuffer
+from roboquant.util.buffer import OHLCVBuffer
 
 # %%
 pipeline = ChronosBoltPipeline.from_pretrained(
@@ -24,7 +24,7 @@ pipeline = ChronosBoltPipeline.from_pretrained(
 )
 
 # %%
-def perc_change(arr):
+def pct_change(arr):
     """Calculate the percentage change of a numpy array to make the data stationary."""
     return np.diff(arr) / arr[:-1]
 
@@ -34,9 +34,11 @@ prediction_days = 10  # predict 10 trading days in the future
 context_window = 250  # use the previous 250 trading days as context
 
 feed = rq.feeds.YahooFeed("SPY", start_date="2015-01-01")
-df = feed.to_dataframe(feed.assets()[0])
-close = df["Close"].values
-close = perc_change(close)  # make the data stationary
+ts = feed.to_timeseries(price_type="close")
+
+
+close = ts["SPY"].to_numpy()
+close = pct_change(close)  # make the data stationary
 close = close[-context_window - prediction_days :-prediction_days]  # use the last 250 trading days as context
 
 # %%
@@ -58,7 +60,7 @@ plt.show()
 
 # %%
 # Make a strategy that uses the predictions to buy or sell the asset
-class ChronosStrategy(rq.strategies.TaStrategy):
+class ChronosStrategy(rq.strategies.IndicatorStrategy):
     """A strategy that uses the Chronos pipeline to predict future prices
     based on historical data. Naive approach that just serves as an example."""
 
@@ -68,7 +70,7 @@ class ChronosStrategy(rq.strategies.TaStrategy):
         self.prediction_length = prediction_length
 
     def _create_signal(self, asset: rq.Asset, ohlcv: OHLCVBuffer) -> rq.Signal | None:
-        close = perc_change(ohlcv.close())
+        close = pct_change(ohlcv.close)
         result = self.pipeline.predict(
             inputs=torch.tensor(close),
             prediction_length=self.prediction_length,

@@ -31,7 +31,8 @@ class EMACrossover(Strategy):
     @override
     def create_signals(self, event: Event) -> list[Signal]:
         result: list[Signal] = []
-        for asset, price in event.get_prices(self.price_type).items():
+        for asset, item in event.price_items.items():
+            price = item.price(self.price_type)
             if calculator := self._history.get(asset):
                 old_rating = calculator.is_above()
                 step = calculator.add_price(price)

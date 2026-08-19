@@ -129,7 +129,7 @@ class TestTickerAllIT(unittest.TestCase):
 
         # --- market place -> close ---
         before = position_tickets()
-        broker.place_orders([Order(asset, Decimal("0.01"), float("nan"))])
+        broker.place_orders([Order(asset, Decimal("0.01"))])  # no limit → market
         time.sleep(4)
         opened = position_tickets() - before
         self.assertTrue(opened, "a market order should open a position")

@@ -7,15 +7,17 @@ build-backend = "uv_build"
 
 [tool.ruff.lint]
 select = ["E", "F", "W"]
-ignore = ["E703"]  # use ; in notebook Python file
+ignore = ["E703", "E402"]  # use ; in notebook Python file
 
 [tool.ty.rules]
 unused-type-ignore-comment = "ignore"
-
+missing-type-argument = "error"
+# possibly-unresolved-reference = "warn"
+# unsound-return-statement = "error"
 
 [tool.pyright]
 typeCheckingMode = "standard"
-reportPrivateImportUsage = "none" 
+# reportPrivateImportUsage = "none" 
 # typeCheckingMode = "strict"
 
 [tool.uv.build-backend]
@@ -24,10 +26,13 @@ module-name = "roboquant"
 
 [tool.pyrefly]
 infer-with-first-use = false
+min-severity = "info"
+project-excludes = ["tests"]
+preset = "strict"
 
 [project]
 name = "roboquant"
-version = "2.6.7"
+version = "2.8.1"
 authors = [{ name = "roboquant team", email = "info@roboquant.org" }]
 description = "A fast algorithmic trading platform with support for AI based strategies"
 readme = "README.md"
@@ -64,7 +69,7 @@ dependencies = [
   "requests>2.30.0",
   "yfinance>=1.5.2",
   "pyarrow>24.0.0",
-  "ta-lib==0.6.5",
+  "ta-lib==0.7.1",
   "pandas>=2.2.0",
   "matplotlib>=3.10.0",
 ]
@@ -75,25 +80,25 @@ ai = [
   "stable-baselines3>=2.9.0",
   "sb3-contrib>=2.9.0",
 ]
-ibkr = ["ibind[oauth]>=0.1.22"]
-alpaca = ["alpaca-py>=0.43.5"]
-crypto = ["ccxt>=4.5.65"]
-tickerall = ["tickerall>=0.1.16"]
+extra = [
+  "ibind[oauth]>=0.1.22",
+  "alpaca-py>=0.43.5",
+  "ccxt>=4.5.65",
+  "tickerall>=0.1.16",
+]
 
 [project.urls]
-Homepage = "https://roboquant.org"
+Homepage = "https://neurallayer.github.io/roboquant.py/"
 Repository = "https://github.com/neurallayer/roboquant.py.git"
 Issues = "https://github.com/neurallayer/roboquant.py/issues"
 
 [dependency-groups]
 dev = [
   "python-dotenv>=1.1.0",
-  "pyright>=1.1.411",
   "ipykernel>=7.3.0",
-  "ipywidgets>=8.1.6",
   "chronos-forecasting>=2.3.1",
-  "ty>=0.0.62",
+  "ty>=0.0.72",
   "tensorboard>=2.21.0",
-  "pdoc3>=0.11.6",
-  "pyrefly>=1.1.1",
+  "jupyter-book>=2.1.6",
+  "pip>=26.2.1",
 ]

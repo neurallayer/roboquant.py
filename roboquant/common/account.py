@@ -1,7 +1,10 @@
 from dataclasses import dataclass, asdict
 from datetime import datetime
 from decimal import Decimal
+from typing import Any
 
+from matplotlib import pyplot as plt
+from matplotlib.axes import Axes
 import pandas as pd
 
 from roboquant.common.portfolio import Portfolio
@@ -13,10 +16,11 @@ from roboquant.common.trade import Trade
 
 @dataclass
 class Account:
-    """Represents a trading account. The account maintains the following state during a run:
+    """Represents a trading account and is managed by the broker.
+    It keeps track of the cash, positions, orders and trades.
 
     Attributes:
-        buying_power (Amount): Available buying power for orders in the base currency of the account.
+        buying_power (Amount): Available buying power for orders in denoted in the base currency of the account.
         cash (Wallet): The cash available in the account.
         positions (Dict[Asset, Position]): the open positions, each denoted in the currency of the asset.
         orders (list[Order]): the open orders, each denoted in the currency of the asset. Each order in
@@ -94,33 +98,53 @@ class Account:
         """
         return self.convert(self.equity())
 
-    def realized_pnl(self) -> Wallet:
+    def cash_value(self) -> float:
+        """
+        Return the cash value denoted in the base currency of the account.
+
+        Returns:
+            float: The cash value in the base currency.
+        """
+        return self.convert(self.cash)
+
+    def realized_pnl(self, *assets: Asset) -> Wallet:
         """
         Return the sum of the realized profit and loss for trades executed in the account.
+        If one or more asset is provided, limit it to those assets, otherwise include all assets.
 
         Returns:
             Wallet: The realized profit and loss.
         """
         result = Wallet()
         for trade in self.trades:
-            result += Amount(trade.asset.currency, trade.pnl)
+            if not assets or trade.asset in assets:
+                result += Amount(trade.asset.currency, trade.pnl)
         return result
 
-    def pnl(self) -> Wallet:
+    def pnl(self, *assets: Asset) -> Wallet:
         """
         Return the total profit and loss of the account, which is
         the sum of realized- and unrealized-PnL.
+        If one or more asset is provided, limit it to those assets, otherwise include all assets.
 
         Returns:
             Wallet: The total profit and loss.
         """
-        return self.realized_pnl() + self.portfolio.unrealized_pnl()
+        return self.realized_pnl(*assets) + self.portfolio.unrealized_pnl(*assets)
+
+    def pnl_value(self, *assets: Asset) -> float:
+        """Return the total profit and loss of the account, which is
+            the sum of realized- and unrealized-PnL expressed in the
+            base currency of the account.
+        """
+        return self.convert(self.pnl())
 
     def get_order(self, order_id: str) -> Order | None:
         """Return an order by its id, or None if no matching order can be found"""
         for order in self.orders:
             if order.id == order_id:
                 return order
+        return None
 
     def __repr__(self) -> str:
         """Condensed representation of this account. It by default won't
@@ -130,7 +154,8 @@ class Account:
         return f"{self:,.0f}"
 
     def __format__(self, format_spec: str) -> str:
-        """Return a float formatted string representation of the wallet.
+        """Return a float formatted string representation of the wallets
+        in the account.
 
         Args:
             format_spec (str): The format specification.
@@ -165,6 +190,45 @@ class Account:
         """Return the trades as a dataframe"""
         return pd.json_normalize([asdict(trade) for trade in self.trades])
 
-    def orders_to_dataframe(self)-> pd.DataFrame:
+    def orders_to_dataframe(self) -> pd.DataFrame:
         """Return the orders as a dataframe"""
         return pd.json_normalize([asdict(order) for order in self.orders])
+
+    def plot_allocation(self, ax: Axes | None = None, include_cash: bool = False, **kwargs: Any) -> Axes:
+        """Plot the exposure of the assets in the portfolio as a pie chart.
+        The allocation is based on the latest market value of the positions.
+
+        Args:
+            ax: The matplotlib axes to plot on.
+            include_cash: Whether to include cash in the allocation pie chart.
+            **kwargs: Additional keyword arguments to pass to the `pie()` plotting function.
+
+        Returns:
+            matplotlib.axes.Axes: The axes object with the pie chart.
+        """
+        if not ax:
+            _, ax = plt.subplots()
+
+        if include_cash:
+            labels = ["cash"]
+            sizes = [self.convert(self.cash)]
+        else:
+            labels = []
+            sizes = []
+
+        labels = labels + [asset.symbol for asset in self.portfolio.keys()]
+        sizes = sizes + [
+            self.convert(asset.amount(abs(pos.size), abs(pos.mkt_price))) for asset, pos in self.portfolio.items()
+        ]
+
+        if len(labels) == 0:
+            return ax
+
+        kwargs = {
+            "autopct": "%1.1f%%",
+            "labels": labels,
+        } | kwargs
+
+        ax.pie(sizes, **kwargs) # type: ignore
+        ax.axis("equal")  # Equal aspect ratio ensures that pie is drawn as a circle.
+        return ax

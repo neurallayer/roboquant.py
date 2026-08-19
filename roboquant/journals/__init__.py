@@ -1,7 +1,8 @@
-from roboquant.journals.metrics import AlphaBeta
+from roboquant.common.metric import Metric
+from roboquant.util.metrics import AlphaBeta
 from roboquant.journals.journal import Journal
 from roboquant.journals.basicjournal import BasicJournal
-from roboquant.journals.metrics import Metric, PNLMetric, PriceMetric, RunMetric, AssetMetric, MarketMetric
+from roboquant.util.metrics import PNLMetric, PriceMetric, RunMetric, AssetMetric, MarketMetric
 from roboquant.journals.metricsjournal import MetricsJournal
 from roboquant.journals.tensorboard import TensorboardJournal
 from roboquant.journals.scorecard import Scorecard

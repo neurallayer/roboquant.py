@@ -1,5 +1,5 @@
 import logging
-from typing import Callable, Iterator
+from typing import Any, Callable, Iterator
 import gymnasium as gym
 from gymnasium import spaces
 from gymnasium.envs.registration import register
@@ -27,7 +27,7 @@ register(id="roboquant/StrategyEnv-v0", entry_point="roboquant.ai.envs:StrategyE
 logger = logging.getLogger(__name__)
 
 
-class TradingEnv(gym.Env):
+class TradingEnv(gym.Env[Any, Any]):
     """A Gym environment for roboquant trading strategies.
     This environment is designed to be used with reinforcement learning algorithms.
     It simulates a trading environment where an agent can take actions based on observations

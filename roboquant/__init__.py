@@ -1,27 +1,32 @@
 """
-The `roboquant` package contains the `run` method and a number of shared classes
-like `Account`, `Asset` and `Event`.
+The `roboquant` package contains the `run` method and imports
+many useful classes and functions form sub-packages.
 """
+
+from roboquant.common.portfolio import Position, Portfolio
+from roboquant.common.account import Account
+from roboquant.common.event import Event, PriceItem, Bar, TradePrice, Quote
+from roboquant.common.signal import Signal, SignalType
+from roboquant.common.order import Order
+from roboquant.common.trade import Trade
+from roboquant.common.monetary import Amount, Wallet, USD, EUR, Currency
+from roboquant.common.asset import Asset, Stock, Crypto, Forex, Option
+from roboquant.common.timeframe import Timeframe, utcnow
+from roboquant.common.timeseries import TimeSeries
+
+
 
 from roboquant import brokers
 from roboquant import feeds
 from roboquant import journals
 from roboquant import strategies
 from roboquant import traders
-from roboquant.common import monetary
+from roboquant import common
 from roboquant import util
 
-from .common.portfolio import Position, Portfolio
-from .common.account import Account
-from .common.event import Event, PriceItem, Bar, TradePrice, Quote
-from .common.signal import Signal, SignalType
-from .common.order import Order
-from .common.trade import Trade
-from .common.monetary import Amount, Wallet
-from .common.asset import Asset, Stock, Crypto, Forex, Option
-from .run import run
-from .common.timeframe import Timeframe, utcnow
-from .common.timeseries import TimeSeries
+from roboquant.util import indicators, Report, set_dark_style, set_light_style
+from roboquant.run import run, stop_run, demo_run
+from roboquant.brokers import SimBroker
 
 from importlib.metadata import version
 import platform
@@ -80,9 +85,19 @@ __all__ = [
     "Option",
     "Trade",
     "run",
+    "stop_run",
+    "demo_run",
+    "indicators",
     "util",
-    "monetary",
+    "common",
+    "set_dark_style",
+    "set_light_style",
+    "Report",
+    "SimBroker",
     "Timeframe",
     "TimeSeries",
+    "Currency",
+    "USD",
+    "EUR",
     "utcnow",
 ]

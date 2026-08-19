@@ -1,0 +1,77 @@
+# See docs at: https://mystmd.org/guide/frontmatter
+version: 1
+project:
+  id: c15ad5e3-dd5e-46ea-b652-044dd1aba723
+  title: roboquant
+  description: Documentation for the roboquant Python framework 
+  keywords: [roboquant, trading, backtesting, algorithmic trading, finance, crypto, stocks, forex]
+  # authors: []
+  # github: https://github.com/neurallayer/roboquant.py
+  plugins:
+    - src/plugin.mjs
+    # - src/link.mjs
+  toc:
+    - file: index.md
+      title: roboquant guide
+    - title: Getting Started
+      children:
+        - file: introduction/installation.md
+        - file: introduction/firststeps.md
+        - file: introduction/development.md
+    - title: Core
+      children:
+        - file: core/run.md
+        - file: core/feed.md
+        - file: core/strategy.md
+        - file: core/trader.md
+        - file: core/broker.md
+        - file: core/journal.md
+    - title: Common Classes
+      children:
+        - file: common/asset.md
+        - file: common/monetary.md
+        - file: common/time.md
+        - file: common/signal.md
+        - file: common/order.md
+        - file: common/event.md
+        - file: common/account.md
+        - file: common/portfolio.md
+        - file: common/indicator.md
+    - title: Charts
+      children:
+        - file: charts/basic_charts.md
+        - file: charts/custom_charts.md
+    - title: AI
+      children:
+        - file: ai/feature.md
+        - file: ai/pytorch.md
+        - file: ai/rl.md        
+    - title: Third Party
+      children:
+        - file: third_party/alpaca.md
+        - file: third_party/crypto.md
+        - file: third_party/ibkr.md 
+    - title: Performance
+      children:
+        - file: performance/multiprocess.md
+    - title: Tutorials
+      children:
+        - file: notebooks/backtest.ipynb
+        - file: notebooks/charts.ipynb
+
+site:
+  title: roboquant
+  nav:
+    - title: GitHub
+      url: https://github.com/neurallayer/roboquant.py
+    - title: Discord
+      url: https://discord.com/channels/954650958300856340/954650958300856343
+    - title: PyPI
+      url: https://pypi.org/project/roboquant/
+  template: book-theme
+  options:
+    style: static/css/style.css
+    folders: true
+    favicon: static/images/favicon.png
+    logo: static/images/logo.png
+

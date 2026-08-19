@@ -2,7 +2,7 @@ import logging
 import re
 from array import array
 from datetime import datetime, timezone
-from typing import Self
+from typing import Self, override
 
 from tickerall import Tickerall
 from tickerall.types import BrokerName, TerminalType, Timeframe
@@ -78,6 +78,7 @@ class TickerAllLiveFeed(LiveFeed):
         self._account_id = account_id
         self._client = Tickerall(api_key=api_key, base_url=base_url)
         self._stream = None
+        self._subscribed: set[str] = set()
         # True only when this feed opened the session itself (via `connect`); a session passed in by
         # account_id belongs to the caller and is never ended on `close`.
         self._owns_session = False
@@ -126,6 +127,12 @@ class TickerAllLiveFeed(LiveFeed):
             self._stream = self._client.stream.connect()
             self._stream.on("tick", self._on_tick)
         self._stream.subscribe_ticks(self._account_id, list(symbols))
+        self._subscribed.update(symbols)
+
+    @override
+    def assets(self) -> list[Asset]:
+        """The assets subscribed so far on this live feed."""
+        return [_to_asset(s) for s in sorted(self._subscribed)]
 
     def _on_tick(self, ev) -> None:
         if ev.symbol is None or ev.bid is None or ev.ask is None:

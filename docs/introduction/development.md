@@ -1,0 +1,129 @@
+---
+kernelspec:
+  name: python3
+  display_name: Python 3
+---
+
+# Development
+
+## Tooling
+You can develop your roboquant based trading solution in different types of environments:
+
+1. Plain text editors like VIM. If you are already used to this, no need to change that.
+2. IDE's like VSCode, PyCharm and Zed. Nice balance between ease of use and features. 
+3. JupyterLab, Notebooks and Marimo. This is great for interactive and visual development.
+4. AI based terminal agents like Claud Code that can help to speedup development. 
+
+It all depends on your personal preferences and all of them can result in solid strategies.
+   
+```{tip}
+[Here](SKILL.md) you can download a SKILL that assists in developing algo-trading
+solutions using *roboquant* in combination with AI coding agents.
+```
+
+But regardless of the tooling used, if you plan to go *live* with your solution, it is
+recommended to follow the *4 stage approach* as outlined in the next section.
+
+## 4 Stage Approach
+When developing, testing, and running a new trading strategy, you go through 4 distinct stages. The diagram below illustrates these stages and their ideal sequence:
+
+```mermaid
+---
+config:
+    themeVariables:
+        fontSize: '24px'
+---
+flowchart LR
+ 
+    A["Stage 1 <br> Back Testing"]
+    B["Stage 2 <br> Forward Testing"]
+    C["Stage 3 <br> Paper Trading"]
+    D["Stage 4 <br> Live Trading"]
+    
+    A --> B --> C --> D
+```
+
+:::{important}
+Each stage has its own specific purpose and advantages. However, before diving into the details, there are two golden rules to follow:
+1. **Do not skip a stage**. Each stage has its own raison d'être. Only by going through all of them will you eventually end up with a well-performing and robust strategy.
+2. **If performance is unsatisfactory in a later stage, go back to stage 1**. Usually, small changes in code can have a big impact on results, so thorough testing at every stage is essential.
+:::
+
+Roboquant supports all 4 stages, requiring only minimal configuration changes when moving from one stage to the next. Your {cl}`Strategy` and {cl}`Trader` should not change between stages; only the {cl}`Feed` and {cl}`Broker` configurations differ.
+
+The mapping of Brokers and Feeds per stage is as follows:
+
+| Stage | Broker | Feed |
+|---|---|---|
+| Back Testing | SimBroker | Historical Data |
+| Forward Testing | SimBroker | Real-time Data |
+| Paper Trading | Real Broker (using simulated/paper account) | Real-time Data |
+| Live Trading | Real Broker (using real account) | Real-time Data |
+
+---
+
+### Stage 1: Back Testing
+
+In this stage, you will test your {cl}`Strategy` and {cl}`Trader` against historical data using the {cl}`SimBroker`.
+
+You can run a single backtest over a complete historical timeline, but Roboquant also makes it easy to perform **walk-forward analysis** and **Monte Carlo simulations**. These types of backtests give you a better understanding of how your strategy performs under different market regimes.
+
+**The core goal** of this stage is to gather as much information as possible about the overall performance and behavior of your strategy, so you know **what to expect**—and **what not to expect**—when going live.
+
+**Important principle**: This is the **only** stage where you should develop and modify your strategy and rules. If performance in a later stage is disappointing, you should return to this stage to make adjustments. For example, if you want to use a circuit breaker to add peace of mind during live trading, you should include this logic during backtesting, not introduce it only during live execution.
+
+:::{note} Configuration
+- Configure your {cl}`SimBroker` to be as similar as possible to the real trading account and broker you plan to use.
+- Set realistic costs and initial deposits to avoid overly optimistic expectations about total costs.
+- As a general rule, it is better to overestimate your cost structure than to underestimate it.
+:::
+
+---
+
+### Stage 2: Forward Testing
+
+In this stage, you will test your {cl}`Strategy` and {cl}`Trader` using **real-time data** and the {cl}`SimBroker`.
+
+**The main purpose** of this stage is to validate that your strategy still performs well on **unseen data**. It is easy to overfit during backtesting, and forward testing provides a crucial sanity check before risking any real capital.
+
+**Why it matters**: While historical data provides a broad view, it does not reflect the current market microstructure, liquidity, or latency. Forward testing exposes your strategy to the live market environment in a risk-free manner, allowing you to observe how it reacts to real-world events like sudden news spikes or market opens/closes.
+
+:::{note} Configuration
+- Use the exact same {cl}`Strategy` and {cl}`Trader` code as in Stage 1.
+- Switch your {cl}`Feed` from historical to a real-time source (e.g., WebSocket or REST API).
+- Keep the {cl}`SimBroker` to simulate fills, slippage, and commissions in real-time without financial risk.
+:::
+
+---
+
+### Stage 3: Paper Trading
+
+In this stage, you will run your strategy with **real-time data** and a **real broker**, but using a **simulated (paper) account**.
+
+**The core goal** is to test the **integration** between your Roboquant application and your chosen broker's API. This stage validates that orders are properly formatted, transmitted, and acknowledged by the broker's system.
+
+**Why it matters**: The interface between your trading system and the broker is a common point of failure. Issues such as authentication errors, rate limits, order type mismatches, or position synchronization bugs can be safely identified and resolved here without losing real money.
+
+:::{note} Configuration
+- Switch your {cl}`Broker` from {cl}`SimBroker` to the real broker's implementation (e.g., IBKR, Alpaca).
+- Ensure your broker account is set to "paper" or "simulated" mode.
+- Monitor the system for API latency, disconnections, and reconnection logic.
+:::
+
+---
+
+### Stage 4: Live Trading
+
+This is the final stage, where you run your strategy with **real-time data** and a **real broker** using a **real money account**.
+
+**The core goal** is to execute the strategy in the live market and generate returns according to your backtested expectations.
+
+**Crucial practice**: Despite all prior testing, live trading often reveals unexpected challenges. Start with a **small position size** and gradually scale up as you gain confidence in the system's stability and performance.
+
+**Risk management**: Even in this stage, you should continuously monitor your strategy. If the live performance deviates significantly from your backtested and forward-tested results, it may be a sign that market conditions have changed or that there is a bug that slipped through the cracks. In such cases, do not hesitate to pause the system and go back to Stage 1 for further investigation and refinement.
+
+:::{note} Configuration
+- Switch your broker account from "paper" to "live" mode.
+- Begin with minimal capital allocation.
+- Ensure comprehensive logging and monitoring are in place to track every trade and system event.
+:::

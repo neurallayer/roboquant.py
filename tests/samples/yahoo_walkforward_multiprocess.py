@@ -1,21 +1,26 @@
-"""This example shows how to perform a walk-forward using a multi-process approach.
-This allows you to utilize all the CPU's available on the machine (typically at the cost
-of higher memory usage).
+# %% [markdown]
+# # Multi-process
+#
+# This example shows how to perform a walk-forward using a multi-process approach.
+# This allows you to utilize all the CPU's available on the machine (typically at the cost
+# of higher memory usage).
+#
+# Each run is over a certain timeframe and set of parameters for the EMA Crossover strategy.
 
-Each run is over a certain timeframe and set of parameters for the EMA Crossover strategy.
-"""
 
+# %%
 from multiprocessing import get_context
 from itertools import product
 
 import roboquant as rq
 
+# %%
 # Feed with over 25 years of data
-FEED = rq.feeds.YahooFeed.us_stocks_10(start_date="2000-01-01")
-print(FEED)
+feed = rq.feeds.YahooFeed.us_stocks_10(start_date="2000-01-01")
+print(feed)
 
-
-def walk_forward(params: tuple[rq.Timeframe, tuple[int, int]]) -> float:
+# %%
+def walk_forward(params: tuple[rq.Timeframe, tuple[int, int]]) -> str:
     """Perform a run over the provided timeframe and EMA parameters
     The return value is the equity value at the end of the run. In general,
     the return value needs to be serialized to be able to pass it back to the
@@ -23,31 +28,31 @@ def walk_forward(params: tuple[rq.Timeframe, tuple[int, int]]) -> float:
     """
     timeframe, (fast, slow) = params
     strategy = rq.strategies.EMACrossover(fast, slow)
-    acc = rq.run(FEED, strategy, timeframe=timeframe)
-    print(f"{timeframe} EMA({fast:2},{slow:2}) ==> {acc.equity()}")
-    return acc.equity_value()
+    acc = rq.run(feed, strategy, timeframe=timeframe)
+    result = f"{timeframe} EMA({fast:2},{slow:2}) ==> {acc.equity():.0f}"
+    return result
 
 
-if __name__ == "__main__":
+# %% [markdown]
+# Using "fork" ensures that the `feed`` object is not being recreated for each process
+# The pool is created with default number of processes (equal to the number of CPU cores)
 
-    # Using "fork" ensures that the FEED object is not being recreated for each process
-    # The pool is created with default number of processes (equal to the number of CPU cores)
-    with get_context("fork").Pool() as p:
+# %%
+with get_context("fork").Pool() as p:
 
-        # Split overal timeframe into 5 equal non-overlapping timeframes
-        timeframe_params = FEED.timeframe().split(5)
+    # Split overal timeframe into 5 equal non-overlapping timeframes
+    timeframe_params = feed.timeframe().split(5)
 
-        # EMACrossover parameters, the fast and slow periods
-        ema_params = [(3, 5), (5, 7), (10, 15), (15, 21)]
+    # EMACrossover parameters, the fast and slow periods
+    ema_params = [(3, 5), (5, 7), (10, 15), (15, 21)]
 
-        # All the combinations of parameters (Cartesian product)
-        all_params = list(product(timeframe_params, ema_params))
+    # All the combinations of parameters (Cartesian product)
+    all_params = list(product(timeframe_params, ema_params))
 
-        assert len(all_params) == len(timeframe_params) * len(ema_params)
+    assert len(all_params) == len(timeframe_params) * len(ema_params)
 
-        # run the walk-forwards in parallel
-        equities = p.map(walk_forward, all_params)
+    # run the walk-forwards in parallel
+    results = p.map(walk_forward, all_params)
 
-        # print some results
-        print("max equity =>", max(equities))
-        print("min equity =>", min(equities))
+    for row in results:
+        print(row)

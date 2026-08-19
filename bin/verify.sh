@@ -9,7 +9,7 @@ echo "Running ruff"
 uvx ruff check || exit 1
 
 echo "Running ty" 
-uvx ty check roboquant tests 
+uvx ty check roboquant tests docs/notebooks|| exit 1
 
 # echo "Running pyright" 
 # uv run pyright tests roboquant || exit 1

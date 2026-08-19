@@ -79,6 +79,7 @@ class SQLFeed(HistoricFeed):
                 return Timeframe.fromisoformat(row[0], row[1], True)
             return Timeframe.EMPTY
 
+    @override
     def assets(self) -> list[Asset]:
         """Return all the assets in the database"""
         with sqlite3.connect(self.db_file) as con:

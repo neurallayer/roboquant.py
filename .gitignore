@@ -6,11 +6,12 @@ scratch/
 dist/
 roboquant.egg-info/
 build/
+scratch/
 .venv/
 .ipynb_checkpoints/
-*.ipynb
 .ruff_cache/
 .pytest_cache/
 .env
 .DS_Store
 reference/
+_build/

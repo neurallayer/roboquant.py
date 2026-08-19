@@ -122,7 +122,7 @@ class TestTickerAll(unittest.TestCase):
 
     def test_place_market_order(self):
         client = _FakeClient(_detail(_fin()))
-        _broker(client).place_orders([Order(Forex("EURUSDm", USD), Decimal("0.01"), float("nan"))])
+        _broker(client).place_orders([Order(Forex("EURUSDm", USD), Decimal("0.01"))])  # no limit → market
         self.assertEqual(len(client.orders.placed), 1)
         self.assertEqual(client.orders.placed[0]["type"], "market")
         self.assertEqual(client.orders.placed[0]["side"], "BUY")

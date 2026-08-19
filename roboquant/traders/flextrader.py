@@ -1,3 +1,4 @@
+from dataclasses import dataclass
 from datetime import datetime
 import logging
 from decimal import Decimal
@@ -9,6 +10,7 @@ from roboquant.common.asset import Asset
 from roboquant.common.event import Event
 from roboquant.common.order import Order
 from roboquant.common.signal import Signal
+from roboquant.traders._util import round_down
 from .trader import Trader
 from ..common.account import Account
 from ..common.event import PriceItem
@@ -86,12 +88,12 @@ class _Context:
                 extra,
             )
 
-
+@dataclass
 class FlexTrader(Trader):
     """Implementation of a Trader that has configurable rules to determine which signals are converted into orders.
     This implementation will not generate orders if there is not a price in the event for the underlying asset.
 
-    It does support SignalType.ENTRY, SignalType.EXIT and SignalType.ENTRY_EXIT signals. Also the signal rating value
+    It does support SignalType.ENTRY, SignalType.EXIT and SignalType.ENTRY_EXIT signals. Also, the signal rating value
     is used to determine the size of the order. A rating of 1.0 means a full BUY order, a rating of 0.5 means half a BUY order
     and a rating of -1.0 means a full SELL order.
 
@@ -121,38 +123,23 @@ class FlexTrader(Trader):
     ```
     """
 
-    def __init__(
-        self,
-        one_order_only: bool = True,
-        size_fractions: int = 0,
-        safety_margin_pct: float = 0.05,
-        shorting: bool = False,
-        max_order_pct: float = 0.05,
-        min_order_pct: float = 0.02,
-        max_position_pct: float = 0.1,
-        price_type: str = "DEFAULT",
-        shuffle_signals: bool = False,
-        limit_offset_pct: float = 0.0,
-        tif: Literal["DAY", "GTC"] = "DAY"
-    ) -> None:
-        super().__init__()
-        self.one_order_only = one_order_only
-        self.size_digits: int = size_fractions
-        self.safety_margin_pct: float = safety_margin_pct
-        self.shorting = shorting
-        self.max_order_pct = max_order_pct
-        self.min_order_pct = min_order_pct
-        self.max_position_pct = max_position_pct
-        self.price_type = price_type
-        self.shuffle_signals = shuffle_signals
-        self.limit_offset_pct: float = limit_offset_pct
-        self.tif: Literal["DAY", "GTC"] = tif
+    one_order_only: bool = True
+    size_fractions: int = 0
+    safety_margin_pct: float = 0.05
+    shorting: bool = False
+    max_order_pct: float = 0.05
+    min_order_pct: float = 0.02
+    max_position_pct: float = 0.1
+    price_type: str = "DEFAULT"
+    shuffle_signals: bool = False
+    limit_offset_pct: float = 0.0
+    limit_rounding: int = 2
+    tif: Literal["DAY", "GTC"] = "DAY"
 
     def _get_order_size(self, rating: float, contract_price: float, max_order_value: float) -> Decimal:
         """Return the order size"""
         size = Decimal(rating * max_order_value / contract_price)
-        rounded_size = round(size, self.size_digits)
-        return rounded_size
+        return round_down(size, self.size_fractions)
 
     @override
     def create_orders(self, signals: list[Signal], event: Event, account: Account) -> list[Order]:
@@ -202,7 +189,7 @@ class FlexTrader(Trader):
                     ctx.log_rule("no exit signal")
                     continue
 
-                rounded_size = round(-pos_size * abs(Decimal(signal.rating)), self.size_digits)
+                rounded_size = round(-pos_size * abs(Decimal(signal.rating)), self.size_fractions)
                 if rounded_size.is_zero():
                     ctx.log_rule("cannot exit with order size zero")
                     continue
@@ -252,10 +239,19 @@ class FlexTrader(Trader):
 
                 new_orders = self._get_orders(asset, order_size, item, signal, event.time)
                 if new_orders:
+                    ctx.log_orders(new_orders)
                     orders += new_orders
                     available -= order_value
 
         return orders
+
+
+    def _get_limit(self, item: PriceItem, size: Decimal) -> float:
+        """Calculate the order limit"""
+        multiplier = 1.0 - self.limit_offset_pct if size > 0 else 1.0 + self.limit_offset_pct
+        price = item.price(self.price_type) * multiplier
+        limit = round(price, self.limit_rounding)
+        return limit
 
     def _get_orders(self, asset: Asset, size: Decimal, item: PriceItem, signal: Signal, time: datetime) -> list[Order]:
         # pylint: disable=unused-argument
@@ -267,11 +263,8 @@ class FlexTrader(Trader):
 
         Overwrite this method if you want to implement different logic.
         """
-        multiplier = 1.0 - self.limit_offset_pct if size > 0 else 1.0 + self.limit_offset_pct
-        price = item.price(self.price_type) * multiplier
-        limit = round(price, 2)
+        limit = self._get_limit(item, size)
         result = [Order(asset, size, limit, self.tif)]
-        logger.info("<== %s converted signal into new order(s) %s", time.replace(tzinfo=None), result)
         return result
 
     def __str__(self) -> str:

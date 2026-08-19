@@ -1,5 +1,5 @@
 
-# ![roboquant logo](https://github.com/neurallayer/roboquant.py/raw/main/docs/roboquant_header.png)
+# ![roboquant logo](https://github.com/neurallayer/roboquant.py/raw/main/docs/static/images/roboquant_header.png)
 
 ![PyPI - Version](https://img.shields.io/pypi/v/roboquant?)
 ![PyPI - License](https://img.shields.io/pypi/l/roboquant?)
@@ -7,12 +7,13 @@
 ![GitHub Actions Workflow Status](https://img.shields.io/github/actions/workflow/status/neurallayer/roboquant.py/verify.yml)
 [![discord](https://img.shields.io/discord/954650958300856340?label=discord)](https://discord.com/channels/954650958300856340/954650958300856343)
 
-Roboquant is an open-source algorithmic trading platform written in Python. It is flexible, user-friendly and completely free to use. It is designed for anyone serious about algo-trading. 
+Roboquant is an open-source algorithmic trading platform written in Python. It is flexible, user-friendly
+and completely free to use. It is designed for anyone serious about algo-trading. 
 
-So whether you are a beginning retail trader or an established trading firm, roboquant can help you to develop robust and fully automated trading strategies. You can find out more at [roboquant.org](https://roboquant.org).
+So whether you are a beginning retail trader or an established trading firm, roboquant can help you to develop robust and fully automated trading strategies. You can find out more at [roboquant](https://python.roboquant.org/).
 
 ## Usage
-The following code snippet shows the required steps to run a full back-test on a number of stocks.
+The following code snippet shows the required steps to run a back-test on a number of stocks.
 
 ```python
 import roboquant as rq
@@ -33,33 +34,24 @@ Below are some of the key features of *roboquant*:
 - [x] larger-than-memory data feeds 
 - [x] TaLib based indicators and strategies
 - [x] plotting of prices and metrics
-- [x] modulair and extensible 
+- [x] modular and extensible 
 
 ## Install
 Roboquant can be installed like most other Python packages, using tools like `uv`, `pip` or `conda`.
 Make sure you have Python version 3.12 or higher installed.
 
 ```shell
-python3 -m pip install --upgrade roboquant
+pip install roboquant
 ```
 
 The core installation of roboquant limits the number of dependencies. But you can install roboquant including one or more of the optional dependencies if you require certain additional functionality:
 
 ```shell
+# Integration with IBKR, Alpaca, Crypto exchanges and MetaTrader (MT4/MT5) via the hosted TickerAll API
+pip install "roboquant[extra]"
+
 # AI based strategies using PyTorch and SB3
-python3 -m pip install --upgrade "roboquant[ai]"
-
-# Integration with Interactive Brokers
-python3 -m pip install --upgrade "roboquant[ibkr]"
-
-# Integration with Alpaca broker
-python3 -m pip install --upgrade "roboquant[alpaca]"
-
-# Integration with MetaTrader (MT4/MT5) accounts via the hosted TickerAll API
-python3 -m pip install --upgrade "roboquant[tickerall]"
-
-# Integration many crypto exchanges via CCXT package
-python3 -m pip install --upgrade "roboquant[crypto]"
+pip install "roboquant[ai]"
 ```
 
 Connect a MetaTrader account straight from its credentials — `TickerAllBroker.connect` opens the broker
@@ -79,7 +71,10 @@ broker.close()  # ends the session connect() opened
 ## License
 Roboquant is made available under the Apache 2.0 license. You can read more about the Apache 2.0 license on this page: https://www.apache.org/licenses/LICENSE-2.0.html
 
+Unless you explicitly state otherwise, any contribution intentionally submitted for inclusion in roboquant by you, as defined in the Apache 2.0 license,
+shall be licensed as above, without any additional terms or conditions.
+
 ## Disclaimer
 Absolutely no warranty is implied with this product. Use at your own risk. I provide no guarantee that it will be profitable, or that it won't lose all your money very quickly or does not contain bugs.
 
-All financial trading offers the possibility of loss. Leveraged trading, may result in you losing all your money, and still owing more. Back tested results are no guarantee of future performance. I can take no responsibility for any losses caused by live trading using roboquant. Use at your own risk. I am not registered or authorised by any financial regulator.
+All financial trading offers the possibility of loss. Leveraged trading, may result in you losing all your money, and still owing more. Back tested results are no guarantee of future performance. I can take no responsibility for any losses caused by live trading using roboquant. Use at your own risk. I am not registered or authorized by any financial regulator.

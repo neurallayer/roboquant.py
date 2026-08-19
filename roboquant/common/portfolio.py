@@ -1,15 +1,12 @@
-from roboquant.common.asset import Asset
-from roboquant.common.monetary import Amount, Wallet
-
-
-import pandas as pd
-
-
 from collections import UserDict
 from dataclasses import asdict, dataclass
 from decimal import Decimal
 
+from roboquant.common.asset import Asset
+from roboquant.common.monetary import Amount, Wallet
 from roboquant.common.order import Order
+
+import pandas as pd
 
 
 @dataclass(slots=True, frozen=True)
@@ -39,6 +36,10 @@ class Position:
         """Return True if this is a long position, False otherwise"""
         return self.size > 0
 
+    @property
+    def is_closed(self):
+        """Return True if this is a closed position, False otherwise"""
+        return self.size.is_zero()
 
 
 class Portfolio(UserDict[Asset, Position]):
@@ -55,7 +56,7 @@ class Portfolio(UserDict[Asset, Position]):
         Returns:
             float: The position value in the base currency.
         """
-        pos = self.get(asset, Position())
+        pos = self.get_position(asset)
         return asset.amount(pos.size, pos.mkt_price)
 
     def short_positions(self) -> "Portfolio":
@@ -76,55 +77,86 @@ class Portfolio(UserDict[Asset, Position]):
         """
         return Portfolio({asset: position for (asset, position) in self.items() if position.is_long})
 
-    def unrealized_pnl(self) -> Wallet:
+    def unrealized_pnl(self, *assets: Asset) -> Wallet:
         """
         Return the sum of the unrealized profit and loss for the open positions.
         This includes both long- and short-positions.
+        If one or more asset is provided, limit it to those assets, otherwise include all assets.
 
         Returns:
             Wallet: The unrealized profit and loss.
         """
         result = Wallet()
         for asset, position in self.items():
-            result += asset.amount(position.size, position.mkt_price - position.avg_price)
+            if not assets or asset in assets:
+                result += asset.amount(position.size, position.mkt_price - position.avg_price)
         return result
 
-    def mkt_value(self) -> Wallet:
+    def mkt_value(self, *assets: Asset) -> Wallet:
         """
         Return the sum of the market values of the open positions in the account. Short
         positions have a negative market value.
+        If one or more asset is provided, limit it to those assets, otherwise include all assets.
 
         Returns:
             Wallet: The total market value of all open positions.
         """
         result = Wallet()
         for asset, position in self.items():
-            result += asset.amount(position.size, position.mkt_price)
+            if not assets or asset in assets:
+                result += asset.amount(position.size, position.mkt_price)
         return result
 
-    def close_positions(self, ndigits:int = 2) -> list[Order]:
-         """Create the orders required to close the current open positions.
-         The limit price of the orders is equal to the last known market price.
+    def exposure(self, *assets: Asset) -> Wallet:
+        """
+        Return the sum of the exposure of the open positions in the account. Short
+        positions have a positive exposure.
+        If one or more asset is provided, limit it to those assets, otherwise include all assets.
 
-         Attributes:
-            ndigits: how many digits to use for the limit price
-         """
-         orders = [Order(asset, -pos.size, round(pos.mkt_price, ndigits)) for asset, pos in self.items()]
-         return orders
+        Returns:
+            Wallet: The total exposure of all open positions.
+        """
+        result = Wallet()
+        for asset, position in self.items():
+            if not assets or asset in assets:
+                result += abs(asset.amount(position.size, position.mkt_price))
+        return result
 
-    def to_dataframe(self)-> pd.DataFrame:
-            """Return the positions as a dataframe"""
-            return  pd.json_normalize([asdict(asset) | asdict(pos) for asset, pos in self.items()])
+    def close_positions(self, ndigits: int = 2) -> list[Order]:
+        """Create the market orders required to close the current open positions.
+
+        Attributes:
+           ndigits: how many digits to use for the limit price
+        """
+        orders = [Order(asset, -pos.size) for asset, pos in self.items()]
+        return orders
+
+    def to_dataframe(self) -> pd.DataFrame:
+        """Return the positions as a dataframe"""
+        return pd.json_normalize([asdict(asset) | asdict(pos) for asset, pos in self.items()])
 
     def size(self, asset: Asset) -> Decimal:
-            """
-            Return the position size for an asset, or zero if there is no open position for that asset.
+        """
+        Return the position size for an asset, or zero if there is no open position for that asset.
 
-            Args:
-                asset (Asset): The asset for which to get the position size.
+        Args:
+            asset (Asset): The asset for which to get the position size.
 
-            Returns:
-                Decimal: The position size as a Decimal.
-            """
-            pos = self.get(asset)
-            return pos.size if pos else Decimal()
+        Returns:
+            Decimal: The position size as a Decimal.
+        """
+        pos = self.get(asset)
+        return pos.size if pos else Decimal()
+
+    def get_position(self, asset: Asset) -> Position:
+        """
+        Return the position size for an asset, en empty position if not
+        in the portfolio.
+
+        Args:
+            asset (Asset): The asset for which to get the position size.
+
+        Returns:
+            Decimal: The position size as a Decimal.
+        """
+        return self.get(asset, Position())

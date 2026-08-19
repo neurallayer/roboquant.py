@@ -2,7 +2,7 @@ from array import array
 import unittest
 import numpy as np
 
-from roboquant.strategies.buffer import NumpyBuffer, OHLCVBuffer
+from roboquant.util.buffer import NumpyBuffer, OHLCVBuffer
 
 
 class TestBuffer(unittest.TestCase):
@@ -31,8 +31,12 @@ class TestBuffer(unittest.TestCase):
         for i in range(12):
             b.append([100+i, 101+i, 99+i, 100+i, 5000])
         self.assertTrue(b.is_full())
-        self.assertTrue(np.all(b.open() == b.close()))
-        c = b.close()
+        self.assertTrue(np.all(b.open == b.close))
+
+        c = b.close
+
+        # assert we are working on a view
+        self.assertTrue(c.base is not None)
         self.assertEqual(10, len(c))
         self.assertEqual(111, c[-1])  # Check the last close price
 
