@@ -9,6 +9,7 @@ project:
   # github: https://github.com/neurallayer/roboquant.py
   plugins:
     - src/plugin.mjs
+    # - src/link.mjs
   toc:
     - file: index.md
       title: roboquant guide
@@ -53,7 +54,7 @@ project:
     - title: Performance
       children:
         - file: performance/multiprocess.md
-    - title: Examples
+    - title: Tutorials
       children:
         - file: notebooks/backtest.ipynb
         - file: notebooks/charts.ipynb
