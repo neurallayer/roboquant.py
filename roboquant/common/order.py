@@ -28,16 +28,19 @@ class Order:
     """The size (number of contracts) of the order. Positive for buy orders, negative for sell orders.
     """
 
-    limit: float
+    limit: float | None = None
     """The limit price of the order, denoted in the currency of the asset.
     The limit price is the maximum price you are willing to pay for a buy order,
     or the minimum price you are willing to accept for a sell order.
-    Make sure to set the limit price in the currency of the asset and not include more decimal places than
-    supported by the broker.
+    Make sure to set the limit price in the currency of the asset and not
+    to include more decimal places than supported by the broker.
     """
 
     tif: Literal["GTC", "DAY"] = "DAY"
-    """The time in force of the order. `GTC` = Good Till Cancelled, `DAY` = valid for a day only."""
+    """The time in force of the order.
+    - `GTC` = Good Till Cancelled,
+    - `DAY` = valid for a day only.
+    """
 
     info: dict[str, Any] | None = None
     """Any additional information about the order"""
@@ -54,18 +57,11 @@ class Order:
 
     time: datetime | None = None
     """When was the order placed at the exchange, so typically the first trading day after the order was submitted
-    to the broker."""
-
+    to the broker. This is also used to determine when a DAY order has expired."""
 
     def __post_init__(self):
         if self.size.is_zero():
             assert id != ""
-
-    @staticmethod
-    def market_order(asset: Asset, size: Decimal, price: float, margin: float = 0.05) -> "Order":
-        """Simulate a market order by using a generous margin on the limit price"""
-        limit = price * (1 + margin) if size > 0 else price * (1 - margin)
-        return Order(asset, size, limit)
 
     def cancel(self) -> "Order":
         """
@@ -78,14 +74,16 @@ class Order:
         assert self.id, "Can only cancel orders with an already assigned id"
         assert self.size, "Cannot cancel a cancellation order, size has to be non-zero"
 
-        return replace(self, size = Decimal())
+        return replace(self, size=Decimal())
 
     def modify(self, size: Decimal | None = None, limit: float | None = None) -> "Order":
         """
-        Create an modify-order. You can update the size and/or the limit of an order.
-        The returned order has the same id as the original order. You can only update existing orders that have an id assigned.
+        Create a modify-order. You can update the size and/or the limit of an order.
+        The returned order has the same id as the original order.
+        You can only update existing orders that have an id assigned.
 
-        If you want to cancel an order, use the `cancel` method instead. The size of an order cannot be modified to zero.
+        If you want to cancel an order, use the `cancel` method instead.
+        The size of an order cannot be modified to zero.
 
         Args:
             size: The new size of the order.
@@ -102,35 +100,23 @@ class Order:
 
         size = size if size is not None else self.size
         limit = limit if limit is not None else self.limit
-        return replace(self, size=size, limit = limit)
+        new_order = replace(self, size=size, limit=limit)
 
-    def value(self) -> float:
-        """
-        The total contract value of this order, it ignores the already filled part of the order.
+        assert self.is_mkt_order == new_order.is_mkt_order, "Cannot swap limit and market orders"
+        return new_order
 
-        Returns:
-            float: The total contract value of the order.
-        """
-        return self.asset.value(self.size, self.limit)
 
-    def remaining_value(self) -> float:
+    def remaining_amount(self, price: float) -> Amount:
         """
-        The remaining contract value of this order denoted in the currency of the asset.
+        The remaining contract amount of this order denoted in the currency of the asset.
+        If this is not a limit order, the provided price will be used to calculate the
+        remaining order amount.
 
         Returns:
-            float: The remaining contract value of the order.
+            Amount: The remaining contract value of the order.
         """
-        return self.asset.value(self.remaining, self.limit)
-
-    def amount(self) -> Amount:
-        """
-        The total order amount of this order as a single Amount denoted in
-        the currency of the asset.
-
-        Returns:
-            Amount: The total value of the order.
-        """
-        return Amount(self.asset.currency, self.value())
+        p = price if self.limit is None else self.limit
+        return Amount(self.asset.currency, self.asset.value(self.remaining, p))
 
     @property
     def is_buy(self) -> bool:
@@ -147,9 +133,25 @@ class Order:
         return self.size < 0
 
     @property
+    def is_limit_order(self) -> bool:
+        """
+        True if this is a limit order, False otherwise.
+        """
+        return self.limit is not None
+
+    @property
+    def is_mkt_order(self) -> bool:
+        """
+        True if this is a market order, False otherwise.
+        """
+        return self.limit is None
+
+    @property
     def remaining(self) -> Decimal:
         """
         The remaining order size that still needs to be filled.
+        For SELL orders this will return a negative value if
+        the order is not yet completely filled.
         """
         return self.size - self.fill
 
@@ -162,4 +164,7 @@ class Order:
 
     def is_executable(self, price: float) -> bool:
         """Will this order execute given the provided price"""
+        if self.limit is None:
+            return True
+
         return price <= self.limit if self.is_buy else price >= self.limit

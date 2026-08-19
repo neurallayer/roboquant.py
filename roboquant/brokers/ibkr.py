@@ -69,7 +69,7 @@ class _AssetMapper:
         If the conid is not mapped, it will make an API call to retrieve the asset.
         If the asset is not found, it will return None.
         """
-        if asset := self._conid_2_asset.get(int(conid)):
+        if asset := self._conid_2_asset.get(conid):
             return asset
 
         contract: ContractInfo = self.client.contract_information_by_conid(conid).data  # type: ignore
@@ -174,12 +174,13 @@ class IBKRBroker(LiveBroker):
             size = info["totalSize"]
             fill = info["filledQuantity"]
             order_id = info["orderId"]
+            limit = info["price"]
             tif = "DAY" if info["timeInForce"] == "CLOSE" else "GTC"
 
             if info["side"] == "SELL":
-                return self._sell_order(order_id, asset, size, info["price"], fill, tif)
+                return self._sell_order(order_id, asset, size, limit, fill, tif)
             else:
-                return self._buy_order(order_id, asset, size, info["price"], fill, tif)
+                return self._buy_order(order_id, asset, size, limit, fill, tif)
 
         logger.warning("ignoring order %s because couldn't map conid to asset", info)
 
@@ -203,7 +204,7 @@ class IBKRBroker(LiveBroker):
         summary: dict = self.client.account_summary().data  # type: ignore
         bp = summary["buyingPower"]
         cash = 0.0
-        balances: list = summary["cashBalances"]
+        balances: list[dict[str, Any]] = summary["cashBalances"]
         for balance in balances:
             ccy: str = balance["currency"]
             if ccy.startswith("Total"):
@@ -220,11 +221,11 @@ class IBKRBroker(LiveBroker):
         side = "BUY" if order.size > 0 else "SELL"
         info = order.info or {}
         return OrderRequest(
-            conid=int(conid),
+            conid=conid,
             side=side,
             quantity=qty,
             order_type="LMT",
-            acct_id=str(self.client.account_id),
+            acct_id=self.client.account_id or "",
             price=order.limit,
             tif=order.tif,
             **info

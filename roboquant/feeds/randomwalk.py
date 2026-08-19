@@ -21,14 +21,14 @@ class RandomWalk(InMemoryFeed):
         n_prices: int = 1_000,
         price_type: Literal["bar", "trade", "quote"] = "bar",
         start_date: str | datetime = "2020-01-01T00:00:00+00:00",
-        frequency=timedelta(days=1),
+        frequency: timedelta =timedelta(days=1),
         start_price_min: float = 50.0,
         start_price_max: float = 200.0,
         volume: float = 1000.0,
         price_dev: float =0.01,
         spread_dev: float =0.001,
         seed: int | None =None,
-        symbol_len: int =4,
+        symbol_len: int = 4,
     ):
         # pylint: disable=too-many-locals
         super().__init__()
@@ -36,7 +36,7 @@ class RandomWalk(InMemoryFeed):
         assets = self._get_assets(n_symbols, symbol_len)
         assert len(assets) == n_symbols
 
-        start_date = start_date if isinstance(start_date, datetime) else datetime.fromisoformat(str(start_date))
+        start_date = start_date if isinstance(start_date, datetime) else datetime.fromisoformat(start_date)
         start_date = start_date.astimezone(timezone.utc)
         timeline = [start_date + frequency * i for i in range(n_prices)]
 

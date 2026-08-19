@@ -34,7 +34,7 @@ class SignalOrderTracker(Journal):
         data : list[float] = []
         for time, orders in self.orders.items():
             if not timeframe or time in timeframe:
-                tmp = [order.limit for order in orders if order.asset == asset and not order.id]
+                tmp = [order.limit for order in orders if order.asset == asset and order.limit is not None and not order.id]
                 if tmp:
                     timeline.append(time)
                     data.append(tmp[0])

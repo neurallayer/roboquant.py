@@ -6,7 +6,7 @@ from torch import nn
 import roboquant as rq
 from roboquant.common.asset import Stock
 from roboquant.journals.basicjournal import BasicJournal
-from roboquant.ai.features import BarFeature, CombinedFeature, MaxReturnFeature, PriceFeature, SMAFeature, DayOfMonthFeature
+from roboquant.ai.features import BarFeature, FeatureSet, MaxReturnFeature, PriceFeature, SMAFeature, DayOfMonthFeature
 from roboquant.ai.strategies import TimeSeriesStrategy, logger
 
 
@@ -58,7 +58,7 @@ feed = rq.feeds.YahooFeed(spy.symbol, start_date=start_date)
 # %%
 
 # The input features
-input = CombinedFeature(
+input = FeatureSet(
     BarFeature(spy).returns(),
     SMAFeature(PriceFeature(spy), 10).returns(),
     SMAFeature(PriceFeature(spy), 20).returns(),

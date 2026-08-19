@@ -3,28 +3,33 @@ kernelspec:
   name: python3
   display_name: Python 3
 ---
-
 # Feed
-A `Feed` represents a source of (financial) events that can be (re-)played to feed a `run` with data.
+
+```mermaid
+---
+config:
+    themeVariables:
+        fontSize: '30px'
+---
+flowchart LR
+    Feed["fa:fa-database<br>Feed"]:::active
+    Strategy["fa:fa-calculator<br>Strategy"]
+    Trader["fa:fa-dollar<br>Trader"]
+    Broker["fa:fa-exchange<br>Broker"]
+    Journal["fa:fa-area-chart<br>Journal"]
+    Feed -- event --> Strategy -- signals --> Trader -- orders --> Broker -- account --> Journal
+    classDef active fill:#00A1FF
+```
+
+
+(feed_def)=
+## Overview
+A {cl}`Feed` represents a source of (financial) events that can be (re-)played to feed a {cl}`run()` with data.
 Although the most common type of events are those containing market data, other types of events are also possible.
 For example, events containing news items or social media posts could also be represented as a feed.
 
-The feed is the driver of the run-loop: it produces the `Event` objects that all the other components
+The feed is the driver of the run-loop: it produces the {cl}`Event` objects that all the other components
 react to.
-
-```mermaid
-flowchart LR
- 
-    Feed["Feed"]
-    Strategy["Strategy"]
-    Trader["Trader"]
-    Broker["Broker"]
-    Journal["Journal"]
-    
-    Feed -- event --> Strategy -- signals --> Trader -- orders --> Broker -- account --> Journal 
-
-    style Feed fill:#888
-```
 
 
 ```{code-cell} python
@@ -33,8 +38,7 @@ import roboquant as rq
 rq.set_dark_style()
 ```
 
-
-A `Feed` is also one of the main components that you swap when moving through the
+A {cl}`Feed` is also one of the main components that you swap when moving through the
 [4 stages](../../concepts/4stages.md) of strategy development:
 
 | Stage | Broker | Feed |
@@ -45,12 +49,12 @@ A `Feed` is also one of the main components that you swap when moving through th
 | Live Trading | Real broker (real account) | Real-time data |
 
 ## Feed API
-The `Feed` interface itself is deliberately small and consists of just two abstract methods.
+The {cl}`Feed` interface itself is deliberately small and consists of just two abstract methods.
 
-- **`play(timeframe=None)`** — Returns an iterator of `Event` objects. Optionally, a `Timeframe` can be
+- **`play(timeframe=None)`** — Returns an iterator of {cl}`Event` objects. Optionally, a {cl}`Timeframe` can be
   provided to only replay the events within that period. This is used for walk-forward and multi-run
   back tests.
-- **`assets()`** — Returns the list of `Asset` objects that are contained in the feed.
+- **`assets()`** — Returns the list of {cl}`Asset` objects that are contained in the feed.
 
 ```{code-cell} python
 feed = rq.feeds.YahooFeed("MSFT", "AAPL", start_date="2020-01-01")
@@ -67,27 +71,27 @@ for event in feed.play():
 ```
 
 :::{note}
-A `Feed` is only a source of data. It does not know anything about orders, positions, or cash.
-Those are the responsibilities of the `Broker` and `Trader`.
+A {cl}`Feed` is only a source of data. It does not know anything about orders, positions, or cash.
+Those are the responsibilities of the {cl}`Broker` and {cl}`Trader`.
 :::
 
 ### Convenience methods
 Most built-in feeds extend `HistoricFeed`, which adds a number of convenient helper methods on top of
-the `Feed` interface:
+the {cl}`Feed` interface:
 
 - `symbols()` — the list of unique symbols in the feed.
-- `get_asset(symbol)` — retrieve an `Asset` by its symbol.
-- `get_ohlcv(asset)` — the OHLCV values of an asset as a `TimeSeries`.
-- `to_timeseries(*assets)` — prices of one or more assets as a multivariate `TimeSeries`.
+- `get_asset(symbol)` — retrieve an {cl}`Asset` by its symbol.
+- `get_ohlcv(asset)` — the OHLCV values of an asset as a {cl}`TimeSeries`.
+- `to_timeseries(*assets)` — prices of one or more assets as a multivariate {cl}`TimeSeries`.
 - `plot(asset)` — plot the prices (and optionally trades) of an asset, requires `matplotlib`.
 - `count_events()` / `count_items()` — quick statistics about the contents of the feed.
-- `track(metric)` — track a `Metric` over time and return the result as a `TimeSeries`.
+- `track(metric)` — track a `Metric` over time and return the result as a {cl}`TimeSeries`.
 
 Feeds that keep everything in memory (like `YahooFeed` and `CSVFeed`) extend `InMemoryFeed` and
 additionally provide:
 
 - `timeline()` — all unique timestamps in the feed.
-- `timeframe()` — the `Timeframe` covered by the feed.
+- `timeframe()` — the {cl}`Timeframe` covered by the feed.
 - `get_first_event()` / `get_last_event()` — the first and last event.
 
 ```{code-cell} python
@@ -110,7 +114,7 @@ data source, speed, and memory usage:
 
 ### YahooFeed
 `YahooFeed` retrieves historic market data from Yahoo Finance. It is free to use and does not require
-an API key. By default it retrieves daily bars, but you can specify a different interval.
+an API key. By default, it retrieves daily bars, but you can specify a different interval.
 
 ```{code-cell} python
 feed = rq.feeds.YahooFeed("TSLA", "MSFT", start_date="2015-01-01", interval="1d")
@@ -220,42 +224,4 @@ two guarantees for the events it publishes:
 
 Live feeds are typically paired with a live broker. Concrete implementations for specific brokers
 (e.g. Alpaca) can be found in the `roboquant.third_party` module.
-
-## Event
-An event can contain any type of information. That being said, the most common type of information
-is market data like trading prices and volumes.
-
-An `Event` is a snapshot of information occurring at a specific moment in time. It contains a list
-of items, and all items in a single event share the same timestamp. When an event is created, its
-timestamp is converted to UTC.
-
-### Price Items
-The most common type of item in an event is a `PriceItem`. Roboquant provides three built-in price
-items, and it is easy to add your own:
-
-- **`Bar`** — Open, high, low, close prices and volume (a.k.a. a candlestick). The default price is
-  the close price, and additional price types like `OPEN`, `HIGH`, and `LOW` are available.
-- **`Quote`** — Ask and bid prices and volumes. The default price is the mid-point price; `ASK` and
-  `BID` are also available.
-- **`TradePrice`** — A single traded price with an optional volume.
-
-### Accessing Prices
-The `price_items` property returns a dictionary that maps each asset in the event to its price item.
-This makes it fast and easy to access the prices of all assets in a single event.
-
-```{code-cell} python
-for event in feed.play():
-    for asset, item in event.price_items.items():
-        print(asset.symbol, item.price())
-    break
-```
-
-There are also a few helper methods directly on the `Event`:
-
-- `get_price(asset, price_type="DEFAULT")` — the price of one asset, or `None` if not present.
-- `get_prices(price_type="DEFAULT")` — a dictionary with the prices of all assets.
-- `get_volume(asset, volume_type="DEFAULT")` — the volume of one asset, or `None` if not present.
-- `is_empty()` — whether the event contains any items.
-
-
 

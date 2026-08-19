@@ -5,31 +5,40 @@ kernelspec:
 ---
 
 # Broker
-The broker is the component that handles the placed orders, either real or simulated during a back-test.
-
-It is also the component owns the `Account` object. 
-
 ```mermaid
+---
+config:
+    themeVariables:
+        fontSize: '30px'
+---
 flowchart LR
- 
-    Feed["Feed"]
-    Strategy["Strategy"]
-    Trader["Trader"]
-    Broker["Broker"]
-    Journal["Journal"]
-    
-    Feed -- event --> Strategy -- signals --> Trader -- orders --> Broker -- account --> Journal 
-
-    style Broker fill:#888
+    Feed["fa:fa-database<br>Feed"]
+    Strategy["fa:fa-calculator<br>Strategy"]
+    Trader["fa:fa-dollar<br>Trader"]
+    Broker["fa:fa-exchange<br>Broker"]:::active
+    Journal["fa:fa-area-chart<br>Journal"]
+    Feed -- event --> Strategy -- signals --> Trader -- orders --> Broker -- account --> Journal
+    classDef active fill:#00A1FF
 ```
+
+(broker_def)=
+## Overview
+The broker handles the placed orders, either real or simulated during a back-test.
+It is also the component that owns the {cl}`Account` object. 
 
 ## API
 
-The `Broker` base class defines the interface that all broker implementations must follow. The two core methods are:
+The {cl}`Broker` base class defines the interface that all broker implementations must follow. The two core methods are:
 
 - **`place_orders(orders: list[Order])`** — submit one or more orders to the broker. These orders are placed at the real broker which will likely sent them to an exchange.
-- **`sync(event: Event) -> Account`** — synchronise the broker state with the latest market event and the real trading account state. Returns the updated `Account` reflecting cash, positions, open orders, and trades.
+- **`sync(event: Event) -> Account`** — synchronize the roboquant broker state with the real trading account state. Returns the updated {cl}`Account` reflecting cash, positions, open orders, and trades.
+  
+  :::{note}
+  With higher frequency live trading, *roboquant* might not call the real broker at each step in order to avoid hitting API limits exposed by this broker.  
+  :::
 
+
+## Example
 
 ```{code-cell} python
 :tags: [remove-input]
@@ -55,23 +64,10 @@ print("trading price:", event.get_price(asset), "\n")
 print(account)
 ```
 
-Most users will not implement `Broker` directly but instead use `SimBroker` for back-testing or a third-party live broker.
-
-## Account
-Account is the main object owned by the Broker and returned when the `sync()` method is invoked. It reflects the state of the real trading account of the underlying broker. 
-It is also the object returned from the `run()` function.
-
-```{code-cell} python
-import roboquant as rq
-account = rq.demo_run()
-print(account)
-```
-
-It contains available cash, open positions in the portfolio, open orders, available buying power and excuted trades. It doesn't contain closed orders and closed positions. 
-
-When using in a `Trader` it is important to use `buying_power` and not `cash` to determine the available budget for orders.
+Most users will not implement {cl}`Broker` directly but instead use {cl}`SimBroker` for back-testing or a third-party live broker.
 
 ## SimBroker
+(simbroker_def)=
 The default broker for back-testing is the SimBroker (short for Simulated Broker). It has several configuration parameters and can be subclassed to change even more of its behavior.
 
 ```{code-cell} python
@@ -83,17 +79,17 @@ broker = SimBroker(
   price_type = "OPEN",     # what price type to use, fe. OPEN, ASK, CLOSE
   slippage= 0.0,           # what price slippage to apply, 0.01 is 1% 
   timezone = timezone.utc, # what timezone to use for validating DAY orders
-  fee = 0@USD              # what additional fee/commision to apply per trade
+  fee = 0@USD              # what additional fee/commission to apply per trade
 )
 ```
 
 Some of the implemented logic that might not be obvious at first:
 
 
-- When `place_orders()` is invoked, orders are given an `id`. However the orders are NOT yet executed. That happens earliest in the next step
-  of the run when the `sync()` methd is invoked. So orders places at time{sup}`t`, will be earliest executed at time{sup}`t+1`.
+- When `place_orders()` is invoked, orders are given an `id`. However, the orders are NOT yet executed. That happens earliest in the next step
+  of the run when the `sync()` method is invoked. So orders places at time{sup}`t`, will be earliest executed at time{sup}`t+1`.
 - If there is no available price for an asset in the event, the corresponding orders will not be executed. They will stay in open state until
-  a price becoes available.
+  a price becomes available.
 - Only once there is a price available, the DAY time-in-force policy is started.
 
   :::{note} Example
@@ -106,6 +102,10 @@ Some of the implemented logic that might not be obvious at first:
   :::
 
 ## Third party Brokers
-
 Looks at [](../third_party/alpaca.md), [](../third_party/ibkr.md) and [](../third_party/crypto.md) for more details about
-third party bokers.
+third party brokers.
+
+
+## Live Broker
+If developing your own Broker implementation, you can use the `LiveBroker` as a base-class.
+To get started, best to look at some existing implementations like the `AlpacaBroker`. 

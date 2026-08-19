@@ -98,6 +98,15 @@ class Account:
         """
         return self.convert(self.equity())
 
+    def cash_value(self) -> float:
+        """
+        Return the cash value denoted in the base currency of the account.
+
+        Returns:
+            float: The cash value in the base currency.
+        """
+        return self.convert(self.cash)
+
     def realized_pnl(self, *assets: Asset) -> Wallet:
         """
         Return the sum of the realized profit and loss for trades executed in the account.
@@ -123,11 +132,19 @@ class Account:
         """
         return self.realized_pnl(*assets) + self.portfolio.unrealized_pnl(*assets)
 
+    def pnl_value(self, *assets: Asset) -> float:
+        """Return the total profit and loss of the account, which is
+            the sum of realized- and unrealized-PnL expressed in the
+            base currency of the account.
+        """
+        return self.convert(self.pnl())
+
     def get_order(self, order_id: str) -> Order | None:
         """Return an order by its id, or None if no matching order can be found"""
         for order in self.orders:
             if order.id == order_id:
                 return order
+        return None
 
     def __repr__(self) -> str:
         """Condensed representation of this account. It by default won't
@@ -184,7 +201,7 @@ class Account:
         Args:
             ax: The matplotlib axes to plot on.
             include_cash: Whether to include cash in the allocation pie chart.
-            **kwargs: Additional keyword arguments to pass to the pie chart plotting function.
+            **kwargs: Additional keyword arguments to pass to the `pie()` plotting function.
 
         Returns:
             matplotlib.axes.Axes: The axes object with the pie chart.
@@ -212,6 +229,6 @@ class Account:
             "labels": labels,
         } | kwargs
 
-        ax.pie(sizes, **kwargs)
+        ax.pie(sizes, **kwargs) # type: ignore
         ax.axis("equal")  # Equal aspect ratio ensures that pie is drawn as a circle.
         return ax

@@ -4,8 +4,8 @@ from dataclasses import replace
 import logging
 from typing import override
 
-from roboquant.common.portfolio import Position
 from roboquant.common.account import Account
+from roboquant.common.portfolio import Position
 from roboquant.common.asset import Asset
 from roboquant.brokers.broker import Broker
 from roboquant.common.event import Event, Quote, PriceItem, TradePrice
@@ -57,6 +57,7 @@ class SimBroker(Broker):
         self._orders: dict[str, Order] = {}
         self._account.cash = Wallet(self.deposit)
         self._account.buying_power = self.deposit
+        self._prices : dict [Asset, PriceItem] = {}
         self._order_id = 0
 
     def _fee(self, asset: Asset, fill: Decimal, price: float, time: datetime) -> float:
@@ -74,7 +75,7 @@ class SimBroker(Broker):
         """update position based on a fill and return the realized pnl"""
         assert fill != 0, "fill cannot be zero"
 
-        pos = self._account.portfolio.get(asset, Position())
+        pos = self._account.portfolio.get_position(asset)
 
         new_size = pos.size + fill
 
@@ -137,14 +138,16 @@ class SimBroker(Broker):
         """
         return order.remaining
 
-    def __update_account_positions(self, event: Event) -> None:
-        """Update the account with the latest market prices found in the event"""
+    def __update_account_positions(self) -> None:
+        """Update the account with the latest known market prices"""
 
         portfolio = self._account.portfolio
+        prices = self._prices
+        price_type = self.price_type
 
         for asset, pos in portfolio.items():
-            if price := event.get_price(asset, self.price_type):
-                portfolio[asset] = Position(pos.size, pos.avg_price, price)
+            mkt_price = prices[asset].price(price_type)
+            portfolio[asset] = Position(pos.size, pos.avg_price, mkt_price)
 
     def __next_order_id(self) -> str:
         """Generate a new order id. The order id is a simple integer that is incremented for each new order."""
@@ -162,15 +165,23 @@ class SimBroker(Broker):
         Orders placed at time `t`, will be processed during time `t+1`. This protects against future bias.
         """
         for order in orders:
+            assert order.asset in self._prices, "can only trade in assets that have had price-items"
+
             if not order.id:
                 assert order.size != 0, "order size of a new order cannot be zero"
                 order = replace(order, id=self.__next_order_id())
 
-            self._orders[order.id] = order
+            if order.is_cancellation:
+                if order.id in self._orders:
+                    del self._orders[order.id]
+                else:
+                    logging.warning("cancelled order doesn't exist %s", order)
+            else:
+                self._orders[order.id] = order
 
 
     def _order_expired(self, order: Order, time: datetime) -> bool:
-        """Check if the order is expired given the provided time"""
+        """Check if the order has expired given the provided time"""
 
         # GTC order never expire
         if order.tif == "GTC" or not order.time:
@@ -183,6 +194,12 @@ class SimBroker(Broker):
         return exchange_date > order_date
 
     def __process_orders(self, event: Event) -> None:
+        """
+        Order processing only uses prices from the event, not prices stored in the
+        history (`self._price`). So if there is no price in the event for an asset,
+        orders for that asset won't be processed.
+        """
+
         if not self._orders:
             return
 
@@ -210,15 +227,17 @@ class SimBroker(Broker):
             if order.remaining:
                 orders[order.id] = order
 
-
         self._orders = orders
 
     def _calculate_open_orders(self) -> Wallet:
-        """Calculate the buying power required for the open orders"""
+        """Calculate the buying power required for the open orders.
+        Orders that reduce position size don't reserve buying power."""
         result = Wallet()
         for order in self._orders.values():
-            if order.is_buy and order.remaining:
-                result += order.asset.amount(order.remaining, order.limit)
+            assert order.remaining
+            if self.__is_increase_position(order):
+                price = self._prices[order.asset].price(self.price_type)
+                result += order.remaining_amount(price)
         return result
 
     def _calculate_short_positions(self) -> Wallet:
@@ -230,7 +249,7 @@ class SimBroker(Broker):
 
     def close_positions(self) -> Account:
         """Close the open positions in the account using last known market price.
-        Existing open orders will be disgarded.
+        Existing open orders will be disguarded.
         """
 
         orders = []
@@ -246,6 +265,11 @@ class SimBroker(Broker):
         self.place_orders(orders)
         return self.sync(Event(self._account.last_update, items))
 
+    def __is_increase_position(self, order: Order) -> bool:
+        pos = self._account.portfolio.get_position(order.asset)
+        if pos.is_closed:
+            return True
+        return order.is_buy if pos.is_long else order.is_sell
 
     def _calculate_buyingpower(self) -> Amount:
         """Calculate the buying power.
@@ -265,9 +289,10 @@ class SimBroker(Broker):
         return the updated the account as a result."""
 
         if event:
+            self._prices = self._prices | event.price_items
             self._account.last_update = event.time
             self.__process_orders(event)
-            self.__update_account_positions(event)
+            self.__update_account_positions()
 
         acc = self._account
         acc.orders = list(self._orders.values())

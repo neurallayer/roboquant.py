@@ -5,16 +5,18 @@ kernelspec:
 ---
 
 # Monetary
-Roboquant comes with several monetary classes that makes dealing with 
-multi-currency situatins a lot easier.
+
+## Overview
+Roboquant comes with several monetary classes that makes trading with 
+multi-currency situations a lot easier.
 
 ## Currency
-
+(currency_def)=
 A `Currency` represents a single currency (e.g. USD, EUR, JPY). Predefined currency
 instances are available as module-level constants and can be used directly.
-Currencies are not limited to fiat currencies and can be used for crypto currencies as well.
+Currencies are not limited to fiat currencies and can be used for cryptocurrencies as well.
 
-Currencies are callable and then create an `Amount`. Or you can use the '@' operator to
+Currencies are callable and then create an {cl}`Amount`. Or you can use the '@' operator to
 achieve the same.
 
 
@@ -32,9 +34,11 @@ print(amount)
 ```
 
 ## Amount
+(amount_def)=
+
 An amount hold a monetary value of a single currency. Amounts are immutable.
-Iternally amount values are stored as floats since that is precise enough for
-trading and it doesn't has the overhead of some other types.
+Internally amount values are stored as floats since that is precise enough for
+trading, and it doesn't have the overhead of some other types.
 
 Roboquant is not a ledger and for trading it doesn't need to be.
 
@@ -55,6 +59,7 @@ print(f"{amt3:.0f}")
 
 
 ## Wallet
+(wallet_def)=
 A wallet can contain monetary values of different currencies. A wallet is mutable and 
 acts very much like a `dict[Currency, float]` 
 
@@ -75,12 +80,13 @@ print(f"{wallet:.0f}")
 print(wallet[USD], wallet[EUR], wallet[JPY])
 ```
 
-## Conversion
+## CurrencyConverter
+(currencyconverter_def)=
 If trading in more than one currency, a conversion is required 
 between amounts in the different currencies. 
 
 Roboquant comes out of the box with a conversion using the exchange 
-reates as published by the ECB. 
+rates as published by the ECB. 
 
 ```{code-cell} python
 from roboquant.common.monetary import ECBConversion

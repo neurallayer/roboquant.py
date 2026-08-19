@@ -14,7 +14,7 @@ class _MyStrategy(IndicatorStrategy):
     """
 
     def _create_signal(self, asset, ohlcv: OHLCVBuffer):
-        close = ohlcv.close()
+        close = ohlcv.close
         sma12 = SMA(close, timeperiod=12)
         sma26 = SMA(close, timeperiod=26)
 

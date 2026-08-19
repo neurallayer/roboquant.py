@@ -12,7 +12,6 @@ __all__ = [
     "NumpyBuffer",
     "AssetBuffers",
     "set_dark_style",
-    "set_light_style"
-
+    "set_light_style",
 ]
 

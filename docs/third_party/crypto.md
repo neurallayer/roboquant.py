@@ -5,8 +5,10 @@ kernelspec:
 ---
 
 # Crypto
+
+## Overview
 The integration with crypto exchanges is done by using the [CCXT](https://github.com/ccxt/ccxt) package.
-It provides both market data as well as broker functionality from these exchanges.
+It provides both market data and broker functionality from these exchanges.
 
 ---
 ## Supported Exchanges
@@ -20,6 +22,16 @@ CCXT supports **100+** exchanges. Some popular ones include:
 | Bybit      | `ccxt.bybit()`     |
 | OKX        | `ccxt.okx()`       |
 
+
+:::{note}
+CCXT differentiates between certified and supported exchanges. See 
+their [github page](https://github.com/ccxt/ccxt#user-content-certified-cryptocurrency-exchanges)
+for more details.
+
+Also not all implementations are feature complete. So if you want to use CCXT,
+check first the level of support for your exchange.
+:::
+
 ```{code-cell} python
 import ccxt
 
@@ -32,7 +44,7 @@ CCXT provides access to historical OHLCV data, order books, and live ticker feed
 from hundreds of cryptocurrency exchanges.
 
 The following example shows a back test over historical data gotten from Binance exchange.
-This uses a public API, so no trading account with Binance is required for this example.
+This uses a public API, so no account with Binance is required to run this example.
 
 ```{code-cell} python
 import ccxt
@@ -57,8 +69,17 @@ for asset in feed.assets():
 ```
 ---
 ## Broker Integration
-
 For broker integration you typically need a trading account with the Exchange/Broker you want to use.
+Often the onboarding is restricted to certain regions.
+
+:::{tip}
+Before selecting a crypto exchange for algo-trading, better to do due diligence:
+
+- [x] is it a reputable exchange?
+- [x] does it have good paper-trading support?
+- [x] does it operate in your region?
+- [x] does it have enough volume to provide good execution prices?
+:::
 
 
 ```{code} python
@@ -67,7 +88,7 @@ For broker integration you typically need a trading account with the Exchange/Br
 
   key = os.getenv("ALPACA_API_KEY")
   secret = os.getenv("ALPACA_SECRET")
-  assert(key is not None and secret is not None), "ALPACA_API_KEY and ALPACA_SECRET must be set"
+
   alpaca = ccxt.alpaca({
       "apiKey": key,
       "secret": secret

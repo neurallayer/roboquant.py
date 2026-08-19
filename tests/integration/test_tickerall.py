@@ -77,15 +77,13 @@ class TestTickerAllIT(unittest.TestCase):
             print(account)
 
         asset = Forex("BTCUSD", USD)
-        price = account.portfolio[asset].mkt_price
-        print("market price =", price, flush=True)
-        # order = Order(asset, Decimal("0.001"), limit=round(price*1.01, 0))
-        order = Order(asset, Decimal("0.001"), limit=round(price, 2))
+        order = Order(asset, Decimal("0.001"))
         broker.place_orders([order])
         for _ in range(3):
             account = broker.sync()
             print(account, "\n", flush=True)
             time.sleep(10)
+
         for order in account.orders:
             print(order)
 

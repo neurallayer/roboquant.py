@@ -8,7 +8,7 @@ import numpy as np
 
 from roboquant.common.account import Account
 from roboquant.common.metric import Metric
-from roboquant.common.portfolio import Position
+from roboquant.common.portfolio import Portfolio, Position
 from roboquant.common.asset import Asset
 from roboquant.common.event import Bar, Event
 from roboquant.common.monetary import USD, Amount, Wallet
@@ -84,6 +84,7 @@ class PNLMetric(Metric):
 
 
 class IndicatorMetric(Metric):
+    """Based class for custom metrics that work on a OHLCV Buffer."""
 
     def __init__(self, asset: Asset, timeperiod: int):
         self.asset = asset
@@ -117,7 +118,7 @@ class SignalRatingMetric(Metric):
     def calc(self, event: Event, account: Account, signals: list[Signal], orders: list[Order]) -> dict[str, float]:
         signals = self.strategy.create_signals(event)
         d = {s.asset: s for s in signals}
-        result = {}
+        result:dict[str, float] = {}
         for asset in self.assets:
             metric_name = f"rating/{asset.symbol.lower()}"
             if signal := d.get(asset):
@@ -126,6 +127,39 @@ class SignalRatingMetric(Metric):
                 result[metric_name] = float("nan")
 
         return result
+
+
+class RelativePNLMetric(Metric):
+    """Calculate the total PNL relative to:
+     - the position exposure for the unrealized PNL
+     - the absolute trade value for the realized PNL
+
+     This is a useful metric as it shows the performance independent
+     of position/order sizing.
+    """
+
+    @override
+    def calc(self, event: Event, account: Account, signals: list[Signal], orders: list[Order]) -> dict[str, float]:
+        pnl = Wallet()
+        value = Wallet()
+        for trade in account.trades:
+            pnl += trade.pnl_amount()
+            value += abs(trade.value())
+
+        p = account.portfolio
+        for asset in p.keys():
+            pnl += p.unrealized_pnl(asset)
+            value += p.exposure(asset)
+
+        pnl_float = pnl.convert_to(account.base_currency, event.time)
+        value_float = value.convert_to(account.base_currency, event.time)
+
+        relative_pnl = pnl_float / value_float if value_float else 0.0
+
+        return {
+            "relative/pnl" : relative_pnl
+        }
+
 
 
 class PriceMetric(Metric):
@@ -206,12 +240,12 @@ class RunMetric(Metric):
 
 class MarketMetric(Metric):
     """Calculates the market PNL by acquiring the same amount of all assets and sum their individual PNL performance.
-    So this metrics reflects the long only performance of the market.
+    So this metrics reflects the BUY-HOLD performance of the market.
     """
 
     def __init__(self, initial_amount: Amount = USD(1_000.0), price_type: str = "DEFAULT") -> None:
         self.initial_amount = initial_amount
-        self.positions: dict[Asset, Position] = {}
+        self.portfolio = Portfolio()
         self.price_type = price_type
 
     @override
@@ -219,29 +253,24 @@ class MarketMetric(Metric):
         for asset, item in event.price_items.items():
             price = item.price(self.price_type)
 
-            if asset not in self.positions:
+            if asset not in self.portfolio:
                 converted_value = self.initial_amount.convert_to(asset.currency, event.time)
                 size = Decimal(converted_value / price)
-                self.positions[asset] = Position(size, price, price)
+                self.portfolio[asset] = Position(size, price, price)
             else:
-                position = self.positions[asset]
-                self.positions[asset] = replace(position, mkt_price = price)
+                position = self.portfolio[asset]
+                self.portfolio[asset] = replace(position, mkt_price = price)
 
-        if not self.positions:
+        if not self.portfolio:
             return {
                 "market/pnl" : 0.0,
                 "market/avg_pnl" : 0.0,
                 "market/pnl_pct" : 0.0
             }
 
-        # Calculate the total PNL for all positions
-        w = Wallet()
-        for asset, position in self.positions.items():
-            w += asset.amount(position.size, position.mkt_price - position.avg_price)
-
-        pnl = account.convert(w)
-        avg_pnl = pnl / len(self.positions)
-        pnl_pct = pnl / ( account.convert(self.initial_amount) * len(self.positions))
+        pnl = account.convert(self.portfolio.unrealized_pnl())
+        avg_pnl = pnl / len(self.portfolio)
+        pnl_pct = pnl / ( account.convert(self.initial_amount) * len(self.portfolio))
 
         return {
             "market/pnl" : pnl,

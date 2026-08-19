@@ -36,6 +36,11 @@ class Position:
         """Return True if this is a long position, False otherwise"""
         return self.size > 0
 
+    @property
+    def is_closed(self):
+        """Return True if this is a closed position, False otherwise"""
+        return self.size.is_zero()
+
 
 class Portfolio(UserDict[Asset, Position]):
     """Contains all the open postions with the corresponding asset"""
@@ -51,7 +56,7 @@ class Portfolio(UserDict[Asset, Position]):
         Returns:
             float: The position value in the base currency.
         """
-        pos = self.get(asset, Position())
+        pos = self.get_position(asset)
         return asset.amount(pos.size, pos.mkt_price)
 
     def short_positions(self) -> "Portfolio":
@@ -102,14 +107,28 @@ class Portfolio(UserDict[Asset, Position]):
                 result += asset.amount(position.size, position.mkt_price)
         return result
 
+    def exposure(self, *assets: Asset) -> Wallet:
+        """
+        Return the sum of the exposure of the open positions in the account. Short
+        positions have a positive exposure.
+        If one or more asset is provided, limit it to those assets, otherwise include all assets.
+
+        Returns:
+            Wallet: The total exposure of all open positions.
+        """
+        result = Wallet()
+        for asset, position in self.items():
+            if not assets or asset in assets:
+                result += abs(asset.amount(position.size, position.mkt_price))
+        return result
+
     def close_positions(self, ndigits: int = 2) -> list[Order]:
-        """Create the orders required to close the current open positions.
-        The limit price of the orders is equal to the last known market price.
+        """Create the market orders required to close the current open positions.
 
         Attributes:
            ndigits: how many digits to use for the limit price
         """
-        orders = [Order(asset, -pos.size, round(pos.mkt_price, ndigits)) for asset, pos in self.items()]
+        orders = [Order(asset, -pos.size) for asset, pos in self.items()]
         return orders
 
     def to_dataframe(self) -> pd.DataFrame:
@@ -128,3 +147,16 @@ class Portfolio(UserDict[Asset, Position]):
         """
         pos = self.get(asset)
         return pos.size if pos else Decimal()
+
+    def get_position(self, asset: Asset) -> Position:
+        """
+        Return the position size for an asset, en empty position if not
+        in the portfolio.
+
+        Args:
+            asset (Asset): The asset for which to get the position size.
+
+        Returns:
+            Decimal: The position size as a Decimal.
+        """
+        return self.get(asset, Position())

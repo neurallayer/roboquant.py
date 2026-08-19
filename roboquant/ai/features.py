@@ -71,7 +71,7 @@ class Feature(Generic[T]):
 
     def __getitem__(self, *args) -> "Feature[T]":
         """Return a slice of the feature.
-        For example, if the feature has size 10 and you call `feature[2:5]`, it will return a new feature
+        For example, if the feature has size 10, and you call `feature[2:5]`, it will return a new feature
         that contains the values for indices 2, 3, and 4 of the original feature.
         """
         return SlicedFeature(self, args)
@@ -143,7 +143,7 @@ class RandomFeature(Feature[Any]):
         np.random.seed(self._seed)
 
 
-class CombinedFeature(Feature[T]):
+class FeatureSet(Feature[T]):
     """Combine multiple features into one single feature by horizontal stacking them.
     So if feature1 has size 3 and feature2 has size 5, the combined feature will have size 8.
     """
@@ -220,7 +220,7 @@ class FillFeature(Feature[T]):
 
     def __init__(self, feature: Feature[T]) -> None:
         super().__init__()
-        self.feature: Feature = feature
+        self.feature: Feature[T] = feature
         self.fill = self._full_nan()
 
     def calc(self, value: T) -> NPFloatArray:
@@ -244,7 +244,7 @@ class FillWithConstantFeature(Feature[T]):
 
     def __init__(self, feature: Feature[T], constant: float = 0.0) -> None:
         super().__init__()
-        self.feature: Feature = feature
+        self.feature: Feature[T] = feature
         self.fill = np.full(self._shape(), constant, dtype=np.float32)
 
     def calc(self, value: T) -> NPFloatArray:
@@ -265,7 +265,7 @@ class ReturnFeature(Feature[T]):
 
     def __init__(self, feature: Feature[T]) -> None:
         super().__init__()
-        self.feature: Feature = feature
+        self.feature: Feature[T] = feature
         self.history = self._full_nan()
 
     def calc(self, value: T) -> NPFloatArray:
@@ -287,7 +287,7 @@ class LongReturnsFeature(Feature[T]):
     def __init__(self, feature: Feature[T], period: int) -> None:
         super().__init__()
         self.history: deque[NPFloatArray] = deque(maxlen=period)
-        self.feature: Feature = feature
+        self.feature: Feature[T] = feature
 
     def calc(self, value: T) -> NPFloatArray:
         values = self.feature.calc(value)
@@ -318,7 +318,7 @@ class MaxReturnFeature(Feature[T]):
         super().__init__()
         assert feature.size() == 1
         self.history: deque[NPFloatArray] = deque(maxlen=period)
-        self.feature: Feature = feature
+        self.feature: Feature[T] = feature
 
     def calc(self, value: T) -> NPFloatArray:
         values = self.feature.calc(value)
@@ -347,7 +347,7 @@ class MinReturnFeature(Feature[T]):
     def __init__(self, feature: Feature[T], period: int) -> None:
         super().__init__()
         self.history: deque[NPFloatArray] = deque(maxlen=period)
-        self.feature: Feature = feature
+        self.feature: Feature[T] = feature
 
     def calc(self, value: T) -> NPFloatArray:
         values = self.feature.calc(value)
@@ -374,7 +374,7 @@ class SMAFeature(Feature[T]):
     def __init__(self, feature: Feature[T], period: int) -> None:
         super().__init__()
         self.period = period
-        self.feature: Feature = feature
+        self.feature: Feature[T] = feature
         self.history = np.zeros((self.period, feature.size()), dtype=np.float32)
         self._cnt = 0
 
@@ -658,7 +658,7 @@ class BarFeature(Feature[Event]):
 
 class QuoteFeature(Feature[Event]):
     """Extract the values from quotes for one or more assets.
-    So if there are 2 assets, the result will be a 8-element array.
+    So if there are 2 assets, the result will be an 8-element array.
     The order of the values is: ask_price, ask_volume, bid_price, bid_volume,  for each asset.
     """
 
@@ -693,7 +693,7 @@ class CacheFeature(Feature[Event]):
 
     def __init__(self, feature: Feature[Event], validate=False) -> None:
         super().__init__()
-        self.feature: Feature = feature
+        self.feature: Feature[Event] = feature
         self._cache: dict[datetime, NPFloatArray] = {}
         self.validate = validate
 
@@ -726,7 +726,7 @@ class CacheFeature(Feature[Event]):
 
 class VolumeFeature(Feature[Event]):
     """Extract the trading volume for one or more assets in the event.
-    Make sure that the data avaialble in the event contains adjusted volume data
+    Make sure that the data available in the event contains adjusted volume data
     (for example for stock splits), otherwise the results will be incorrect.
     """
 

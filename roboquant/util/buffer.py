@@ -65,22 +65,27 @@ class OHLCVBuffer(NumpyBuffer):
         """Create a new OHLCV buffer"""
         super().__init__(capacity, 5, "float64")
 
+    @property
     def open(self) -> NDArray[np.float64]:
         """Return the open prices as a Numpy array"""
         return self._get(0)
 
+    @property
     def high(self) -> NDArray[np.float64]:
         """Return the high prices as a Numpy array"""
         return self._get(1)
 
+    @property
     def low(self) -> NDArray[np.float64]:
         """Return the low prices as a Numpy array"""
         return self._get(2)
 
+    @property
     def close(self) -> NDArray[np.float64]:
         """Return the close prices as a Numpy array"""
         return self._get(3)
 
+    @property
     def volume(self) -> NDArray[np.float64]:
         """Return the volumes as a Numpy array"""
         return self._get(4)

@@ -3,6 +3,8 @@ import logging
 
 from roboquant.common.account import Account
 from roboquant.common.asset import Asset, Crypto, Forex
+from roboquant.common.order import Order
+from roboquant.common.signal import Signal
 from roboquant.common.timeframe import Timeframe
 from roboquant.brokers.broker import Broker
 from roboquant.brokers.simbroker import SimBroker
@@ -44,9 +46,9 @@ def run(
 
     try:
         for event in feed.play(timeframe):
-            account = broker.sync(event)
-            signals = strategy.create_signals(event) if strategy else []
-            orders = trader.create_orders(signals, event, account)
+            account: Account = broker.sync(event)
+            signals: list[Signal] = strategy.create_signals(event) if strategy else []
+            orders : list[Order]= trader.create_orders(signals, event, account)
             broker.place_orders(orders)
             if journal:
                 journal.track(event, account, signals, orders)
@@ -66,14 +68,14 @@ class __StopRun(Exception):
 
 def stop_run(message: str = "") -> NoReturn:
     """Raised an exception that causes the run to be stopped while
-    still regulary returning the account object.
+    still regularly returning the account object.
 
     Optionally provide a message that will be part of the logging.
     """
     raise __StopRun(message)
 
 
-def _derive_simple_trader(assets: list[Asset], account: Account) -> SimpleTrader:
+def _derive_simple_trader(assets: list[Asset], account: Account) -> Trader:
     """Derive SimpleTrader settings from provided list of assets
     and broker account
     """
@@ -86,8 +88,7 @@ def _derive_simple_trader(assets: list[Asset], account: Account) -> SimpleTrader
     return SimpleTrader(max_positions)
 
 
-
-def _derive_flex_trader(assets: list[Asset], account: Account) -> "FlexTrader":
+def _derive_flex_trader(assets: list[Asset], account: Account) -> Trader:
     """Derive FlexTrader settings from provided list of assets
     and broker account
     """
@@ -119,8 +120,10 @@ def _derive_flex_trader(assets: list[Asset], account: Account) -> "FlexTrader":
     )
 
 
-def demo_run() -> Account:
-    """Small demo run for testing purposes"""
-    feed = YahooFeed.us_stocks_10()
+def demo_run(journal: Journal | None = None) -> Account:
+    """Small demo run for testing purposes.
+    Optional a journal can be provided.
+    """
+    feed = YahooFeed.us_stocks_10(start_date="2022-01-01", end_date="2026-01-01")
     strategy = EMACrossover()
-    return run(feed, strategy)
+    return run(feed, strategy, journal=journal)

@@ -38,7 +38,7 @@ class IndicatorStrategy(Strategy):
         Subclasses should implement this method. This method is only invoked if enough data
         is available for the asset, i.e. the size of the OHLCVBuffer is at least `self.period`.
 
-        Sample:
+        Example:
         ```
         prices = ohlcv.close()
         if prices[-10:].mean() > prices[-20:].mean():

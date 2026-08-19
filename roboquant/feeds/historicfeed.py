@@ -1,6 +1,8 @@
-from abc import ABC, abstractmethod
+from abc import ABC
 from datetime import datetime
 from typing import Any, Iterable
+
+from matplotlib.axes import Axes
 
 from roboquant.common.trade import Trade
 from roboquant.common.asset import Asset
@@ -16,9 +18,6 @@ import matplotlib.pyplot as plt
 class HistoricFeed(Feed, ABC):
     """Base class for most implementations of Historic Feeds. Contains several methods
     to enhance feeds, like plotting prices and conversion to dataframes."""
-
-    @abstractmethod
-    def assets(self) -> list[Asset]: ...
 
     def symbols(self) -> list[str]:
         """Return the list of unique symbols available in this feed"""
@@ -123,14 +122,14 @@ class HistoricFeed(Feed, ABC):
         price_type: str = "DEFAULT",
         volume_type: str = "DEFAULT",
         timeframe: Timeframe | None = None,
-        ax=None,
+        ax: Axes | None = None,
         trades: Iterable[Trade] | None = None,
         plot_volume: bool = True,
         **kwargs: Any,
-    ):
+    ) -> Axes:
         """
         Plots the prices of a single asset. This function requires matplotlib to be installed.
-        It also support plotting trades on the same chart,
+        It also supports plotting trades on the same chart,
 
         Args:
             asset (Asset | str): The asset or symbol for which to plot prices.
@@ -196,7 +195,7 @@ class HistoricFeed(Feed, ABC):
 
         timeline: list[datetime] = []
         account = Account()
-        data = {}
+        data: dict[str, list[float]] = {}
 
         for event in self.play(timeframe):
             result = metric.calc(event, account, [], [])

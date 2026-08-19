@@ -5,6 +5,8 @@ from dataclasses import dataclass
 from datetime import datetime
 from decimal import Decimal
 
+from roboquant.common.monetary import Amount
+
 
 @dataclass(slots=True, frozen=True)
 class Trade:
@@ -28,3 +30,10 @@ class Trade:
     size: Decimal
     price: float
     pnl: float
+
+    def value(self) -> Amount:
+        """Trade value in the currency of the asset"""
+        return Amount(self.asset.currency, self.asset.value(self.size, self.price))
+
+    def pnl_amount(self) -> Amount:
+        return Amount(self.asset.currency, self.pnl)

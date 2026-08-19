@@ -6,7 +6,7 @@ import numpy as np
 
 import roboquant as rq
 from roboquant.common.asset import Stock
-from roboquant.ai.features import BarFeature, CombinedFeature, PriceFeature, SMAFeature
+from roboquant.ai.features import BarFeature, FeatureSet, PriceFeature, SMAFeature
 from roboquant.ai.strategies import TimeSeriesStrategy, SequenceDataset
 from tests.common import get_feed
 
@@ -49,7 +49,7 @@ class TestRNN(unittest.TestCase):
         feed = get_feed()
         model = _MyModel()
 
-        input_feature = CombinedFeature(
+        input_feature = FeatureSet(
             BarFeature(apple),
             SMAFeature(PriceFeature(apple, price_type="HIGH"), 10)
         ).returns().normalize()

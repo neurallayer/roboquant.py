@@ -104,7 +104,7 @@ class LiveBroker(Broker):
         id: str | int,
         asset: Asset,
         size: Decimal | str | int | float,
-        limit: float|str,
+        limit: Decimal|float|str|None,
         fill:Decimal | str | int | float,
         tif: Literal['GTC', 'DAY'] = "DAY",
         ):
@@ -116,7 +116,7 @@ class LiveBroker(Broker):
         order = Order(
             asset=asset,
             size=-Decimal(size), # Negative size for sell orders
-            limit=float(limit),
+            limit=float(limit) if limit is not None else None,
             tif=tif,
             fill=Decimal(fill),
             id = str(id)
@@ -129,7 +129,7 @@ class LiveBroker(Broker):
         id: str | int,
         asset: Asset,
         size: Decimal | str | int | float,
-        limit: float|str,
+        limit: Decimal|float|str|None,
         fill:Decimal | str | int | float,
         tif: Literal['GTC', 'DAY'] = "DAY",
         ):
@@ -140,7 +140,7 @@ class LiveBroker(Broker):
         order = Order(
             asset=asset,
             size=Decimal(size), # Negative size for sell orders
-            limit=float(limit),
+            limit=float(limit) if limit is not None else None,
             tif=tif,
             fill=Decimal(fill),
             id = str(id)

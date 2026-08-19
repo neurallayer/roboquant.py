@@ -162,7 +162,9 @@ class TickerAllBroker(LiveBroker):
                 size = -size
             entry = float(p.entry_price or 0.0)
             mkt = float(p.current_price) if p.current_price is not None else entry
-            portfolio[_to_asset(p.symbol, currency)] = Position(size, entry, mkt)
+            position = Position(size, entry, mkt)
+            portfolio[_to_asset(p.symbol, currency)] = position
+            logger.info("synced position=%s", position)
         return portfolio
 
     def _sync_orders(self, currency: Currency) -> list[Order]:
@@ -170,23 +172,23 @@ class TickerAllBroker(LiveBroker):
         for o in self._client.orders.list_pending(self._account_id):
             if not o.symbol or o.volume is None or o.ticket is None:
                 continue
-            limit = o.limit_price if o.limit_price is not None else o.price
-            if limit is None:
-                limit = float("nan")
+            limit = o.limit_price
             asset = _to_asset(o.symbol, currency)
             # size = abs(float(o.volume))
             size = abs(Decimal(str(o.volume)))
             if str(o.side).upper() == "SELL":
-                orders.append(self._sell_order(o.ticket, asset, size, limit, 0))
+                order = self._sell_order(o.ticket, asset, size, limit, 0)
             else:
-                orders.append(self._buy_order(o.ticket, asset, size, limit, 0))
+                order = self._buy_order(o.ticket, asset, size, limit, 0)
+            orders.append(order)
+            logger.info("synced order=%s", order)
         return orders
 
     def _place_order(self, order: Order) -> None:
         try:
             result = self._client.orders.place(
                 self._account_id,
-                type="limit",
+                type="limit" if order.is_limit_order else "market",
                 symbol=order.asset.symbol,
                 side="BUY" if order.is_buy else "SELL",
                 volume=abs(float(order.size)),

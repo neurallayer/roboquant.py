@@ -1,8 +1,8 @@
 import logging
+from typing import Any
 import ccxt
 from array import array
 from datetime import date, datetime, timezone
-from typing import Any
 
 from roboquant.common.asset import Asset, Crypto
 from roboquant.common.event import Bar
@@ -19,7 +19,7 @@ class CryptoFeed(InMemoryFeed):
         self,
         exchange: ccxt.Exchange,
         *symbols: str,
-        start_date: str | date | datetime = "2020-01-01T00:00:00",
+        start_date: str | date | datetime = "2025-01-01T00:00:00",
         end_date: str | date | datetime | None = None,
         interval: str = "1d",
     ):

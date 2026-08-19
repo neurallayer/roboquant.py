@@ -5,34 +5,77 @@ kernelspec:
 ---
 
 # Run
-The `run()` function implements the main event loop used for everything from back testing to live trading.
+
+```mermaid
+---
+config:
+    themeVariables:
+        fontSize: '30px'
+---
+flowchart LR
+    Feed["fa:fa-database<br>Feed"]
+    Strategy["fa:fa-calculator<br>Strategy"]
+    Trader["fa:fa-dollar<br>Trader"]
+    Broker["fa:fa-exchange<br>Broker"]
+    Journal["fa:fa-area-chart<br>Journal"]
+    Feed -- event --> Strategy -- signals --> Trader -- orders --> Broker -- account --> Journal
+    classDef active fill:#00A1FF
+```
+
+(run_def)=
+## Overview
+The core of the system is the `run()` function, which connects all components in a streaming event loop. 
+The run is used for every stage in the 4 stages, from back-testing to live-trading. 
+
+Each of these five components in the run has its own responsibilities:
+
+| Component | Responsibility |
+|-----------|---------------|
+| **{cl}`Feed`** | Provides (market) data events |
+| **{cl}`Strategy`** | Generates trading signals from events |
+| **{cl}`Trader`** | Converts signals into orders (risk/sizing) |
+| **{cl}`Broker`** | Executes orders, maintains account state |
+| **{cl}`Journal`** | Logs/tracks every step (read-only) |
+
+Each component is implemented an Abstract Base Class with pluggable implementations, making every part of
+the pipeline independently swappable.
+
+
+## Step-by-step
 
 It is helpful to understand some of the details of the run loop.
 
 ```python
 for event in feed.play(...):
-    account = broker.sync(event)                # syncs and updates the account
-    singals = strategy.create_signals(event)    # generate signals from market data
-    orders = trader.create_orders(signals, ...) # apply risk rules, create orders
-    broker.place_orders(orders)                 # place orders at broker
-    journal.track(...)                          # record metrics (optional)
+    account = broker.sync(event)                # 1 syncs and updates the account
+    signals = strategy.create_signals(event)    # 2 generate signals from market data
+    orders = trader.create_orders(signals, ...) # 3 apply risk rules, create orders
+    broker.place_orders(orders)                 # 4 place orders at broker
+    journal.track(...)                          # 5 record metrics (optional)
 ```
 
-## Step-by-step
+1. **`broker.sync(event)`** — Sync with the state of the underlying broker. Returns an updated {cl}`Account` object which reflects the latest state and market data. Orders and positions that are closed, are not included in the returned account object.   
 
-1. **`broker.sync(event)`** — Sync with the state of the underlying real broker. Returns an updated `Account` object which reflects the latest state and market data. Orders and positions that are closed, are not included in the returned account object.   
-
-2. **`strategy.create_signals(event)`** — The strategy examines the event's price data and returns a list of `Signal` objects. Each signal has an asset, a rating (typically -1.0 to 1.0), and a type (`ENTRY`, `EXIT`, or `ENTRY_EXIT`). Strategies are **pure decision-makers** — they know nothing about cash, positions, or risk.
+2. **`strategy.create_signals(event)`** — The strategy examines the event's price data and returns a list of {cl}`Signal` objects. Each signal has an asset, a rating (typically -1.0 to 1.0), and a type (`ENTRY`, `EXIT`, or `ENTRY_EXIT`). Strategies are **pure decision-makers** — they know nothing about cash, positions, or risk.
 
 3. **`trader.create_orders(signals, event, account)`** — The trader applies risk management rules (position sizing, shorting constraints, order limits) and converts signals into concrete `Order` objects. Unlike strategies, traders **have full access to the Account** (cash, positions, buying power).
 
-4. **`broker.place_orders(orders)`** — New orders are submitted to the broker. In `SimBroker`, they are stored and only evaluated for execution when the next event arrives.
+4. **`broker.place_orders(orders)`** — New orders are submitted to the broker. In {cl}`SimBroker`, they are stored and only evaluated for execution when the next event arrives.
 
 5. **`journal.track(...)`** — Optional logging and metrics collection. Journals are passive observers that never modify state.
 
+
+The run function also has many defaults for its parameters in case they are not provided:
+
+- if no broker is provider, the SimBroker is used
+- if no trader is provided, the SimpleTrader is used
+- if no journal is provided, this step is skipped all together
+- if None is provided as a strategy, this step is skipped
+  and the trader is provided with an empty list of signals 
+
+
 :::{tip}
-Any exception thrown during the execution of the run loop, will stop the run. However if you call the `stop_run()` function, the run is stopped early while still
-regulary returning the latest account object.
+Any exception thrown during the execution of the run loop, will stop the run. However, if you call the `stop_run()` function, the run is stopped early while still exiting normally and returning the latest account object.
 :::
 
 ## Basic Backtest
@@ -48,9 +91,10 @@ account = rq.run(feed, strategy)
 print(account)
 ```
 
-This works because `run()` provides sensible defaults: `SimBroker` (USD 1M deposit, 0% slippage) and `SimpleTrader`.
+This works because `run()` provides sensible defaults: {cl}`SimBroker` (USD 1M deposit, 0% slippage) and {cl}`SimpleTrader`.
 
 ## Custom Backtest
+The following snippets shows how to override many of the default settings. 
 
 ```{code-cell} python
 from roboquant import USD
@@ -64,10 +108,9 @@ journal = rq.journals.MetricsJournal()
 account = rq.run(feed, strategy, trader=trader, broker=broker, journal=journal)
 ```
 
-
 ## Walk Forward
 Walk-forward analysis is a backtesting technique that mimics real-world trading by splitting historical data into successive periods. 
-Below is very simple example of a walk forward that provides some insights into the performance in different timeframes.
+Below is very simple example of a walk forward that provides insights into the performance in different timeframes.
 
 ```{code-cell} python
 timeframes = feed.timeframe().split(5)
@@ -78,7 +121,7 @@ for timeframe in timeframes:
     print(f"{timeframe.strftime('%Y-%m-%d')} equity={account.equity():.0f}")
 ```
 
-But typically a walk forward is used in combination with hyper-parameter tuning.
+Often a walk forward is used in combination with hyperparameter tuning.
 This is known as **Walk-Forward Optimization (WFO)**. The idea is:
 
 1. Split the historical data into a sequence of time windows (e.g. 5 periods).
@@ -87,7 +130,7 @@ This is known as **Walk-Forward Optimization (WFO)**. The idea is:
 4. Move forward one window and repeat.
 
 This approach helps detect **overfitting**: if a parameter set performs well in-sample but poorly out-of-sample,
-the strategy likely doesn't generalise. By measuring performance only on unseen data, you get a more
+the strategy likely doesn't generalize. By measuring performance only on unseen data, you get a more
 realistic estimate of how the strategy would have performed in production.
 
 :::{note}
@@ -95,30 +138,33 @@ A common pitfall is peeking into the future — ensure the training window alway
 The example below respects this by using `timeframes[idx]` for training and `timeframes[idx+1]` for testing.
 :::
 
-In practice you might also track metrics across all out-of-sample periods (e.g. average Sharpe ratio, win rate)
+In practice, you might also track metrics across all out-of-sample periods (e.g. average Sharpe ratio, win rate)
 rather than just the final equity value, giving a fuller picture of robustness.
 
 
 ```{code-cell} python
+from collections import namedtuple
+Best = namedtuple("Best", "equity param")
+
 timeframes = feed.timeframe().split(5)
 params = [(3,5), (13,26), (20, 31)]
 
 for idx in range(len(timeframes) - 1):
-    best = None
-
+    best = Best(-1_000_000.0, None)
+  
     # Find the best parameter
     for param in params:
         strategy = rq.strategies.EMACrossover(*param)
         account = rq.run(feed, strategy, timeframe=timeframes[idx])
         equity = account.equity_value()
-        if not best or equity > best[0]:
-            best = (equity, param)
+        if equity > best.equity:
+            best = Best(equity, param)
 
     # Validate 
-    strategy = rq.strategies.EMACrossover(*best[1])
+    strategy = rq.strategies.EMACrossover(*best.param)
     account = rq.run(feed, strategy, timeframe=timeframes[idx+1])
     equity = account.equity_value()
-    print(f"param={best[1]} training={best[0]:,.0f} testing={equity:,.0f}")
+    print(f"param={best.param} training={best.equity:,.0f} testing={equity:,.0f}")
 ```
 
 
@@ -138,11 +184,12 @@ for timeframe in timeframes:
 print(f"min={min(equities):.0f}, max={max(equities):.0f}")
 ```
 
+
 ## Live and paper-trade run
 A live or paper-trade run is only different from a back test in the implementation
 of two of the components selected.
 
-Instead of a the `SimBroker` a real broker is selected and instead of a historic
+Instead of the {cl}`SimBroker` a real broker is selected and instead of a historic
 data feed, a live datafeed is used.
 
 ```python
@@ -170,8 +217,13 @@ account = rq.run(feed, strategy, broker=broker, timeframe=timeframe)
 
 ## Early stopping
 It is possible to stop a run before all the events are handled. You do so
-by having one of the components invoke the `stop_run()` function.
+by having one of the components call the `stop_run()` function.
 
 For example a custom Journal could track some metrics and based on the results
 invoke the `stop_run()` function. See also [journal](journal.md#guard-journal)
 
+Under the hood it will throw a special type of exception that is handled gracefully within
+the run loop. 
+
+All other types of exceptions thrown during the execution of the run loop,
+will stop the run but will propagate that exception.

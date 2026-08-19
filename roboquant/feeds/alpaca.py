@@ -229,6 +229,7 @@ class AlpacaHistoricStockFeed(_AlpacaHistoricFeed):
         res = self.client.get_stock_trades(req)
         assert isinstance(res, TradeSet)
         self._process_trades(res.data, AssetClass.US_EQUITY)
+        self._update()
 
     def retrieve_quotes(self, *symbols: str, start: datetime | str | None = None, end: datetime | str | None = None):
         """Retrieve quote data for the given symbols.
@@ -242,6 +243,7 @@ class AlpacaHistoricStockFeed(_AlpacaHistoricFeed):
         res = self.client.get_stock_quotes(req)
         assert isinstance(res, QuoteSet)
         self._process_quotes(res.data, AssetClass.US_EQUITY)
+        self._update()
 
 
 class AlpacaHistoricCryptoFeed(_AlpacaHistoricFeed):
@@ -280,6 +282,7 @@ class AlpacaHistoricCryptoFeed(_AlpacaHistoricFeed):
         assert isinstance(res, BarSet)
         freq = str(resolution)
         self._process_bars(res.data, freq, AssetClass.CRYPTO)
+        self._update()
 
     def retrieve_trades(self, *symbols: str, start: datetime | str | None = None, end: datetime | str | None = None):
         """Retrieve trade data for the given symbols.
@@ -293,5 +296,5 @@ class AlpacaHistoricCryptoFeed(_AlpacaHistoricFeed):
         res = self.client.get_crypto_trades(req)
         assert isinstance(res, TradeSet)
         self._process_trades(res.data, AssetClass.CRYPTO)
-
+        self._update()
 

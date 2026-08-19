@@ -70,7 +70,7 @@ class ChronosStrategy(rq.strategies.IndicatorStrategy):
         self.prediction_length = prediction_length
 
     def _create_signal(self, asset: rq.Asset, ohlcv: OHLCVBuffer) -> rq.Signal | None:
-        close = pct_change(ohlcv.close())
+        close = pct_change(ohlcv.close)
         result = self.pipeline.predict(
             inputs=torch.tensor(close),
             prediction_length=self.prediction_length,

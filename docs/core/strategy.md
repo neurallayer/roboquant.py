@@ -5,38 +5,44 @@ kernelspec:
 ---
 
 # Strategy
-A `Strategy` is responsible for creating signals based on incoming events. So a strategy doesn't generate
-the orders, that is the responsibility of a `Trader`.
-
-Often the items in the event represent market data and the strategy uses this to perform (technical)
-analysis. But it is also possible for events to contain different data and, for example, perform
-fundamental analysis.
-
-Strategies are **pure decision-makers**. They only look at the `Event` and produce a list of `Signal`
-objects. They have no knowledge of cash, positions, or risk — that is the domain of the `Trader`.
 
 ```mermaid
+---
+config:
+    themeVariables:
+        fontSize: '30px'
+---
 flowchart LR
- 
-    Feed["Feed"]
-    Strategy["Strategy"]
-    Trader["Trader"]
-    Broker["Broker"]
-    Journal["Journal"]
-    
-    Feed -- event --> Strategy -- signals --> Trader -- orders --> Broker -- account --> Journal 
-
-    style Strategy fill:#888
+    Feed["fa:fa-database<br>Feed"]
+    Strategy["fa:fa-calculator<br>Strategy"]:::active
+    Trader["fa:fa-dollar<br>Trader"]
+    Broker["fa:fa-exchange<br>Broker"]
+    Journal["fa:fa-area-chart<br>Journal"]
+    Feed -- event --> Strategy -- signals --> Trader -- orders --> Broker -- account --> Journal
+    classDef active fill:#00A1FF
 ```
 
+(strategy_def)=
+## Overview
+The {cl}`Strategy` is responsible for creating signals based on incoming events from the feed. 
+So a strategy doesn't generate the orders, that is the responsibility of a {cl}`Trader`.
+
+Often the items in the event represent market data and the strategy uses this to perform some
+type of (technical) analysis. But it is also possible for events to contain different data and,
+for example, perform fundamental analysis.
+
+Strategies are **pure decision-makers**. They only look at the {cl}`Event` and produce a list of {cl}`Signal`
+objects. They have no knowledge of cash, positions, or risk — that is the domain of the {cl}`Trader`.
+
+
 Because a strategy has no access to the account, the same strategy instance can be used unchanged
-across all [4 stages](../../concepts/4stages.md) of development. Only the `Feed` and `Broker` change
+across all [4 stages](../introduction/development.md) of development. Only the {cl}`Feed` and {cl}`Broker` change
 when moving from back testing to live trading.
 
 ## API
-The `Strategy` base class has a single abstract method that you must implement:
+The {cl}`Strategy` base class has a single abstract method that you must implement:
 
-- **`create_signals(event)`** — Create zero or more `Signal` objects based on the provided event.
+- **`create_signals(event)`** — Create zero or more {cl}`Signal` objects based on the provided event.
   Return an empty list if no signals should be created.
 
 The simplest possible strategy buys every asset that has a price in the event:
@@ -53,10 +59,10 @@ strategy = MyStrategy()
 ```
 
 ### Accessing prices
-The most common thing a strategy does is inspect the prices in an event. The `Event` class provides
+The most common thing a strategy does is inspect the prices in an event. The {cl}`Event` class provides
 several helpers to make this easy:
 
-- `event.price_items` — a dictionary mapping each `Asset` to its `PriceItem`.
+- `event.price_items` — a dictionary mapping each {cl}`Asset` to its `PriceItem`.
 - `event.get_prices(price_type)` — a dictionary of all prices of a given type (e.g. `"CLOSE"`).
 - `event.get_price(asset, price_type)` — the price of a single asset, or `None` if not present.
 
@@ -106,41 +112,6 @@ class MovingAverageStrategy(rq.strategies.Strategy):
                     result.append(rq.Signal.sell(asset))
         return result
 ```
-
-## Signal
-The output of a strategy is a list of `Signal` objects. Each signal contains three pieces of
-information:
-
-- **`asset`** — the asset the signal applies to.
-- **`rating`** — a float, normally between -1.0 (strong sell) and 1.0 (strong buy). This range is
-  not enforced; it is up to the used `Trader` to interpret the value when sizing orders.
-- **`type`** — a `SignalType` flag indicating how the signal may be used: `ENTRY` (open or increase a
-  position), `EXIT` (close or reduce a position), or `ENTRY_EXIT` (both, the default).
-
-There are several ways to create a signal:
-
-| Constructor | rating | type | Use |
-|---|---|---|---|
-| `Signal.buy(asset)` | 1.0 | `ENTRY_EXIT` | Strong buy |
-| `Signal.sell(asset)` | -1.0 | `ENTRY_EXIT` | Strong sell |
-| `Signal.buy(asset, SignalType.ENTRY)` | 1.0 | `ENTRY` | Only open/increase a position |
-| `Signal.sell(asset, SignalType.EXIT)` | -1.0 | `EXIT` | Only close/reduce a position |
-| `Signal(asset, rating, type)` | custom | custom | Full control |
-
-```{code-cell} python
-apple = rq.Stock("AAPL")
-
-buy = rq.Signal.buy(apple)
-print("buy:", buy, "| is_buy:", buy.is_buy, "| is_entry:", buy.is_entry)
-
-sell = rq.Signal.sell(apple, rq.SignalType.EXIT)
-print("sell:", sell, "| is_sell:", sell.is_sell, "| is_exit:", sell.is_exit)
-
-custom = rq.Signal(apple, 0.5, rq.SignalType.ENTRY)
-print("custom:", custom)
-```
-
-Convenience properties on a signal: `is_buy`, `is_sell`, `is_entry`, and `is_exit`.
 
 ## Base classes
 In order to make it quicker to develop and test custom strategies, there are several base classes
@@ -231,8 +202,8 @@ Verify any strategy yourself with thorough back testing before risking real capi
 | `IBSStrategy(buy_threshold=0.2, sell_threshold=0.8)` | A mean-reversion strategy based on the Internal Bar Strength (IBS) indicator. Buys when the asset is oversold, sells when it is overbought. |
 
 ### Running a strategy
-A strategy is used by passing it to the `run` function, together with a `Feed`. The other components
-(`Trader`, `Broker`, `Journal`) use sensible defaults when not specified.
+A strategy is used by passing it to the {cl}`run` function, together with a {cl}`Feed`. The other components
+(`Trader`, {cl}`Broker`, {cl}`Journal`) use sensible defaults when not specified.
 
 ```{code-cell} python
 feed = rq.feeds.RandomWalk(n_symbols=5, n_prices=1_000)

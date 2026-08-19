@@ -7,7 +7,6 @@ from roboquant.common.asset import Asset
 from roboquant.common.event import Event
 from roboquant.common.monetary import Amount
 from roboquant.common.order import Order
-from roboquant.common.portfolio import Position
 from roboquant.common.signal import Signal
 from roboquant.traders.trader import Trader
 
@@ -64,8 +63,8 @@ class SimpleTrader(Trader):
                 logger.info("no price found")
                 continue
 
-            pos = account.portfolio.get(asset, Position())
-            if signal.is_entry_position(pos):
+            pos = account.portfolio.get_position(asset)
+            if signal.is_open_position(pos):
 
                 if remaining_positions <= 0:
                     logger.info("no remaining positions")
@@ -79,9 +78,9 @@ class SimpleTrader(Trader):
                 asset_cost = asset.value(Decimal(1), price)
                 size = int((asset_budget / asset_cost) * signal.rating)
                 if size:
-                    result[asset] = Order.market_order(asset, Decimal(size), price)
+                    result[asset] = Order(asset, Decimal(size))
                     remaining_positions -= 1
-            elif signal.is_exit_position(pos):
-                result[asset] = Order.market_order(asset, -pos.size, price)
+            elif signal.is_close_position(pos):
+                result[asset] = Order(asset, -pos.size)
 
         return list(result.values())

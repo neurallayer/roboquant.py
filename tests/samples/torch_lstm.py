@@ -5,7 +5,7 @@ import torch.nn.functional as F
 
 import roboquant as rq
 from roboquant.journals.basicjournal import BasicJournal
-from roboquant.ai.features import BarFeature, CombinedFeature, MaxReturnFeature, PriceFeature, SMAFeature, VolumeFeature
+from roboquant.ai.features import BarFeature, FeatureSet, MaxReturnFeature, PriceFeature, SMAFeature, VolumeFeature
 from roboquant.ai.strategies import TimeSeriesStrategy, logger
 
 
@@ -38,7 +38,7 @@ test_tf = rq.Timeframe.fromisoformat("2020-01-01", "2030-01-01")
 # Define the strategy
 
 # What are the input features
-input_feature = CombinedFeature(
+input_feature = FeatureSet(
     BarFeature(apple).returns(),
     SMAFeature(PriceFeature(apple), 10).returns(),
     SMAFeature(PriceFeature(apple), 20).returns(),

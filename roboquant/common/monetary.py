@@ -20,7 +20,7 @@ logger = logging.getLogger(__name__)
 
 class Currency(str):
     """Represents a monetary currency and is a subclass of `str`.
-    It doesn't differentiate between fiat- and crypto-currencies.
+    It doesn't differentiate between fiat- and cryptocurrencies.
 
     It is possible to create an `Amount` using a combination of a `number` and a `Currency`:
     ```
@@ -146,6 +146,9 @@ class NoConversion(CurrencyConverter):
 
     @override
     def convert(self, amount: "Amount", to_currency: Currency, dt: datetime) -> float:
+        if amount.currency == to_currency or amount.value == 0.0:
+            return amount.value
+
         """Raise an error as no conversions are supported."""
         raise NotImplementedError("The default NoConversion doesn't support any conversions")
 
@@ -154,7 +157,7 @@ class ECBConversion(CurrencyConverter):
     """CurrencyConverter that retrieves its exchange rates from the ECB (European Central Bank).
     These exchange rates are based on the Euro and are updated daily by the ECB.
     They don't contain any historical data from before the Euro was introduced in 1999 and also
-    there is not support for crypto-currencies.
+    there is no support for cryptocurrencies.
     """
 
     __file_name = Path.home() / ".roboquant" / "eurofxref-hist.csv"
@@ -321,7 +324,9 @@ class Amount:
 
     currency: Currency
     value: float
+
     __converter: ClassVar[CurrencyConverter] = NoConversion()
+    """the registered currency converter, used for all conversions."""
 
     @staticmethod
     def register_converter(converter: CurrencyConverter):
@@ -380,6 +385,9 @@ class Amount:
 
     def __mul__(self, other: float) -> "Amount":
         return Amount(self.currency, self.value * other)
+
+    def __abs__(self) -> "Amount":
+        return Amount(self.currency, abs(self.value))
 
     def convert_to(self, currency: Currency, dt: datetime) -> float:
         """Convert this amount to another currency and return the monetary value.

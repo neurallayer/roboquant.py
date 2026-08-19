@@ -9,7 +9,6 @@ build/
 scratch/
 .venv/
 .ipynb_checkpoints/
-*.ipynb
 .ruff_cache/
 .pytest_cache/
 .env

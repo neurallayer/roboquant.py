@@ -7,7 +7,18 @@ kernelspec:
 
 # Installation
 
-Roboquant can be installed like most other Python packages. Below you'll find instructions for various installation methods and scenarios.
+## Introduction
+Roboquant can be installed like most other Python packages. It is being published on PyPI and
+below you'll find instructions for various installation methods and scenarios.
+
+:::{tip}
+If you don't want to install anything, you can try the included Jupyter Notebooks online: [![Binder](https://mybinder.org/badge_logo.svg)](https://mybinder.org/v2/gh/neurallayer/roboquant.py/HEAD?urlpath=%2Fdoc%2Ftree%2Fdocs%2Fnotebooks)
+
+Or if you have a Google account, you can run the Notebooks on Google Colaboratory, or "Colab" for short. The Colab environments have more compute resources available, making the execution snappier. You can also use Gemini if you want to.
+
+[![Back Test](https://img.shields.io/badge/Backtest_Notebook-00A1FF?logo=google-colab&logoColor=white)](https://colab.research.google.com/github/neurallayer/roboquant.py/blob/main/docs/notebooks/backtest.ipynb)
+[![Charts](https://img.shields.io/badge/Chart_Notebook-00A1FF?logo=google-colab&logoColor=white)](https://colab.research.google.com/github/neurallayer/roboquant.py/blob/main/docs/notebooks/charts.ipynb)
+:::
 
 ## Prerequisites
 
@@ -26,7 +37,8 @@ This installs the **core** package with a minimal set of dependencies.
 
 ## Optional Dependencies
 
-The core installation keeps the dependency footprint small. If you need specific functionality, install roboquant with one or more of the following extras:
+The core installation keeps the dependency footprint small.
+If you need specific functionality, install roboquant with one or more of the following optional dependencies:
 
 | Optional   | Description                                            | Install command |
 |------------|--------------------------------------------------------|-----------------|
@@ -40,9 +52,18 @@ To install roboquant with **all** optional dependencies at once:
 pip install --upgrade "roboquant[ai,extra]"
 ```
 
+:::{note}
+Part of the `ai` dependency is PyTorch which is a very large package. So it can take some time before
+it is completely downloaded and installed. 
+:::
+
+
 ## Install with uv
 
-[uv](https://github.com/astral-sh/uv) is a fast Python package and project manager. If you are using `uv`, getting started is straightforward:
+[uv](https://github.com/astral-sh/uv) is a fast Python package and project manager. It is also the package manager
+used to develop *roboquant*. It is highly recommended to check it out if you didn't do so already.
+
+If you are using `uv`, starting a new project from scratch is straightforward:
 
 ```bash
 mkdir my-project
@@ -52,7 +73,7 @@ uv add roboquant
 uv run python -c "import roboquant;roboquant.info()"
 ```
 
-With extras:
+Or with all the extras:
 
 ```bash
 uv add "roboquant[ai,extra]"

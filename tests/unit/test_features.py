@@ -6,7 +6,7 @@ from roboquant.common.event import Event
 
 from roboquant.ai.features import (
     CacheFeature,
-    CombinedFeature,
+    FeatureSet,
     NormalizeFeature,
     PriceFeature,
     SMAFeature,
@@ -27,7 +27,7 @@ class TestFeatures(unittest.TestCase):
         symbol1 = symbols[0]
         symbol2 = symbols[1]
 
-        feature = CombinedFeature(
+        feature = FeatureSet(
             PriceFeature(symbol1, price_type="CLOSE"),
             PriceFeature(symbol1, price_type="OPEN"),
             SMAFeature(FixedValueFeature(np.ones((3,))), 8),
@@ -62,7 +62,7 @@ class TestFeatures(unittest.TestCase):
     def test_normalize(self):
         feed = get_feed()
 
-        feature = CombinedFeature(
+        feature = FeatureSet(
             PriceFeature(*feed.assets()).returns(),
         )
 

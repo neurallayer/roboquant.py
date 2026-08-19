@@ -10,6 +10,7 @@ from roboquant.common.asset import Asset
 from roboquant.common.event import Event
 from roboquant.common.order import Order
 from roboquant.common.signal import Signal
+from roboquant.traders._util import round_down
 from .trader import Trader
 from ..common.account import Account
 from ..common.event import PriceItem
@@ -92,7 +93,7 @@ class FlexTrader(Trader):
     """Implementation of a Trader that has configurable rules to determine which signals are converted into orders.
     This implementation will not generate orders if there is not a price in the event for the underlying asset.
 
-    It does support SignalType.ENTRY, SignalType.EXIT and SignalType.ENTRY_EXIT signals. Also the signal rating value
+    It does support SignalType.ENTRY, SignalType.EXIT and SignalType.ENTRY_EXIT signals. Also, the signal rating value
     is used to determine the size of the order. A rating of 1.0 means a full BUY order, a rating of 0.5 means half a BUY order
     and a rating of -1.0 means a full SELL order.
 
@@ -138,8 +139,7 @@ class FlexTrader(Trader):
     def _get_order_size(self, rating: float, contract_price: float, max_order_value: float) -> Decimal:
         """Return the order size"""
         size = Decimal(rating * max_order_value / contract_price)
-        rounded_size = round(size, self.size_fractions)
-        return rounded_size
+        return round_down(size, self.size_fractions)
 
     @override
     def create_orders(self, signals: list[Signal], event: Event, account: Account) -> list[Order]:

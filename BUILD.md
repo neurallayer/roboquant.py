@@ -25,10 +25,11 @@ For convenience there are some shell scripts in the ./bin directory
 ./bin/verify.sh
 ```
 
-The validation will run the following three tools:
+The validation will run the following tools:
 1. ruff (linter and code formatter)
-2. pyright (static type checker)
-3. unit test
+2. ty (type checker)
+3. pyright (another type checker)
+4. unit test
 
 ### Publish
 
