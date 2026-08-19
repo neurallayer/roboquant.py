@@ -47,6 +47,9 @@ class TestSimbroker(unittest.TestCase):
         self.assertEqual(1_000_000.0, account.buying_power.value)
 
         order = Order(TestSimbroker.apple, Decimal(100), 101.0)
+        event = self._create_event(100)
+        broker.sync(event)
+
         broker.place_orders([order])
         # No sync yet called
         self.assertEqual(len(account.orders), 0)

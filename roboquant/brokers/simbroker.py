@@ -57,6 +57,7 @@ class SimBroker(Broker):
         self._orders: dict[str, Order] = {}
         self._account.cash = Wallet(self.deposit)
         self._account.buying_power = self.deposit
+        self._prices : dict [Asset, PriceItem] = {}
         self._order_id = 0
 
     def _fee(self, asset: Asset, fill: Decimal, price: float, time: datetime) -> float:
@@ -137,14 +138,16 @@ class SimBroker(Broker):
         """
         return order.remaining
 
-    def __update_account_positions(self, event: Event) -> None:
-        """Update the account with the latest market prices found in the event"""
+    def __update_account_positions(self) -> None:
+        """Update the account with the latest known market prices"""
 
         portfolio = self._account.portfolio
+        prices = self._prices
+        price_type = self.price_type
 
         for asset, pos in portfolio.items():
-            if price := event.get_price(asset, self.price_type):
-                portfolio[asset] = Position(pos.size, pos.avg_price, price)
+            mkt_price = prices[asset].price(price_type)
+            portfolio[asset] = Position(pos.size, pos.avg_price, mkt_price)
 
     def __next_order_id(self) -> str:
         """Generate a new order id. The order id is a simple integer that is incremented for each new order."""
@@ -162,6 +165,8 @@ class SimBroker(Broker):
         Orders placed at time `t`, will be processed during time `t+1`. This protects against future bias.
         """
         for order in orders:
+            assert order.asset in self._prices, "can only trade in assets that have had price-items"
+
             if not order.id:
                 assert order.size != 0, "order size of a new order cannot be zero"
                 order = replace(order, id=self.__next_order_id())
@@ -189,6 +194,12 @@ class SimBroker(Broker):
         return exchange_date > order_date
 
     def __process_orders(self, event: Event) -> None:
+        """
+        Order processing only uses prices from the event, not prices stored in the
+        history (`self._price`). So if there is no price in the event for an asset,
+        orders for that asset won't be processed.
+        """
+
         if not self._orders:
             return
 
@@ -225,7 +236,8 @@ class SimBroker(Broker):
         for order in self._orders.values():
             assert order.remaining
             if self.__is_increase_position(order):
-                result += order.remaining_amount()
+                price = self._prices[order.asset].price(self.price_type)
+                result += order.remaining_amount(price)
         return result
 
     def _calculate_short_positions(self) -> Wallet:
@@ -277,9 +289,10 @@ class SimBroker(Broker):
         return the updated the account as a result."""
 
         if event:
+            self._prices = self._prices | event.price_items
             self._account.last_update = event.time
             self.__process_orders(event)
-            self.__update_account_positions(event)
+            self.__update_account_positions()
 
         acc = self._account
         acc.orders = list(self._orders.values())

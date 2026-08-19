@@ -123,13 +123,12 @@ class Portfolio(UserDict[Asset, Position]):
         return result
 
     def close_positions(self, ndigits: int = 2) -> list[Order]:
-        """Create the orders required to close the current open positions.
-        The limit price of the orders is equal to the last known market price.
+        """Create the market orders required to close the current open positions.
 
         Attributes:
            ndigits: how many digits to use for the limit price
         """
-        orders = [Order.market_order(asset, -pos.size, pos.mkt_price, ndigits=ndigits) for asset, pos in self.items()]
+        orders = [Order(asset, -pos.size) for asset, pos in self.items()]
         return orders
 
     def to_dataframe(self) -> pd.DataFrame:

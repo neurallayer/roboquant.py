@@ -146,6 +146,9 @@ class NoConversion(CurrencyConverter):
 
     @override
     def convert(self, amount: "Amount", to_currency: Currency, dt: datetime) -> float:
+        if amount.currency == to_currency or amount.value == 0.0:
+            return amount.value
+
         """Raise an error as no conversions are supported."""
         raise NotImplementedError("The default NoConversion doesn't support any conversions")
 
@@ -321,7 +324,9 @@ class Amount:
 
     currency: Currency
     value: float
+
     __converter: ClassVar[CurrencyConverter] = NoConversion()
+    """the registered currency converter, used for all conversions."""
 
     @staticmethod
     def register_converter(converter: CurrencyConverter):

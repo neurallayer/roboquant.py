@@ -8,8 +8,7 @@ kernelspec:
 
 (order_def)=
 ## Overview
-All orders are limit orders in roboquant. If you want them to behave more like a market order,
-you can set a generous `limit` price.
+All new orders are either a market- or limit-order in roboquant.
 
 Also, the only difference between a BUY and a SELL order is the sign of their `size`. So SELL orders
 have a negative `size` and BUY orders a positive `size`.
@@ -56,7 +55,7 @@ class Order:
     Positive size for buy orders, negative size for sell orders.
     """
 
-    limit: float
+    limit: float | None = None
     """The limit price of the order, denoted in the currency of the asset.
     The limit price is the maximum price you are willing to pay for a buy order,
     or the minimum price you are willing to accept for a sell order.
@@ -101,13 +100,15 @@ from decimal import Decimal
 from roboquant import Stock, Order
 
 asset = Stock("AAPL")
-buy_order = Order(asset, size = Decimal(10), limit = 200.0, tif="DAY")
-sell_order = Order(asset, size = -Decimal(10), limit = 200.0, tif="GTC")
+buy_mkt_order = Order(asset, size = Decimal(10), tif="DAY")
+sell_limit_order = Order(asset, size = -Decimal(10), limit = 200.0, tif="GTC")
 ```
 
 ## Cancel & Modify orders
 Existing orders are orders with a non-empty `id`. This `id` is assigned by the broker when placed at that broker.
 These are the orders that are found in `account.orders`. Only these type of orders can be canceled or modified. 
+
+If you try set a limit on a market-order an Error will be raised.
 
 ```{code-cell} python
 :tags: [remove-input]
@@ -142,17 +143,17 @@ the number of decimal places:
 Most {cl}`Trader` implementations that come with *roboquant* allow you to configure this behavior and if you
 want to use them in Forex or Crypto, you likely will have to change the defaults.
 
-:::{tip} Avoid Market Orders
-Roboquant doesn't support market orders, and it might be tempting to
-extend the Order class to do so. But in algo-trading, market
+:::{tip} Market Orders can be dangerous
+Roboquant supports market orders, and it might be tempting to
+use these order types for everything. But in algo-trading, market
 orders introduce more risk. 
 
-For example if there is any data quality issue in the {cl}`Feed` and prices
+For example if there is any data quality issue with a {cl}`Feed` and prices
 might be way off, there is no protection when placing the corresponding orders.
 
 Imagine what happens to the order-size when the {cl}`Trader` thinks BTC is worth
 500 USD while the real market value is 50_000 USD. And if this is a market-order,
 there is nothing stopping this order from being filled (if enough buying power)
 
-So better to use limit orders and get at least some extra safety. 
+So better to use limit orders and get some extra safety. 
 :::

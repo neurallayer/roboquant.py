@@ -24,7 +24,6 @@ class SimpleTrader(Trader):
         self.shorting = shorting
         self.price_type = price_type
         self.max_positions: int = max_positions
-        self.limit_ndigits: int = 2
 
     @override
     def create_orders(self, signals: list[Signal], event: Event, account: Account) -> list[Order]:
@@ -79,9 +78,9 @@ class SimpleTrader(Trader):
                 asset_cost = asset.value(Decimal(1), price)
                 size = int((asset_budget / asset_cost) * signal.rating)
                 if size:
-                    result[asset] = Order.market_order(asset, Decimal(size), price, self.limit_ndigits)
+                    result[asset] = Order(asset, Decimal(size))
                     remaining_positions -= 1
             elif signal.is_close_position(pos):
-                result[asset] = Order.market_order(asset, -pos.size, price, self.limit_ndigits)
+                result[asset] = Order(asset, -pos.size)
 
         return list(result.values())

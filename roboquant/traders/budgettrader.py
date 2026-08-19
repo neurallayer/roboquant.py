@@ -92,9 +92,9 @@ class BudgetTrader(Trader):
                 asset_cost = asset.value(Decimal(1), price)
                 order_size = round_down((asset_budget / asset_cost) * signal.rating, self.ndigits)
                 if order_size:
-                    order = Order(asset, order_size, price)
+                    order = Order(asset, order_size)
                     result[asset] = order
-                    value = order.amount().convert_to(base_currency, event.time)
+                    value = order.remaining_amount(price).convert_to(base_currency, event.time)
                     buying_power -= abs(value)
             else:
                 assert pos.size, "position size should be non-zero"

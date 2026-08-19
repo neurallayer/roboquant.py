@@ -9,7 +9,7 @@ from roboquant.feeds.alpaca import _get_asset, logger
 from alpaca.trading.client import TradingClient
 from alpaca.trading.enums import OrderSide, PositionSide, QueryOrderStatus, TimeInForce
 from alpaca.trading.models import Order as AOrder, Position as APosition, TradeAccount
-from alpaca.trading.requests import GetOrdersRequest, LimitOrderRequest, ReplaceOrderRequest
+from alpaca.trading.requests import GetOrdersRequest, LimitOrderRequest, MarketOrderRequest, ReplaceOrderRequest
 
 
 from decimal import Decimal
@@ -81,8 +81,17 @@ class AlpacaBroker(LiveBroker):
         result = self.__client.submit_order(req)
         logger.info("result place order oder=%s result=%s", order, result)
 
-    def _get_order_request(self, order: Order) -> LimitOrderRequest:
+    def _get_order_request(self, order: Order) -> LimitOrderRequest | MarketOrderRequest:
         side = OrderSide.BUY if order.is_buy else OrderSide.SELL
+
+        if order.is_mkt_order:
+            return MarketOrderRequest(
+                symbol=order.asset.symbol,
+                qty=abs(float(order.size)),
+                side=side,
+                time_in_force=TimeInForce.GTC if order.tif == "GTC" else TimeInForce.DAY,
+            )
+
         return LimitOrderRequest(
             symbol=order.asset.symbol,
             qty=abs(float(order.size)),
