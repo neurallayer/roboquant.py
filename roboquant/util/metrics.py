@@ -84,7 +84,11 @@ class PNLMetric(Metric):
 
 
 class IndicatorMetric(Metric):
-    """Based class for custom metrics that work on a OHLCV Buffer."""
+    """
+    Based class for custom metrics that work on a OHLCV Buffer.
+    These make it easy to implement metrics using for example the
+    TA-Lib indicators.
+    """
 
     def __init__(self, asset: Asset, timeperiod: int):
         self.asset = asset
@@ -101,6 +105,7 @@ class IndicatorMetric(Metric):
 
     @abstractmethod
     def _calc(self, buffer: OHLCVBuffer) -> dict[str, float]:
+        """Override this method in subclasses"""
         ...
 
 

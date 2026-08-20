@@ -29,10 +29,10 @@ class Report:
     """
 
     def __init__(self) -> None:
-        self._figures: list[plt.Figure] = []
+        self._figures: list[Figure] = []
         self._figsize = (11.69,8.27)
 
-    def add_figure(self, fig: plt.Figure) -> None:
+    def add_figure(self, fig: Figure) -> None:
         """Add a matplotlib figure to the report."""
         self._figures.append(fig)
 

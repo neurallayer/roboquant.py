@@ -94,8 +94,12 @@ class BarAggregatorFeed(Feed):
 
 
 class TimeGroupingFeed(Feed):
-    """Group events that occur closely after each other into a single event. It uses the time of the events to
-    determine if they are close to each other.
+    """Group events that occur closely after each other into a single event.
+    It uses the time of the events to determine if they are close to each other.
+
+    Typically used if you have a live feed and for example the 5 minute `Bar`
+    prices for different assets arrive just few seconds after each other. This
+    allows you to group them still together in a single event.
     """
 
     def __init__(
@@ -111,21 +115,29 @@ class TimeGroupingFeed(Feed):
     def play(self, timeframe: Timeframe | None = None) -> Iterator[Event]:
         items: list[Any] = []
         time = None
+        last_time = None
         for event in self.feed.play(timeframe):
-            time = time or event.time
-            remaining = self.timeout - (event.time - time).total_seconds()
-
-            if remaining <= 0.0:
-                new_event = Event(time, items)
-                yield new_event
-                items = []
+            send_heartbeat = True
+            if items:
+                assert time
+                remaining = self.timeout - (event.time - time).total_seconds()
+                if remaining <= 0.0:
+                    yield Event(event.time, items)
+                    send_heartbeat = False
+                    items = []
+            elif event.items:
                 time = event.time
 
-            items.extend(event.items)
+            if event.items:
+                items.extend(event.items)
+            elif send_heartbeat:
+                # heart beat event is always propagated unless we already
+                # send an event for this time
+                yield event
+            last_time = event.time
 
-        if time:
-            new_event = Event(time, items)
-            yield new_event
+        if last_time and items:
+            yield Event(last_time, items)
 
 
     @override
