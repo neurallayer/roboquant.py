@@ -26,7 +26,7 @@ from roboquant.feeds.tickerall import TickerAllHistoricFeed, TickerAllLiveFeed, 
 from roboquant.brokers.tickerall import TickerAllBroker
 from roboquant.journals.basicjournal import BasicJournal
 from roboquant.strategies.ema_crossover import EMACrossover
-from roboquant.traders.flextrader import FlexTrader
+from roboquant.traders.budgettrader import BudgetTrader
 
 load_dotenv()
 KEY = os.environ.get("TICKERALL_API_KEY", "")
@@ -69,6 +69,7 @@ class TestTickerAllIT(unittest.TestCase):
             print(asset, position)
 
         if account.orders:
+            print("cancelling orders")
             cancellations = [order.cancel() for order in account.orders]
             print(cancellations)
             broker.place_orders(cancellations)
@@ -76,8 +77,16 @@ class TestTickerAllIT(unittest.TestCase):
             account = broker.sync()
             print(account)
 
+        if account.portfolio:
+            print("closing positions")
+            orders = account.portfolio.close_positions()
+            broker.place_orders(orders)
+            time.sleep(10)
+            account = broker.sync()
+            print(account)
+
         asset = Forex("BTCUSD", USD)
-        order = Order(asset, Decimal("0.001"))
+        order = Order(asset, Decimal("0.01"))
         broker.place_orders([order])
         for _ in range(3):
             account = broker.sync()
@@ -93,21 +102,22 @@ class TestTickerAllIT(unittest.TestCase):
         try:
             broker = TickerAllBroker.connect(KEY, **CONFIG)
             feed = TickerAllLiveFeed(KEY, broker.account_id)
-            feed.subscribe(SYMBOL)
+            feed.subscribe("BTCUSD", "EURUSD")
+            account = broker.sync()
+            print(account, flush=True)
             strategy = EMACrossover(2, 5)
-            trader = FlexTrader(
-                size_fractions=4,
-                shorting=True,
-                max_order_pct=0.01,
-                min_order_pct=0.001,
-                max_position_pct=0.2,
-                limit_rounding=6
+            trader = BudgetTrader(
+                order_value = 5_000,
+                position_value= 1_000_000,
+                shorting= True,
+                ndigits = 2
             )
             tf = rq.Timeframe.next("60 minutes")
             journal = BasicJournal()
             ECBConversion().register()
             account = rq.run(feed, strategy, trader, broker=broker, journal=journal, timeframe=tf)
-            print(account)
+            print(journal, flush=True)
+            print(account, flush=True)
         finally:
             if broker:
                 broker.close()

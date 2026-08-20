@@ -122,11 +122,9 @@ class Portfolio(UserDict[Asset, Position]):
                 result += abs(asset.amount(position.size, position.mkt_price))
         return result
 
-    def close_positions(self, ndigits: int = 2) -> list[Order]:
-        """Create the market orders required to close the current open positions.
-
-        Attributes:
-           ndigits: how many digits to use for the limit price
+    def close_positions(self) -> list[Order]:
+        """
+        Create the market orders required to close the current open positions.
         """
         orders = [Order(asset, -pos.size) for asset, pos in self.items()]
         return orders
