@@ -6,6 +6,10 @@
     background-color: rgb(0, 161, 255);
 }
 
+.myst-top-nav-item {
+    color: rgb(241 250 254);
+}
+
 /* 1. Target the foreignObject (the parent) */
 foreignObject {
   display: flex;
