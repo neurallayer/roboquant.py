@@ -82,7 +82,7 @@ ai = [
 ]
 extra = [
   "ibind[oauth]>=0.1.22",
-  "alpaca-py>=0.43.5",
+  "alpaca-py>=0.44.0",
   "ccxt>=4.5.65"
 ]
 
