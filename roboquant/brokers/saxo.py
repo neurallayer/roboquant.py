@@ -37,7 +37,7 @@ class SaxoBroker(LiveBroker):
         assert simulator, "right now only simulator mode is supported"
         self._base_url = "https://gateway.saxobank.com/sim/openapi" if simulator else "https://gateway.saxobank.com/openapi"
 
-        self._session = requests.Session()
+        self._session: requests.Session = requests.Session()
         self._session.headers.update(
             {
                 "Authorization": f"Bearer {self._access_token}",
@@ -50,6 +50,21 @@ class SaxoBroker(LiveBroker):
         self._account_key = account_key or default_acc_key
         self._client_key = client_key or default_client_key
         self._last_prices = {}
+
+    def reset_session(self):
+        """Close the old session and start a new one"""
+        try:
+            self._session.close()
+        except: # noqa: E722
+            pass
+        self._session = requests.Session()
+        self._session.headers.update(
+            {
+                "Authorization": f"Bearer {self._access_token}",
+                "Accept": "application/json",
+                "Content-Type": "application/json",
+            }
+        )
 
     def __get_asset(self, uic: int, assetType: str) -> Asset:
         for k, v in self._asset_mapping.items():
