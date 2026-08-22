@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+from decimal import Decimal
 import os
 from typing import Any, Mapping, override
 
@@ -7,8 +8,10 @@ import requests
 
 from roboquant.brokers.livebroker import LiveBroker
 from roboquant.common.account import Account
+from roboquant.common.asset import Asset, Stock
+from roboquant.common.monetary import Amount, Currency, Wallet
 from roboquant.common.order import Order
-from roboquant.common.portfolio import Portfolio
+from roboquant.common.portfolio import Portfolio, Position
 
 
 class SaxoBroker(LiveBroker):
@@ -19,16 +22,14 @@ class SaxoBroker(LiveBroker):
         access_token: str | None = None,
         account_key: str | None = None,
         client_key: str | None = None,
-        base_url: str | None = None,
     ):
+        super().__init__()
         self._access_token = access_token or os.environ["SAXO_ACCESS_TOKEN"]
-        self._account_key = account_key or os.environ["SAXO_ACCOUNT_KEY"]
-        self._client_key = client_key or os.getenv("SAXO_CLIENT_KEY")
-        self._base_url = (
-            base_url
-            or os.getenv("SAXO_BASE_URL")
-            or "https://gateway.saxobank.com/openapi"
-        ).rstrip("/")
+        self._account_key = None
+        self._client_key = None
+        self._asset_mapping: dict[Asset, tuple[int, str]] = {}
+
+        self._base_url = "https://gateway.saxobank.com/sim/openapi"
 
         self._session = requests.Session()
         self._session.headers.update(
@@ -39,6 +40,26 @@ class SaxoBroker(LiveBroker):
             }
         )
 
+        default_client_key, default_acc_key = self.__get_defaults()
+        self._account_key = account_key or os.getenv("SAXO_ACCOUNT_KEY") or default_acc_key
+        self._client_key = client_key or os.getenv("SAXO_CLIENT_KEY") or default_client_key
+        self._last_prices = {}
+
+
+    def __get_asset(self, uic: int, assetType: str) -> Asset:
+        for k, v in self._asset_mapping.items():
+            if v[0] == uic and v[1] == assetType:
+                return k
+        data = self._request("GET", f"/ref/v1/instruments/details/{uic}/{assetType}")
+        symbol = data["Symbol"].split(":")[0]
+        asset = Stock(symbol, Currency(data["CurrencyCode"]))
+        self._asset_mapping[asset] = (uic, assetType)
+        return asset
+
+    def __get_defaults(self):
+        data = self._request("GET", "/port/v1/clients/me")
+        return data["ClientKey"], data["DefaultAccountKey"]
+
     def _request(
         self,
         method: str,
@@ -46,9 +67,13 @@ class SaxoBroker(LiveBroker):
         *,
         params: Mapping[str, Any] | None = None,
         json: Mapping[str, Any] | None = None,
+        include_account: bool = True,
+        include_client: bool = True,
     ) -> Any:
-        query = {"AccountKey": self._account_key}
-        if self._client_key:
+        query = {}
+        if self._account_key and include_account:
+            query["AccountKey"] = self._account_key
+        if self._client_key and include_client:
             query["ClientKey"] = self._client_key
         if params:
             query.update(params)
@@ -63,9 +88,25 @@ class SaxoBroker(LiveBroker):
         response.raise_for_status()
         return response.json() if response.content else None
 
-    @staticmethod
-    def _value(value: Any) -> Any:
-        return getattr(value, "value", value)
+
+    def __get_price(self, asset: Asset, price_type:str="Close") -> float:
+        if price := self._last_prices.get(asset):
+            return price
+        uic, asset_type = self._asset_mapping[asset]
+        data = self._request(
+                "GET",
+                "/chart/v3/charts",
+                params={
+                    "AssetType": asset_type,
+                    "Uic" : uic,
+                    "Count" : 1,
+                    "Horizon": 1
+                },
+            )
+        price = data["Data"][0][price_type]
+        self._last_prices[asset] = price
+        return price
+
 
     def __get_portfolio(self) -> Portfolio:
         """Get open net positions."""
@@ -73,34 +114,21 @@ class SaxoBroker(LiveBroker):
             "GET",
             "/port/v1/netpositions/me",
             params={
-                "FieldGroups": "DisplayAndFormat,NetPositionBase,NetPositionView"
+                "FieldGroups": "NetPositionBase,NetPositionView"
             },
         )
 
         portfolio = Portfolio()
-        positions = getattr(portfolio, "positions", None)
 
         for item in data.get("Data", []):
             view = item.get("NetPositionView", {})
             base = item.get("NetPositionBase", {})
-            instrument = (
-                view.get("DisplayAndFormat", {}).get("Symbol")
-                or base.get("DisplayAndFormat", {}).get("Symbol")
-                or item.get("Uic")
-            )
-            quantity = view.get("CurrentPriceDelayMinutes")
-            quantity = (
-                view.get("Amount")
-                or view.get("NetPositionAmount")
-                or base.get("Amount")
-                or item.get("Amount")
-            )
 
-            if instrument is not None and quantity is not None:
-                if isinstance(positions, dict):
-                    positions[instrument] = quantity
-                else:
-                    setattr(portfolio, "positions", {instrument: quantity})
+            asset = self.__get_asset(base["Uic"], base["AssetType"])
+            size = Decimal(base["Amount"])
+            avg_price = view["AverageOpenPrice"]
+            mkt_price = view["CurrentPrice"] or self.__get_price(asset)
+            portfolio[asset] = Position(size, avg_price, mkt_price)
 
         return portfolio
 
@@ -108,100 +136,83 @@ class SaxoBroker(LiveBroker):
         """Get open orders."""
         data = self._request(
             "GET",
-            "/port/v1/orders/me",
+            "/port/v1/orders",
             params={
                 "FieldGroups": (
-                    "DisplayAndFormat,ExchangeInfo,OrderDetails,"
-                    "OrderRelatedData,TradingSchedule"
+                    "DisplayAndFormat,ExchangeInfo"
                 )
             },
         )
 
         orders: list[Order] = []
         for item in data.get("Data", []):
-            details = item.get("OrderDetails", {})
-            display = item.get("DisplayAndFormat", {})
 
+            asset = self.__get_asset(item["Uic"], item["AssetType"])
+            assert asset
+            is_mkt = item["OpenOrderType"] == "Market"
+            is_buy = item["BuySell"] == "Buy"
             order = Order(
-                asset = display.get("Symbol") or item.get("Uic"),
-                size = item.get("Amount"),
+                asset = asset,
+                size = Decimal(item.get("Amount")) if is_buy else -Decimal(item.get("Amount")),
                 id = item.get("OrderId"),
-                limit = details.get("OrderPrice") or item.get("OrderPrice")
+                limit = None if is_mkt else item["Price"]
             )
             orders.append(order)
 
         return orders
 
+
+    def __get_base_account(self):
+        data = self._request(
+            "GET",
+            "/port/v1/balances",
+            )
+        base_currency = Currency(data["Currency"])
+        cash = Amount(base_currency, data["CashBalance"])
+        bp = Amount(base_currency, data["CashAvailableForTrading"])
+        acc = Account(base_currency)
+        acc.cash = Wallet(cash)
+        acc.buying_power = bp
+        return acc
+
     @override
     def _get_account(self) -> Account:
-        account = Account()
-        account.orders = self.__get_orders()
+        account = self.__get_base_account()
         account.portfolio = self.__get_portfolio()
+        account.orders = self.__get_orders()
         return account
 
-    @staticmethod
-    def _order_id(order: Order) -> str:
-        order_id = (
-            getattr(order, "order_id", None)
-            or getattr(order, "id", None)
-            or getattr(order, "broker_order_id", None)
-        )
-        if not order_id:
-            raise ValueError("The order does not have a Saxo order ID")
-        return str(order_id)
-
     def _order_payload(self, order: Order) -> dict[str, Any]:
-        instrument = getattr(order, "instrument", None)
-        uic = (
-            getattr(order, "uic", None)
-            or getattr(instrument, "uic", None)
-            or getattr(instrument, "id", None)
-        )
+        uic, assetType = self._asset_mapping[order.asset]
         if uic is None:
             raise ValueError("The order instrument must provide a Saxo UIC")
 
-        side = str(self._value(getattr(order, "side", ""))).upper()
-        order_type = str(
-            self._value(getattr(order, "order_type", "Market"))
-        ).replace("_", "").lower()
-
-        type_map = {
-            "market": "Market",
-            "limit": "Limit",
-            "stop": "Stop",
-            "stoplimit": "StopLimit",
-        }
-
         payload: dict[str, Any] = {
             "AccountKey": self._account_key,
-            "AssetType": getattr(instrument, "asset_type", "Stock"),
+            "AssetType": assetType,
             "Uic": uic,
-            "BuySell": "Buy" if side in {"BUY", "B", "1"} else "Sell",
-            "Amount": abs(getattr(order, "quantity")),
-            "OrderType": type_map.get(order_type, "Market"),
+            "BuySell": "Buy" if order.is_buy else "Sell",
+            "Amount": str(abs(order.size)),
+            "OrderType": "Market" if order.is_mkt_order else "Limit",
             "ManualOrder": True,
         }
 
-        limit_price = getattr(order, "limit_price", None)
+        limit_price = order.limit
         if limit_price is not None:
             payload["OrderPrice"] = limit_price
-
-        stop_price = getattr(order, "stop_price", None)
-        if stop_price is not None:
-            payload["StopLimitPrice"] = stop_price
 
         return payload
 
     @override
     def _cancel_order(self, order: Order):
         """Cancel an open order."""
-        self._request("DELETE", f"/trade/v2/orders/{self._order_id(order)}")
+        self._request("DELETE", f"/trade/v2/orders/{order.id}")
 
     @override
     def _update_order(self, order: Order):
         """Modify an existing order."""
         payload = self._order_payload(order)
-        payload["OrderId"] = self._order_id(order)
+        payload["OrderId"] = order.id
         self._request("PATCH", "/trade/v2/orders", json=payload)
 
     @override
