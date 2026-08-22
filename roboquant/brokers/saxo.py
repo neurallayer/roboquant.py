@@ -145,7 +145,7 @@ class SaxoBroker(LiveBroker):
         response.raise_for_status()
         return response.json() if response.content else None
 
-    def __get_price(self, asset: Asset, price_type: str = "Close") -> float:
+    def get_price(self, asset: Asset, price_type: str = "Close") -> float:
         if asset not in self._last_prices:
             uic, asset_type = self._asset_mapping[asset]
             data = self.__request(
@@ -177,7 +177,7 @@ class SaxoBroker(LiveBroker):
 
             # Unfortunately Saxo doesn't include the latest market price if
             # the market is closed. So in those case we need to get the price.
-            mkt_price = view["CurrentPrice"] or self.__get_price(asset)
+            mkt_price = view["CurrentPrice"] or self.get_price(asset)
 
             portfolio[asset] = Position(size, avg_price, mkt_price)
 
@@ -261,24 +261,24 @@ class SaxoBroker(LiveBroker):
     @override
     def _cancel_order(self, order: Order):
         """Cancel an open order."""
-        self.__request("DELETE", f"/trade/v2/orders/{order.id}")
+        resp = self.__request("DELETE", f"/trade/v2/orders/{order.id}")
+        logger.info("cancelled order=%s resp=%s", order, resp)
 
     @override
     def _update_order(self, order: Order):
         """Modify an existing order."""
         payload = self.__order_payload(order)
         payload["OrderId"] = order.id
-        self.__request("PATCH", "/trade/v2/orders", json=payload)
+        resp = self.__request("PATCH", "/trade/v2/orders", json=payload)
+        logger.info("updated order=%s resp=%s", order, resp)
 
     @override
     def _place_order(self, order: Order):
         """Place a single market or limit order."""
-        response = self.__request(
+        resp = self.__request(
             "POST",
             "/trade/v2/orders",
             json=self.__order_payload(order),
         )
 
-        if isinstance(response, dict):
-            order_id = response.get("OrderId")
-            logger.info("placed order %s", order_id)
+        logger.info("placed order=%s resp=%s", order, resp)
