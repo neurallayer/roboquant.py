@@ -1,4 +1,4 @@
-from typing import TypedDict, List
+from typing import Any, TypedDict, List
 
 class NetPositionBase(TypedDict):
     AccountId: str
@@ -70,7 +70,7 @@ class Exchange(TypedDict):
 
 # For RelatedOpenOrders, if it's an array of objects, define a minimal type or use List[dict]
 # Since it's empty in the example, we'll use List[dict] for flexibility.
-RelatedOpenOrder = dict  # or define a more specific type if needed
+RelatedOpenOrder = dict[Any,Any]  # or define a more specific type if needed
 
 class OpenOrderItem(TypedDict):
     AccountId: str

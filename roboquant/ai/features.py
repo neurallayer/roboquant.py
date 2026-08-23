@@ -60,7 +60,7 @@ class Feature(Generic[T]):
         """Return a full NaN array of the correct shape"""
         return np.full(self._shape(), float("nan"), dtype=np.float32)
 
-    def returns(self, period=1) -> "Feature[T]":
+    def returns(self, period : int =1) -> "Feature[T]":
         if period == 1:
             return ReturnFeature(self)
         return LongReturnsFeature(self, period)
@@ -196,7 +196,7 @@ class NormalizeFeature(Feature[T]):
         stdev = np.sqrt(m2 / count) - 1e-12
         return value * stdev + mean
 
-    def __update(self, new_value):
+    def __update(self, new_value: NPFloatArray):
         (count, mean, m2) = self.existing_aggregate
         mask = ~np.isnan(new_value)
         count[mask] += 1
@@ -205,7 +205,7 @@ class NormalizeFeature(Feature[T]):
         delta2 = new_value - mean
         m2[mask] += delta[mask] * delta2[mask]
 
-    def __normalize_values(self, values) -> NPFloatArray:
+    def __normalize_values(self, values: NPFloatArray) -> NPFloatArray:
         (count, mean, m2) = self.existing_aggregate
         stdev = self._full_nan()
         mask = count >= self.min_count
@@ -487,7 +487,7 @@ class DayOfWeekFeature(Feature[Event]):
     - not one-hot encoded: [0.0]
     """
 
-    def __init__(self, tz=timezone.utc, one_hot_encoded: bool = True) -> None:
+    def __init__(self, tz: timezone=timezone.utc, one_hot_encoded: bool = True) -> None:
         super().__init__()
         self.tz = tz
         self.one_hot_encoded = one_hot_encoded

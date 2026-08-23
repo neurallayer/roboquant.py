@@ -11,7 +11,7 @@ from roboquant.feeds.crypto import logger
 import ccxt
 
 
-from typing import override
+from typing import Any, override
 
 
 class CryptoBroker(LiveBroker):
@@ -21,7 +21,7 @@ class CryptoBroker(LiveBroker):
     a `NotSupported` exception will be raised.
     """
 
-    def __init__(self, exchange: ccxt.Exchange, *args, **kwargs):
+    def __init__(self, exchange: ccxt.Exchange, *args: Any, **kwargs: Any):
         super().__init__(*args, **kwargs)
         self.__exchange = exchange
 

@@ -31,9 +31,9 @@ class SaxoBroker(LiveBroker):
         simulator: bool = True
     ):
         super().__init__()
-        self._access_token = access_token
-        self._account_key = None
-        self._client_key = None
+        self._access_token : str = access_token
+        self._account_key : str | None= None
+        self._client_key : str | None = None
         self._asset_mapping: dict[Asset, tuple[int, str]] = {}
 
         assert simulator, "right now only simulator mode is supported"
@@ -89,7 +89,7 @@ class SaxoBroker(LiveBroker):
         return list(self._asset_mapping.keys())
 
     def _refresh_all_stocks(self):
-        def get_relevant_data(result):
+        def get_relevant_data(result: dict[str, Any]):
             keys = ["Symbol", "CurrencyCode", "Identifier", "AssetType"]
             r = []
             for row in result["Data"]:
