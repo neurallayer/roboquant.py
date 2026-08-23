@@ -21,6 +21,7 @@
         "IBIT",
         "ibkr",
         "ipykernel",
+        "ipynb",
         "isinstance",
         "itertools",
         "LSTM",

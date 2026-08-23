@@ -14,6 +14,7 @@ from roboquant.common.monetary import Amount, Currency, Wallet
 from roboquant.common.order import Order
 from roboquant.common.portfolio import Portfolio, Position
 
+from roboquant.brokers._saxo_types import NetPositionsResponse, OpenOrdersResponse
 
 logger = logging.getLogger(__name__)
 
@@ -52,7 +53,7 @@ class SaxoBroker(LiveBroker):
         self._client_key = client_key or default_client_key
         self._last_prices = {}
         self._load_assets()
-        self._simplify_assets()
+        self.__simplify_assets()
 
     def reset_session(self):
         """Close the old session and start a new one"""
@@ -118,7 +119,7 @@ class SaxoBroker(LiveBroker):
     def _load_assets(self):
         """Load assets from a included file"""
         json_str = importlib.resources.read_text(self.__module__, "__saxo_assets.json")
-        data = json.loads(json_str)
+        data: list[tuple[str,str,int,str]] = json.loads(json_str)
         for row in data:
             symbol, currencyCode, uic, asset_type = row
             currency = Currency(currencyCode)
@@ -136,8 +137,8 @@ class SaxoBroker(LiveBroker):
 
         logger.info("loaded %s assets", len(self._asset_mapping))
 
-    def _simplify_assets(self):
-        """Use simplier symbol names if there is no clash.
+    def __simplify_assets(self):
+        """Use simpler symbol names if there is no clash.
         This makes it easier to map feed assets and order assets
         """
         tmp: set[Asset] = set()
@@ -206,7 +207,7 @@ class SaxoBroker(LiveBroker):
 
     def __get_portfolio(self) -> Portfolio:
         """Get open net positions."""
-        data = self.__request(
+        data: NetPositionsResponse = self.__request(
             "GET",
             "/port/v1/netpositions/me",
             params={"FieldGroups": "NetPositionBase,NetPositionView"},
@@ -232,7 +233,7 @@ class SaxoBroker(LiveBroker):
 
     def __get_orders(self) -> list[Order]:
         """Get open orders."""
-        data = self.__request(
+        data: OpenOrdersResponse = self.__request(
             "GET",
             "/port/v1/orders",
             params={"FieldGroups": ("DisplayAndFormat,ExchangeInfo")},
