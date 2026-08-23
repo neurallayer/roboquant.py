@@ -50,6 +50,7 @@ class SaxoBroker(LiveBroker):
         self._account_key = account_key or default_acc_key
         self._client_key = client_key or default_client_key
         self._last_prices = {}
+        self._load_assets()
 
     def reset_session(self):
         """Close the old session and start a new one"""
@@ -81,7 +82,7 @@ class SaxoBroker(LiveBroker):
         return data["ClientKey"], data["DefaultAccountKey"]
 
     def assets(self) -> list[Asset]:
-        """Return the current known asset with this broker"""
+        """Return the current known assets with this broker"""
         return list(self._asset_mapping.keys())
 
     def _refresh_all_stocks(self):
@@ -112,7 +113,7 @@ class SaxoBroker(LiveBroker):
         with open('__saxo_assets.json', 'w') as f:
             json.dump(data, f)
 
-    def _load_all_assets(self):
+    def _load_assets(self):
         """Load assets from a included file"""
         json_str = importlib.resources.read_text(self.__module__, "__saxo_assets.json")
         data = json.loads(json_str)
@@ -160,7 +161,11 @@ class SaxoBroker(LiveBroker):
         response.raise_for_status()
         return response.json() if response.content else None
 
-    def get_price(self, asset: Asset, price_type: str = "Close") -> float:
+    def get_price(self, asset: Asset) -> float:
+        """Get the latest known price for an asset using the Saxo charts API.
+        It will cache the price and is mostly used to set mkt_price for positions
+        when the market is closed.
+        """
         if asset not in self._last_prices:
             uic, asset_type = self._asset_mapping[asset]
             data = self.__request(
@@ -168,7 +173,7 @@ class SaxoBroker(LiveBroker):
                 "/chart/v3/charts",
                 params={"AssetType": asset_type, "Uic": uic, "Count": 1, "Horizon": 1},
             )
-            price = data["Data"][0][price_type]
+            price = data["Data"][0]["Close"]
             self._last_prices[asset] = price
         return self._last_prices[asset]
 

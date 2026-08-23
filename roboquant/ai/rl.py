@@ -1,5 +1,5 @@
 import logging
-from typing import Any, Callable, Iterator
+from typing import Any, Callable, Iterator, override
 import gymnasium as gym
 from gymnasium import spaces
 from gymnasium.envs.registration import register
@@ -85,6 +85,7 @@ class TradingEnv(gym.Env[Any, Any]):
         """Based on the account, calculate the reward features and return them as a Numpy array"""
         return self.reward_feature.calc(account)[0]
 
+    @override
     def step(self, action):
         """Take a step"""
         assert self.event is not None
@@ -115,6 +116,7 @@ class TradingEnv(gym.Env[Any, Any]):
 
         return None, 0.0, True, False, {}
 
+    @override
     def reset(self, *, seed=None, options=None):
         super().reset(seed=seed, options=options)
         self.broker.reset()
@@ -137,6 +139,7 @@ class TradingEnv(gym.Env[Any, Any]):
                 return observation, {}
             logger.info(observation)
 
+    @override
     def render(self):
         """No rendering is supported"""
         pass
@@ -170,6 +173,7 @@ class SB3PolicyStrategy(Strategy):
         env: TradingEnv = model.env  # type: ignore
         return cls(env.obs_feature, env.assets, model.policy)
 
+    @override
     def create_signals(self, event: Event) -> list[Signal]:
         obs = self.obs_feature.calc(event)
         if np.any(np.isnan(obs)):

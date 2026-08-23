@@ -2,6 +2,7 @@ import logging
 from abc import abstractmethod
 from collections import deque
 from datetime import datetime
+from typing import override
 
 import numpy as np
 import torch
@@ -31,6 +32,7 @@ class FeatureStrategy(Strategy):
         self._hist = deque(maxlen=history)
         self._dtype = dtype
 
+    @override
     def create_signals(self, event: Event) -> list[Signal]:
         """Create signals based on the event features."""
         h = self._hist
@@ -87,6 +89,7 @@ class SequenceDataset(Dataset[tuple[NDArray, NDArray]]):
         calc_l = len(self.target_data) - self.input_sequences - self.output_sequences - self.gap + 1
         return max(0, calc_l)
 
+    @override
     def __getitem__(self, index) -> tuple[NDArray, NDArray]:
         """Get a sample from the dataset."""
         end = index + self.input_sequences
@@ -133,6 +136,7 @@ class TimeSeriesStrategy(FeatureStrategy):
         self.sell_pct = sell_pct
         self.asset = asset
 
+    @override
     def predict(self, x, dt) -> list[Signal]:
         """Predict signals based on the input features using the RNN model."""
         x = torch.asarray(x)

@@ -67,6 +67,7 @@ class BarAggregatorFeed(Feed):
             result[symbol] = b
         return result
 
+    @override
     def play(self, timeframe: Timeframe | None = None):
         bars: dict[Asset, Bar] = {}
         next_time = None

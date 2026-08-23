@@ -184,7 +184,12 @@ class Account:
         return result
 
     def trades_for_asset(self, asset: Asset) -> list[Trade]:
+        """Get all the trades for the provided asset"""
         return [trade for trade in self.trades if trade.asset == asset]
+
+    def orders_for_asset(self, asset: Asset) -> list[Order]:
+        """Get all the orders for the provided asset"""
+        return [order for order in self.orders if order.asset == asset]
 
     def trades_to_dataframe(self) -> pd.DataFrame:
         """Return the trades as a dataframe"""
