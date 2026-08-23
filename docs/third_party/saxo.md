@@ -4,13 +4,13 @@ kernelspec:
   display_name: Python 3
 ---
 
-# Saxo
+# Saxo Bank
 
 ## Overview
 Saxo Bank is a Danish investment bank and a global online trading and investment platform. 
 
-The `SaxoBroker` integrates roboquant with Saxo Bank's OpenAPI, enabling simulated order execution through a Saxo account.
-It can be used standalone or passed into {cl}`run` for paper trading execution.
+The `SaxoBroker` integrates roboquant with Saxo Bank's OpenAPI, enabling simulated order execution through
+a Saxo account. It can be used standalone or passed into {cl}`run` for paper trading execution.
 
 :::{note}
 Right now *roboquant* only supports the API key authentication method.
@@ -22,10 +22,9 @@ Saxo Bank support many assets and assets classes world wide. And currently *robo
 Funds and Forex totalling more than 25.000 assets.   
 
 It is a simple and well documented API that you can checkout [here](https://www.developer.saxo/openapi/referencedocs).
----
 
 ## Prerequisite
-In contrast to other broker integrations, the Saxo OpenAPI integrations only relies on the `requests` library and so
+In contrast to other broker integrations, the Saxo OpenAPI integrations relies solely on the `requests` library and so
 no additional libraries need to be loaded.
 
 You'll need however create a temporary API key (24 hour valid) from your Saxo developer account.

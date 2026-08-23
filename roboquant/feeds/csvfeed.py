@@ -86,9 +86,9 @@ class CSVFeed(InMemoryFeed):
         self._parse_csvfiles(files)  # type: ignore
         self._update()
 
-    def _get_files(self, path: str | pathlib.Path) -> list[str | pathlib.Path]:
+    def _get_files(self, path: str | pathlib.Path) -> list[str]:
         if pathlib.Path(path).is_file():
-            return [path]
+            return [str(path)]
 
         files = []
         for dirpath, _, filenames in os.walk(path):

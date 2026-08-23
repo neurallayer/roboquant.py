@@ -4,6 +4,8 @@ from datetime import date, datetime, timezone
 import math
 import warnings
 
+from pandas import DataFrame
+
 from roboquant.common.asset import Asset, Stock
 from roboquant.common.event import Bar
 from roboquant.feeds.in_memory_feed import InMemoryFeed
@@ -105,7 +107,7 @@ class YahooFeed(InMemoryFeed):
         return YahooFeed(*symbols, start_date=start_date, end_date=end_date, interval=interval)
 
     @staticmethod
-    def __auto_adjust(df):
+    def __auto_adjust(df: DataFrame):
         ratio = df["Adj Close"] / df["Close"]
         df["Open"] = df["Open"] * ratio
         df["High"] = df["High"] * ratio

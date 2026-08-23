@@ -235,7 +235,7 @@ class ECBConversion(CurrencyConverter):
             float: The exchange rate.
         """
         rates = self._rates[currency]
-        idx = bisect_left(rates, dt, key=lambda r: r[0])
+        idx = bisect_left(rates, dt, key=lambda r: r[0]) # type: ignore
         idx = min(idx, len(rates) - 1)
         return rates[idx][1]
 

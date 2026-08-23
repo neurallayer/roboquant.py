@@ -25,7 +25,7 @@ module-root = ""
 module-name = "roboquant"
 
 [tool.pyrefly]
-infer-with-first-use = false
+infer-with-first-use = true
 min-severity = "info"
 project-excludes = ["tests"]
 preset = "strict"
