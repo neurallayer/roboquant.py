@@ -1,3 +1,4 @@
+from dataclasses import replace
 from decimal import Decimal
 import logging
 import json
@@ -51,6 +52,7 @@ class SaxoBroker(LiveBroker):
         self._client_key = client_key or default_client_key
         self._last_prices = {}
         self._load_assets()
+        self._simplify_assets()
 
     def reset_session(self):
         """Close the old session and start a new one"""
@@ -134,6 +136,31 @@ class SaxoBroker(LiveBroker):
 
         logger.info("loaded %s assets", len(self._asset_mapping))
 
+    def _simplify_assets(self):
+        """Use simplier symbol names if there is no clash.
+        This makes it easier to map feed assets and order assets
+        """
+        tmp: set[Asset] = set()
+        duplicate: set[Asset] = set()
+        for asset in self._asset_mapping.keys():
+            simplified_symbol = asset.symbol.split(":")[0]
+            a = replace(asset, symbol = simplified_symbol)
+            if a in tmp:
+                duplicate.add(a)
+            else:
+                tmp.add(a)
+
+        result: dict[Asset, tuple[int, str]] = {}
+        for asset, v in self._asset_mapping.items():
+            simplified_symbol = asset.symbol.split(":")[0]
+            a = replace(asset, symbol = simplified_symbol)
+            if a in duplicate:
+                result[asset] = v
+            else:
+                result[a] = v
+
+        assert len(result) == len(self._asset_mapping)
+        self._asset_mapping = result
 
     def __request(
         self,

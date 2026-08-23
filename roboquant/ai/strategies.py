@@ -8,16 +8,20 @@ import numpy as np
 import torch
 from numpy.typing import NDArray
 
+from torch.optim import Optimizer
 from torch.utils.data import DataLoader, Dataset
 
 from roboquant.common.asset import Asset
 from roboquant.common.event import Event
 from roboquant.ai.features import Feature, NormalizeFeature
 from roboquant.common.signal import Signal
+from roboquant.common.timeframe import Timeframe
+from roboquant.feeds.feed import Feed
 from roboquant.strategies.strategy import Strategy
 
 logger = logging.getLogger(__name__)
 
+DS_TYPE = tuple[NDArray, NDArray]
 
 class FeatureStrategy(Strategy):
     """Abstract base class for strategies that use event features as input.
@@ -49,7 +53,7 @@ class FeatureStrategy(Strategy):
         ...
 
 
-class SequenceDataset(Dataset[tuple[NDArray, NDArray]]):
+class SequenceDataset(Dataset[DS_TYPE]):
     """Dataset for creating input and output sequences for recurrent networks.
     This dataset is designed to create sequences of input data and corresponding target data
     for training recurrent neural networks (RNNs) or similar models.
@@ -66,10 +70,10 @@ class SequenceDataset(Dataset[tuple[NDArray, NDArray]]):
         target_data: NDArray,
         input_sequences: int = 20,
         target_sequences: int = 1,
-        gap=0,
+        gap: int=0,
         transform=None,
         target_transform=None,
-        target_squeeze=True
+        target_squeeze=True,
     ):
         assert len(input_data) == len(target_data), "input_data and target_data must have the same length"
         self.input_data = input_data
@@ -90,12 +94,12 @@ class SequenceDataset(Dataset[tuple[NDArray, NDArray]]):
         return max(0, calc_l)
 
     @override
-    def __getitem__(self, index) -> tuple[NDArray, NDArray]:
+    def __getitem__(self, index: int) -> DS_TYPE:
         """Get a sample from the dataset."""
         end = index + self.input_sequences
         features = self.input_data[index:end]
         start = end + self.gap
-        target = self.target_data[start: start + self.output_sequences]
+        target = self.target_data[start : start + self.output_sequences]
         if self.transform:
             features = self.transform(features)
         if self.target_transform:
@@ -127,7 +131,7 @@ class TimeSeriesStrategy(FeatureStrategy):
         asset: Asset,
         sequences: int = 20,
         buy_pct: float = 0.01,
-        sell_pct=0.0,
+        sell_pct: float = 0.0,
     ):
         super().__init__(input_feature, sequences)
         self.label_feature = label_feature
@@ -137,7 +141,7 @@ class TimeSeriesStrategy(FeatureStrategy):
         self.asset = asset
 
     @override
-    def predict(self, x, dt) -> list[Signal]:
+    def predict(self, x, dt: datetime) -> list[Signal]:
         """Predict signals based on the input features using the RNN model."""
         x = torch.asarray(x)
         x = torch.unsqueeze(x, dim=0)  # Add the batch dimension
@@ -158,7 +162,9 @@ class TimeSeriesStrategy(FeatureStrategy):
                 return [Signal.sell(self.asset)]
         return []
 
-    def _get_dataloaders(self, x, y, prediction: int, validation_split: float, batch_size: int):
+    def _get_dataloaders(
+        self, x: NDArray, y: NDArray, prediction: int, validation_split: float, batch_size: int
+    ) -> tuple[DataLoader[DS_TYPE], DataLoader[DS_TYPE] | None]:
         """Create dataloaders for training and validation datasets."""
         # Determine the border between training and validation data
         border = round(len(y) * (1.0 - validation_split))
@@ -178,7 +184,7 @@ class TimeSeriesStrategy(FeatureStrategy):
 
         return train_dataloader, valid_dataloader
 
-    def __get_xy(self, feed, timeframe=None, warmup=0) -> tuple[NDArray, NDArray]:
+    def __get_xy(self, feed: Feed, timeframe: Timeframe | None = None, warmup: int = 0) -> tuple[NDArray, NDArray]:
         """Extract input and label features from the feed."""
         x = []
         y = []
@@ -195,21 +201,21 @@ class TimeSeriesStrategy(FeatureStrategy):
         return np.asarray(x, dtype=self._dtype), np.asarray(y, dtype=self._dtype)
 
     @staticmethod
-    def describe(x):
+    def describe(x: NDArray):
         """Print the shape, min, max, and mean of the input array."""
         print("shape=", x.shape, "min=", np.min(x, axis=0), "max=", np.max(x, axis=0), "mean=", np.mean(x, axis=0))
 
     def fit(
         self,
-        feed,
-        optimizer=None,
+        feed: Feed,
+        optimizer : Optimizer | None = None,
         criterion=None,
-        prediction=1,
-        timeframe=None,
+        prediction: int = 1,
+        timeframe: Timeframe | None = None,
         epochs: int = 10,
         batch_size: int = 32,
         validation_split: float = 0.2,
-        warmup=50,
+        warmup: int = 50,
         writer=None,
     ):
         """
@@ -251,7 +257,7 @@ class TimeSeriesStrategy(FeatureStrategy):
         if writer:
             writer.flush()
 
-    def _train_epoch(self, data_loader, opt, crit):
+    def _train_epoch(self, data_loader: DataLoader[DS_TYPE], opt: Optimizer, crit):
         """Train the model for one epoch."""
         model = self.model
         model.train()
@@ -267,7 +273,7 @@ class TimeSeriesStrategy(FeatureStrategy):
 
         return (total_loss / b).item()
 
-    def _valid_epoch(self, data_loader, crit):
+    def _valid_epoch(self, data_loader: DataLoader[DS_TYPE], crit):
         """Validate the model for one epoch."""
         model = self.model
         model.eval()
