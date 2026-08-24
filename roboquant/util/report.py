@@ -7,6 +7,8 @@ from pathlib import Path
 import base64
 import io
 
+from pandas import DataFrame
+
 
 _open_html_snippet = """
 <!DOCTYPE html>
@@ -36,7 +38,7 @@ class Report:
         """Add a matplotlib figure to the report."""
         self._figures.append(fig)
 
-    def add_df(self, df, title: str | None = None) -> None:
+    def add_df(self, df: DataFrame, title: str | None = None) -> None:
         """Add a df to the report.
         The dataframe will be rendered using matplotlib.
         """

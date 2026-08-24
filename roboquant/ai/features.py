@@ -69,12 +69,12 @@ class Feature(Generic[T]):
         """Normalize the feature values by calculating the mean and standard deviation."""
         return NormalizeFeature(self, min_period)
 
-    def __getitem__(self, *args) -> "Feature[T]":
+    def __getitem__(self, *args: Any) -> "Feature[T]":
         """Return a slice of the feature.
         For example, if the feature has size 10, and you call `feature[2:5]`, it will return a new feature
         that contains the values for indices 2, 3, and 4 of the original feature.
         """
-        return SlicedFeature(self, args)
+        return SlicedFeature(self, *args)
 
 
 ##############################
@@ -85,7 +85,7 @@ class Feature(Generic[T]):
 class SlicedFeature(Feature[T]):
     """Calculate a slice from another feature"""
 
-    def __init__(self, feature: Feature[T], args) -> None:
+    def __init__(self, feature: Feature[T], args: Any) -> None:
         super().__init__()
         self.args = args
         self.feature = feature
@@ -190,10 +190,10 @@ class NormalizeFeature(Feature[T]):
     def _zero_int(self) -> NPIntArray:
         return np.zeros((self.size(),), dtype="int64")
 
-    def denormalize(self, value) -> NPFloatArray:
+    def denormalize(self, value : NPFloatArray) -> NPFloatArray:
         """Denormalize the value"""
         (count, mean, m2) = self.existing_aggregate
-        stdev = np.sqrt(m2 / count) - 1e-12
+        stdev = np.sqrt(m2 / count) # - 1e-12
         return value * stdev + mean
 
     def __update(self, new_value: NPFloatArray):
@@ -518,7 +518,7 @@ class DayOfMonthFeature(Feature[Event]):
     - not one-hot encoded: [14.0]
     """
 
-    def __init__(self, tz=timezone.utc, one_hot_encoded: bool = True) -> None:
+    def __init__(self, tz: timezone=timezone.utc, one_hot_encoded: bool = True) -> None:
         super().__init__()
         self.tz = tz
         self.one_hot_encoded = one_hot_encoded
@@ -548,7 +548,7 @@ class MonthOfYearFeature(Feature[Event]):
     - not one-hot encoded: [2.0]
     """
 
-    def __init__(self, tz=timezone.utc, one_hot_encoded: bool = True) -> None:
+    def __init__(self, tz : timezone =timezone.utc, one_hot_encoded: bool = True) -> None:
         super().__init__()
         self.tz = tz
         self.one_hot_encoded = one_hot_encoded
@@ -643,7 +643,7 @@ class TrueRangeFeature(Feature[Event]):
 
     def __init__(self, asset: Asset) -> None:
         super().__init__()
-        self.prev_close = None
+        self.prev_close : float | None = None
         self.asset = asset
 
     @override
@@ -679,7 +679,7 @@ class PriceFeature(Feature[Event]):
         self.price_type = price_type
 
     @override
-    def calc(self, value):
+    def calc(self, value: Event):
         prices = [value.get_price(asset, self.price_type) for asset in self.assets]
         return np.array(prices, dtype=np.float32)
 
@@ -751,7 +751,7 @@ class CacheFeature(Feature[Event]):
     the cache, use the `clear()` method.
     """
 
-    def __init__(self, feature: Feature[Event], validate=False) -> None:
+    def __init__(self, feature: Feature[Event], validate : bool =False) -> None:
         super().__init__()
         self.feature: Feature[Event] = feature
         self._cache: dict[datetime, NPFloatArray] = {}

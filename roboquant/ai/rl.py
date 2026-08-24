@@ -86,7 +86,7 @@ class TradingEnv(gym.Env[Any, Any]):
         return self.reward_feature.calc(account)[0]
 
     @override
-    def step(self, action):
+    def step(self, action: Any):
         """Take a step"""
         assert self.event is not None
         assert self.account is not None
@@ -117,7 +117,7 @@ class TradingEnv(gym.Env[Any, Any]):
         return None, 0.0, True, False, {}
 
     @override
-    def reset(self, *, seed=None, options=None):
+    def reset(self, *, seed : int | None=None, options : dict[str, None] | None=None):
         super().reset(seed=seed, options=options)
         self.broker.reset()
         self.obs_feature.reset()
@@ -162,7 +162,7 @@ class SB3PolicyStrategy(Strategy):
         self.obs_feature = obs_feature
         self.assets = assets
         self.policy = policy
-        self.state = None
+        self.state : Any | None = None
 
     @classmethod
     def from_env(cls, env: TradingEnv, policy: BasePolicy):

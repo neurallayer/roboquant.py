@@ -2,7 +2,7 @@ import logging
 from abc import abstractmethod
 from collections import deque
 from datetime import datetime
-from typing import override
+from typing import Any, override
 
 import numpy as np
 import torch
@@ -21,7 +21,10 @@ from roboquant.strategies.strategy import Strategy
 
 logger = logging.getLogger(__name__)
 
-DS_TYPE = tuple[NDArray, NDArray]
+
+FLOAT_ARRAY = NDArray[np.float32]
+
+DS_TYPE = tuple[FLOAT_ARRAY, FLOAT_ARRAY]
 
 class FeatureStrategy(Strategy):
     """Abstract base class for strategies that use event features as input.
@@ -29,7 +32,7 @@ class FeatureStrategy(Strategy):
     which can then be used to generate signals.
     """
 
-    def __init__(self, input_feature: Feature[Event], history: int, dtype="float32"):
+    def __init__(self, input_feature: Feature[Event], history: int, dtype : str="float32"):
         super().__init__()
         self.input_feature = input_feature
         self.history = history
@@ -48,7 +51,7 @@ class FeatureStrategy(Strategy):
         return []
 
     @abstractmethod
-    def predict(self, x: NDArray, dt: datetime) -> list[Signal]:
+    def predict(self, x: FLOAT_ARRAY, dt: datetime) -> list[Signal]:
         """Subclasses need to implement this method to predict signals based on input features."""
         ...
 
@@ -66,14 +69,14 @@ class SequenceDataset(Dataset[DS_TYPE]):
 
     def __init__(
         self,
-        input_data: NDArray,
-        target_data: NDArray,
+        input_data: Any,
+        target_data: Any,
         input_sequences: int = 20,
         target_sequences: int = 1,
         gap: int=0,
         transform=None,
         target_transform=None,
-        target_squeeze=True,
+        target_squeeze: bool=True,
     ):
         assert len(input_data) == len(target_data), "input_data and target_data must have the same length"
         self.input_data = input_data
@@ -141,14 +144,14 @@ class TimeSeriesStrategy(FeatureStrategy):
         self.asset = asset
 
     @override
-    def predict(self, x, dt: datetime) -> list[Signal]:
+    def predict(self, x: FLOAT_ARRAY, dt: datetime) -> list[Signal]:
         """Predict signals based on the input features using the RNN model."""
-        x = torch.asarray(x)
-        x = torch.unsqueeze(x, dim=0)  # Add the batch dimension
+        inp = torch.asarray(x)
+        inp = torch.unsqueeze(inp, dim=0)  # Add the batch dimension
 
         self.model.eval()
         with torch.no_grad():
-            output = self.model(x).numpy()
+            output = self.model(inp).numpy()
 
             if isinstance(self.label_feature, NormalizeFeature):
                 p = self.label_feature.denormalize(output).item()
@@ -163,7 +166,7 @@ class TimeSeriesStrategy(FeatureStrategy):
         return []
 
     def _get_dataloaders(
-        self, x: NDArray, y: NDArray, prediction: int, validation_split: float, batch_size: int
+        self, x: FLOAT_ARRAY, y: FLOAT_ARRAY, prediction: int, validation_split: float, batch_size: int
     ) -> tuple[DataLoader[DS_TYPE], DataLoader[DS_TYPE] | None]:
         """Create dataloaders for training and validation datasets."""
         # Determine the border between training and validation data
@@ -184,7 +187,7 @@ class TimeSeriesStrategy(FeatureStrategy):
 
         return train_dataloader, valid_dataloader
 
-    def __get_xy(self, feed: Feed, timeframe: Timeframe | None = None, warmup: int = 0) -> tuple[NDArray, NDArray]:
+    def __get_xy(self, feed: Feed, timeframe: Timeframe | None = None, warmup: int = 0) -> tuple[FLOAT_ARRAY, FLOAT_ARRAY]:
         """Extract input and label features from the feed."""
         x = []
         y = []
@@ -201,7 +204,7 @@ class TimeSeriesStrategy(FeatureStrategy):
         return np.asarray(x, dtype=self._dtype), np.asarray(y, dtype=self._dtype)
 
     @staticmethod
-    def describe(x: NDArray):
+    def describe(x: FLOAT_ARRAY):
         """Print the shape, min, max, and mean of the input array."""
         print("shape=", x.shape, "min=", np.min(x, axis=0), "max=", np.max(x, axis=0), "mean=", np.mean(x, axis=0))
 
