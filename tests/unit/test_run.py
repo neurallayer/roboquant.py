@@ -1,5 +1,6 @@
 import unittest
 from datetime import timedelta
+from typing import override
 
 import roboquant as rq
 import math
@@ -8,6 +9,7 @@ from tests.common import get_feed
 
 class TestRoboquant(unittest.TestCase):
 
+    @override
     def setUp(self):
         self.feed = get_feed()
 

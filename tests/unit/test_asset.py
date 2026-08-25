@@ -1,5 +1,6 @@
 from dataclasses import dataclass
 from decimal import Decimal
+from typing import override
 import unittest
 
 from roboquant.common.asset import Crypto, Stock, Option, Forex, Asset
@@ -57,13 +58,16 @@ class TestAsset(unittest.TestCase):
 
             multiplier: int = 2
 
+            @override
             def value(self, size: Decimal, price: float) -> float:
                 return super().value(size, price) * self.multiplier
 
+            @override
             def serialize(self) -> str:
                 return f"CustomAsset:{self.symbol}:{self.currency}:{self.multiplier}"
 
             @classmethod
+            @override
             def deserialize(cls, value: str) -> "CustomAsset":
                 _, symbol, currency_name, multiplier = value.split(":")
                 return CustomAsset(symbol, Currency(currency_name), int(multiplier))

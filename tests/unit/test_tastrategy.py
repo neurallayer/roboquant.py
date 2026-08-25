@@ -1,5 +1,7 @@
+from typing import override
 import unittest
 
+from roboquant.common.asset import Asset
 from roboquant.common.signal import Signal
 from roboquant.strategies import IndicatorStrategy
 from roboquant.util import OHLCVBuffer
@@ -9,7 +11,8 @@ from tests.common import run_strategy
 class _MyStrategy(IndicatorStrategy):
     """Example using TaStrategy as a baseclass to create a custom strategy"""
 
-    def _create_signal(self, asset, ohlcv: OHLCVBuffer):
+    @override
+    def _create_signal(self, asset: Asset, ohlcv: OHLCVBuffer):
         close = ohlcv.close
         sma12 = close[-12:].mean()
         sma26 = close[-26:].mean()

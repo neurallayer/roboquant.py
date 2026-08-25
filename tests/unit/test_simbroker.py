@@ -20,7 +20,7 @@ class TestSimbroker(unittest.TestCase):
     apple = Stock("AAPL")
 
     @staticmethod
-    def _create_event(price=100.0):
+    def _create_event(price: float =100.0):
         item = TradePrice(TestSimbroker.apple, price, 1000)
         event = Event(datetime.now(timezone.utc), [item])
         return event

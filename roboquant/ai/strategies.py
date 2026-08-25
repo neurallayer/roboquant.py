@@ -2,7 +2,7 @@ import logging
 from abc import abstractmethod
 from collections import deque
 from datetime import datetime
-from typing import Any, override
+from typing import Any, Callable, override
 
 import numpy as np
 import torch
@@ -25,6 +25,8 @@ logger = logging.getLogger(__name__)
 FLOAT_ARRAY = NDArray[np.float32]
 
 DS_TYPE = tuple[FLOAT_ARRAY, FLOAT_ARRAY]
+
+CRITERION = Callable[[torch.Tensor, torch.Tensor], torch.Tensor]
 
 class FeatureStrategy(Strategy):
     """Abstract base class for strategies that use event features as input.
@@ -69,13 +71,13 @@ class SequenceDataset(Dataset[DS_TYPE]):
 
     def __init__(
         self,
-        input_data: Any,
-        target_data: Any,
+        input_data: NDArray[Any],
+        target_data: NDArray[Any],
         input_sequences: int = 20,
         target_sequences: int = 1,
         gap: int=0,
-        transform=None,
-        target_transform=None,
+        transform : Callable[[NDArray[Any]], NDArray[Any]] | None =None,
+        target_transform : Callable[[NDArray[Any]], NDArray[Any]] | None =None,
         target_squeeze: bool=True,
     ):
         assert len(input_data) == len(target_data), "input_data and target_data must have the same length"
@@ -212,14 +214,14 @@ class TimeSeriesStrategy(FeatureStrategy):
         self,
         feed: Feed,
         optimizer : Optimizer | None = None,
-        criterion=None,
+        criterion : CRITERION | None =None,
         prediction: int = 1,
         timeframe: Timeframe | None = None,
         epochs: int = 10,
         batch_size: int = 32,
         validation_split: float = 0.2,
         warmup: int = 50,
-        writer=None,
+        writer: Any | None = None,
     ):
         """
         Train the model for a fixed number of epochs.
@@ -260,7 +262,7 @@ class TimeSeriesStrategy(FeatureStrategy):
         if writer:
             writer.flush()
 
-    def _train_epoch(self, data_loader: DataLoader[DS_TYPE], opt: Optimizer, crit):
+    def _train_epoch(self, data_loader: DataLoader[DS_TYPE], opt: Optimizer, crit: CRITERION):
         """Train the model for one epoch."""
         model = self.model
         model.train()
@@ -276,7 +278,7 @@ class TimeSeriesStrategy(FeatureStrategy):
 
         return (total_loss / b).item()
 
-    def _valid_epoch(self, data_loader: DataLoader[DS_TYPE], crit):
+    def _valid_epoch(self, data_loader: DataLoader[DS_TYPE], crit : CRITERION):
         """Validate the model for one epoch."""
         model = self.model
         model.eval()

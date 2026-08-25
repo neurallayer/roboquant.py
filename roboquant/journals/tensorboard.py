@@ -1,4 +1,4 @@
-from typing import override
+from typing import Protocol, override
 
 from roboquant.common.account import Account
 from roboquant.common.event import Event
@@ -6,6 +6,12 @@ from roboquant.journals.journal import Journal
 from roboquant.common.metric import Metric
 from roboquant.common.order import Order
 from roboquant.common.signal import Signal
+
+
+class Writer(Protocol):
+
+    def add_scalar(self, tag: str, data: float, step: int, *, wall_time: float, description: str | None = None) -> None:
+        ...
 
 
 class TensorboardJournal(Journal):
@@ -29,16 +35,17 @@ class TensorboardJournal(Journal):
     ```
     """
 
-    def __init__(self, writer, *metrics: Metric) -> None:
+    def __init__(self, writer: Writer, *metrics: Metric) -> None:
         """
         Initialize the TensorboardJournal.
 
         Args:
-            writer: A tensorboard writer instance (`tensorboard.summary.Writer`).
+            writer: A tensorboard summary writer instance (`tensorboard.summary.Writer` or
+            `torch.utils.tensorboard.SummaryWriter`).
             metrics: Metrics that should be calculated at each step and added to the tensorboard writer.
         """
         super().__init__()
-        assert hasattr(writer, "add_scalar") and callable(writer.add_scalar), "writer not a tensorboard writer"
+        assert hasattr(writer, "add_scalar") and callable(writer.add_scalar), "writer not a tensorboard summary writer"
         self.__writer = writer
         self._step : int = 0
         self.metrics = metrics
