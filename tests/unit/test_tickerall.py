@@ -37,12 +37,27 @@ class _FakeOrders:
         self.cancelled.append(ticket)
 
 
+class _FakePositions:
+    """Records the close-by-ticket calls the broker makes (volume None = full close)."""
+
+    def __init__(self):
+        self.closed: list[tuple] = []
+
+    def close(self, account_id, ticket, *, volume=None, **kw):
+        self.closed.append((ticket, volume))
+        return SimpleNamespace(ticket=ticket, symbol="", side="", volume=volume, closed=True)
+
+
 class _FakeClient:
     """A minimal stand-in for the `tickerall` SDK client, recording the calls the broker makes."""
 
-    def __init__(self, detail, pending=None):
-        self.accounts = SimpleNamespace(get=lambda account_id: detail)
+    def __init__(self, detail, pending=None, specs=None):
+        self.accounts = SimpleNamespace(
+            get=lambda account_id: detail,
+            symbol_specs=lambda account_id: (specs or []),
+        )
         self.orders = _FakeOrders(pending or [])
+        self.positions = _FakePositions()
 
 
 def _detail(account=None, positions=None):
@@ -70,6 +85,17 @@ class TestAccountIdGuard(unittest.TestCase):
 
 def _fin(balance=100.0, currency="USD", free_margin=None):
     return SimpleNamespace(balance=balance, currency=currency, free_margin=free_margin)
+
+
+def _pos(symbol, volume, side, ticket, *, entry=1.10, cur=1.11, open_time=None):
+    return SimpleNamespace(
+        symbol=symbol, volume=volume, side=side, ticket=ticket,
+        entry_price=entry, current_price=cur, open_time=open_time,
+    )
+
+
+def _spec(name, *, volume_step=0.01, volume_min=0.01):
+    return SimpleNamespace(name=name, volume_step=volume_step, volume_min=volume_min)
 
 
 def _broker(client: _FakeClient) -> TickerAllBroker:
@@ -234,6 +260,71 @@ class TestTickerAll(unittest.TestCase):
             self.assertEqual(fake.sessions.keep_alive_calls[0]["broker"], "mt5")
             feed.close()
             self.assertEqual(fake.sessions.ended, ["acc-from-session"])
+
+
+class TestNetEmulation(unittest.TestCase):
+    """A MetaTrader account may be HEDGING (one broker ticket per trade), but roboquant models one NET
+    position per asset. The broker aggregates same-symbol tickets into a net Position, and translates an
+    opposing MARKET order into close-by-ticket (+ any reversal remainder) instead of opening a hedge."""
+
+    def test_aggregate_multiple_tickets_to_net(self):
+        positions = [
+            _pos("EURUSDm", 0.10, "BUY", 1, entry=1.10),
+            _pos("EURUSDm", 0.20, "BUY", 2, entry=1.20),
+            _pos("EURUSDm", 0.05, "SELL", 3, entry=1.15),
+        ]
+        acc = _broker(_FakeClient(_detail(_fin(), positions)))._get_account()
+        self.assertEqual(len(acc.portfolio), 1)
+        pos = acc.portfolio[_to_asset("EURUSDm")]
+        self.assertEqual(pos.size, Decimal("0.25"))  # 0.10 + 0.20 - 0.05
+        # weighted-average entry over the BUY (net-side) tickets only: (0.10*1.10 + 0.20*1.20) / 0.30
+        self.assertAlmostEqual(pos.avg_price, (0.10 * 1.10 + 0.20 * 1.20) / 0.30, places=6)
+
+    def test_fully_hedged_flat_is_dropped(self):
+        positions = [_pos("EURUSDm", 0.10, "BUY", 1), _pos("EURUSDm", 0.10, "SELL", 2)]
+        acc = _broker(_FakeClient(_detail(_fin(), positions)))._get_account()
+        self.assertEqual(len(acc.portfolio), 0)  # net zero => no exposure to report
+
+    def test_opposing_market_partial_close(self):
+        client = _FakeClient(_detail(_fin(), [_pos("EURUSDm", 0.10, "BUY", 1)]))
+        _broker(client).place_orders([Order(Forex("EURUSDm", USD), Decimal("-0.04"))])  # SELL 0.04 market
+        self.assertEqual(client.positions.closed, [(1, 0.04)])  # partial close of the net-side ticket
+        self.assertEqual(client.orders.placed, [])  # no hedge opened
+
+    def test_opposing_market_full_close(self):
+        client = _FakeClient(_detail(_fin(), [_pos("EURUSDm", 0.10, "BUY", 1)]))
+        _broker(client).place_orders([Order(Forex("EURUSDm", USD), Decimal("-0.10"))])  # SELL 0.10 market
+        self.assertEqual(client.positions.closed, [(1, None)])  # full close (no volume => whole ticket)
+        self.assertEqual(client.orders.placed, [])
+
+    def test_opposing_market_reversal_opens_remainder(self):
+        client = _FakeClient(_detail(_fin(), [_pos("EURUSDm", 0.10, "BUY", 1)]))
+        _broker(client).place_orders([Order(Forex("EURUSDm", USD), Decimal("-0.15"))])  # SELL 0.15 market
+        self.assertEqual(client.positions.closed, [(1, None)])  # close the whole 0.10 net first
+        self.assertEqual(len(client.orders.placed), 1)  # then open the 0.05 reversal remainder
+        rem = client.orders.placed[0]
+        self.assertEqual(rem["type"], "market")
+        self.assertEqual(rem["side"], "SELL")
+        self.assertAlmostEqual(rem["volume"], 0.05, places=6)
+
+    def test_limit_opposer_is_placed_not_closed(self):
+        client = _FakeClient(_detail(_fin(), [_pos("EURUSDm", 0.10, "BUY", 1)]))
+        _broker(client).place_orders([Order(Forex("EURUSDm", USD), Decimal("-0.05"), 1.05)])  # SELL limit
+        self.assertEqual(client.positions.closed, [])  # a limit opposer nets when it fills, not now
+        self.assertEqual(len(client.orders.placed), 1)
+        self.assertEqual(client.orders.placed[0]["type"], "limit")
+
+    def test_same_side_market_places_normally(self):
+        client = _FakeClient(_detail(_fin(), [_pos("EURUSDm", 0.10, "BUY", 1)]))
+        _broker(client).place_orders([Order(Forex("EURUSDm", USD), Decimal("0.05"))])  # BUY adds to the net
+        self.assertEqual(client.positions.closed, [])  # not opposing => nothing closed
+        self.assertEqual(len(client.orders.placed), 1)
+        self.assertEqual(client.orders.placed[0]["side"], "BUY")
+
+    def test_quantize_volume_rounds_down_and_floors_below_min(self):
+        broker = _broker(_FakeClient(_detail(_fin()), specs=[_spec("EURUSDm", volume_step=0.01, volume_min=0.01)]))
+        self.assertEqual(broker._quantize_volume("EURUSDm", Decimal("0.024")), Decimal("0.02"))  # down to step
+        self.assertEqual(broker._quantize_volume("EURUSDm", Decimal("0.005")), Decimal("0"))  # below min => 0
 
 
 if __name__ == "__main__":

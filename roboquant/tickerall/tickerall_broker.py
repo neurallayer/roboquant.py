@@ -1,4 +1,5 @@
 import logging
+from collections import defaultdict
 from decimal import Decimal
 from typing import Self
 
@@ -8,6 +9,7 @@ from tickerall.types import BrokerName, TerminalType
 from roboquant.brokers.livebroker import LiveBroker
 from roboquant.common.account import Account
 from roboquant.common.monetary import Amount, Currency, USD, Wallet
+from roboquant.common.asset import Asset
 from roboquant.common.order import Order
 from roboquant.common.portfolio import Portfolio, Position
 from roboquant.tickerall.tickerall_feed import _require_tickerall_account_id, _to_asset
@@ -63,6 +65,8 @@ class TickerAllBroker(LiveBroker):
         _require_tickerall_account_id(account_id)
         self._account_id = account_id
         self._client = Tickerall(api_key=api_key, base_url=base_url)
+        # Lazily-loaded cache of the broker's symbol specs (lot step/min), for volume quantization.
+        self._symbol_specs_cache: dict | None = None
         # True only when this broker opened the session itself (via `connect`); a session passed in by
         # account_id belongs to the caller and is never ended on `close`.
         self._owns_session = False
@@ -153,16 +157,37 @@ class TickerAllBroker(LiveBroker):
         return account
 
     def _sync_positions(self, positions, currency: Currency) -> Portfolio:
-        portfolio = Portfolio()
+        # A MetaTrader account may be HEDGING (one broker ticket per trade) rather than netting. roboquant
+        # models one NET position per asset, so aggregate all of a symbol's tickets into a single net
+        # Position — otherwise same-symbol tickets overwrite each other and roboquant sees only the last
+        # ticket instead of the net exposure.
+        groups: dict[Asset, list] = defaultdict(list)
         for p in positions:
             if not p.symbol or p.volume is None:
                 continue
-            size = Decimal(str(p.volume))
-            if str(p.side).upper() == "SELL":
-                size = -size
-            entry = float(p.entry_price or 0.0)
-            mkt = float(p.current_price) if p.current_price is not None else entry
-            portfolio[_to_asset(p.symbol, currency)] = Position(size, entry, mkt)
+            groups[_to_asset(p.symbol, currency)].append(p)
+
+        portfolio = Portfolio()
+        for asset, tickets in groups.items():
+            net = Decimal("0")
+            for p in tickets:
+                vol = Decimal(str(p.volume))
+                net += vol if str(p.side).upper() == "BUY" else -vol
+            if net == 0:
+                continue  # fully hedged flat — no net exposure to report
+            net_long = net > 0
+            # Weighted-average entry over the net-side tickets (the side matching the net sign). Under
+            # active net-emulation all tickets are one-sided, so this is the exact average entry.
+            num = Decimal("0")
+            den = Decimal("0")
+            for p in tickets:
+                if (str(p.side).upper() == "BUY") == net_long:
+                    vol = Decimal(str(p.volume))
+                    num += vol * Decimal(str(p.entry_price or 0.0))
+                    den += vol
+            entry = float(num / den) if den else 0.0
+            mkt = float(tickets[0].current_price) if tickets[0].current_price is not None else entry
+            portfolio[asset] = Position(net, entry, mkt)
         return portfolio
 
     def _sync_orders(self, currency: Currency) -> list[Order]:
@@ -183,6 +208,52 @@ class TickerAllBroker(LiveBroker):
         return orders
 
     def _place_order(self, order: Order) -> None:
+        # roboquant expresses a close/reduce/reverse as a new opposite-signed order. On a NETTING account
+        # the broker nets it; on a HEDGING account a raw opposite order opens a SECOND ticket instead of
+        # closing. So when a MARKET order opposes the current net, emulate netting: close the net-side
+        # tickets (FIFO) up to the order size, then open any remainder (a reversal past flat). A limit
+        # opposer can't be a market close, so it's placed as a normal pending order and nets when it fills.
+        tickets = self._open_tickets(order.asset.symbol)
+        net = Decimal("0")
+        for t in tickets:
+            vol = Decimal(str(t.volume))
+            net += vol if str(t.side).upper() == "BUY" else -vol
+        opposing = (net > 0 and order.is_sell) or (net < 0 and order.is_buy)
+        if not opposing or not order.is_mkt_order:
+            return self._place_raw(order)
+
+        remaining = abs(order.size)
+        net_long = net > 0
+        for t in sorted(tickets, key=lambda x: (x.open_time or "", x.ticket)):
+            if remaining <= 0:
+                break
+            if (str(t.side).upper() == "BUY") != net_long:
+                continue  # only close net-side exposure; leave any already-opposite tickets alone
+            vol = Decimal(str(t.volume))
+            take = self._quantize_volume(order.asset.symbol, min(vol, remaining))
+            if take <= 0:
+                continue
+            if take >= vol:
+                self._client.positions.close(self._account_id, t.ticket)
+            else:
+                self._client.positions.close(self._account_id, t.ticket, volume=float(take))
+            remaining -= take
+
+        remaining = self._quantize_volume(order.asset.symbol, remaining)
+        if remaining > 0:
+            # Reversal past flat: open a fresh position for the leftover in the order's direction.
+            self._client.orders.place(
+                self._account_id,
+                type="market",
+                symbol=order.asset.symbol,
+                side="BUY" if order.is_buy else "SELL",
+                volume=float(remaining),
+                price=None,
+            )
+        logger.info("net-emulated order symbol=%s size=%s net_before=%s", order.asset.symbol, order.size, net)
+
+    def _place_raw(self, order: Order) -> None:
+        """Place an order straight through to the broker (the original, netting-account behavior)."""
         is_market = order.is_mkt_order
         result = self._client.orders.place(
             self._account_id,
@@ -193,6 +264,39 @@ class TickerAllBroker(LiveBroker):
             price=None if is_market else order.limit,
         )
         logger.info("placed order symbol=%s ticket=%s", order.asset.symbol, result.ticket)
+
+    def _open_tickets(self, symbol: str) -> list:
+        """Fresh open-position tickets for one symbol, read live (not from the possibly-stale account cache)."""
+        detail = self._client.accounts.get(self._account_id)
+        return [p for p in detail.positions if p.symbol == symbol and p.volume is not None]
+
+    def _quantize_volume(self, symbol: str, vol: Decimal) -> Decimal:
+        """Round a volume DOWN to the symbol's lot step; return 0 if it falls below the minimum lot."""
+        if vol <= 0:
+            return Decimal("0")
+        spec = self._symbol_spec(symbol)
+        if spec is None:
+            return vol
+        step = Decimal(str(spec.volume_step)) if getattr(spec, "volume_step", None) else Decimal("0")
+        vmin = Decimal(str(spec.volume_min)) if getattr(spec, "volume_min", None) else Decimal("0")
+        q = (vol // step) * step if step > 0 else vol
+        if vmin > 0 and q < vmin:
+            return Decimal("0")
+        return q
+
+    def _symbol_spec(self, symbol: str):
+        """Lazily fetch + cache the broker's symbol specs, keyed by symbol name."""
+        if self._symbol_specs_cache is None:
+            cache: dict = {}
+            try:
+                for s in self._client.accounts.symbol_specs(self._account_id):
+                    name = getattr(s, "name", None)
+                    if name:
+                        cache[name] = s
+            except Exception:
+                logger.warning("failed to load symbol specs for %s", self._account_id, exc_info=True)
+            self._symbol_specs_cache = cache
+        return self._symbol_specs_cache.get(symbol)
 
     def _update_order(self, order: Order) -> None:
         self._client.orders.modify_pending(self._account_id, int(order.id), price=order.limit)
