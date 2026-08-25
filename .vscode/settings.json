@@ -21,6 +21,7 @@
         "IBIT",
         "ibkr",
         "ipykernel",
+        "ipynb",
         "isinstance",
         "itertools",
         "LSTM",
@@ -40,6 +41,7 @@
         "Pythonic",
         "relu",
         "roboquant",
+        "saxo",
         "stooq",
         "Tensorboard",
         "timeframes",
@@ -51,19 +53,10 @@
     ],
     "python.testing.unittestArgs": [
         "-v",
-        "-p",
-        "test_*.py"
-    ],
-    "__python.testing.unittestArgs": [
-        "-v",
         "-s",
         "./tests/unit",
         "-p",
         "test_*.py"
-    ],
-    "__python.testing.pytestArgs": [
-        "--ignore=tests/integration",
-        "--ignore=tests/performance"
     ],
     "python.testing.pytestEnabled": false,
     "python.testing.unittestEnabled": true,

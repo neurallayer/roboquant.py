@@ -5,7 +5,7 @@ import os
 import pathlib
 from array import array
 from datetime import datetime, time, timezone
-from typing import Callable
+from typing import Callable, override
 
 from roboquant.common.asset import Asset, Stock
 from roboquant.common.event import Bar
@@ -86,9 +86,9 @@ class CSVFeed(InMemoryFeed):
         self._parse_csvfiles(files)  # type: ignore
         self._update()
 
-    def _get_files(self, path: str | pathlib.Path) -> list[str | pathlib.Path]:
+    def _get_files(self, path: str | pathlib.Path) -> list[str]:
         if pathlib.Path(path).is_file():
-            return [path]
+            return [str(path)]
 
         files = []
         for dirpath, _, filenames in os.walk(path):
@@ -157,6 +157,7 @@ class CSVFeed(InMemoryFeed):
                     asset_filter=asset_filter,
                 )
 
+            @override
             def _get_asset(self, filename: str):
                 base = pathlib.Path(filename).stem
                 symbol = base.split(".")[0].upper()
@@ -183,6 +184,7 @@ class CSVFeed(InMemoryFeed):
             def __init__(self):
                 super().__init__(path, columns=columns, endswith=".txt", asset_filter=asset_filter)
 
+            @override
             def _get_asset(self, filename: str):
                 base = pathlib.Path(filename).stem
                 symbol = base.split(".")[0].upper()

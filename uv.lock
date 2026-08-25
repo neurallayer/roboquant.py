@@ -181,7 +181,7 @@ wheels = [
 
 [[package]]
 name = "alpaca-py"
-version = "0.43.5"
+version = "0.44.0"
 source = { registry = "https://pypi.org/simple" }
 dependencies = [
     { name = "msgpack" },
@@ -192,9 +192,9 @@ dependencies = [
     { name = "sseclient-py" },
     { name = "websockets" },
 ]
-sdist = { url = "https://files.pythonhosted.org/packages/b8/9c/0d5b0565f31a6a439876cb343282c1b7353f20ff90fefb57d33f94b4e215/alpaca_py-0.43.5.tar.gz", hash = "sha256:7b09ba442cb0c6f957c2c57a30c6035456e2e670e63e383d439c639ffdbf98ba", size = 98289, upload-time = "2026-07-02T07:22:07.016Z" }
+sdist = { url = "https://files.pythonhosted.org/packages/2d/b7/99f09835590f2a3fbdb82abf72d81a199a7aca6d0335a6bc6ec057fc2792/alpaca_py-0.44.0.tar.gz", hash = "sha256:5388715b67b51ad30fa07308e89299d48b19bed65b81013b8a1158fa5837337b", size = 103559, upload-time = "2026-08-11T10:15:05.96Z" }
 wheels = [
-    { url = "https://files.pythonhosted.org/packages/02/40/83c7ef8bc3e74e73cda6308f7107fe57815dcfc808dc9cd03bd09aa22dd3/alpaca_py-0.43.5-py3-none-any.whl", hash = "sha256:0b4cac9b743851310f19f6a9aa84f57ddf95ae75b601350395746a893f54a2da", size = 122677, upload-time = "2026-07-02T07:22:08.06Z" },
+    { url = "https://files.pythonhosted.org/packages/8e/9e/69a2d867988578d6f9e52e35d435d8a43296257cf590fb881a3752de7651/alpaca_py-0.44.0-py3-none-any.whl", hash = "sha256:b54673f967c0c814a5e0223cbb0211a5d9d75a8d107e792872b14e5bae957c03", size = 128904, upload-time = "2026-08-11T10:15:07.141Z" },
 ]
 
 [[package]]
@@ -2833,7 +2833,7 @@ wheels = [
 
 [[package]]
 name = "roboquant"
-version = "2.8.1"
+version = "2.8.2"
 source = { editable = "." }
 dependencies = [
     { name = "matplotlib" },
@@ -2870,7 +2870,7 @@ dev = [
 
 [package.metadata]
 requires-dist = [
-    { name = "alpaca-py", marker = "extra == 'extra'", specifier = ">=0.43.5" },
+    { name = "alpaca-py", marker = "extra == 'extra'", specifier = ">=0.44.0" },
     { name = "ccxt", marker = "extra == 'extra'", specifier = ">=4.5.65" },
     { name = "ibind", extras = ["oauth"], marker = "extra == 'extra'", specifier = ">=0.1.22" },
     { name = "matplotlib", specifier = ">=3.10.0" },

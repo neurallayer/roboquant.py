@@ -1,3 +1,4 @@
+from typing import override
 import unittest
 
 from roboquant.common.account import Account
@@ -10,6 +11,7 @@ from tests.common import get_feed
 
 class TestTrader(unittest.TestCase):
 
+    @override
     def setUp(self) -> None:
         acc = Account()
         acc.buying_power = Amount(USD, 100_000.0)

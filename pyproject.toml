@@ -25,14 +25,18 @@ module-root = ""
 module-name = "roboquant"
 
 [tool.pyrefly]
-infer-with-first-use = false
+infer-with-first-use = true
 min-severity = "info"
-project-excludes = ["tests"]
+project-excludes = ["tests/samples", "tests/performance"]
 preset = "strict"
+
+[tool.pyrefly.errors]
+implicit-any-empty-container = false
+implicit-any-lambda = false
 
 [project]
 name = "roboquant"
-version = "2.8.1"
+version = "2.8.2"
 authors = [{ name = "roboquant team", email = "info@roboquant.org" }]
 description = "A fast algorithmic trading platform with support for AI based strategies"
 readme = "README.md"
@@ -82,13 +86,13 @@ ai = [
 ]
 extra = [
   "ibind[oauth]>=0.1.22",
-  "alpaca-py>=0.43.5",
+  "alpaca-py>=0.44.0",
   "ccxt>=4.5.65",
   "tickerall>=0.1.16",
 ]
 
 [project.urls]
-Homepage = "https://neurallayer.github.io/roboquant.py/"
+Homepage = "https://python.roboquant.py/"
 Repository = "https://github.com/neurallayer/roboquant.py.git"
 Issues = "https://github.com/neurallayer/roboquant.py/issues"
 

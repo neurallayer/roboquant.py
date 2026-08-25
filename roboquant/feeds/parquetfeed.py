@@ -3,12 +3,12 @@ import logging
 import os.path
 from array import array
 from pathlib import Path
-from typing import Iterable, Iterator, override
+from typing import Callable, Iterable, Iterator, override
 
 import pyarrow as pa
 import pyarrow.parquet as pq
 
-from roboquant.common.event import Quote, Bar, TradePrice
+from roboquant.common.event import PriceItem, Quote, Bar, TradePrice
 from roboquant.common.event import Event
 from roboquant.feeds.feed import Feed
 from roboquant.common.asset import deserialize_to_asset, Asset
@@ -47,7 +47,7 @@ class ParquetFeed(HistoricFeed):
         MSFT,NVDA,AAPL,AMZN,META,GOOGL,AVGO,JPM,XOM,TSLA.
         This is included for demo purposes and should not be relied upon for serious back testing.
         """
-        path = os.path.join(os.path.dirname(__file__), 'resources', 'us10.parquet')
+        path = os.path.join(os.path.dirname(__file__), "resources", "us10.parquet")
         return ParquetFeed(path)
 
     def exists(self) -> bool:
@@ -161,7 +161,13 @@ class ParquetFeed(HistoricFeed):
     def __repr__(self) -> str:
         return f"ParquetFeed(path={self.parquet_path})"
 
-    def record(self, feed: Feed, timeframe: Timeframe | None = None, row_group_size: int = 10_000, priceitem_filter = None):
+    def record(
+        self,
+        feed: Feed,
+        timeframe: Timeframe | None = None,
+        row_group_size: int = 10_000,
+        priceitem_filter: Callable[[PriceItem], bool] | None = None,
+    ):
         """
         Records a feed to a Parquet file for later replay.
 
@@ -222,4 +228,3 @@ class ParquetFeed(HistoricFeed):
             if items:
                 batch = pa.RecordBatch.from_pylist(items, schema=ParquetFeed.__schema)
                 writer.write_batch(batch)
-

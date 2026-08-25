@@ -132,7 +132,7 @@ class FlexTrader(Trader):
     max_position_pct: float = 0.1
     price_type: str = "DEFAULT"
     shuffle_signals: bool = False
-    limit_offset_pct: float = 0.0
+    limit_offset_pct: float | None = 0.0
     limit_rounding: int = 2
     tif: Literal["DAY", "GTC"] = "DAY"
 
@@ -246,8 +246,10 @@ class FlexTrader(Trader):
         return orders
 
 
-    def _get_limit(self, item: PriceItem, size: Decimal) -> float:
+    def _get_limit(self, item: PriceItem, size: Decimal) -> float | None:
         """Calculate the order limit"""
+        if self.limit_offset_pct is None:
+            return None
         multiplier = 1.0 - self.limit_offset_pct if size > 0 else 1.0 + self.limit_offset_pct
         price = item.price(self.price_type) * multiplier
         limit = round(price, self.limit_rounding)

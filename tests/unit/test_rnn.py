@@ -1,3 +1,4 @@
+from typing import Any, override
 import unittest
 
 from torch import nn
@@ -20,7 +21,8 @@ class _MyModel(nn.Module):
         self.flatten = nn.Flatten()
         self.linear = nn.Linear(8, 1)
 
-    def forward(self, inputs):
+    @override
+    def forward(self, inputs: Any):
         output, _ = self.lstm(inputs)
         output = F.relu(self.flatten(output[:, -1, :]))
         output = self.linear(output)
