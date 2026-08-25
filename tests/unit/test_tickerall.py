@@ -1,7 +1,7 @@
 import unittest
 from decimal import Decimal
 from types import SimpleNamespace
-from typing import cast
+from typing import Any, cast
 from unittest import mock
 
 from roboquant.common.asset import Forex
@@ -19,8 +19,8 @@ from roboquant.tickerall.tickerall_feed import (
 class _FakeOrders:
     def __init__(self, pending):
         self._pending = pending
-        self.placed: list[dict] = []
-        self.modified: list[tuple] = []
+        self.placed: list[dict[str, Any]] = []
+        self.modified: list[tuple[Any, ...]] = []
         self.cancelled: list[int] = []
 
     def place(self, account_id, *, type, symbol, side, volume, price=None, **kw):  # noqa: A002 - SDK kw name
@@ -41,7 +41,7 @@ class _FakePositions:
     """Records the close-by-ticket calls the broker makes (volume None = full close)."""
 
     def __init__(self):
-        self.closed: list[tuple] = []
+        self.closed: list[tuple[Any, ...]] = []
 
     def close(self, account_id, ticket, *, volume=None, **kw):
         self.closed.append((ticket, volume))
@@ -100,7 +100,7 @@ def _spec(name, *, volume_step=0.01, volume_min=0.01):
 
 def _broker(client: _FakeClient) -> TickerAllBroker:
     broker = TickerAllBroker("dummy-key", "acc-test")
-    broker._client = client  # type: ignore[assignment]
+    broker._client = client  # type: ignore
     return broker
 
 
@@ -108,7 +108,7 @@ class _FakeSessions:
     """Records the session-lifecycle calls the credential `connect(...)` path makes."""
 
     def __init__(self) -> None:
-        self.keep_alive_calls: list[dict] = []
+        self.keep_alive_calls: list[dict[str, Any]] = []
         self.ended: list[str] = []
 
     def keep_alive(self, *, broker, server, account, password, terminal_type=None, **kw):
@@ -237,7 +237,7 @@ class TestTickerAll(unittest.TestCase):
         # a caller-supplied account_id belongs to the caller; close must NOT end that session
         broker = TickerAllBroker("k", "acc-passed")
         fake = _FakeSessionClient()
-        broker._client = fake  # type: ignore[assignment]
+        broker._client = fake  # type: ignore
         broker.close()
         self.assertEqual(fake.sessions.ended, [])
         self.assertTrue(fake.closed)

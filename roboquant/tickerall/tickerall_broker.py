@@ -4,7 +4,7 @@ from decimal import Decimal
 from typing import Self
 
 from tickerall import Tickerall
-from tickerall.types import BrokerName, TerminalType
+from tickerall.types import BrokerName, Position as TaPosition, SymbolSpec, TerminalType
 
 from roboquant.brokers.livebroker import LiveBroker
 from roboquant.common.account import Account
@@ -66,7 +66,7 @@ class TickerAllBroker(LiveBroker):
         self._account_id = account_id
         self._client = Tickerall(api_key=api_key, base_url=base_url)
         # Lazily-loaded cache of the broker's symbol specs (lot step/min), for volume quantization.
-        self._symbol_specs_cache: dict | None = None
+        self._symbol_specs_cache: dict[str, SymbolSpec] | None = None
         # True only when this broker opened the session itself (via `connect`); a session passed in by
         # account_id belongs to the caller and is never ended on `close`.
         self._owns_session = False
@@ -161,7 +161,7 @@ class TickerAllBroker(LiveBroker):
         # models one NET position per asset, so aggregate all of a symbol's tickets into a single net
         # Position — otherwise same-symbol tickets overwrite each other and roboquant sees only the last
         # ticket instead of the net exposure.
-        groups: dict[Asset, list] = defaultdict(list)
+        groups: dict[Asset, list[TaPosition]] = defaultdict(list)
         for p in positions:
             if not p.symbol or p.volume is None:
                 continue
@@ -265,7 +265,7 @@ class TickerAllBroker(LiveBroker):
         )
         logger.info("placed order symbol=%s ticket=%s", order.asset.symbol, result.ticket)
 
-    def _open_tickets(self, symbol: str) -> list:
+    def _open_tickets(self, symbol: str) -> list[TaPosition]:
         """Fresh open-position tickets for one symbol, read live (not from the possibly-stale account cache)."""
         detail = self._client.accounts.get(self._account_id)
         return [p for p in detail.positions if p.symbol == symbol and p.volume is not None]
@@ -287,7 +287,7 @@ class TickerAllBroker(LiveBroker):
     def _symbol_spec(self, symbol: str):
         """Lazily fetch + cache the broker's symbol specs, keyed by symbol name."""
         if self._symbol_specs_cache is None:
-            cache: dict = {}
+            cache: dict[str, SymbolSpec] = {}
             try:
                 for s in self._client.accounts.symbol_specs(self._account_id):
                     name = getattr(s, "name", None)
