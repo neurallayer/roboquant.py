@@ -165,7 +165,7 @@ class TickerAllBroker(LiveBroker):
         for p in positions:
             if not p.symbol or p.volume is None:
                 continue
-            groups[_to_asset(p.symbol, currency)].append(p)
+            groups[_to_asset(p.symbol, self._quote_currency(p.symbol), currency)].append(p)
 
         portfolio = Portfolio()
         for asset, tickets in groups.items():
@@ -198,7 +198,7 @@ class TickerAllBroker(LiveBroker):
             limit = o.limit_price if o.limit_price is not None else o.price
             if limit is None:
                 limit = float("nan")
-            asset = _to_asset(o.symbol, currency)
+            asset = _to_asset(o.symbol, self._quote_currency(o.symbol), currency)
             # Decimal via str(), not float, keeps the size exact (see _sync_positions).
             size = abs(Decimal(str(o.volume)))
             if str(o.side).upper() == "SELL":
@@ -297,6 +297,13 @@ class TickerAllBroker(LiveBroker):
                 logger.warning("failed to load symbol specs for %s", self._account_id, exc_info=True)
             self._symbol_specs_cache = cache
         return self._symbol_specs_cache.get(symbol)
+
+    def _quote_currency(self, symbol: str) -> Currency | None:
+        """The instrument's quote currency from the broker's symbol metadata (its profit currency), or None
+        when unavailable — so an asset is denoted in its real currency, not defaulted to the account's."""
+        spec = self._symbol_spec(symbol)
+        code = getattr(spec, "profit_currency", None) if spec is not None else None
+        return Currency(code) if code else None
 
     def _update_order(self, order: Order) -> None:
         self._client.orders.modify_pending(self._account_id, int(order.id), price=order.limit)

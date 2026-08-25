@@ -88,7 +88,7 @@ extra = [
   "ibind[oauth]>=0.1.22",
   "alpaca-py>=0.44.0",
   "ccxt>=4.5.65",
-  "tickerall>=0.1.16",
+  "tickerall>=0.4.1",
 ]
 
 [project.urls]

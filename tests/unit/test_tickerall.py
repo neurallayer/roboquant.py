@@ -94,8 +94,10 @@ def _pos(symbol, volume, side, ticket, *, entry=1.10, cur=1.11, open_time=None):
     )
 
 
-def _spec(name, *, volume_step=0.01, volume_min=0.01):
-    return SimpleNamespace(name=name, volume_step=volume_step, volume_min=volume_min)
+def _spec(name, *, volume_step=0.01, volume_min=0.01, profit_currency=None):
+    return SimpleNamespace(
+        name=name, volume_step=volume_step, volume_min=volume_min, profit_currency=profit_currency
+    )
 
 
 def _broker(client: _FakeClient) -> TickerAllBroker:
@@ -325,6 +327,49 @@ class TestNetEmulation(unittest.TestCase):
         broker = _broker(_FakeClient(_detail(_fin()), specs=[_spec("EURUSDm", volume_step=0.01, volume_min=0.01)]))
         self.assertEqual(broker._quantize_volume("EURUSDm", Decimal("0.024")), Decimal("0.02"))  # down to step
         self.assertEqual(broker._quantize_volume("EURUSDm", Decimal("0.005")), Decimal("0"))  # below min => 0
+
+
+class TestAssetCurrency(unittest.TestCase):
+    """The asset currency is the instrument's quote currency from broker metadata, not defaulted to the
+    account currency. roboquant identifies an asset by symbol AND currency, so the broker and the feeds
+    must resolve the same currency for a symbol."""
+
+    def test_broker_uses_symbol_spec_quote_currency(self):
+        # A symbol whose trailing letters are not its quote currency: the broker's spec is authoritative.
+        positions = [_pos("US30", 1.0, "BUY", "1", entry=39000.0, cur=39010.0)]
+        specs = [_spec("US30", profit_currency="EUR")]
+        account = _broker(_FakeClient(_detail(_fin(currency="USD"), positions), specs=specs))._get_account()
+        asset = next(a for a in account.portfolio if a.symbol == "US30")
+        self.assertEqual(asset.currency, Currency("EUR"))  # from the spec, not the account's USD
+
+    def test_broker_infers_quote_currency_without_spec(self):
+        # No spec (e.g. MT4): fall back to the pair heuristic, still not the account currency.
+        positions = [_pos("EURGBP", 1.0, "BUY", "1")]
+        account = _broker(_FakeClient(_detail(_fin(currency="USD"), positions), specs=[]))._get_account()
+        asset = next(a for a in account.portfolio if a.symbol == "EURGBP")
+        self.assertEqual(asset.currency, Currency("GBP"))  # inferred quote, not the account's USD
+
+    def test_to_asset_prefers_explicit_quote_currency(self):
+        # an explicit (spec-resolved) currency wins even over the pair heuristic
+        self.assertEqual(_to_asset("EURGBP", Currency("CHF")).currency, Currency("CHF"))
+        # a non-pair symbol uses the explicit currency instead of the fallback
+        self.assertEqual(_to_asset("US30", Currency("EUR")).currency, Currency("EUR"))
+        # without an explicit currency: standard pairs infer, non-pairs use the fallback
+        self.assertEqual(_to_asset("EURGBP").currency, Currency("GBP"))
+        self.assertEqual(_to_asset("US30", None, Currency("JPY")).currency, Currency("JPY"))
+
+    def test_feed_and_broker_resolve_the_same_asset(self):
+        # A position (broker) and a price event (feed) for one symbol must be the SAME asset, or roboquant
+        # cannot align them — both read the spec's quote currency.
+        specs = [_spec("US30", profit_currency="EUR")]
+        broker_account = _broker(
+            _FakeClient(_detail(_fin(currency="USD"), [_pos("US30", 1.0, "BUY", "1")]), specs=specs)
+        )._get_account()
+        broker_asset = next(a for a in broker_account.portfolio if a.symbol == "US30")
+        feed = TickerAllLiveFeed("key", "acc-test")
+        feed._client = _FakeClient(_detail(_fin()), specs=specs)  # type: ignore
+        feed_asset = _to_asset("US30", feed._quote_currency("US30"))
+        self.assertEqual(broker_asset, feed_asset)  # equal by symbol AND currency
 
 
 if __name__ == "__main__":

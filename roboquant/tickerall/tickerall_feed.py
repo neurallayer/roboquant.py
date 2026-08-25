@@ -16,13 +16,18 @@ from roboquant.feeds.livefeed import LiveFeed
 logger = logging.getLogger(__name__)
 
 
-def _to_asset(symbol: str, fallback_currency: Currency = USD) -> Asset:
+def _to_asset(symbol: str, quote_currency: Currency | None = None, fallback_currency: Currency = USD) -> Asset:
     """Map a MetaTrader symbol to a roboquant `Forex` asset.
 
-    MetaTrader symbols are typically a standard currency pair, sometimes with a broker suffix (for example
-    `EURUSDm`). The quote currency (the second half of the pair) becomes the asset currency, so `EURUSDm`
-    is denoted in `USD`. When the symbol is not a recognizable 6-letter pair, `fallback_currency` is used.
+    The asset's currency is the instrument's quote currency. It is taken from `quote_currency` when the
+    caller resolved it from the broker's symbol metadata (see `_SymbolCurrency`); this is authoritative and
+    is preferred over any inference. When it is not available, the quote currency is inferred from a standard
+    6-letter pair (optionally with a broker suffix, e.g. `EURUSDm` -> `USD`), and only when the symbol is not
+    a recognizable pair does it fall back to `fallback_currency` (never silently the account currency for a
+    symbol whose real currency is known).
     """
+    if quote_currency is not None:
+        return Forex(symbol, quote_currency)
     core = re.sub(r"[^A-Za-z]", "", symbol).upper()
     # strip a single trailing broker suffix letter that leaves a 6-letter pair (e.g. EURUSDm -> EURUSD)
     if len(core) == 7:
@@ -30,6 +35,35 @@ def _to_asset(symbol: str, fallback_currency: Currency = USD) -> Asset:
     if len(core) == 6:
         return Forex(symbol, Currency(core[3:6]))
     return Forex(symbol, fallback_currency)
+
+
+class _SymbolCurrency:
+    """Resolves a symbol's quote currency from the broker's symbol metadata, lazily and cached.
+
+    roboquant denotes each asset in its quote currency, and an asset's identity includes that currency, so
+    the broker and the feeds must agree on it. The broker exposes each symbol's `profit_currency` (the quote
+    currency) on its symbol spec; this loads that map once (one `symbol_specs` call) and serves it to both,
+    so a position and a price event for the same symbol resolve to the same asset. Returns `None` when the
+    symbol has no spec currency (e.g. an MT4 account, whose spec list is empty), leaving `_to_asset` to fall
+    back to the pair heuristic.
+    """
+
+    def __init__(self, client: Tickerall, account_id: str) -> None:
+        self._client = client
+        self._account_id = account_id
+        self._cache: dict[str, Currency] | None = None
+
+    def get(self, symbol: str) -> Currency | None:
+        if self._cache is None:
+            self._cache = {}
+            try:
+                for spec in self._client.accounts.symbol_specs(self._account_id):
+                    code = getattr(spec, "profit_currency", None)
+                    if spec.name and code:
+                        self._cache[spec.name] = Currency(code)
+            except Exception:
+                logger.warning("failed to load symbol specs for currency resolution", exc_info=True)
+        return self._cache.get(symbol)
 
 
 def _parse_tick_time(value) -> datetime:
@@ -79,6 +113,8 @@ class TickerAllLiveFeed(LiveFeed):
         self._client = Tickerall(api_key=api_key, base_url=base_url)
         self._stream = None
         self._subscribed: set[str] = set()
+        # Resolved lazily (a session opened via `connect` sets `_account_id` after __init__).
+        self._symbol_currency: _SymbolCurrency | None = None
         # True only when this feed opened the session itself (via `connect`); a session passed in by
         # account_id belongs to the caller and is never ended on `close`.
         self._owns_session = False
@@ -121,6 +157,12 @@ class TickerAllLiveFeed(LiveFeed):
         """The id of the connected TickerAll broker account this feed streams."""
         return self._account_id
 
+    def _quote_currency(self, symbol: str) -> Currency | None:
+        """The instrument's quote currency from broker metadata, or None to fall back to inference."""
+        if self._symbol_currency is None:
+            self._symbol_currency = _SymbolCurrency(self._client, self._account_id)
+        return self._symbol_currency.get(symbol)
+
     def subscribe(self, *symbols: str) -> None:
         """Subscribe to live ticks for the given symbols. Can be called more than once to add symbols."""
         if self._stream is None:
@@ -128,16 +170,19 @@ class TickerAllLiveFeed(LiveFeed):
             self._stream.on("tick", self._on_tick)
         self._stream.subscribe_ticks(self._account_id, list(symbols))
         self._subscribed.update(symbols)
+        # Pre-warm the currency cache (one metadata call) so tick handling never blocks on it.
+        if symbols:
+            self._quote_currency(next(iter(symbols)))
 
     @override
     def assets(self) -> list[Asset]:
         """The assets subscribed so far on this live feed."""
-        return [_to_asset(s) for s in sorted(self._subscribed)]
+        return [_to_asset(s, self._quote_currency(s)) for s in sorted(self._subscribed)]
 
     def _on_tick(self, ev) -> None:
         if ev.symbol is None or ev.bid is None or ev.ask is None:
             return
-        asset = _to_asset(ev.symbol)
+        asset = _to_asset(ev.symbol, self._quote_currency(ev.symbol))
         # roboquant Quote data layout: [ask-price, ask-volume, bid-price, bid-volume]. A MetaTrader tick
         # carries no size, so the volumes are left at 0.0 (only the prices are meaningful).
         quote = Quote(asset, array("f", [float(ev.ask), 0.0, float(ev.bid), 0.0]))
@@ -180,9 +225,17 @@ class TickerAllHistoricFeed(InMemoryFeed):
         _require_tickerall_account_id(account_id)
         self._account_id = account_id
         self._client = Tickerall(api_key=api_key, base_url=base_url)
+        # Resolved lazily (a session opened via `connect` sets `_account_id` after __init__).
+        self._symbol_currency: _SymbolCurrency | None = None
         # True only when this feed opened the session itself (via `connect`); a session passed in by
         # account_id belongs to the caller and is never ended on `close`.
         self._owns_session = False
+
+    def _quote_currency(self, symbol: str) -> Currency | None:
+        """The instrument's quote currency from broker metadata, or None to fall back to inference."""
+        if self._symbol_currency is None:
+            self._symbol_currency = _SymbolCurrency(self._client, self._account_id)
+        return self._symbol_currency.get(symbol)
 
     @classmethod
     def connect(
@@ -225,7 +278,7 @@ class TickerAllHistoricFeed(InMemoryFeed):
     def retrieve(self, *symbols: str, timeframe: Timeframe = "H1", hours: int = 168) -> None:
         """Retrieve candles for the given symbols at `timeframe` (e.g. `M1`, `H1`, `D1`) over the last `hours`."""
         for symbol in symbols:
-            asset = _to_asset(symbol)
+            asset = _to_asset(symbol, self._quote_currency(symbol))
             for candle in self._client.candles.get(self._account_id, symbol=symbol, hours=hours, timeframe=timeframe):
                 dt = datetime.fromtimestamp(int(candle.timestamp), tz=timezone.utc)
                 ohlcv = array(

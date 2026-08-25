@@ -2919,7 +2919,7 @@ requires-dist = [
     { name = "sb3-contrib", marker = "extra == 'ai'", specifier = ">=2.9.0" },
     { name = "stable-baselines3", marker = "extra == 'ai'", specifier = ">=2.9.0" },
     { name = "ta-lib", specifier = "==0.7.1" },
-    { name = "tickerall", marker = "extra == 'extra'", specifier = ">=0.1.16" },
+    { name = "tickerall", marker = "extra == 'extra'", specifier = ">=0.4.1" },
     { name = "torch", marker = "extra == 'ai'", specifier = ">=2.9.0" },
     { name = "yfinance", specifier = ">=1.5.2" },
 ]
@@ -3208,15 +3208,15 @@ wheels = [
 
 [[package]]
 name = "tickerall"
-version = "0.4.0"
+version = "0.4.1"
 source = { registry = "https://pypi.org/simple" }
 dependencies = [
     { name = "httpx" },
     { name = "websocket-client" },
 ]
-sdist = { url = "https://files.pythonhosted.org/packages/24/00/93446f0c7e108a9a14202164eaf9ac84dc2d2d97bbd7a5958f69f6dd5ae7/tickerall-0.4.0.tar.gz", hash = "sha256:eb8bddb3a69995fe679496044cfad44717a6e7972b7bf3eb176c8610f1574c5f", size = 27811, upload-time = "2026-08-14T07:11:13.057Z" }
+sdist = { url = "https://files.pythonhosted.org/packages/de/1c/5d728f2a16e0a35563f7f04666f3205db88b38f81a2c40ce2e1b9eceb4a9/tickerall-0.4.1.tar.gz", hash = "sha256:ee9d3c98daaa10b72b2c85dcf4ccf4b349bcae015e46cc48b77d0756f8d4c11f", size = 27920, upload-time = "2026-08-25T12:57:12.077Z" }
 wheels = [
-    { url = "https://files.pythonhosted.org/packages/9d/8b/e4043227928bc32ba2425c60e0dbf5eacd81c2cf22c435cdbb1a71154e8f/tickerall-0.4.0-py3-none-any.whl", hash = "sha256:1fcdc6df93ead71ef03f9c184b9605a9f6839263ee6570f03e4e05eaa2c44580", size = 35212, upload-time = "2026-08-14T07:11:11.674Z" },
+    { url = "https://files.pythonhosted.org/packages/85/84/385d6ec3f6beb8ce127ab776b2c8a86f745dac7f0d42a41a31e892200d79/tickerall-0.4.1-py3-none-any.whl", hash = "sha256:8899ca2d1b89185bc9776d544b13f8fc5d2710679239e3ee36ec9660815a9370", size = 35331, upload-time = "2026-08-25T12:57:10.608Z" },
 ]
 
 [[package]]
