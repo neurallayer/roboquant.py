@@ -1,5 +1,7 @@
+from typing import override
 import unittest
 
+from roboquant.common.asset import Asset
 from roboquant.common.signal import Signal
 from roboquant.util.buffer import OHLCVBuffer
 from roboquant.strategies.indicator_strategy import IndicatorStrategy
@@ -13,7 +15,8 @@ class _MyStrategy(IndicatorStrategy):
     using talib for the technical indicators.
     """
 
-    def _create_signal(self, asset, ohlcv: OHLCVBuffer):
+    @override
+    def _create_signal(self, asset: Asset, ohlcv: OHLCVBuffer):
         close = ohlcv.close
         sma12 = SMA(close, timeperiod=12)
         sma26 = SMA(close, timeperiod=26)

@@ -50,6 +50,7 @@ asset = rq.Stock("ABC")
 broker = rq.brokers.SimBroker()
 item = TradePrice(asset, 49.0, 1000)
 event = Event(rq.utcnow(), [item])
+broker.sync(event)
 ```
 
 ```{code-cell} python

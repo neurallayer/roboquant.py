@@ -60,12 +60,11 @@ class TestMonetary(unittest.TestCase):
 
         self.assertEqual(f"{w:.0f}", "200@USD + 50@EUR")
 
-        def _update(self):
+        def _update():
             a = Amount(USD, 10)
             a.value = 100  # type: ignore
 
         self.assertRaises(Exception, _update)
-
 
     def test_conversion(self):
         now = datetime.now()

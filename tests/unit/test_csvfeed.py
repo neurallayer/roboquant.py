@@ -9,7 +9,7 @@ from tests.common import run_price_item_feed
 class TestCSVFeed(unittest.TestCase):
 
     @staticmethod
-    def _get_root_dir(*paths):
+    def _get_root_dir(*paths: str):
         root = pathlib.Path(__file__).parent.resolve().joinpath("..", "data", *paths)
         return str(root)
 

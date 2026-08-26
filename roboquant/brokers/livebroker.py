@@ -63,7 +63,7 @@ class LiveBroker(Broker):
     def sync(self, event: Event | None = None) -> Account:
         now = utcnow()
 
-        # Safety check for not using this real broker in a back test over historic data
+        # Safety check for not using this live broker in a back test over historic data
         if event and (now - event.time > self.max_delay_event):
             raise ValueError(f"received event too far in the past now={now} event-time={event.time}")
 

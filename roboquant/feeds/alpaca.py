@@ -12,9 +12,9 @@ from alpaca.data.historical.stock import StockHistoricalDataClient
 from alpaca.data.live.crypto import CryptoDataStream
 from alpaca.data.live.option import OptionDataStream
 from alpaca.data.live.stock import StockDataStream
-from alpaca.data.models.bars import BarSet
-from alpaca.data.models.quotes import QuoteSet
-from alpaca.data.models.trades import TradeSet
+from alpaca.data.models.bars import BarSet, Bar as AlpacaBar
+from alpaca.data.models.quotes import QuoteSet, Quote as AlpacaQuote
+from alpaca.data.models.trades import TradeSet, Trade as AlpacaTrade
 from alpaca.data.requests import (
     CryptoBarsRequest,
     CryptoTradesRequest,
@@ -93,17 +93,17 @@ class AlpacaLiveFeed(LiveFeed):
         event = Event(time, [item])
         self._put(event)
 
-    async def __handle_trades(self, data):
+    async def __handle_trades(self, data: AlpacaTrade | Any):
         asset = _get_asset(data.symbol, self.asset_class)
         item = TradePrice(asset, data.price, data.size)
         self.__put_item(data.timestamp, item)
 
-    async def __handle_bars(self, data):
+    async def __handle_bars(self, data: AlpacaBar | Any):
         asset = _get_asset(data.symbol, self.asset_class)
         item = Bar(asset, array("f", [data.open, data.high, data.low, data.close, data.volume]), self.__one_minute)
         self.__put_item(data.timestamp, item)
 
-    async def __handle_quotes(self, data):
+    async def __handle_quotes(self, data: AlpacaQuote | Any):
         asset = _get_asset(data.symbol, self.asset_class)
         item = Quote(asset, array("f", [data.ask_price, data.ask_size, data.bid_price, data.bid_size]))
         self.__put_item(data.timestamp, item)
@@ -144,8 +144,8 @@ class _AlpacaHistoricFeed(InMemoryFeed):
     """Base class for Alpaca historic feeds.
     This class is not intended to be used directly."""
 
-    def _process_bars(self, bar_set, freq: str, asset_class: AssetClass):
-        for symbol, data in bar_set.items():
+    def _process_bars(self, bar_set: BarSet, freq: str, asset_class: AssetClass):
+        for symbol, data in bar_set.data.items():
             asset = _get_asset(symbol, asset_class)
             for d in data:
                 time = d.timestamp
@@ -153,16 +153,16 @@ class _AlpacaHistoricFeed(InMemoryFeed):
                 item = Bar(asset, ohlcv, freq)
                 super()._add_item(time, item)
 
-    def _process_trades(self, quote_set, asset_class):
-        for symbol, data in quote_set.items():
+    def _process_trades(self, trade_set: TradeSet, asset_class: AssetClass):
+        for symbol, data in trade_set.data.items():
             asset = _get_asset(symbol, asset_class)
             for d in data:
                 time = d.timestamp
                 item = TradePrice(asset, d.price, d.size)
                 super()._add_item(time, item)
 
-    def _process_quotes(self, quote_set, asset_class):
-        for symbol, data in quote_set.items():
+    def _process_quotes(self, quote_set: QuoteSet, asset_class: AssetClass):
+        for symbol, data in quote_set.data.items():
             asset = _get_asset(symbol, asset_class)
             for d in data:
                 time = d.timestamp
@@ -215,7 +215,7 @@ class AlpacaHistoricStockFeed(_AlpacaHistoricFeed):
         res = self.client.get_stock_bars(req)
         assert isinstance(res, BarSet)
         freq = str(resolution)
-        self._process_bars(res.data, freq, AssetClass.US_EQUITY)
+        self._process_bars(res, freq, AssetClass.US_EQUITY)
 
     def retrieve_trades(self, *symbols: str, start: datetime | str | None = None, end: datetime | str | None = None):
         """Retrieve trade data for the given symbols.
@@ -228,7 +228,7 @@ class AlpacaHistoricStockFeed(_AlpacaHistoricFeed):
         req = StockTradesRequest(symbol_or_symbols=list(symbols), start=start, end=end, feed=self.feed)  # type: ignore
         res = self.client.get_stock_trades(req)
         assert isinstance(res, TradeSet)
-        self._process_trades(res.data, AssetClass.US_EQUITY)
+        self._process_trades(res, AssetClass.US_EQUITY)
         self._update()
 
     def retrieve_quotes(self, *symbols: str, start: datetime | str | None = None, end: datetime | str | None = None):
@@ -242,7 +242,7 @@ class AlpacaHistoricStockFeed(_AlpacaHistoricFeed):
         req = StockQuotesRequest(symbol_or_symbols=list(symbols), start=start, end=end, feed=self.feed)  # type: ignore
         res = self.client.get_stock_quotes(req)
         assert isinstance(res, QuoteSet)
-        self._process_quotes(res.data, AssetClass.US_EQUITY)
+        self._process_quotes(res, AssetClass.US_EQUITY)
         self._update()
 
 
@@ -281,7 +281,7 @@ class AlpacaHistoricCryptoFeed(_AlpacaHistoricFeed):
         res = self.client.get_crypto_bars(req)
         assert isinstance(res, BarSet)
         freq = str(resolution)
-        self._process_bars(res.data, freq, AssetClass.CRYPTO)
+        self._process_bars(res, freq, AssetClass.CRYPTO)
         self._update()
 
     def retrieve_trades(self, *symbols: str, start: datetime | str | None = None, end: datetime | str | None = None):
@@ -295,6 +295,6 @@ class AlpacaHistoricCryptoFeed(_AlpacaHistoricFeed):
         req = CryptoTradesRequest(symbol_or_symbols=list(symbols), start=start, end=end)  # type: ignore
         res = self.client.get_crypto_trades(req)
         assert isinstance(res, TradeSet)
-        self._process_trades(res.data, AssetClass.CRYPTO)
+        self._process_trades(res, AssetClass.CRYPTO)
         self._update()
 

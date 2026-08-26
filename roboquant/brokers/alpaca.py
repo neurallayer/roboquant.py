@@ -1,3 +1,5 @@
+from typing import override
+
 from roboquant.brokers.livebroker import LiveBroker
 from roboquant.common.account import Account
 from roboquant.common.monetary import USD, Amount, Wallet
@@ -26,7 +28,7 @@ class AlpacaBroker(LiveBroker):
         super().__init__()
         self.__client = TradingClient(api_key, secret_key)
 
-    def _sync_orders(self):
+    def __sync_orders(self):
         orders = []
         request = GetOrdersRequest(status=QueryOrderStatus.OPEN)
         alpaca_orders: list[AOrder] = self.__client.get_orders(request)  # type: ignore
@@ -43,7 +45,7 @@ class AlpacaBroker(LiveBroker):
 
         return orders
 
-    def _sync_positions(self):
+    def __sync_positions(self):
         positions = Portfolio()
         open_pos: list[APosition] = self.__client.get_all_positions()  # type: ignore
 
@@ -56,6 +58,7 @@ class AlpacaBroker(LiveBroker):
             positions[asset] = new_pos
         return positions
 
+    @override
     def _get_account(self) -> Account:
         account = Account()
         acc: TradeAccount = self.__client.get_account()  # type: ignore
@@ -64,18 +67,21 @@ class AlpacaBroker(LiveBroker):
         if acc.cash:
             account.cash = Wallet(Amount(USD, float(acc.cash)))
 
-        account.portfolio = self._sync_positions()
-        account.orders = self._sync_orders()
+        account.portfolio = self.__sync_positions()
+        account.orders = self.__sync_orders()
         return account
 
+    @override
     def _cancel_order(self, order: Order):
         self.__client.cancel_order_by_id(order.id)
 
+    @override
     def _update_order(self, order: Order):
         req = ReplaceOrderRequest(qty=int(abs(float(order.size))), limit_price=order.limit)
         result = self.__client.replace_order_by_id(order.id, req)
         logger.info("result update order oder=%s result=%s", order, result)
 
+    @override
     def _place_order(self, order: Order):
         req = self._get_order_request(order)
         result = self.__client.submit_order(req)

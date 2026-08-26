@@ -1,5 +1,6 @@
 import logging
 import os.path
+from pathlib import Path
 import sqlite3
 from array import array
 from datetime import datetime
@@ -40,7 +41,7 @@ class SQLFeed(HistoricFeed):
     _sql_insert_quote = "INSERT into prices VALUES(?,?,?,?,?,?)"
     _sql_create_index = "CREATE INDEX IF NOT EXISTS date_idx ON prices(date)"
 
-    def __init__(self, db_file, price_type: Literal["bar", "quote"] = "bar") -> None:
+    def __init__(self, db_file: str | Path, price_type: Literal["bar", "quote"] = "bar") -> None:
         super().__init__()
         self.db_file = db_file
         self.price_type = price_type

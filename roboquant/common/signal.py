@@ -131,7 +131,9 @@ class Signal:
         return self.is_buy if pos.is_short else self.is_sell
 
     def is_open_position(self, pos: Position) -> bool:
-        """Return True if this an opening of a position, False otherwise.
+        """Return True if this signal would be an opening of a position,
+        False otherwise.
+        Opening a position can be both Short and Long.
         """
         return self.is_entry and pos.is_closed
 

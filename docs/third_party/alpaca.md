@@ -33,7 +33,7 @@ The `AlpacaHistoricStockFeed` fetches historical stock data from Alpaca's API. I
 
 ### Basic Usage
 
-```{code-cell} python
+```{code} python
 import os
 from dotenv import load_dotenv
 
@@ -64,7 +64,7 @@ The `AlpacaBroker` allows you to execute orders against an Alpaca live or paper 
 It can be used standalone or passed into {cl}`run` for live or paper trading execution.
 
 
-```{code-cell} python
+```{code} python
 from roboquant.brokers.alpaca import AlpacaBroker
 
 broker = AlpacaBroker(

@@ -1,7 +1,7 @@
 from abc import abstractmethod
 from collections import deque
 from datetime import datetime, timezone
-from typing import Any, TypeVar, Generic
+from typing import Any, TypeVar, Generic, override
 
 import numpy as np
 from numpy.typing import NDArray, ArrayLike
@@ -60,7 +60,7 @@ class Feature(Generic[T]):
         """Return a full NaN array of the correct shape"""
         return np.full(self._shape(), float("nan"), dtype=np.float32)
 
-    def returns(self, period=1) -> "Feature[T]":
+    def returns(self, period : int =1) -> "Feature[T]":
         if period == 1:
             return ReturnFeature(self)
         return LongReturnsFeature(self, period)
@@ -69,12 +69,12 @@ class Feature(Generic[T]):
         """Normalize the feature values by calculating the mean and standard deviation."""
         return NormalizeFeature(self, min_period)
 
-    def __getitem__(self, *args) -> "Feature[T]":
+    def __getitem__(self, *args: Any) -> "Feature[T]":
         """Return a slice of the feature.
         For example, if the feature has size 10, and you call `feature[2:5]`, it will return a new feature
         that contains the values for indices 2, 3, and 4 of the original feature.
         """
-        return SlicedFeature(self, args)
+        return SlicedFeature(self, *args)
 
 
 ##############################
@@ -85,19 +85,22 @@ class Feature(Generic[T]):
 class SlicedFeature(Feature[T]):
     """Calculate a slice from another feature"""
 
-    def __init__(self, feature: Feature[T], args) -> None:
+    def __init__(self, feature: Feature[T], args: Any) -> None:
         super().__init__()
         self.args = args
         self.feature = feature
         self._size = len(feature._zeros()[args])
 
+    @override
     def calc(self, value: T) -> NPFloatArray:
         values = self.feature.calc(value)
         return values[self.args]
 
+    @override
     def size(self):
         return self._size
 
+    @override
     def reset(self):
         return self.feature.reset()
 
@@ -111,9 +114,11 @@ class FixedValueFeature(Feature[Any]):
         super().__init__()
         self.value = np.array(value, dtype="float32")
 
+    @override
     def size(self) -> int:
         return len(self.value)
 
+    @override
     def calc(self, value: Any) -> NPFloatArray:
         return self.value
 
@@ -133,12 +138,15 @@ class RandomFeature(Feature[Any]):
         self._seed = seed
         self.reset()
 
+    @override
     def size(self) -> int:
         return self._size
 
+    @override
     def calc(self, value: Any) -> NPFloatArray:
         return np.random.rand(self._size).astype(np.float32)
 
+    @override
     def reset(self):
         np.random.seed(self._seed)
 
@@ -153,13 +161,16 @@ class FeatureSet(Feature[T]):
         self.features = features
         self._size = sum(feature.size() for feature in self.features)
 
+    @override
     def calc(self, value: T) -> NPFloatArray:
         data = [feature.calc(value) for feature in self.features]
         return np.hstack(data, dtype=np.float32)
 
+    @override
     def size(self) -> int:
         return self._size
 
+    @override
     def reset(self):
         for feature in self.features:
             feature.reset()
@@ -179,13 +190,13 @@ class NormalizeFeature(Feature[T]):
     def _zero_int(self) -> NPIntArray:
         return np.zeros((self.size(),), dtype="int64")
 
-    def denormalize(self, value) -> NPFloatArray:
+    def denormalize(self, value : NPFloatArray) -> NPFloatArray:
         """Denormalize the value"""
         (count, mean, m2) = self.existing_aggregate
-        stdev = np.sqrt(m2 / count) - 1e-12
+        stdev = np.sqrt(m2 / count) # - 1e-12
         return value * stdev + mean
 
-    def __update(self, new_value):
+    def __update(self, new_value: NPFloatArray):
         (count, mean, m2) = self.existing_aggregate
         mask = ~np.isnan(new_value)
         count[mask] += 1
@@ -194,21 +205,24 @@ class NormalizeFeature(Feature[T]):
         delta2 = new_value - mean
         m2[mask] += delta[mask] * delta2[mask]
 
-    def __normalize_values(self, values) -> NPFloatArray:
+    def __normalize_values(self, values: NPFloatArray) -> NPFloatArray:
         (count, mean, m2) = self.existing_aggregate
         stdev = self._full_nan()
         mask = count >= self.min_count
         stdev[mask] = np.sqrt(m2[mask] / count[mask]) + 1e-12
         return (values - mean) / stdev
 
+    @override
     def calc(self, value: T) -> NPFloatArray:
         values = self.feature.calc(value)
         self.__update(values)
         return self.__normalize_values(values)
 
+    @override
     def size(self) -> int:
         return self.feature.size()
 
+    @override
     def reset(self):
         self.existing_aggregate = (self._zero_int(), self._zeros(), self._zeros())
         self.feature.reset()
@@ -223,6 +237,7 @@ class FillFeature(Feature[T]):
         self.feature: Feature[T] = feature
         self.fill = self._full_nan()
 
+    @override
     def calc(self, value: T) -> NPFloatArray:
         values = self.feature.calc(value)
         mask = np.isnan(values)
@@ -230,10 +245,12 @@ class FillFeature(Feature[T]):
         self.fill = np.copy(values)
         return values
 
+    @override
     def reset(self):
         self.fill = self._full_nan()
         self.feature.reset()
 
+    @override
     def size(self) -> int:
         return self.feature.size()
 
@@ -247,15 +264,18 @@ class FillWithConstantFeature(Feature[T]):
         self.feature: Feature[T] = feature
         self.fill = np.full(self._shape(), constant, dtype=np.float32)
 
+    @override
     def calc(self, value: T) -> NPFloatArray:
         values = self.feature.calc(value)
         mask = np.isnan(values)
         values[mask] = self.fill[mask]
         return values
 
+    @override
     def reset(self):
         self.feature.reset()
 
+    @override
     def size(self) -> int:
         return self.feature.size()
 
@@ -268,15 +288,18 @@ class ReturnFeature(Feature[T]):
         self.feature: Feature[T] = feature
         self.history = self._full_nan()
 
+    @override
     def calc(self, value: T) -> NPFloatArray:
         values = self.feature.calc(value)
         r: NPFloatArray = values / self.history - np.float32(1.0)
         self.history = values
         return r
 
+    @override
     def size(self) -> int:
         return self.feature.size()
 
+    @override
     def reset(self):
         self.history = self._full_nan()
         self.feature.reset()
@@ -289,6 +312,7 @@ class LongReturnsFeature(Feature[T]):
         self.history: deque[NPFloatArray] = deque(maxlen=period)
         self.feature: Feature[T] = feature
 
+    @override
     def calc(self, value: T) -> NPFloatArray:
         values = self.feature.calc(value)
         h = self.history
@@ -301,9 +325,11 @@ class LongReturnsFeature(Feature[T]):
         h.append(values)
         return r
 
+    @override
     def size(self) -> int:
         return self.feature.size()
 
+    @override
     def reset(self):
         self.history.clear()
         self.feature.reset()
@@ -320,6 +346,7 @@ class MaxReturnFeature(Feature[T]):
         self.history: deque[NPFloatArray] = deque(maxlen=period)
         self.feature: Feature[T] = feature
 
+    @override
     def calc(self, value: T) -> NPFloatArray:
         values = self.feature.calc(value)
         h = self.history
@@ -331,9 +358,11 @@ class MaxReturnFeature(Feature[T]):
         r = max(h) / h[0] - 1.0
         return r
 
+    @override
     def size(self) -> int:
         return self.feature.size()
 
+    @override
     def reset(self):
         self.history.clear()
         self.feature.reset()
@@ -349,6 +378,7 @@ class MinReturnFeature(Feature[T]):
         self.history: deque[NPFloatArray] = deque(maxlen=period)
         self.feature: Feature[T] = feature
 
+    @override
     def calc(self, value: T) -> NPFloatArray:
         values = self.feature.calc(value)
         h = self.history
@@ -360,9 +390,11 @@ class MinReturnFeature(Feature[T]):
         r = min(h) / h[0] - 1.0
         return r
 
+    @override
     def size(self) -> int:
         return self.feature.size()
 
+    @override
     def reset(self):
         self.history.clear()
         self.feature.reset()
@@ -378,6 +410,7 @@ class SMAFeature(Feature[T]):
         self.history = np.zeros((self.period, feature.size()), dtype=np.float32)
         self._cnt = 0
 
+    @override
     def calc(self, value: T) -> NPFloatArray:
         values = self.feature.calc(value)
         idx = self._cnt % self.period
@@ -389,9 +422,11 @@ class SMAFeature(Feature[T]):
 
         return np.mean(self.history, axis=0)
 
+    @override
     def size(self) -> int:
         return self.feature.size()
 
+    @override
     def reset(self):
         self.history = np.zeros((self.period, self.feature.size()), dtype=np.float32)
         self.feature.reset()
@@ -406,9 +441,11 @@ class SMAFeature(Feature[T]):
 class EquityFeature(Feature[Account]):
     """Calculates the total equity value of the account"""
 
+    @override
     def calc(self, value: Account) -> NPFloatArray:
         return np.array(value.equity_value(), dtype=np.float32)
 
+    @override
     def size(self):
         return 1
 
@@ -422,6 +459,7 @@ class UnrealizedPNLFeature(Feature[Account]):
     ```
     """
 
+    @override
     def calc(self, value: Account) -> NPFloatArray:
         mkt_value = value.convert(value.portfolio.mkt_value())
         pnl = value.convert(value.portfolio.unrealized_pnl())
@@ -429,6 +467,7 @@ class UnrealizedPNLFeature(Feature[Account]):
             return np.array(pnl / mkt_value, dtype=np.float32)
         return np.array(0.0, dtype=np.float32)
 
+    @override
     def size(self):
         return 1
 
@@ -448,11 +487,12 @@ class DayOfWeekFeature(Feature[Event]):
     - not one-hot encoded: [0.0]
     """
 
-    def __init__(self, tz=timezone.utc, one_hot_encoded: bool = True) -> None:
+    def __init__(self, tz: timezone=timezone.utc, one_hot_encoded: bool = True) -> None:
         super().__init__()
         self.tz = tz
         self.one_hot_encoded = one_hot_encoded
 
+    @override
     def calc(self, value: Event) -> NPFloatArray:
         dt = datetime.astimezone(value.time, self.tz)
         weekday = dt.weekday()
@@ -463,6 +503,7 @@ class DayOfWeekFeature(Feature[Event]):
         result[weekday] = 1.0
         return result
 
+    @override
     def size(self) -> int:
         return 7 if self.one_hot_encoded else 1
 
@@ -477,11 +518,12 @@ class DayOfMonthFeature(Feature[Event]):
     - not one-hot encoded: [14.0]
     """
 
-    def __init__(self, tz=timezone.utc, one_hot_encoded: bool = True) -> None:
+    def __init__(self, tz: timezone=timezone.utc, one_hot_encoded: bool = True) -> None:
         super().__init__()
         self.tz = tz
         self.one_hot_encoded = one_hot_encoded
 
+    @override
     def calc(self, value: Event) -> NPFloatArray:
         dt = datetime.astimezone(value.time, self.tz)
         day = dt.day - 1  # day of month is 1-31, we want 0-30
@@ -492,6 +534,7 @@ class DayOfMonthFeature(Feature[Event]):
         result[day] = 1.0
         return result
 
+    @override
     def size(self) -> int:
         return 31 if self.one_hot_encoded else 1
 
@@ -505,11 +548,12 @@ class MonthOfYearFeature(Feature[Event]):
     - not one-hot encoded: [2.0]
     """
 
-    def __init__(self, tz=timezone.utc, one_hot_encoded: bool = True) -> None:
+    def __init__(self, tz : timezone =timezone.utc, one_hot_encoded: bool = True) -> None:
         super().__init__()
         self.tz = tz
         self.one_hot_encoded = one_hot_encoded
 
+    @override
     def calc(self, value: Event) -> NPFloatArray:
         dt = datetime.astimezone(value.time, self.tz)
         month = dt.month - 1  # month is 1-12, we want 0-11
@@ -520,6 +564,7 @@ class MonthOfYearFeature(Feature[Event]):
         result[month] = 1.0
         return result
 
+    @override
     def size(self) -> int:
         return 12 if self.one_hot_encoded else 1
 
@@ -531,6 +576,7 @@ class TimeDifference(Feature[Event]):
         super().__init__()
         self._last_time: datetime | None = None
 
+    @override
     def calc(self, value: Event) -> NPFloatArray:
         if self._last_time:
             diff = value.time - self._last_time
@@ -540,9 +586,11 @@ class TimeDifference(Feature[Event]):
         self._last_time = value.time
         return self._full_nan()
 
+    @override
     def size(self) -> int:
         return 1
 
+    @override
     def reset(self):
         self._last_time = None
 
@@ -559,6 +607,7 @@ class IndicatorFeature(Feature[Event]):
         self.timeperiod = timeperiod
         self.assets = list(assets)
 
+    @override
     def calc(self, value: Event) -> NPFloatArray:
         result = []
         nan = float("nan")
@@ -580,9 +629,11 @@ class IndicatorFeature(Feature[Event]):
         """Override this method with technical analysis logic"""
         ...
 
+    @override
     def size(self) -> int:
         return len(self.assets)
 
+    @override
     def reset(self):
         self._data = {}
 
@@ -592,9 +643,10 @@ class TrueRangeFeature(Feature[Event]):
 
     def __init__(self, asset: Asset) -> None:
         super().__init__()
-        self.prev_close = None
+        self.prev_close : float | None = None
         self.asset = asset
 
+    @override
     def calc(self, value: Event):
         item = value.price_items.get(self.asset)
         if item is None or not isinstance(item, Bar):
@@ -609,9 +661,11 @@ class TrueRangeFeature(Feature[Event]):
 
         return np.array([result], dtype=np.float32)
 
+    @override
     def size(self) -> int:
         return 1
 
+    @override
     def reset(self):
         self.prev_close = None
 
@@ -624,10 +678,12 @@ class PriceFeature(Feature[Event]):
         self.assets = assets
         self.price_type = price_type
 
-    def calc(self, value):
+    @override
+    def calc(self, value: Event):
         prices = [value.get_price(asset, self.price_type) for asset in self.assets]
         return np.array(prices, dtype=np.float32)
 
+    @override
     def size(self) -> int:
         return len(self.assets)
 
@@ -642,6 +698,7 @@ class BarFeature(Feature[Event]):
         super().__init__()
         self.assets = assets
 
+    @override
     def calc(self, value: Event) -> NPFloatArray:
         result = self._full_nan()
         for idx, asset in enumerate(self.assets):
@@ -652,6 +709,7 @@ class BarFeature(Feature[Event]):
 
         return result
 
+    @override
     def size(self) -> int:
         return 5 * len(self.assets)
 
@@ -666,6 +724,7 @@ class QuoteFeature(Feature[Event]):
         super().__init__()
         self.assets = assets
 
+    @override
     def calc(self, value: Event) -> NPFloatArray:
         result = self._full_nan()
         for idx, asset in enumerate(self.assets):
@@ -676,6 +735,7 @@ class QuoteFeature(Feature[Event]):
 
         return result
 
+    @override
     def size(self) -> int:
         return 4 * len(self.assets)
 
@@ -691,12 +751,13 @@ class CacheFeature(Feature[Event]):
     the cache, use the `clear()` method.
     """
 
-    def __init__(self, feature: Feature[Event], validate=False) -> None:
+    def __init__(self, feature: Feature[Event], validate : bool =False) -> None:
         super().__init__()
         self.feature: Feature[Event] = feature
         self._cache: dict[datetime, NPFloatArray] = {}
         self.validate = validate
 
+    @override
     def calc(self, value: Event) -> NPFloatArray:
         time = value.time
         if time in self._cache:
@@ -712,6 +773,7 @@ class CacheFeature(Feature[Event]):
         self._cache[time] = values
         return values
 
+    @override
     def reset(self):
         """Reset the underlying feature. This doesn't clear the cache"""
         self.feature.reset()
@@ -720,6 +782,7 @@ class CacheFeature(Feature[Event]):
         """Clear all the cache"""
         self._cache = {}
 
+    @override
     def size(self) -> int:
         return self.feature.size()
 
@@ -735,9 +798,11 @@ class VolumeFeature(Feature[Event]):
         self.assets = assets
         self.volume_type = volume_type
 
+    @override
     def calc(self, value: Event) -> NPFloatArray:
         volumes = [value.get_volume(asset, self.volume_type) for asset in self.assets]
         return np.array(volumes, dtype=np.float32)
 
+    @override
     def size(self) -> int:
         return len(self.assets)

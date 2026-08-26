@@ -15,9 +15,10 @@ logger = logging.getLogger(__name__)
 
 
 class SimpleTrader(Trader):
-    """Trader only opens and close positions based on the received signals.
-    It will not increase or decrease position sizes. If there is already an open order for
-    an asset, it will not create another one. But the open orders don't count for positions.
+    """Trader only opens and close positions based on the received signals using Market Orders.
+    It will not increase or decrease position sizes once a position is opened for an asset.
+    If there is already an open order for an asset, it will not create another one.
+    But the open orders don't count for positions.
     """
     def __init__(self, max_positions: int = 10, shorting: bool = False, price_type: str = "DEFAULT") -> None:
         super().__init__()

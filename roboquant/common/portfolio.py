@@ -11,10 +11,10 @@ import pandas as pd
 
 @dataclass(slots=True, frozen=True)
 class Position:
-    """The position of an asset in the portfolio. The position prices are denoted in the currency of the asset that
-    is linked to this position.
+    """The position of an asset in the portfolio. The position prices are denoted in the
+    currency of the asset that is linked to this position.
 
-    A position is immutable and is managed only by the broker.
+    A position object is immutable and is managed only by the broker.
     """
 
     size: Decimal = Decimal()
@@ -43,7 +43,9 @@ class Position:
 
 
 class Portfolio(UserDict[Asset, Position]):
-    """Contains all the open postions with the corresponding asset"""
+    """Contains the open postions with the corresponding asset.
+    If a position is closed, it will no longer be included in the portfolio.
+    """
 
     def value(self, asset: Asset) -> Amount:
         """
@@ -94,9 +96,10 @@ class Portfolio(UserDict[Asset, Position]):
 
     def mkt_value(self, *assets: Asset) -> Wallet:
         """
-        Return the sum of the market values of the open positions in the account. Short
-        positions have a negative market value.
-        If one or more asset is provided, limit it to those assets, otherwise include all assets.
+        Return the sum of the market values of the open positions in the account.
+        Short positions have a negative market value.
+        If one or more asset is provided, limit it to those assets, otherwise
+        include all assets.
 
         Returns:
             Wallet: The total market value of all open positions.
@@ -109,9 +112,10 @@ class Portfolio(UserDict[Asset, Position]):
 
     def exposure(self, *assets: Asset) -> Wallet:
         """
-        Return the sum of the exposure of the open positions in the account. Short
+        Return the sum of the exposure of the open positions in the portfolio. Short
         positions have a positive exposure.
-        If one or more asset is provided, limit it to those assets, otherwise include all assets.
+        If one or more asset is provided, limit it to those assets,
+        otherwise include all assets.
 
         Returns:
             Wallet: The total exposure of all open positions.
@@ -148,8 +152,8 @@ class Portfolio(UserDict[Asset, Position]):
 
     def get_position(self, asset: Asset) -> Position:
         """
-        Return the position size for an asset, en empty position if not
-        in the portfolio.
+        Return the position for an asset, or an empty position
+        if the asset is not in the portfolio.
 
         Args:
             asset (Asset): The asset for which to get the position size.
