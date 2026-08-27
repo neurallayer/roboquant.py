@@ -13,7 +13,7 @@ account = rq.demo_run()
 ```
 
 
-# Portfolio
+# Position
 
 (portfolio_def)=
 ## Overview
@@ -26,14 +26,10 @@ Only the {cl}`Broker` modifies the portfolio and its positions.
 
 ```{code-cell} python
 :tags: [hide-output]
-portfolio = account.portfolio
 
-asset = rq.Stock("JPM")
-pprint.pp(portfolio[asset])
+print(f"unrealized pnl {account.unrealized_pnl():_.2f}")
 
-print(f"unrealized pnl {portfolio.unrealized_pnl():_.2f}")
-
-print(f"market value {portfolio.mkt_value():_.2f}")
+print(f"market value {account.mkt_value():_.2f}")
 ```
 
 ## Position
@@ -41,8 +37,9 @@ print(f"market value {portfolio.mkt_value():_.2f}")
 A position is the net quantity of an {cl}`Asset` currently held, representing its market exposure and risk at any given moment.
 Every time a trade is executed, the Position for that Asset is updated.
 
-The Position class is immutable and contains 3 attributes:
+The Position class is immutable and contains 4 attributes:
 
+- asset of the position
 - contract size (combined result of all trades)
 - average price paid (combined result of all trades)
 - latest market price (updated at the end of each step)

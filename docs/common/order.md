@@ -114,7 +114,7 @@ If you try set a limit on a market-order an Error will be raised.
 ```{code-cell} python
 :tags: [remove-input]
 from roboquant import Account, SimBroker
-account = Account()
+account = Account.empty()
 broker = SimBroker()
 order = Order(Stock("ABC"), Decimal(100), limit=50.0, id="1234")
 ```
