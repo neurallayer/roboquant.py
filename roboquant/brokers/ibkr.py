@@ -149,8 +149,10 @@ class IBKRBroker(LiveBroker):
             conid = pos_info["conid"]
             if asset := self._mapper.get_asset(conid):
                 if size := pos_info["position"]:
-                    position = roboquant.common.portfolio.Position(Decimal(size), pos_info["avgPrice"], pos_info["mktPrice"])
-                    result[asset] = position
+                    position = roboquant.common.portfolio.Position(
+                        asset, Decimal(size), pos_info["avgPrice"], pos_info["mktPrice"]
+                    )
+                    result.append(position)
             else:
                 logger.warning("ignoring position %s because couldn't map conid to asset", pos_info)
         return result

@@ -53,14 +53,15 @@ class AlpacaBroker(LiveBroker):
             size = Decimal(p.qty)
             if p.side == PositionSide.SHORT:
                 size = -size
-            new_pos = Position(size, float(p.avg_entry_price), float(p.current_price or "nan"))
             asset = _get_asset(p.symbol, p.asset_class)
-            positions[asset] = new_pos
+            new_pos = Position(asset, size, float(p.avg_entry_price), float(p.current_price or "nan"))
+            positions.append(new_pos)
         return positions
 
     @override
     def _get_account(self) -> Account:
         account = Account()
+        account.last_update = self._last_update
         acc: TradeAccount = self.__client.get_account()  # type: ignore
         if acc.buying_power:
             account.buying_power = Amount(USD, float(acc.buying_power))

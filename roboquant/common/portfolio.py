@@ -1,4 +1,3 @@
-from collections import UserDict
 from dataclasses import asdict, dataclass
 from decimal import Decimal
 
@@ -16,6 +15,8 @@ class Position:
 
     A position object is immutable and is managed only by the broker.
     """
+    asset: Asset
+    """The asset of the position"""
 
     size: Decimal = Decimal()
     """Position size as a Decimal with a negative size indicating a short position"""
@@ -41,15 +42,33 @@ class Position:
         """Return True if this is a closed position, False otherwise"""
         return self.size.is_zero()
 
+    def mkt_value(self) -> Amount:
+        """
+        Return the market value of the open position.
+        Short positions have a negative market value.
 
-class Portfolio(UserDict[Asset, Position]):
+        Returns:
+            The total market value of all open positions.
+        """
+        return self.asset.amount(self.size, self.mkt_price)
+
+    def unrealized_pnl(self) -> Amount:
+        """
+        Return the unrealized profit and loss for the open position.
+        Returns:
+            The unrealized profit and loss.
+        """
+        return self.asset.amount(self.size, self.mkt_price - self.avg_price)
+
+
+class Portfolio(list[Position]):
     """Contains the open postions with the corresponding asset.
     If a position is closed, it will no longer be included in the portfolio.
     """
 
     def value(self, asset: Asset) -> Amount:
         """
-        Return position amount denoted in the base currency of the account. If there is no
+        Return position amount denoted in the currency of the asset. If there is no
         open position, 0.0 will be returned. Short positions will return a negative value.
 
         Args:
@@ -68,7 +87,7 @@ class Portfolio(UserDict[Asset, Position]):
         Returns:
             dict[Asset, Position]: A dictionary of assets and their corresponding short positions.
         """
-        return Portfolio({asset: position for (asset, position) in self.items() if position.is_short})
+        return Portfolio(position for position in self if position.is_short)
 
     def long_positions(self) -> "Portfolio":
         """
@@ -77,7 +96,7 @@ class Portfolio(UserDict[Asset, Position]):
         Returns:
             dict[Asset, Position]: A dictionary of assets and their corresponding long positions.
         """
-        return Portfolio({asset: position for (asset, position) in self.items() if position.is_long})
+        return Portfolio(position for position in self if position.is_long)
 
     def unrealized_pnl(self, *assets: Asset) -> Wallet:
         """
@@ -89,9 +108,9 @@ class Portfolio(UserDict[Asset, Position]):
             Wallet: The unrealized profit and loss.
         """
         result = Wallet()
-        for asset, position in self.items():
-            if not assets or asset in assets:
-                result += asset.amount(position.size, position.mkt_price - position.avg_price)
+        for position in self:
+            if not assets or position.asset in assets:
+                result += position.unrealized_pnl()
         return result
 
     def mkt_value(self, *assets: Asset) -> Wallet:
@@ -105,40 +124,25 @@ class Portfolio(UserDict[Asset, Position]):
             Wallet: The total market value of all open positions.
         """
         result = Wallet()
-        for asset, position in self.items():
-            if not assets or asset in assets:
-                result += asset.amount(position.size, position.mkt_price)
+        for position in self:
+            if not assets or position.asset in assets:
+                result += position.mkt_value()
         return result
 
-    def exposure(self, *assets: Asset) -> Wallet:
-        """
-        Return the sum of the exposure of the open positions in the portfolio. Short
-        positions have a positive exposure.
-        If one or more asset is provided, limit it to those assets,
-        otherwise include all assets.
-
-        Returns:
-            Wallet: The total exposure of all open positions.
-        """
-        result = Wallet()
-        for asset, position in self.items():
-            if not assets or asset in assets:
-                result += abs(asset.amount(position.size, position.mkt_price))
-        return result
 
     def close_positions(self) -> list[Order]:
         """Create the market orders required to close the current open positions.
         """
-        orders = [Order(asset, -pos.size) for asset, pos in self.items()]
+        orders = [Order(pos.asset, -pos.size) for pos in self]
         return orders
 
     def to_dataframe(self) -> pd.DataFrame:
         """Return the positions as a dataframe"""
-        return pd.json_normalize([asdict(asset) | asdict(pos) for asset, pos in self.items()])
+        return pd.json_normalize([asdict(pos) for pos in self])
 
     def size(self, asset: Asset) -> Decimal:
         """
-        Return the position size for an asset, or zero if there is no open position for that asset.
+        Return the net position size for an asset, or zero if there is no open position for that asset.
 
         Args:
             asset (Asset): The asset for which to get the position size.
@@ -146,13 +150,17 @@ class Portfolio(UserDict[Asset, Position]):
         Returns:
             Decimal: The position size as a Decimal.
         """
-        pos = self.get(asset)
-        return pos.size if pos else Decimal()
+        result = Decimal()
+        for pos in self:
+            if pos.asset == asset:
+                result += pos.size
+        return result
 
     def get_position(self, asset: Asset) -> Position:
         """
-        Return the position for an asset, or an empty position
+        Return the net position for an asset, or an empty position
         if the asset is not in the portfolio.
+        The avg price and mkt price are not set.
 
         Args:
             asset (Asset): The asset for which to get the position size.
@@ -160,4 +168,4 @@ class Portfolio(UserDict[Asset, Position]):
         Returns:
             Decimal: The position size as a Decimal.
         """
-        return self.get(asset, Position())
+        return Position(asset, self.size(asset))

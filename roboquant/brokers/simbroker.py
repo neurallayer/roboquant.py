@@ -5,10 +5,10 @@ import logging
 from typing import override
 
 from roboquant.common.account import Account
-from roboquant.common.portfolio import Position
+from roboquant.common.portfolio import Portfolio, Position
 from roboquant.common.asset import Asset
 from roboquant.brokers.broker import Broker
-from roboquant.common.event import Event, Quote, PriceItem, TradePrice
+from roboquant.common.event import Event, Quote, PriceItem
 from roboquant.common.order import Order
 from roboquant.common.monetary import Amount, Wallet, USD
 from roboquant.common.trade import Trade
@@ -53,12 +53,14 @@ class SimBroker(Broker):
 
     def reset(self) -> None:
         """Reset the broker with the cash and buying power set to the initial deposit."""
-        self._account = Account(self.deposit.currency)
         self._orders: dict[str, Order] = {}
-        self._account.cash = Wallet(self.deposit)
-        self._account.buying_power = self.deposit
+        self._cash = Wallet(self.deposit)
+        self._buying_power = self.deposit
+        self._trades = []
         self._prices : dict [Asset, PriceItem] = {}
+        self._portfolio: dict[Asset, Position] = {}
         self._order_id = 0
+        self._last_update = datetime.fromisoformat("1900-01-01T00:00:00+00:00")
 
     def _fee(self, asset: Asset, fill: Decimal, price: float, time: datetime) -> float:
         """Calculate any additional fee or commission, the default is zero.
@@ -75,7 +77,7 @@ class SimBroker(Broker):
         """update position based on a fill and return the realized pnl"""
         assert fill != 0, "fill cannot be zero"
 
-        pos = self._account.portfolio.get_position(asset)
+        pos = self._portfolio.get(asset, Position(asset))
 
         new_size = pos.size + fill
 
@@ -95,9 +97,9 @@ class SimBroker(Broker):
             pnl = asset.value(pos.size, price - pos.avg_price)
 
         if new_size:
-            self._account.portfolio[asset] = Position(new_size, avg_price, pos.mkt_price)
+            self._portfolio[asset] = Position(asset, new_size, avg_price, pos.mkt_price)
         else:
-            del self._account.portfolio[asset]
+            del self._portfolio[asset]
 
         return pnl
 
@@ -106,13 +108,12 @@ class SimBroker(Broker):
         if not fill:
             return
 
-        acc = self._account
-        acc.cash -= asset.amount(fill, price)
+        self._cash -= asset.amount(fill, price)
         fee = self._fee(asset, fill, price, time)
-        acc.cash -= Amount(asset.currency, fee)
+        self._cash -= Amount(asset.currency, fee)
         pnl = self.__update_position(asset, fill, price) - fee
         trade = Trade(asset, time, fill, price, pnl)
-        acc.trades.append(trade)
+        self._trades.append(trade)
 
     def _get_execution_price(self, order: Order, item: PriceItem) -> float:
         """Return the execution price to use for an order based on the price item.
@@ -140,14 +141,12 @@ class SimBroker(Broker):
 
     def __update_account_positions(self) -> None:
         """Update the account with the latest known market prices"""
-
-        portfolio = self._account.portfolio
         prices = self._prices
         price_type = self.price_type
 
-        for asset, pos in portfolio.items():
+        for asset, pos in self._portfolio.items():
             mkt_price = prices[asset].price(price_type)
-            portfolio[asset] = Position(pos.size, pos.avg_price, mkt_price)
+            self._portfolio[asset] = Position(asset, pos.size, pos.avg_price, mkt_price)
 
     def __next_order_id(self) -> str:
         """Generate a new order id. The order id is a simple integer that is incremented for each new order."""
@@ -242,33 +241,28 @@ class SimBroker(Broker):
 
     def _calculate_short_positions(self) -> Wallet:
         reserved = Wallet()
-        for asset, position in self._account.portfolio.short_positions().items():
-            short_value = asset.amount(-position.size, position.mkt_price)
-            reserved += short_value
+        for asset, position in self._portfolio.items():
+            if position.is_short:
+                short_value = asset.amount(-position.size, position.mkt_price)
+                reserved += short_value
         return reserved
 
     def close_positions(self) -> Account:
         """Close the open positions in the account using last known market price.
         Existing open orders will be disguarded.
         """
-
         orders = []
-        items = []
-        for asset, pos in self._account.portfolio.items():
-            limit = pos.mkt_price * 1.1 if pos.size > 0 else pos.mkt_price * 0.9
-            order = Order(asset, - pos.size, limit, "GTC")
+        for asset, pos in self._portfolio.items():
+            order = Order(asset, - pos.size)
             orders.append(order)
-            item = TradePrice(asset, pos.mkt_price, float("nan"))
-            items.append(item)
-
         self._orders = {}
         self.place_orders(orders)
-        return self.sync(Event(self._account.last_update, items))
+        return self.sync(Event(self._last_update, list(self._prices.values())))
 
     def __is_increase_position(self, order: Order) -> bool:
-        pos = self._account.portfolio.get_position(order.asset)
-        if pos.is_closed:
+        if order.asset not in self._portfolio:
             return True
+        pos = self._portfolio[order.asset]
         return order.is_buy if pos.is_long else order.is_sell
 
     def _calculate_buyingpower(self) -> Amount:
@@ -278,10 +272,13 @@ class SimBroker(Broker):
         buying_power = cash - open_orders - short_positions
         """
         result = Wallet()
-        result += self._account.cash
+        result += self._cash
         result -= self._calculate_open_orders()
         result -= self._calculate_short_positions()
-        return Amount(self._account.base_currency, self._account.convert(result))
+        return Amount(self.deposit.currency, self._convert(result))
+
+    def _convert(self, wallet: Wallet):
+        return wallet.convert_to(self.deposit.currency, self._last_update)
 
     @override
     def sync(self, event: Event | None = None) -> Account:
@@ -290,12 +287,16 @@ class SimBroker(Broker):
 
         if event:
             self._prices = self._prices | event.price_items
-            self._account.last_update = event.time
+            self._last_update = event.time
             self.__process_orders(event)
             self.__update_account_positions()
 
-        acc = self._account
+        acc = Account(self.deposit.currency)
+        acc.portfolio = Portfolio(self._portfolio.values())
         acc.orders = list(self._orders.values())
+        acc.last_update = self._last_update
+        acc.cash = self._cash
+        acc.trades = self._trades
         acc.buying_power = self._calculate_buyingpower()
         return acc
 

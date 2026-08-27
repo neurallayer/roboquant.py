@@ -226,8 +226,8 @@ class SaxoBroker(LiveBroker):
             # Unfortunately Saxo doesn't include the latest market price if
             # the market is closed. So in those case we need to get the price.
             mkt_price = view["CurrentPrice"] or self.get_price(asset)
-
-            portfolio[asset] = Position(size, avg_price, mkt_price)
+            pos = Position(asset, size, avg_price, mkt_price)
+            portfolio.append(pos)
 
         return portfolio
 

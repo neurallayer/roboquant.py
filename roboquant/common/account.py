@@ -31,6 +31,7 @@ class Account:
     Only the `broker` updates the account and does this only during its `sync` method.
     """
 
+
     __slots__ = "buying_power", "portfolio", "orders", "last_update", "cash", "trades"
 
     def __init__(self, base_currency: Currency = USD):
@@ -163,7 +164,7 @@ class Account:
         Returns:
             str: The formatted string representation.
         """
-        p = [f"{v.size}@{k.symbol}" for k, v in self.portfolio.items()]
+        p = [f"{p.size}@{p.asset.symbol}" for p in self.portfolio]
         p_str = ", ".join(p) or "none"
 
         o = [f"{o.size}@{o.asset.symbol}" for o in self.orders]
@@ -221,9 +222,10 @@ class Account:
             labels = []
             sizes = []
 
-        labels = labels + [asset.symbol for asset in self.portfolio.keys()]
+        assets = set(p.asset for p in self.portfolio)
+        labels = labels + [asset.symbol for asset in assets]
         sizes = sizes + [
-            self.convert(asset.amount(abs(pos.size), abs(pos.mkt_price))) for asset, pos in self.portfolio.items()
+            self.convert(self.portfolio.mkt_value(asset)) for asset in assets
         ]
 
         if len(labels) == 0:

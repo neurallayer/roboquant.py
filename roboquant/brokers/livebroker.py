@@ -50,8 +50,7 @@ class LiveBroker(Broker):
         self.sleep_after_cancel = 0.0
 
         self._has_new_orders = False
-        self._account: Account = Account()
-        self._account.last_update = Timeframe.INFINITE.start
+        self._last_update = Timeframe.INFINITE.start
         self.metrics = {
             "new": 0,
             "update": 0,

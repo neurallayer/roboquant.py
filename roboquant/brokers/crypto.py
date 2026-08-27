@@ -112,8 +112,8 @@ class CryptoBroker(LiveBroker):
             asset = Crypto.from_symbol(position["symbol"])
             size = position["amount"]
             avg_entry_price = position["entry_price"]
-            p = Position(size, avg_entry_price, float("nan"))
-            result[asset] = p
+            p = Position(asset, size, avg_entry_price, float("nan"))
+            result.append(p)
         return result
 
     @override

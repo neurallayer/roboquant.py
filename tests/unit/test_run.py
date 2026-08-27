@@ -24,7 +24,7 @@ class TestRoboquant(unittest.TestCase):
         for tf in self.feed.timeframe().split(5):
             account = rq.run(self.feed, rq.strategies.EMACrossover(), timeframe=tf)
             self.assertLessEqual(account.last_update, tf.end)
-            for p in account.portfolio.values():
+            for p in account.portfolio:
                 self.assertTrue(math.isfinite(p.mkt_price))
                 self.assertTrue(math.isfinite(p.avg_price))
                 self.assertTrue(p.size != 0)
