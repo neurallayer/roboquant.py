@@ -208,7 +208,7 @@ class FlexTrader(Trader):
                     ctx.log_rule("available buying power below minimum order value")
                     continue
 
-                position_value = account.convert(account.portfolio.value(asset))
+                position_value = account.convert(account.position_amount(asset))
                 available_order_value = min(available, max_order_value, max_pos_value - abs(position_value))
                 if available_order_value < min_order_value:
                     ctx.log_rule("calculated available order value below minimum order value")

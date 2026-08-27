@@ -54,7 +54,7 @@ class PNLMetric(Metric):
         if self.first_equity is None:
             self.first_equity = equity
 
-        unrealized = account.convert(account.portfolio.unrealized_pnl())
+        unrealized = account.convert(account.unrealized_pnl())
         total = equity - self.first_equity
         realized = total - unrealized
         return total, realized, unrealized

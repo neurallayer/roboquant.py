@@ -18,7 +18,7 @@ class TestAccount(unittest.TestCase):
         self.assertEqual(acc.buying_power.value, 0.0)
         self.assertEqual(acc.buying_power.currency, USD)
         self.assertEqual(acc.base_currency, USD)
-        self.assertEqual(acc.portfolio.unrealized_pnl(), Wallet())
+        self.assertEqual(acc.unrealized_pnl(), Wallet())
         self.assertEqual(acc.realized_pnl(), Wallet())
         self.assertEqual(acc.portfolio.mkt_value(), Wallet())
         self.assertEqual(acc.equity(), acc.cash)
@@ -36,7 +36,7 @@ class TestAccount(unittest.TestCase):
 
         self.assertAlmostEqual(acc.portfolio.mkt_value().convert_to(USD, now), 5*10*11.0)
         self.assertAlmostEqual(acc.equity_value(), 1_000.0 + (5*10*11.0))
-        self.assertAlmostEqual(acc.portfolio.unrealized_pnl().convert_to(USD, now), 50.0)
+        self.assertAlmostEqual(acc.unrealized_pnl().convert_to(USD, now), 50.0)
 
 
 if __name__ == "__main__":

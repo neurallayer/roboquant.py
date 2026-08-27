@@ -3,7 +3,6 @@ from decimal import Decimal
 
 from roboquant.common.asset import Asset
 from roboquant.common.monetary import Amount, Wallet
-from roboquant.common.order import Order
 
 import pandas as pd
 
@@ -66,20 +65,6 @@ class Portfolio(list[Position]):
     If a position is closed, it will no longer be included in the portfolio.
     """
 
-    def value(self, asset: Asset) -> Amount:
-        """
-        Return position amount denoted in the currency of the asset. If there is no
-        open position, 0.0 will be returned. Short positions will return a negative value.
-
-        Args:
-            asset (Asset): The asset for which to calculate the position value.
-
-        Returns:
-            float: The position value in the base currency.
-        """
-        pos = self.get_position(asset)
-        return asset.amount(pos.size, pos.mkt_price)
-
     def short_positions(self) -> "Portfolio":
         """
         Return all the open short positions in the account.
@@ -98,21 +83,6 @@ class Portfolio(list[Position]):
         """
         return Portfolio(position for position in self if position.is_long)
 
-    def unrealized_pnl(self, *assets: Asset) -> Wallet:
-        """
-        Return the sum of the unrealized profit and loss for the open positions.
-        This includes both long- and short-positions.
-        If one or more asset is provided, limit it to those assets, otherwise include all assets.
-
-        Returns:
-            Wallet: The unrealized profit and loss.
-        """
-        result = Wallet()
-        for position in self:
-            if not assets or position.asset in assets:
-                result += position.unrealized_pnl()
-        return result
-
     def mkt_value(self, *assets: Asset) -> Wallet:
         """
         Return the sum of the market values of the open positions in the account.
@@ -128,13 +98,6 @@ class Portfolio(list[Position]):
             if not assets or position.asset in assets:
                 result += position.mkt_value()
         return result
-
-
-    def close_positions(self) -> list[Order]:
-        """Create the market orders required to close the current open positions.
-        """
-        orders = [Order(pos.asset, -pos.size) for pos in self]
-        return orders
 
     def to_dataframe(self) -> pd.DataFrame:
         """Return the positions as a dataframe"""

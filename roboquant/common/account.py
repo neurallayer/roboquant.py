@@ -103,6 +103,17 @@ class Account:
         """
         return self.convert(self.cash)
 
+    def position_amount(self, asset: Asset) -> Amount:
+        """
+        Return the cash value denoted in the base currency of the account.
+
+        Returns:
+            float: The cash value in the base currency.
+        """
+        s = sum(p.mkt_value().value for p in self.portfolio if p.asset == asset)
+        return Amount(asset.currency, s)
+
+
     def realized_pnl(self, *assets: Asset) -> Wallet:
         """
         Return the sum of the realized profit and loss for trades executed in the account.
@@ -117,6 +128,20 @@ class Account:
                 result += Amount(trade.asset.currency, trade.pnl)
         return result
 
+    def unrealized_pnl(self, *assets: Asset) -> Wallet:
+        """
+        Return the sum of the unrealized profit and loss for positions in the account.
+        If one or more asset is provided, limit it to those assets, otherwise include all assets.
+
+        Returns:
+            Wallet: The unrealized profit and loss.
+        """
+        result = Wallet()
+        for pos in self.portfolio:
+            if not assets or pos.asset in assets:
+                result += pos.unrealized_pnl()
+        return result
+
     def pnl(self, *assets: Asset) -> Wallet:
         """
         Return the total profit and loss of the account, which is
@@ -126,7 +151,7 @@ class Account:
         Returns:
             Wallet: The total profit and loss.
         """
-        return self.realized_pnl(*assets) + self.portfolio.unrealized_pnl(*assets)
+        return self.realized_pnl(*assets) + self.unrealized_pnl(*assets)
 
     def pnl_value(self, *assets: Asset) -> float:
         """Return the total profit and loss of the account, which is
