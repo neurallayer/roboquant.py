@@ -7,7 +7,7 @@ from matplotlib import pyplot as plt
 from matplotlib.axes import Axes
 import pandas as pd
 
-from roboquant.common.portfolio import Portfolio
+from roboquant.common.position import Position
 from roboquant.common.asset import Asset
 from roboquant.common.monetary import USD, Amount, Currency, Wallet
 from roboquant.common.order import Order
@@ -33,7 +33,7 @@ class Account:
     """
 
     buying_power: Amount
-    portfolio: Portfolio
+    positions: list[Position]
     orders: list[Order]
     last_update: datetime
     cash: Wallet
@@ -46,7 +46,8 @@ class Account:
 
     @staticmethod
     def empty(currency : Currency = USD) -> "Account":
-        return Account(Amount(currency, 0), Portfolio(), [], utcnow(), Wallet(), [])
+        """Create an empty account"""
+        return Account(Amount(currency, 0), [], [], utcnow(), Wallet(), [])
 
     def convert(self, x: Wallet | Amount) -> float:
         """
@@ -83,7 +84,7 @@ class Account:
         Returns:
             Wallet: The equity of the account.
         """
-        return self.cash + self.portfolio.mkt_value()
+        return self.cash + self.mkt_value()
 
     def equity_value(self) -> float:
         """
@@ -110,8 +111,24 @@ class Account:
         Returns:
             float: The cash value in the base currency.
         """
-        s = sum(p.mkt_value().value for p in self.portfolio if p.asset == asset)
+        s = sum(p.mkt_value().value for p in self.positions if p.asset == asset)
         return Amount(asset.currency, s)
+
+
+    def mkt_value(self) -> Wallet:
+        """
+        Return the sum of the market values of the open positions in the account.
+        Short positions have a negative market value.
+        If one or more asset is provided, limit it to those assets, otherwise
+        include all assets.
+
+        Returns:
+            Wallet: The total market value of all open positions.
+        """
+        result = Wallet()
+        for position in self.positions:
+            result += position.mkt_value()
+        return result
 
 
     def realized_pnl(self, *assets: Asset) -> Wallet:
@@ -128,6 +145,37 @@ class Account:
                 result += Amount(trade.asset.currency, trade.pnl)
         return result
 
+    def position_size(self, asset: Asset) -> Decimal:
+        """
+        Return the net position size for an asset, or zero if there is no open position for that asset.
+
+        Args:
+            asset (Asset): The asset for which to get the position size.
+
+        Returns:
+            Decimal: The position size as a Decimal.
+        """
+        result = Decimal()
+        for pos in self.positions:
+            if pos.asset == asset:
+                result += pos.size
+        return result
+
+    def get_position(self, asset: Asset) -> Position:
+        """
+        Return the net position for an asset, or an empty position
+        if the asset is not in the portfolio.
+        The avg price and mkt price are not set.
+
+        Args:
+            asset (Asset): The asset for which to get the position size.
+
+        Returns:
+            Decimal: The position size as a Decimal.
+        """
+        return Position(asset, self.position_size(asset))
+
+
     def unrealized_pnl(self, *assets: Asset) -> Wallet:
         """
         Return the sum of the unrealized profit and loss for positions in the account.
@@ -137,7 +185,7 @@ class Account:
             Wallet: The unrealized profit and loss.
         """
         result = Wallet()
-        for pos in self.portfolio:
+        for pos in self.positions:
             if not assets or pos.asset in assets:
                 result += pos.unrealized_pnl()
         return result
@@ -184,13 +232,13 @@ class Account:
         Returns:
             str: The formatted string representation.
         """
-        p = [f"{p.size}@{p.asset.symbol}" for p in self.portfolio]
+        p = [f"{p.size}@{p.asset.symbol}" for p in self.positions]
         p_str = ", ".join(p) or "none"
 
         o = [f"{o.size}@{o.asset.symbol}" for o in self.orders]
         o_str = ", ".join(o) or "none"
 
-        mkt = self.portfolio.mkt_value() or Amount(self.base_currency, 0.0)
+        mkt = self.mkt_value() or Amount(self.base_currency, 0.0)
 
         result = (
             f"buying power : {self.buying_power:{format_spec}}\n"
@@ -211,6 +259,10 @@ class Account:
     def orders_for_asset(self, asset: Asset) -> list[Order]:
         """Get all the orders for the provided asset"""
         return [order for order in self.orders if order.asset == asset]
+
+    def positions_to_dataframe(self) -> pd.DataFrame:
+        """Return the positions as a dataframe"""
+        return pd.json_normalize([asdict(pos) for pos in self.positions])
 
     def trades_to_dataframe(self) -> pd.DataFrame:
         """Return the trades as a dataframe"""
@@ -242,10 +294,10 @@ class Account:
             labels = []
             sizes = []
 
-        assets = set(p.asset for p in self.portfolio)
+        assets = set(p.asset for p in self.positions)
         labels = labels + [asset.symbol for asset in assets]
         sizes = sizes + [
-            self.convert(self.portfolio.mkt_value(asset)) for asset in assets
+            self.convert(self.position_amount(asset)) for asset in assets
         ]
 
         if len(labels) == 0:

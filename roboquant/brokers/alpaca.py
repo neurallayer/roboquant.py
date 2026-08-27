@@ -4,7 +4,7 @@ from roboquant.brokers.livebroker import LiveBroker
 from roboquant.common.account import Account
 from roboquant.common.monetary import USD, Amount, Wallet
 from roboquant.common.order import Order
-from roboquant.common.portfolio import Portfolio, Position
+from roboquant.common.position import Position
 from roboquant.common.timeframe import utcnow
 from roboquant.feeds.alpaca import _get_asset, logger
 
@@ -47,7 +47,7 @@ class AlpacaBroker(LiveBroker):
         return orders
 
     def __sync_positions(self):
-        positions = Portfolio()
+        positions = []
         open_pos: list[APosition] = self.__client.get_all_positions()  # type: ignore
 
         for p in open_pos:
@@ -64,7 +64,7 @@ class AlpacaBroker(LiveBroker):
         acc: TradeAccount = self.__client.get_account()  # type: ignore
         return Account(
             buying_power=Amount(USD, float(acc.buying_power or 0.0)),
-            portfolio= self.__sync_positions(),
+            positions= self.__sync_positions(),
             orders = self.__sync_orders(),
             last_update=utcnow(),
             cash = Wallet(Amount(USD, float(acc.cash or 0.0))),

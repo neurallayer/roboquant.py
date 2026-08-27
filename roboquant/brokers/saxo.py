@@ -12,7 +12,7 @@ from roboquant.common.account import Account
 from roboquant.common.asset import Asset, Forex, Stock
 from roboquant.common.monetary import Amount, Currency, Wallet
 from roboquant.common.order import Order
-from roboquant.common.portfolio import Portfolio, Position
+from roboquant.common.position import Position
 
 from roboquant.brokers._saxo_types import NetPositionsResponse, OpenOrdersResponse
 from roboquant.common.timeframe import utcnow
@@ -206,7 +206,7 @@ class SaxoBroker(LiveBroker):
             self._last_prices[asset] = price
         return self._last_prices[asset]
 
-    def __get_portfolio(self) -> Portfolio:
+    def __get_portfolio(self) -> list[Position]:
         """Get open net positions."""
         data: NetPositionsResponse = self.__request(
             "GET",
@@ -214,7 +214,7 @@ class SaxoBroker(LiveBroker):
             params={"FieldGroups": "NetPositionBase,NetPositionView"},
         )
 
-        portfolio = Portfolio()
+        portfolio = []
 
         for item in data.get("Data", []):
             view = item.get("NetPositionView", {})
@@ -270,7 +270,7 @@ class SaxoBroker(LiveBroker):
 
         return Account(
             buying_power=bp,
-            portfolio= self.__get_portfolio(),
+            positions= self.__get_portfolio(),
             orders = self.__get_orders(),
             last_update=utcnow(),
             cash = Wallet(cash),

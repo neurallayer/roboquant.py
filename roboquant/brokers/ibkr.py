@@ -4,9 +4,8 @@ from time import sleep
 from typing import Any, override
 
 from roboquant.common.order import Order
-from roboquant.common.portfolio import Portfolio
 from roboquant.common.monetary import Currency, Wallet
-import roboquant.common.portfolio
+import roboquant.common.position
 from roboquant.brokers.livebroker import LiveBroker
 import roboquant as rq
 from roboquant.brokers._ibkr_types import AccountInfo, ContractInfo, PositionInfo, OrderInfo
@@ -142,15 +141,15 @@ class IBKRBroker(LiveBroker):
         self._mapper = _AssetMapper(client)
 
 
-    def __get_positions(self) -> Portfolio:
+    def __get_positions(self) -> list[roboquant.common.position.Position]:
         """Return all the open positions"""
-        result = Portfolio()
+        result = []
         positions: list[PositionInfo] = self.client.positions().data or []  # type: ignore
         for pos_info in positions:
             conid = pos_info["conid"]
             if asset := self._mapper.get_asset(conid):
                 if size := pos_info["position"]:
-                    position = roboquant.common.portfolio.Position(
+                    position = roboquant.common.position.Position(
                         asset, Decimal(size), pos_info["avgPrice"], pos_info["mktPrice"]
                     )
                     result.append(position)
@@ -256,7 +255,7 @@ class IBKRBroker(LiveBroker):
         cash, bp = self.__get_cash_bp()
         return rq.Account(
             buying_power=rq.Amount(self.base_currency, bp),
-            portfolio= self.__get_positions(),
+            positions= self.__get_positions(),
             orders = self.__get_orders(),
             last_update=rq.utcnow(),
             cash = Wallet(rq.Amount(self.base_currency, cash)),

@@ -48,6 +48,6 @@ class BasicJournal(Journal):
         self.trades = len(account.trades)
         self.signals += len(signals)
         self.orders += len(orders)
-        self.max_positions = max(self.max_positions, len(account.portfolio))
+        self.max_positions = max(self.max_positions, len(account.positions))
 
         logger.log(self.__log_level, "time=%s info=%s", event.time, self)

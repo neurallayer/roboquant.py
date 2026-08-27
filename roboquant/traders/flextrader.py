@@ -161,7 +161,7 @@ class FlexTrader(Trader):
 
         for signal in signals:
             asset = signal.asset
-            pos_size = account.portfolio.size(asset)
+            pos_size = account.position_size(asset)
             change = _PositionChange.get_change(signal.is_buy, pos_size)
 
             ctx.log_received(signal=signal, position=pos_size, available=available)

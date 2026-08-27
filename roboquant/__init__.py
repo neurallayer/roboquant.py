@@ -3,7 +3,7 @@ The `roboquant` package contains the `run` method and imports
 many useful classes and functions form sub-packages.
 """
 
-from roboquant.common.portfolio import Position, Portfolio
+from roboquant.common.position import Position
 from roboquant.common.account import Account
 from roboquant.common.event import Event, PriceItem, Bar, TradePrice, Quote
 from roboquant.common.signal import Signal, SignalType
@@ -67,7 +67,6 @@ __all__ = [
     "traders",
     "Account",
     "Position",
-    "Portfolio",
     "Event",
     "PriceItem",
     "Bar",

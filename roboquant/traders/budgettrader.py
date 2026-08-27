@@ -73,7 +73,7 @@ class BudgetTrader(Trader):
                 logger.info("no price found")
                 continue
 
-            pos = account.portfolio.get_position(asset)
+            pos = account.get_position(asset)
             if signal.is_increase_position(pos):
                 if buying_power < self.order_value:
                     logger.info("not enough buying_power remaining")

@@ -4,7 +4,7 @@ from roboquant.common.asset import Crypto
 from roboquant.common.event import Event
 from roboquant.common.monetary import Amount, Wallet
 from roboquant.common.order import Order
-from roboquant.common.portfolio import Portfolio, Position
+from roboquant.common.position import Position
 from roboquant.common.timeframe import utcnow
 from roboquant.feeds.crypto import logger
 
@@ -58,7 +58,7 @@ class CryptoBroker(LiveBroker):
         """
         return Account(
             buying_power=self._get_buying_power(),
-            portfolio= self._get_positions(),
+            positions= self._get_positions(),
             orders = self._get_open_orders(),
             last_update=utcnow(),
             cash = self._get_balance(),
@@ -101,8 +101,8 @@ class CryptoBroker(LiveBroker):
             result.append(o)
         return result
 
-    def _get_positions(self) -> Portfolio:
-        result = Portfolio()
+    def _get_positions(self) -> list[Position]:
+        result = []
         try:
             positions = self.__exchange.fetch_positions()
         except ccxt.NotSupported as e:

@@ -5,7 +5,7 @@ import logging
 from typing import override
 
 from roboquant.common.account import Account
-from roboquant.common.portfolio import Portfolio, Position
+from roboquant.common.position import Position
 from roboquant.common.asset import Asset
 from roboquant.brokers.broker import Broker
 from roboquant.common.event import Event, Quote, PriceItem
@@ -293,7 +293,7 @@ class SimBroker(Broker):
 
         return Account(
             buying_power=self._calculate_buyingpower(),
-            portfolio=Portfolio(self._portfolio.values()),
+            positions=list(self._portfolio.values()),
             orders= list(self._orders.values()),
             last_update=self._last_update,
             cash = self._cash,
