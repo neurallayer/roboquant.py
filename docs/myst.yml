@@ -35,7 +35,7 @@ project:
         - file: common/order.md
         - file: common/event.md
         - file: common/account.md
-        - file: common/portfolio.md
+        - file: common/position.md
         - file: common/indicator.md
     - title: Charts
       children:
