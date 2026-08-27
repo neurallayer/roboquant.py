@@ -11,7 +11,7 @@ from roboquant.common.timeframe import utcnow
 class TestAccount(unittest.TestCase):
 
     def test_initial_account(self):
-        acc = Account()
+        acc = Account.empty()
         acc.cash = Wallet(Amount(USD, 1_000.0))
         now = utcnow()
         acc.last_update = now
@@ -27,7 +27,7 @@ class TestAccount(unittest.TestCase):
         self.assertEqual(len(acc.trades), 0)
 
     def test_account_with_positions(self):
-        acc = Account()
+        acc = Account.empty()
         now = utcnow()
         acc.cash = Wallet(Amount(USD, 1_000.0))
         for i in range(5):

@@ -5,6 +5,7 @@ from roboquant.common.account import Account
 from roboquant.common.monetary import USD, Amount, Wallet
 from roboquant.common.order import Order
 from roboquant.common.portfolio import Portfolio, Position
+from roboquant.common.timeframe import utcnow
 from roboquant.feeds.alpaca import _get_asset, logger
 
 
@@ -60,17 +61,15 @@ class AlpacaBroker(LiveBroker):
 
     @override
     def _get_account(self) -> Account:
-        account = Account()
-        account.last_update = self._last_update
         acc: TradeAccount = self.__client.get_account()  # type: ignore
-        if acc.buying_power:
-            account.buying_power = Amount(USD, float(acc.buying_power))
-        if acc.cash:
-            account.cash = Wallet(Amount(USD, float(acc.cash)))
-
-        account.portfolio = self.__sync_positions()
-        account.orders = self.__sync_orders()
-        return account
+        return Account(
+            buying_power=Amount(USD, float(acc.buying_power or 0.0)),
+            portfolio= self.__sync_positions(),
+            orders = self.__sync_orders(),
+            last_update=utcnow(),
+            cash = Wallet(Amount(USD, float(acc.cash or 0.0))),
+            trades = []
+        )
 
     @override
     def _cancel_order(self, order: Order):

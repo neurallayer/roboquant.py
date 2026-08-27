@@ -11,10 +11,11 @@ from roboquant.common.portfolio import Portfolio
 from roboquant.common.asset import Asset
 from roboquant.common.monetary import USD, Amount, Currency, Wallet
 from roboquant.common.order import Order
+from roboquant.common.timeframe import utcnow
 from roboquant.common.trade import Trade
 
 
-@dataclass
+@dataclass(slots=True)
 class Account:
     """Represents a trading account and is managed by the broker.
     It keeps track of the cash, positions, orders and trades.
@@ -31,27 +32,21 @@ class Account:
     Only the `broker` updates the account and does this only during its `sync` method.
     """
 
-
-    __slots__ = "buying_power", "portfolio", "orders", "last_update", "cash", "trades"
-
-    def __init__(self, base_currency: Currency = USD):
-        """
-        Initialize a new Account instance.
-
-        Args:
-            base_currency (Currency): The base currency of the account, defaults to USD.
-        """
-        self.buying_power: Amount = Amount(base_currency, 0.0)
-        self.portfolio: Portfolio = Portfolio()
-        self.orders: list[Order] = []
-        self.last_update: datetime = datetime.fromisoformat("1900-01-01T00:00:00+00:00")
-        self.cash: Wallet = Wallet()
-        self.trades: list[Trade] = []
+    buying_power: Amount
+    portfolio: Portfolio
+    orders: list[Order]
+    last_update: datetime
+    cash: Wallet
+    trades: list[Trade]
 
     @property
     def base_currency(self) -> Currency:
         """Return the base currency of this account"""
         return self.buying_power.currency
+
+    @staticmethod
+    def empty(currency : Currency = USD) -> "Account":
+        return Account(Amount(currency, 0), Portfolio(), [], utcnow(), Wallet(), [])
 
     def convert(self, x: Wallet | Amount) -> float:
         """

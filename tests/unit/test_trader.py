@@ -13,7 +13,7 @@ class TestTrader(unittest.TestCase):
 
     @override
     def setUp(self) -> None:
-        acc = Account()
+        acc = Account.empty()
         acc.buying_power = Amount(USD, 100_000.0)
         acc.cash = Wallet(Amount(USD, 100_000.0))
         self.account = acc

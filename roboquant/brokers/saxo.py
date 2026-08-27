@@ -15,6 +15,7 @@ from roboquant.common.order import Order
 from roboquant.common.portfolio import Portfolio, Position
 
 from roboquant.brokers._saxo_types import NetPositionsResponse, OpenOrdersResponse
+from roboquant.common.timeframe import utcnow
 
 logger = logging.getLogger(__name__)
 
@@ -257,25 +258,24 @@ class SaxoBroker(LiveBroker):
 
         return orders
 
-    def __get_base_account(self):
+    @override
+    def _get_account(self) -> Account:
         data = self.__request(
-            "GET",
-            "/port/v1/balances",
-        )
+                    "GET",
+                    "/port/v1/balances",
+                )
         base_currency = Currency(data["Currency"])
         cash = Amount(base_currency, data["CashBalance"])
         bp = Amount(base_currency, data["CashAvailableForTrading"])
-        acc = Account(base_currency)
-        acc.cash = Wallet(cash)
-        acc.buying_power = bp
-        return acc
 
-    @override
-    def _get_account(self) -> Account:
-        account = self.__get_base_account()
-        account.portfolio = self.__get_portfolio()
-        account.orders = self.__get_orders()
-        return account
+        return Account(
+            buying_power=bp,
+            portfolio= self.__get_portfolio(),
+            orders = self.__get_orders(),
+            last_update=utcnow(),
+            cash = Wallet(cash),
+            trades = []
+        )
 
     def match_asset(self, asset: Asset) -> Asset | None:
         """Tries to match an asset, even if not 100% matching symbol name."""

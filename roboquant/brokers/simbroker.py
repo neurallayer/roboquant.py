@@ -291,14 +291,14 @@ class SimBroker(Broker):
             self.__process_orders(event)
             self.__update_account_positions()
 
-        acc = Account(self.deposit.currency)
-        acc.portfolio = Portfolio(self._portfolio.values())
-        acc.orders = list(self._orders.values())
-        acc.last_update = self._last_update
-        acc.cash = self._cash
-        acc.trades = self._trades
-        acc.buying_power = self._calculate_buyingpower()
-        return acc
+        return Account(
+            buying_power=self._calculate_buyingpower(),
+            portfolio=Portfolio(self._portfolio.values()),
+            orders= list(self._orders.values()),
+            last_update=self._last_update,
+            cash = self._cash,
+            trades=self._trades
+        )
 
     def __repr__(self) -> str:
         attrs = " ".join([f"{k}={v}" for k, v in self.__dict__.items() if not k.startswith("_")])

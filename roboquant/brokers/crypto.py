@@ -5,6 +5,7 @@ from roboquant.common.event import Event
 from roboquant.common.monetary import Amount, Wallet
 from roboquant.common.order import Order
 from roboquant.common.portfolio import Portfolio, Position
+from roboquant.common.timeframe import utcnow
 from roboquant.feeds.crypto import logger
 
 
@@ -55,13 +56,14 @@ class CryptoBroker(LiveBroker):
         - fetch_open_orders
         - fetch_positions
         """
-
-        account = Account()
-        account.orders = self._get_open_orders()
-        account.portfolio = self._get_positions()
-        account.cash = self._get_balance()
-        account.buying_power = self._get_buying_power()
-        return account
+        return Account(
+            buying_power=self._get_buying_power(),
+            portfolio= self._get_positions(),
+            orders = self._get_open_orders(),
+            last_update=utcnow(),
+            cash = self._get_balance(),
+            trades = []
+        )
 
     @override
     def _cancel_order(self, order: Order):
