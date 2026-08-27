@@ -19,25 +19,35 @@ from roboquant.common.trade import Trade
 class Account:
     """Represents a trading account and is managed by the broker.
     It keeps track of the cash, positions, orders and trades.
-
-    Attributes:
-        buying_power (Amount): Available buying power for orders in denoted in the base currency of the account.
-        cash (Wallet): The cash available in the account.
-        positions (Dict[Asset, Position]): the open positions, each denoted in the currency of the asset.
-        orders (list[Order]): the open orders, each denoted in the currency of the asset. Each order in
-            this list has an id assigned to it.
-        trades (list[Trade]): the trades that have been executed, each denoted in the currency of the asset.
-        last_update (datetime): The last time the account was updated.
-
     Only the `broker` updates the account and does this only during its `sync` method.
     """
 
     buying_power: Amount
+    """Available buying power for orders in denoted in the base currency of the account"""
+
     positions: list[Position]
+    """the open positions, values denoted in the currency of the asset"""
+
     orders: list[Order]
+    """
+    the open orders, each denoted in the currency of the asset. Each order in this list has an id assigned to it.
+    """
+
     last_update: datetime
+    """
+    The last time the account was updated.
+    """
+
     cash: Wallet
+    """
+    The cash available in the account
+    """
+
     trades: list[Trade]
+    """
+    The trades that have been executed, each denoted in the currency of the asset.
+    Not all brokers might fill these.
+    """
 
     @property
     def base_currency(self) -> Currency:
