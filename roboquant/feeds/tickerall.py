@@ -2,9 +2,9 @@ import logging
 import re
 from array import array
 from datetime import datetime, timezone
-from typing import Self, override
+from typing import Any, Self, override
 
-from tickerall import Tickerall
+from tickerall import Tickerall, TickerallStream
 from tickerall.types import BrokerName, TerminalType, Timeframe
 
 from roboquant.common.asset import Asset, Currency, Forex, USD
@@ -66,7 +66,7 @@ class _SymbolCurrency:
         return self._cache.get(symbol)
 
 
-def _parse_tick_time(value) -> datetime:
+def _parse_tick_time(value: str) -> datetime:
     """Parse a tick timestamp (an ISO-8601 string like `2026-07-30T07:26:26.000Z`) into a datetime."""
     if isinstance(value, str):
         try:
@@ -111,7 +111,7 @@ class TickerAllLiveFeed(LiveFeed):
         _require_tickerall_account_id(account_id)
         self._account_id = account_id
         self._client = Tickerall(api_key=api_key, base_url=base_url)
-        self._stream = None
+        self._stream : TickerallStream | None = None
         self._subscribed: set[str] = set()
         # Resolved lazily (a session opened via `connect` sets `_account_id` after __init__).
         self._symbol_currency: _SymbolCurrency | None = None
@@ -167,7 +167,7 @@ class TickerAllLiveFeed(LiveFeed):
         """Subscribe to live ticks for the given symbols. Can be called more than once to add symbols."""
         if self._stream is None:
             self._stream = self._client.stream.connect()
-            self._stream.on("tick", self._on_tick)
+            self._stream.on("tick", self.__on_tick)
         self._stream.subscribe_ticks(self._account_id, list(symbols))
         self._subscribed.update(symbols)
         # Pre-warm the currency cache (one metadata call) so tick handling never blocks on it.
@@ -179,7 +179,7 @@ class TickerAllLiveFeed(LiveFeed):
         """The assets subscribed so far on this live feed."""
         return [_to_asset(s, self._quote_currency(s)) for s in sorted(self._subscribed)]
 
-    def _on_tick(self, ev) -> None:
+    def __on_tick(self, ev: Any) -> None:
         if ev.symbol is None or ev.bid is None or ev.ask is None:
             return
         asset = _to_asset(ev.symbol, self._quote_currency(ev.symbol))
@@ -223,13 +223,13 @@ class TickerAllHistoricFeed(InMemoryFeed):
     def __init__(self, api_key: str, account_id: str, base_url: str = "https://api.tickerall.com") -> None:
         super().__init__()
         _require_tickerall_account_id(account_id)
-        self._account_id = account_id
+        self._account_id : str = account_id
         self._client = Tickerall(api_key=api_key, base_url=base_url)
         # Resolved lazily (a session opened via `connect` sets `_account_id` after __init__).
         self._symbol_currency: _SymbolCurrency | None = None
         # True only when this feed opened the session itself (via `connect`); a session passed in by
         # account_id belongs to the caller and is never ended on `close`.
-        self._owns_session = False
+        self._owns_session : bool = False
 
     def _quote_currency(self, symbol: str) -> Currency | None:
         """The instrument's quote currency from broker metadata, or None to fall back to inference."""
@@ -280,15 +280,15 @@ class TickerAllHistoricFeed(InMemoryFeed):
         for symbol in symbols:
             asset = _to_asset(symbol, self._quote_currency(symbol))
             for candle in self._client.candles.get(self._account_id, symbol=symbol, hours=hours, timeframe=timeframe):
-                dt = datetime.fromtimestamp(int(candle.timestamp), tz=timezone.utc)
+                dt = datetime.fromtimestamp(candle.timestamp, tz=timezone.utc)
                 ohlcv = array(
                     "f",
                     [
-                        float(candle.open),
-                        float(candle.high),
-                        float(candle.low),
-                        float(candle.close),
-                        float(candle.tick_volume or 0.0),
+                        candle.open,
+                        candle.high,
+                        candle.low,
+                        candle.close,
+                        candle.tick_volume or 0.0,
                     ],
                 )
                 self._add_item(dt, Bar(asset, ohlcv, timeframe))

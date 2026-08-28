@@ -151,7 +151,7 @@ class TestTickerAllIT(unittest.TestCase):
             return {str(p.ticket) for p in client.accounts.get(aid).positions if p.ticket}
 
         def pending_by_ticket():
-            return {str(o.ticket): o for o in client.orders.list_pending(aid) if o.ticket}
+            return {o.ticket: o for o in client.orders.list_pending(aid) if o.ticket}
 
         # --- market place -> close ---
         before = position_tickets()
@@ -168,7 +168,7 @@ class TestTickerAllIT(unittest.TestCase):
         candles = client.candles.get(aid, symbol=SYMBOL, count=6, timeframe="M1")
         if not candles:
             self.skipTest("no price available to place a resting pending order")
-        last = float(candles[-1].close)
+        last = candles[-1].close
         p1, p2 = round(last * 0.90, 5), round(last * 0.85, 5)
 
         before_pending = set(pending_by_ticket())
@@ -186,7 +186,7 @@ class TestTickerAllIT(unittest.TestCase):
         assert modified
         self.assertIsNotNone(modified, "the pending order should still be resting after modify")
         shown = modified.limit_price if modified.limit_price is not None else modified.price
-        self.assertLess(abs(float(shown) - p2), p2 * 0.005, f"price should reflect modify (got {shown}, want ~{p2})")
+        self.assertLess(abs(shown - p2), p2 * 0.005, f"price should reflect modify (got {shown}, want ~{p2})")
 
         # cancel through the broker (id + zero size)
         broker.place_orders([resting.cancel()])
