@@ -11,7 +11,8 @@ from roboquant.common.account import Account
 from roboquant.common.monetary import Amount, Currency, USD, Wallet
 from roboquant.common.asset import Asset
 from roboquant.common.order import Order
-from roboquant.common.portfolio import Portfolio, Position
+from roboquant.common.position import Position
+from roboquant.common.timeframe import utcnow
 from roboquant.feeds.tickerall import _require_tickerall_account_id, _to_asset
 
 logger = logging.getLogger(__name__)
@@ -137,7 +138,6 @@ class TickerAllBroker(LiveBroker):
         self._client.close()
 
     def _get_account(self) -> Account:
-        account = Account()
         detail = self._client.accounts.get(self._account_id)
 
         # The financials block (`account`) is present only when the account is connected/warm. A balance of
@@ -150,13 +150,20 @@ class TickerAllBroker(LiveBroker):
         currency = Currency(financials.currency or USD)
         free_margin = financials.free_margin
         balance = financials.balance
-        account.buying_power = Amount(currency, float(free_margin if free_margin is not None else balance))
-        account.cash = Wallet(Amount(currency, float(balance)))
-        account.portfolio = self._sync_positions(detail.positions, currency)
-        account.orders = self._sync_orders(currency)
-        return account
+        buying_power = Amount(currency, float(free_margin if free_margin is not None else balance))
+        cash = Wallet(Amount(currency, float(balance)))
+        portfolio = self._sync_positions(detail.positions, currency)
+        orders = self._sync_orders(currency)
+        return Account(
+            buying_power=buying_power,
+            cash=cash,
+            positions=portfolio,
+            orders=orders,
+            trades=[],
+            last_update=utcnow()
+        )
 
-    def _sync_positions(self, positions, currency: Currency) -> Portfolio:
+    def _sync_positions(self, positions, currency: Currency) -> list[Position]:
         # A MetaTrader account may be HEDGING (one broker ticket per trade) rather than netting. roboquant
         # models one NET position per asset, so aggregate all of a symbol's tickets into a single net
         # Position — otherwise same-symbol tickets overwrite each other and roboquant sees only the last
@@ -167,7 +174,7 @@ class TickerAllBroker(LiveBroker):
                 continue
             groups[_to_asset(p.symbol, self._quote_currency(p.symbol), currency)].append(p)
 
-        portfolio = Portfolio()
+        portfolio = []
         for asset, tickets in groups.items():
             net = Decimal("0")
             for p in tickets:
@@ -187,7 +194,7 @@ class TickerAllBroker(LiveBroker):
                     den += vol
             entry = float(num / den) if den else 0.0
             mkt = float(tickets[0].current_price) if tickets[0].current_price is not None else entry
-            portfolio[asset] = Position(net, entry, mkt)
+            portfolio.append(Position(asset, net, entry, mkt))
         return portfolio
 
     def _sync_orders(self, currency: Currency) -> list[Order]:

@@ -65,8 +65,8 @@ class TestTickerAllIT(unittest.TestCase):
         account = broker.sync()
         print(account)
 
-        for asset, position in account.portfolio.items():
-            print(asset, position)
+        for position in account.positions:
+            print(position)
 
         if account.orders:
             print("cancelling orders")
@@ -77,9 +77,9 @@ class TestTickerAllIT(unittest.TestCase):
             account = broker.sync()
             print(account)
 
-        if account.portfolio:
+        if account.positions:
             print("closing positions")
-            orders = account.portfolio.close_positions()
+            orders = account.close_positions()
             broker.place_orders(orders)
             time.sleep(10)
             account = broker.sync()

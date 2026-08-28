@@ -275,6 +275,9 @@ class Account:
         )
         return result
 
+    def close_positions(self) -> list[Order]:
+        return [Order(p.asset, -p.size) for p in self.positions]
+
     def trades_for_asset(self, asset: Asset) -> list[Trade]:
         """Get all the trades for the provided asset"""
         return [trade for trade in self.trades if trade.asset == asset]
