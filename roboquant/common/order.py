@@ -59,6 +59,9 @@ class Order:
     """When was the order placed at the exchange, so typically the first trading day after the order was submitted
     to the broker. This is also used to determine when a DAY order has expired."""
 
+    position_id: str | None = None
+    """Linking order to a position, can be used for hedging broker accounts"""
+
     def __post_init__(self):
         if self.size.is_zero():
             assert id != ""

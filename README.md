@@ -47,7 +47,7 @@ pip install roboquant
 The core installation of roboquant limits the number of dependencies. But you can install roboquant including one or more of the optional dependencies if you require certain additional functionality:
 
 ```shell
-# Integration with IBKR, Alpaca and Crypto exchanges
+# Integration with IBKR, Alpaca, Crypto and MetaTrader (TickerAll) exchanges
 pip install "roboquant[extra]"
 
 # AI based strategies using PyTorch and SB3

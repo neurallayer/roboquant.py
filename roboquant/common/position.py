@@ -1,8 +1,10 @@
 from dataclasses import dataclass
 from decimal import Decimal
+from typing import Literal
 
 from roboquant.common.asset import Asset
 from roboquant.common.monetary import Amount
+from roboquant.common.order import Order
 
 
 @dataclass(slots=True, frozen=True)
@@ -23,6 +25,10 @@ class Position:
 
     mkt_price: float = float("nan")
     """Latest market price denoted in the currency of the asset. This is updated at every step in a run."""
+
+    id: str | None = None
+    """Identifier for the position, can be used for hedging accounts thatcan have
+    multiple positions for a single asset."""
 
     @property
     def is_short(self):
@@ -56,3 +62,7 @@ class Position:
             The unrealized profit and loss.
         """
         return self.asset.amount(self.size, self.mkt_price - self.avg_price)
+
+    def close_order(self, limit : float|None = None, tif: Literal['GTC', 'DAY'] = "DAY") -> Order:
+        """Create a close order for this position, optionally provide a limit and Time In Force."""
+        return Order(self.asset, - self.size, limit=limit, tif=tif, position_id=self.id)

@@ -26,7 +26,7 @@ class TestBigFeed(unittest.TestCase):
         print(f"throughput = {throughput:.1f}M candles/s")
         print()
 
-    def _run(self, feed: rq.feeds.Feed, journal: rq.journals.BasicJournal):
+    def _run(self, feed: rq.Feed, journal: rq.journals.BasicJournal):
         strategy = rq.strategies.EMACrossover(13, 26)
         start = time.time()
         trader = SimpleTrader(50)
