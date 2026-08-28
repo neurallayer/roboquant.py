@@ -13,7 +13,8 @@ from roboquant.common.monetary import Amount, Wallet, USD, EUR, Currency
 from roboquant.common.asset import Asset, Stock, Crypto, Forex, Option
 from roboquant.common.timeframe import Timeframe, utcnow
 from roboquant.common.timeseries import TimeSeries
-
+from roboquant.feeds import Feed
+from roboquant.strategies import Strategy
 
 
 from roboquant import brokers
@@ -65,6 +66,8 @@ __all__ = [
     "journals",
     "strategies",
     "traders",
+    "Feed",
+    "Strategy",
     "Account",
     "Position",
     "Event",

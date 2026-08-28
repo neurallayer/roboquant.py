@@ -1,5 +1,6 @@
 # %%
 import logging
+from typing import override
 import torch
 from torch import nn
 
@@ -33,6 +34,7 @@ class TimeSeriesTransformer(nn.Module):
         self.transformer_encoder = nn.TransformerEncoder(encoder_layer, num_layers=num_layers)
         self.fc_out = nn.Linear(d_model, label_size)
 
+    @override
     def forward(self, src):
         src = self.input_fc(src)
         src = src + self.pos_embedding

@@ -6,6 +6,7 @@ from statistics import mean, stdev
 from dotenv import load_dotenv
 
 from roboquant import Timeframe
+from roboquant.feeds import Feed
 from roboquant.feeds.alpaca import AlpacaLiveFeed
 
 load_dotenv()
@@ -28,7 +29,7 @@ class TestDelay(unittest.TestCase):
     - From the access-point to your computer (f.e lan or Wi-Fi)
     """
 
-    def _measure(self, title, feed):
+    def _measure(self, title: str, feed: Feed):
         print()
         print(title)
         print("=" * len(title))

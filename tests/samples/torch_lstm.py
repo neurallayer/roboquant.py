@@ -1,5 +1,6 @@
 # %%
 import logging
+from typing import override
 from torch import nn
 import torch.nn.functional as F
 
@@ -13,12 +14,13 @@ from roboquant.ai.strategies import TimeSeriesStrategy, logger
 # PyTorch LSTM Model
 class TimeSeriesLSTM(nn.Module):
 
-    def __init__(self, feature_size) -> None:
+    def __init__(self, feature_size: int) -> None:
         super().__init__()
         self.lstm = nn.LSTM(feature_size, 16, batch_first=True, num_layers=2, dropout=0.4)
         self.flatten = nn.Flatten()
         self.linear = nn.Linear(16, 1)
 
+    @override
     def forward(self, inputs):
         output, _ = self.lstm(inputs)
         output = F.relu(self.flatten(output[:, -1, :]))

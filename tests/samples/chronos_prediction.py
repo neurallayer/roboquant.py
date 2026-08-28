@@ -8,6 +8,9 @@
 #
 
 # %%
+from typing import Any, override
+
+from numpy.typing import NDArray
 import torch
 from matplotlib import pyplot as plt
 import roboquant as rq
@@ -24,7 +27,7 @@ pipeline = ChronosBoltPipeline.from_pretrained(
 )
 
 # %%
-def pct_change(arr):
+def pct_change(arr: NDArray[Any]):
     """Calculate the percentage change of a numpy array to make the data stationary."""
     return np.diff(arr) / arr[:-1]
 
@@ -69,6 +72,7 @@ class ChronosStrategy(rq.strategies.IndicatorStrategy):
         self.pipeline = pipeline
         self.prediction_length = prediction_length
 
+    @override
     def _create_signal(self, asset: rq.Asset, ohlcv: OHLCVBuffer) -> rq.Signal | None:
         close = pct_change(ohlcv.close)
         result = self.pipeline.predict(
