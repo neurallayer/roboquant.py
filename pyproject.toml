@@ -36,7 +36,7 @@ implicit-any-lambda = false
 
 [project]
 name = "roboquant"
-version = "2.8.2"
+version = "2.9.0.dev1"
 authors = [{ name = "roboquant team", email = "info@roboquant.org" }]
 description = "A fast algorithmic trading platform with support for AI based strategies"
 readme = "README.md"
