@@ -82,6 +82,6 @@ class SimpleTrader(Trader):
                     result[asset] = Order(asset, Decimal(size))
                     remaining_positions -= 1
             elif signal.is_close_position(pos):
-                result[asset] = Order(asset, -pos.size)
+                result[asset] = pos.close_order()
 
         return list(result.values())

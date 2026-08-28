@@ -107,7 +107,8 @@ class LiveBroker(Broker):
         limit: Decimal|float|str|None,
         fill:Decimal | str | int | float,
         tif: Literal['GTC', 'DAY'] = "DAY",
-        ):
+        position_id: str | None = None
+        ) -> Order:
         """
         Create a roboquant SELL order for the given asset. This method assumes the order is a sell order, meaning the size
         and fill are positive values. This method is used to create an order based on the state of an existing order at
@@ -119,7 +120,8 @@ class LiveBroker(Broker):
             limit=float(limit) if limit is not None else None,
             tif=tif,
             fill=Decimal(fill),
-            id = str(id)
+            id = str(id),
+            position_id=position_id
         )
 
         return order
@@ -132,7 +134,8 @@ class LiveBroker(Broker):
         limit: Decimal|float|str|None,
         fill:Decimal | str | int | float,
         tif: Literal['GTC', 'DAY'] = "DAY",
-        ):
+        position_id: str | None = None
+        ) -> Order :
         """
         Create a buy order for the given asset. Typically used to create an order based on the state of an existing order at
         the broker.
@@ -143,7 +146,8 @@ class LiveBroker(Broker):
             limit=float(limit) if limit is not None else None,
             tif=tif,
             fill=Decimal(fill),
-            id = str(id)
+            id = str(id),
+            position_id=position_id
         )
         return order
 

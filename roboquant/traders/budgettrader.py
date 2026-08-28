@@ -98,6 +98,6 @@ class BudgetTrader(Trader):
                     buying_power -= abs(value)
             else:
                 assert pos.size, "position size should be non-zero"
-                result[asset] = Order(asset, -pos.size, price)
+                result[asset] = pos.close_order()
 
         return list(result.values())

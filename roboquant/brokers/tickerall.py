@@ -104,7 +104,11 @@ class TickerAllBroker(LiveBroker):
         instance = cls(api_key, "", base_url)
         try:
             result = instance._client.sessions.keep_alive(
-                broker=broker, server=server, account=account, password=password, terminal_type=terminal_type,
+                broker=broker,
+                server=server,
+                account=account,
+                password=password,
+                terminal_type=terminal_type,
             )
         except Exception:
             instance._client.close()
@@ -154,12 +158,7 @@ class TickerAllBroker(LiveBroker):
         positions = self.__sync_positions(detail.positions, currency)
         orders = self.__sync_orders(currency)
         return Account(
-            buying_power=buying_power,
-            cash=cash,
-            positions=positions,
-            orders=orders,
-            trades=[],
-            last_update=utcnow()
+            buying_power=buying_power, cash=cash, positions=positions, orders=orders, trades=[], last_update=utcnow()
         )
 
     def __sync_positions(self, positions: list[TaPosition], currency: Currency) -> list[Position]:
@@ -173,7 +172,7 @@ class TickerAllBroker(LiveBroker):
             entry = p.entry_price or 0.0
             mkt = p.current_price if p.current_price is not None else float("nan")
             asset = _to_asset(p.symbol, self.__quote_currency(p.symbol), currency)
-            pos= Position(asset, size, entry, mkt, id=str(p.ticket))
+            pos = Position(asset, size, entry, mkt, id=str(p.ticket))
             portfolio.append(pos)
         return portfolio
 
@@ -182,16 +181,15 @@ class TickerAllBroker(LiveBroker):
         for o in self._client.orders.list_pending(self._account_id):
             if not o.symbol or o.volume is None or o.ticket is None:
                 continue
-            limit = o.limit_price if o.limit_price is not None else o.price
-            if limit is None:
-                limit = float("nan")
+            limit = o.limit_price
             asset = _to_asset(o.symbol, self.__quote_currency(o.symbol), currency)
             # Decimal via str(), not float, keeps the size exact (see _sync_positions).
             size = abs(Decimal(str(o.volume)))
+            position_id = str(o.ticket)
             if o.side.upper() == "SELL":
-                orders.append(self._sell_order(o.ticket, asset, size, limit, 0))
+                orders.append(self._sell_order(o.ticket, asset, size, limit, 0, position_id=position_id))
             else:
-                orders.append(self._buy_order(o.ticket, asset, size, limit, 0))
+                orders.append(self._buy_order(o.ticket, asset, size, limit, 0, position_id=position_id))
         return orders
 
     def __get_pos_size(self, position_id: str) -> Decimal:
@@ -208,7 +206,7 @@ class TickerAllBroker(LiveBroker):
 
         if order.position_id:
             pos_size = self.__get_pos_size(order.position_id)
-            assert pos_size == - order.size
+            assert pos_size == -order.size
             ticket = int(order.position_id)
             result = self._client.positions.close(
                 self._account_id,
