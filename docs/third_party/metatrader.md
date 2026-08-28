@@ -19,14 +19,15 @@ environment variable. You can do this at the [TickerAll website](https://tickera
 
 You of course also need to already have a MT4 or MT5 broker.  
 
-## Example
-The following example shows how to cancel orders and close positions.
+## Broker Example
+The following example shows how to cancel orders and close positions using the
+`TickerAllBroker`.
 
 ```{code} python
 import os
 from time import sleep
 from dotenv import load_dotenv
-
+import roboquant as rq
 from roboquant.brokers.tickerall import TickerAllBroker
 
 load_dotenv()
@@ -73,8 +74,24 @@ finally:
 
 ```
 
-Use the symbol format and endpoint documented by TickerAll for the instrument
-you want to access. Check its documentation for available symbols, historical
-data, rate limits, and authentication details. This API is intended for market
-data; order execution still requires a broker or MetaTrader connection.
+## Feed example
+Below is an example how to use a live feed from your MetaTrader broker.
+
+```{code} python
+import roboquant as rq
+from roboquant.feeds.tickerall import TickerAllLiveFeed
+
+feed = TickerAllLiveFeed.connect(
+    api_key = KEY,
+    broker= "mt5",
+    server=MT5_SERVER,
+    account=MT5_ACCOUNT,
+    password=MT5_PASSWORD
+)
+
+feed.subscribe("BTCUSD", "EURUSD")
+tf = rq.Timeframe.next("10 min")
+for event in feed.play(tf):
+  print(event)
+```
 
