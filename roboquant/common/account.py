@@ -1,4 +1,4 @@
-from dataclasses import dataclass, asdict
+from dataclasses import dataclass, asdict, replace
 from datetime import datetime
 from decimal import Decimal
 from typing import Any
@@ -15,7 +15,7 @@ from roboquant.common.timeframe import utcnow
 from roboquant.common.trade import Trade
 
 
-@dataclass(slots=True)
+@dataclass(slots=True, frozen=True)
 class Account:
     """Represents a trading account and is managed by the broker.
     It keeps track of the cash, positions, orders and trades.
@@ -25,22 +25,25 @@ class Account:
     buying_power: Amount
     """Available buying power for orders in denoted in the base currency of the account"""
 
+    cash: Wallet
+    """
+    The cash available in the account
+    """
+
     positions: list[Position]
-    """the open positions, values denoted in the currency of the asset"""
+    """the open positions, values are denoted in the currency of the asset.
+    Depending on the broker these reflect Netting or Hedging positions.
+    """
 
     orders: list[Order]
     """
-    the open orders, each denoted in the currency of the asset. Each order in this list has an id assigned to it.
+    The open orders, each denoted in the currency of the asset.
+    Each order in this list has an id assigned to it.
     """
 
     last_update: datetime
     """
     The last time the account was updated.
-    """
-
-    cash: Wallet
-    """
-    The cash available in the account
     """
 
     trades: list[Trade]
@@ -57,7 +60,19 @@ class Account:
     @staticmethod
     def empty(currency : Currency = USD) -> "Account":
         """Create an empty account"""
-        return Account(Amount(currency, 0), [], [], utcnow(), Wallet(), [])
+        return Account(
+            buying_power=Amount(currency, 0),
+            cash=Wallet(),
+            positions=[],
+            orders=[],
+            last_update=utcnow(),
+            trades=[]
+        )
+
+    @staticmethod
+    def with_defaults(**kwargs: Any) -> "Account":
+        """Create an account with non provided arguments having defaults"""
+        return replace(Account.empty(), **kwargs)
 
     def convert(self, x: Wallet | Amount) -> float:
         """

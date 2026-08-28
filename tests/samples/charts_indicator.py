@@ -25,11 +25,11 @@ rq.set_dark_style()
 # %%
 class RSIMetric(IndicatorMetric):
     def _calc(self, buffer):
-        return {"rsi": RSI(buffer.close(), self.timeperiod-1)}
+        return {"rsi": RSI(buffer.close, self.timeperiod-1)}
 
 class BBandsMetric(IndicatorMetric):
     def _calc(self, buffer):
-        upper, _, lower = BBANDS(buffer.close(), timeperiod=self.timeperiod - 1)
+        upper, _, lower = BBANDS(buffer.close, timeperiod=self.timeperiod - 1)
         return {"lower": lower, "upper": upper}
 
 # %%

@@ -18,8 +18,7 @@ The account doesn't contain closed orders and closed positions.
 If you want to track all orders during a run, use the {cl}`SignalOrderTracker` journal.
 :::
 
-
-Account is the only created and modified by the {cl}`Broker` and returned when the `sync()` method is invoked. 
+Account is immutable and only created by the {cl}`Broker` and returned when the `sync()` method is invoked. 
 It is also the object returned from the {cl}`run()` function.
 
 ```{code-cell} python
