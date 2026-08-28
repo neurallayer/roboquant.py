@@ -10,7 +10,7 @@ class TestBigFeed(unittest.TestCase):
     """Run two large back tests, one over daily bars and one over 5-minutes bars"""
 
     @staticmethod
-    def _print(account, journal: rq.journals.BasicJournal, n_assets, load_time, runtime):
+    def _print(account: rq.Account, journal: rq.journals.BasicJournal, n_assets: int, load_time: float, runtime: float):
         print("", account, journal, sep="\n\n")
 
         candles = journal.items / 1_000_000.0
@@ -26,7 +26,7 @@ class TestBigFeed(unittest.TestCase):
         print(f"throughput = {throughput:.1f}M candles/s")
         print()
 
-    def _run(self, feed, journal: rq.journals.BasicJournal):
+    def _run(self, feed: rq.feeds.Feed, journal: rq.journals.BasicJournal):
         strategy = rq.strategies.EMACrossover(13, 26)
         start = time.time()
         trader = SimpleTrader(50)

@@ -38,7 +38,7 @@ class SimpleTrader(Trader):
         if not signals:
             return []
 
-        remaining_positions = self.max_positions - len(account.portfolio)
+        remaining_positions = self.max_positions - len(account.positions)
         order_assets = {o.asset for o in account.orders}
 
         if remaining_positions > 0:
@@ -64,7 +64,7 @@ class SimpleTrader(Trader):
                 logger.info("no price found")
                 continue
 
-            pos = account.portfolio.get_position(asset)
+            pos = account.get_position(asset)
             if signal.is_open_position(pos):
 
                 if remaining_positions <= 0:

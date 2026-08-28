@@ -161,7 +161,7 @@ class FlexTrader(Trader):
 
         for signal in signals:
             asset = signal.asset
-            pos_size = account.portfolio.size(asset)
+            pos_size = account.position_size(asset)
             change = _PositionChange.get_change(signal.is_buy, pos_size)
 
             ctx.log_received(signal=signal, position=pos_size, available=available)
@@ -208,7 +208,7 @@ class FlexTrader(Trader):
                     ctx.log_rule("available buying power below minimum order value")
                     continue
 
-                position_value = account.convert(account.portfolio.value(asset))
+                position_value = account.convert(account.position_amount(asset))
                 available_order_value = min(available, max_order_value, max_pos_value - abs(position_value))
                 if available_order_value < min_order_value:
                     ctx.log_rule("calculated available order value below minimum order value")

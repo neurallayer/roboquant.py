@@ -2,10 +2,10 @@ from decimal import Decimal
 import logging
 from time import sleep
 from typing import Any, override
+
 from roboquant.common.order import Order
-from roboquant.common.portfolio import Portfolio
-from roboquant.common.monetary import Currency
-import roboquant.common.portfolio
+from roboquant.common.monetary import Currency, Wallet
+import roboquant.common.position
 from roboquant.brokers.livebroker import LiveBroker
 import roboquant as rq
 from roboquant.brokers._ibkr_types import AccountInfo, ContractInfo, PositionInfo, OrderInfo
@@ -141,16 +141,18 @@ class IBKRBroker(LiveBroker):
         self._mapper = _AssetMapper(client)
 
 
-    def __get_positions(self) -> Portfolio:
+    def __get_positions(self) -> list[roboquant.common.position.Position]:
         """Return all the open positions"""
-        result = Portfolio()
+        result = []
         positions: list[PositionInfo] = self.client.positions().data or []  # type: ignore
         for pos_info in positions:
             conid = pos_info["conid"]
             if asset := self._mapper.get_asset(conid):
                 if size := pos_info["position"]:
-                    position = roboquant.common.portfolio.Position(Decimal(size), pos_info["avgPrice"], pos_info["mktPrice"])
-                    result[asset] = position
+                    position = roboquant.common.position.Position(
+                        asset, Decimal(size), pos_info["avgPrice"], pos_info["mktPrice"]
+                    )
+                    result.append(position)
             else:
                 logger.warning("ignoring position %s because couldn't map conid to asset", pos_info)
         return result
@@ -250,11 +252,12 @@ class IBKRBroker(LiveBroker):
 
     @override
     def _get_account(self):
-        account = rq.Account()
-        account.portfolio = self.__get_positions()
-        account.orders = self.__get_orders()
         cash, bp = self.__get_cash_bp()
-        account.last_update = rq.utcnow()
-        account.cash[self.base_currency] = cash
-        account.buying_power = rq.Amount(self.base_currency, bp)
-        return account
+        return rq.Account(
+            buying_power=rq.Amount(self.base_currency, bp),
+            positions= self.__get_positions(),
+            orders = self.__get_orders(),
+            last_update=rq.utcnow(),
+            cash = Wallet(rq.Amount(self.base_currency, cash)),
+            trades = []
+        )

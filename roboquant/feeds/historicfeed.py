@@ -197,7 +197,7 @@ class HistoricFeed(Feed, ABC):
         from roboquant.common.account import Account
 
         timeline: list[datetime] = []
-        account = Account()
+        account = Account.empty()
         data: dict[str, list[float]] = {}
 
         for event in self.play(timeframe):

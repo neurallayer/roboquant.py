@@ -4,7 +4,7 @@ from .event import Event, PriceItem, Bar, Quote, TradePrice
 from .monetary import Wallet, Amount
 from .order import Order
 from .trade import Trade
-from .portfolio import Position, Portfolio
+from .position import Position
 from .signal import SignalType, Signal
 from .timeframe import Timeframe, utcnow
 from .timeseries import TimeSeries
@@ -26,7 +26,6 @@ __all__ = [
     "Order",
     "Trade",
     "Position",
-    "Portfolio",
     "SignalType",
     "Signal",
     "Timeframe",

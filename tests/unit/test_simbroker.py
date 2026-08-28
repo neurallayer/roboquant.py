@@ -63,11 +63,11 @@ class TestSimbroker(unittest.TestCase):
         event = self._create_event(100)
         account = broker.sync(event)
         self.assertEqual(len(account.orders), 0)
-        self.assertEqual(len(account.portfolio), 1)
-        position = account.portfolio[order.asset]
-        self.assertEqual(position.size, order.size)
+        self.assertEqual(len(account.positions), 1)
+        pos_size = account.position_size(order.asset)
+        self.assertEqual(pos_size, order.size)
         self.assert_orders(account)
-        self.assertEqual(Decimal(100), account.portfolio[TestSimbroker.apple].size)
+        self.assertEqual(Decimal(100), pos_size)
 
         # Limit should prevent execution
         order = Order(TestSimbroker.apple, Decimal(-50), 101.0)
@@ -75,8 +75,8 @@ class TestSimbroker(unittest.TestCase):
         account = broker.sync(event)
         self.assertEqual(len(account.orders), 1)
         self.assert_orders(account)
-        self.assertEqual(len(account.portfolio), 1)
-        self.assertEqual(Decimal(100), account.portfolio[TestSimbroker.apple].size)
+        self.assertEqual(len(account.positions), 1)
+        self.assertEqual(Decimal(100), account.positions[0].size)
 
         # Lower the limit so it gets executed
         order = account.orders[0].modify(limit=99.0)
@@ -84,8 +84,8 @@ class TestSimbroker(unittest.TestCase):
         account = broker.sync(event)
         self.assertEqual(len(account.orders), 0)
         self.assert_orders(account)
-        self.assertEqual(len(account.portfolio), 1)
-        self.assertEqual(Decimal(50), account.portfolio[TestSimbroker.apple].size)
+        self.assertEqual(len(account.positions), 1)
+        self.assertEqual(Decimal(50), account.positions[0].size)
 
 
 if __name__ == "__main__":

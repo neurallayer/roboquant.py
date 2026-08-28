@@ -9,7 +9,7 @@ from roboquant.journals.metricsjournal import MetricsJournal
 feed = rq.feeds.YahooFeed.us_stocks_10()
 
 # %%
-def run_and_plot(strategy):
+def run_and_plot(strategy: rq.Strategy):
     journal = MetricsJournal.pnl()
     account = rq.run(feed, strategy, journal = journal)
     print(account)

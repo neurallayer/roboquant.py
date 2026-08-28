@@ -1,4 +1,6 @@
 # %%
+from typing import override
+
 from roboquant.util.indicators import RSI
 import roboquant as rq
 from roboquant.common.asset import Asset
@@ -9,6 +11,7 @@ from roboquant.util.buffer import OHLCVBuffer
 class RSIFeature(IndicatorFeature):
     """Example using TaLib to create a RSI feature"""
 
+    @override
     def _calc(self, asset: Asset, ohlcv: OHLCVBuffer) -> float:
         return RSI(ohlcv.close, timeperiod=self.timeperiod - 1)
 

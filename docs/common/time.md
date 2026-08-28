@@ -81,7 +81,7 @@ objects like orders, trades and positions.
 
 ```{code-cell} python
 :tags: [hide-output]
-print(account.portfolio.to_dataframe())
+print(account.positions_to_dataframe())
 print(account.orders_to_dataframe())
 print(account.trades_to_dataframe())
 ```

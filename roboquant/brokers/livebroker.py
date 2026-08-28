@@ -50,8 +50,8 @@ class LiveBroker(Broker):
         self.sleep_after_cancel = 0.0
 
         self._has_new_orders = False
-        self._account: Account = Account()
-        self._account.last_update = Timeframe.INFINITE.start
+        self._account : Account | None = None
+        self._last_update = Timeframe.INFINITE.start
         self.metrics = {
             "new": 0,
             "update": 0,
@@ -67,14 +67,14 @@ class LiveBroker(Broker):
         if event and (now - event.time > self.max_delay_event):
             raise ValueError(f"received event too far in the past now={now} event-time={event.time}")
 
-        diff_time = now - self._account.last_update
+        diff_time = now - self._last_update
 
         # We always get a new account state if we just placed orders
         # or if we are due to refresh
-        if self._has_new_orders or diff_time > self.max_delay_sync:
+        if self._account is None or self._has_new_orders or diff_time > self.max_delay_sync:
             self.metrics["sync"] += 1
             self._account = self._get_account()
-            self._account.last_update = now
+            self._last_update = now
             self._has_new_orders = False
 
         return self._account

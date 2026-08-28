@@ -12,9 +12,10 @@ from roboquant.common.account import Account
 from roboquant.common.asset import Asset, Forex, Stock
 from roboquant.common.monetary import Amount, Currency, Wallet
 from roboquant.common.order import Order
-from roboquant.common.portfolio import Portfolio, Position
+from roboquant.common.position import Position
 
 from roboquant.brokers._saxo_types import NetPositionsResponse, OpenOrdersResponse
+from roboquant.common.timeframe import utcnow
 
 logger = logging.getLogger(__name__)
 
@@ -205,7 +206,7 @@ class SaxoBroker(LiveBroker):
             self._last_prices[asset] = price
         return self._last_prices[asset]
 
-    def __get_portfolio(self) -> Portfolio:
+    def __get_portfolio(self) -> list[Position]:
         """Get open net positions."""
         data: NetPositionsResponse = self.__request(
             "GET",
@@ -213,7 +214,7 @@ class SaxoBroker(LiveBroker):
             params={"FieldGroups": "NetPositionBase,NetPositionView"},
         )
 
-        portfolio = Portfolio()
+        portfolio = []
 
         for item in data.get("Data", []):
             view = item.get("NetPositionView", {})
@@ -226,8 +227,8 @@ class SaxoBroker(LiveBroker):
             # Unfortunately Saxo doesn't include the latest market price if
             # the market is closed. So in those case we need to get the price.
             mkt_price = view["CurrentPrice"] or self.get_price(asset)
-
-            portfolio[asset] = Position(size, avg_price, mkt_price)
+            pos = Position(asset, size, avg_price, mkt_price)
+            portfolio.append(pos)
 
         return portfolio
 
@@ -257,25 +258,24 @@ class SaxoBroker(LiveBroker):
 
         return orders
 
-    def __get_base_account(self):
+    @override
+    def _get_account(self) -> Account:
         data = self.__request(
-            "GET",
-            "/port/v1/balances",
-        )
+                    "GET",
+                    "/port/v1/balances",
+                )
         base_currency = Currency(data["Currency"])
         cash = Amount(base_currency, data["CashBalance"])
         bp = Amount(base_currency, data["CashAvailableForTrading"])
-        acc = Account(base_currency)
-        acc.cash = Wallet(cash)
-        acc.buying_power = bp
-        return acc
 
-    @override
-    def _get_account(self) -> Account:
-        account = self.__get_base_account()
-        account.portfolio = self.__get_portfolio()
-        account.orders = self.__get_orders()
-        return account
+        return Account(
+            buying_power=bp,
+            positions= self.__get_portfolio(),
+            orders = self.__get_orders(),
+            last_update=utcnow(),
+            cash = Wallet(cash),
+            trades = []
+        )
 
     def match_asset(self, asset: Asset) -> Asset | None:
         """Tries to match an asset, even if not 100% matching symbol name."""

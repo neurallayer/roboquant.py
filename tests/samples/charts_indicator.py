@@ -9,11 +9,14 @@
 # It uses the YahooFeed to get the data for TSLA and plots the price, Bollinger Bands, RSI, and buy/sell signals on a chart.
 # %%
 
+from typing import override
+
 import roboquant as rq
 import matplotlib.pyplot as plt
 
 from roboquant.util.metrics import IndicatorMetric, SignalRatingMetric
 from roboquant.util.indicators import BBANDS, RSI
+from roboquant.util.buffer import OHLCVBuffer
 
 # Setup some defaults for matplotlib
 rq.set_dark_style()
@@ -24,12 +27,16 @@ rq.set_dark_style()
 
 # %%
 class RSIMetric(IndicatorMetric):
-    def _calc(self, buffer):
-        return {"rsi": RSI(buffer.close(), self.timeperiod-1)}
+
+    @override
+    def _calc(self, buffer: OHLCVBuffer):
+        return {"rsi": RSI(buffer.close, self.timeperiod-1)}
 
 class BBandsMetric(IndicatorMetric):
-    def _calc(self, buffer):
-        upper, _, lower = BBANDS(buffer.close(), timeperiod=self.timeperiod - 1)
+
+    @override
+    def _calc(self, buffer: OHLCVBuffer):
+        upper, _, lower = BBANDS(buffer.close, timeperiod=self.timeperiod - 1)
         return {"lower": lower, "upper": upper}
 
 # %%

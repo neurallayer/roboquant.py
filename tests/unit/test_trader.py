@@ -13,9 +13,10 @@ class TestTrader(unittest.TestCase):
 
     @override
     def setUp(self) -> None:
-        acc = Account()
-        acc.buying_power = Amount(USD, 100_000.0)
-        acc.cash = Wallet(Amount(USD, 100_000.0))
+        acc = Account.with_defaults(
+            buying_power=Amount(USD, 100_000.0),
+            cash=Wallet(Amount(USD, 100_000.0)),
+        )
         self.account = acc
         self.feed = get_feed()
 

@@ -4,7 +4,8 @@ from roboquant.common.asset import Crypto
 from roboquant.common.event import Event
 from roboquant.common.monetary import Amount, Wallet
 from roboquant.common.order import Order
-from roboquant.common.portfolio import Portfolio, Position
+from roboquant.common.position import Position
+from roboquant.common.timeframe import utcnow
 from roboquant.feeds.crypto import logger
 
 
@@ -55,13 +56,14 @@ class CryptoBroker(LiveBroker):
         - fetch_open_orders
         - fetch_positions
         """
-
-        account = Account()
-        account.orders = self._get_open_orders()
-        account.portfolio = self._get_positions()
-        account.cash = self._get_balance()
-        account.buying_power = self._get_buying_power()
-        return account
+        return Account(
+            buying_power=self._get_buying_power(),
+            positions= self._get_positions(),
+            orders = self._get_open_orders(),
+            last_update=utcnow(),
+            cash = self._get_balance(),
+            trades = []
+        )
 
     @override
     def _cancel_order(self, order: Order):
@@ -99,8 +101,8 @@ class CryptoBroker(LiveBroker):
             result.append(o)
         return result
 
-    def _get_positions(self) -> Portfolio:
-        result = Portfolio()
+    def _get_positions(self) -> list[Position]:
+        result = []
         try:
             positions = self.__exchange.fetch_positions()
         except ccxt.NotSupported as e:
@@ -112,8 +114,8 @@ class CryptoBroker(LiveBroker):
             asset = Crypto.from_symbol(position["symbol"])
             size = position["amount"]
             avg_entry_price = position["entry_price"]
-            p = Position(size, avg_entry_price, float("nan"))
-            result[asset] = p
+            p = Position(asset, size, avg_entry_price, float("nan"))
+            result.append(p)
         return result
 
     @override
