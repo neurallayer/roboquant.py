@@ -52,6 +52,7 @@ project:
         - file: third_party/crypto.md
         - file: third_party/ibkr.md 
         - file: third_party/saxo.md 
+        - file: third_party/metatrader.md 
     - title: Performance
       children:
         - file: performance/multiprocess.md
