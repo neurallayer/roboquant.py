@@ -127,7 +127,7 @@ equity.plot();
 ```
 
 ### Asset Allocation Chart
-For larger portfolios it is useful to see which percentage is allocated to which asset.
+For larger number of open positions it is useful to see which percentage is allocated to which asset.
 
 Since assets can be denoted in different currencies, roboquant takes care of converting them to a single
 currency before plotting.

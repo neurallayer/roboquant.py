@@ -146,12 +146,12 @@ class Trader(ABC):
 
 A `Trader` has access to the latest `Account`, unlike a `Strategy`. This makes it the appropriate place for:
 - position-aware sizing;
-- portfolio exposure limits;
+- position exposure limits;
 - converting signals into orders;
 - reacting to current positions or cash;
 - custom order-management rules.
 
-Prefer a custom `Trader` over putting portfolio state and order construction into `Strategy`.
+Prefer a custom `Trader` over putting position state and order construction into `Strategy`.
 
 If the standard trader behavior is sufficient, do not implement this ABC.
 

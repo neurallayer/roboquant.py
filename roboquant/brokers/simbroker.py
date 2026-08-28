@@ -58,7 +58,7 @@ class SimBroker(Broker):
         self._buying_power = self.deposit
         self._trades = []
         self._prices : dict [Asset, PriceItem] = {}
-        self._portfolio: dict[Asset, Position] = {}
+        self._positions: dict[Asset, Position] = {}
         self._order_id = 0
         self._last_update = datetime.fromisoformat("1900-01-01T00:00:00+00:00")
 
@@ -77,7 +77,7 @@ class SimBroker(Broker):
         """update position based on a fill and return the realized pnl"""
         assert fill != 0, "fill cannot be zero"
 
-        pos = self._portfolio.get(asset, Position(asset))
+        pos = self._positions.get(asset, Position(asset))
 
         new_size = pos.size + fill
 
@@ -97,9 +97,9 @@ class SimBroker(Broker):
             pnl = asset.value(pos.size, price - pos.avg_price)
 
         if new_size:
-            self._portfolio[asset] = Position(asset, new_size, avg_price, pos.mkt_price)
+            self._positions[asset] = Position(asset, new_size, avg_price, pos.mkt_price)
         else:
-            del self._portfolio[asset]
+            del self._positions[asset]
 
         return pnl
 
@@ -144,9 +144,9 @@ class SimBroker(Broker):
         prices = self._prices
         price_type = self.price_type
 
-        for asset, pos in self._portfolio.items():
+        for asset, pos in self._positions.items():
             mkt_price = prices[asset].price(price_type)
-            self._portfolio[asset] = Position(asset, pos.size, pos.avg_price, mkt_price)
+            self._positions[asset] = Position(asset, pos.size, pos.avg_price, mkt_price)
 
     def __next_order_id(self) -> str:
         """Generate a new order id. The order id is a simple integer that is incremented for each new order."""
@@ -241,7 +241,7 @@ class SimBroker(Broker):
 
     def _calculate_short_positions(self) -> Wallet:
         reserved = Wallet()
-        for asset, position in self._portfolio.items():
+        for asset, position in self._positions.items():
             if position.is_short:
                 short_value = asset.amount(-position.size, position.mkt_price)
                 reserved += short_value
@@ -252,7 +252,7 @@ class SimBroker(Broker):
         Existing open orders will be disguarded.
         """
         orders = []
-        for asset, pos in self._portfolio.items():
+        for asset, pos in self._positions.items():
             order = Order(asset, - pos.size)
             orders.append(order)
         self._orders = {}
@@ -260,9 +260,9 @@ class SimBroker(Broker):
         return self.sync(Event(self._last_update, list(self._prices.values())))
 
     def __is_increase_position(self, order: Order) -> bool:
-        if order.asset not in self._portfolio:
+        if order.asset not in self._positions:
             return True
-        pos = self._portfolio[order.asset]
+        pos = self._positions[order.asset]
         return order.is_buy if pos.is_long else order.is_sell
 
     def _calculate_buyingpower(self) -> Amount:
@@ -293,7 +293,7 @@ class SimBroker(Broker):
 
         return Account(
             buying_power=self._calculate_buyingpower(),
-            positions=list(self._portfolio.values()),
+            positions=list(self._positions.values()),
             orders= list(self._orders.values()),
             last_update=self._last_update,
             cash = self._cash,

@@ -152,12 +152,12 @@ class TickerAllBroker(LiveBroker):
         balance = financials.balance
         buying_power = Amount(currency, float(free_margin if free_margin is not None else balance))
         cash = Wallet(Amount(currency, float(balance)))
-        portfolio = self._sync_positions(detail.positions, currency)
+        positions = self._sync_positions(detail.positions, currency)
         orders = self._sync_orders(currency)
         return Account(
             buying_power=buying_power,
             cash=cash,
-            positions=portfolio,
+            positions=positions,
             orders=orders,
             trades=[],
             last_update=utcnow()

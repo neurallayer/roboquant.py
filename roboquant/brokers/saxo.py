@@ -206,7 +206,7 @@ class SaxoBroker(LiveBroker):
             self._last_prices[asset] = price
         return self._last_prices[asset]
 
-    def __get_portfolio(self) -> list[Position]:
+    def __get_positions(self) -> list[Position]:
         """Get open net positions."""
         data: NetPositionsResponse = self.__request(
             "GET",
@@ -214,7 +214,7 @@ class SaxoBroker(LiveBroker):
             params={"FieldGroups": "NetPositionBase,NetPositionView"},
         )
 
-        portfolio = []
+        positions = []
 
         for item in data.get("Data", []):
             view = item.get("NetPositionView", {})
@@ -228,9 +228,9 @@ class SaxoBroker(LiveBroker):
             # the market is closed. So in those case we need to get the price.
             mkt_price = view["CurrentPrice"] or self.get_price(asset)
             pos = Position(asset, size, avg_price, mkt_price)
-            portfolio.append(pos)
+            positions.append(pos)
 
-        return portfolio
+        return positions
 
     def __get_orders(self) -> list[Order]:
         """Get open orders."""
@@ -270,7 +270,7 @@ class SaxoBroker(LiveBroker):
 
         return Account(
             buying_power=bp,
-            positions= self.__get_portfolio(),
+            positions= self.__get_positions(),
             orders = self.__get_orders(),
             last_update=utcnow(),
             cash = Wallet(cash),

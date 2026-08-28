@@ -187,7 +187,7 @@ class Account:
     def get_position(self, asset: Asset) -> Position:
         """
         Return the net position for an asset, or an empty position
-        if the asset is not in the portfolio.
+        if the asset is not in the open positions.
         The avg price and mkt price are not set.
 
         Args:
@@ -304,7 +304,7 @@ class Account:
         return pd.json_normalize([asdict(order) for order in self.orders])
 
     def plot_allocation(self, ax: Axes | None = None, include_cash: bool = False, **kwargs: Any) -> Axes:
-        """Plot the exposure of the assets in the portfolio as a pie chart.
+        """Plot the exposure of the assets in the open positions as a pie chart.
         The allocation is based on the latest market value of the positions.
 
         Args:
