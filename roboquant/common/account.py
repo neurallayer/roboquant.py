@@ -32,7 +32,7 @@ class Account:
 
     positions: list[Position]
     """the open positions, values are denoted in the currency of the asset.
-    Depending on the broker these reflect Netting or Hedging positions.
+    Depending on the broker, these reflect `Netting` or `Hedging` positions.
     """
 
     orders: list[Order]
@@ -283,6 +283,10 @@ class Account:
         """Get all the orders for the provided asset"""
         return [order for order in self.orders if order.asset == asset]
 
+    def positions_for_asset(self, asset: Asset) -> list[Position]:
+            """Get all the positions for the provided asset"""
+            return [pos for pos in self.positions if pos.asset == asset]
+
     def positions_to_dataframe(self) -> pd.DataFrame:
         """Return the positions as a dataframe"""
         return pd.json_normalize([asdict(pos) for pos in self.positions])
@@ -320,7 +324,7 @@ class Account:
         assets = set(p.asset for p in self.positions)
         labels = labels + [asset.symbol for asset in assets]
         sizes = sizes + [
-            self.convert(self.position_amount(asset)) for asset in assets
+            self.convert(abs(self.position_amount(asset))) for asset in assets
         ]
 
         if len(labels) == 0:
