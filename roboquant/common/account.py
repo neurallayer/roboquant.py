@@ -131,10 +131,10 @@ class Account:
 
     def position_amount(self, asset: Asset) -> Amount:
         """
-        Return the cash value denoted in the base currency of the account.
+        Return the netting position amount denoted in the currency of the asset.
 
         Returns:
-            float: The cash value in the base currency.
+            The position amount.
         """
         s = sum(p.mkt_value().value for p in self.positions if p.asset == asset)
         return Amount(asset.currency, s)
@@ -144,8 +144,6 @@ class Account:
         """
         Return the sum of the market values of the open positions in the account.
         Short positions have a negative market value.
-        If one or more asset is provided, limit it to those assets, otherwise
-        include all assets.
 
         Returns:
             Wallet: The total market value of all open positions.

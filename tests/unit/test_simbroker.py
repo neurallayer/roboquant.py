@@ -64,10 +64,10 @@ class TestSimbroker(unittest.TestCase):
         account = broker.sync(event)
         self.assertEqual(len(account.orders), 0)
         self.assertEqual(len(account.positions), 1)
-        position = account.get_position(order.asset)
-        self.assertEqual(position.size, order.size)
+        pos_size = account.position_size(order.asset)
+        self.assertEqual(pos_size, order.size)
         self.assert_orders(account)
-        self.assertEqual(Decimal(100), position.size)
+        self.assertEqual(Decimal(100), pos_size)
 
         # Limit should prevent execution
         order = Order(TestSimbroker.apple, Decimal(-50), 101.0)
