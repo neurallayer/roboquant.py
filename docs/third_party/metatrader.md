@@ -17,7 +17,13 @@ functionality for any MT4/MT5 compatible broker.
 Create an API key with TickerAll and store it in the `TICKERALL_API_KEY`
 environment variable. You can do this at the [TickerAll website](https://tickerall.com)
 
-You of course also need to already have a MT4 or MT5 broker.  
+You of course also need to signed up with a MT4 or MT5 broker. 
+
+:::{note}
+MetaTrader doesn't offer a native REST API and their Python API supports only Windows.
+So TickerAll acts as bridge and as a consequence all your Broker traffic will be routed
+via TickerAll.  
+:::
 
 ## Broker Example
 The following example shows how to cancel orders and close positions using the
@@ -75,7 +81,8 @@ finally:
 ```
 
 ## Feed example
-Below is an example how to use a live feed from your MetaTrader broker.
+Below is an example how to use a live market data feed from your MetaTrader broker.
+There is also a similar `TickerAllHistoricFeed` available.
 
 ```{code} python
 import roboquant as rq
@@ -93,5 +100,7 @@ feed.subscribe("BTCUSD", "EURUSD")
 tf = rq.Timeframe.next("10 min")
 for event in feed.play(tf):
   print(event)
+
+feed.close()
 ```
 

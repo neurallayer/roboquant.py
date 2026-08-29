@@ -44,6 +44,7 @@ There are several {cl}`Feed` providers included, like the Yahoo Finance one used
 It is free to use without an API key and provides data for a large number of stocks, ETFs, indices and more. The data is provided in the form of `Bars`, which contain the open, high, low and close prices for a given time period.
 
 ```{code-cell} python
+:tags: [remove-output]
 feed = rq.feeds.YahooFeed("TSLA", "MSFT", "GOOG", start_date="2010-01-10")
 ```
 

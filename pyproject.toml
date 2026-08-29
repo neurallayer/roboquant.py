@@ -71,7 +71,7 @@ keywords = [
 dependencies = [
   "numpy>2.0.0",
   "requests>2.30.0",
-  "yfinance>=1.5.2",
+  "yfinance>=1.7.0",
   "pyarrow>24.0.0",
   "ta-lib==0.7.1",
   "pandas>=2.2.0",
