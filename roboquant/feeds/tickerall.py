@@ -165,14 +165,16 @@ class TickerAllLiveFeed(LiveFeed):
 
     def subscribe(self, *symbols: str) -> None:
         """Subscribe to live ticks for the given symbols. Can be called more than once to add symbols."""
+        if not symbols:
+            return
+
         if self._stream is None:
             self._stream = self._client.stream.connect()
             self._stream.on("tick", self.__on_tick)
         self._stream.subscribe_ticks(self._account_id, list(symbols))
         self._subscribed.update(symbols)
         # Pre-warm the currency cache (one metadata call) so tick handling never blocks on it.
-        if symbols:
-            self._quote_currency(next(iter(symbols)))
+        self._quote_currency(next(iter(symbols)))
 
     @override
     def assets(self) -> list[Asset]:
@@ -182,7 +184,10 @@ class TickerAllLiveFeed(LiveFeed):
     def __on_tick(self, ev: Any) -> None:
         if ev.symbol is None or ev.bid is None or ev.ask is None:
             return
-        asset = _to_asset(ev.symbol, self._quote_currency(ev.symbol))
+        asset = self.get_asset(ev.symbol)
+        if asset is None:
+            asset = _to_asset(ev.symbol, self._quote_currency(ev.symbol))
+            self.register(ev.symbol, asset)
         # roboquant Quote data layout: [ask-price, ask-volume, bid-price, bid-volume]. A MetaTrader tick
         # carries no size, so the volumes are left at 0.0 (only the prices are meaningful).
         quote = Quote(asset, array("f", [float(ev.ask), 0.0, float(ev.bid), 0.0]))

@@ -192,7 +192,7 @@ class HistoricFeed(Feed, ABC):
         """
         Track a metric over time and return the results as a TimeSeries.
         The metric will only be provided the event and empty values for the other
-        parameters in tis `calc()` method.
+        parameters in its `calc()` method.
         """
         from roboquant.common.account import Account
 

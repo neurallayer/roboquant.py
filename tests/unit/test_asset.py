@@ -23,6 +23,7 @@ class TestAsset(unittest.TestCase):
 
     def test_crypto(self):
         btc = Crypto.from_symbol("BTC/USDT")
+        self.assertRaises(ValueError, Crypto.from_symbol, "ABCD")
         self.assertEqual("BTC/USDT", btc.symbol)
         self.assertEqual(Currency("USDT"), btc.currency)
         v = btc.serialize()
@@ -32,6 +33,10 @@ class TestAsset(unittest.TestCase):
 
     def test_forex(self):
         btc = Forex.from_symbol("EUR/USD")
+        btc2 = Forex.from_symbol("EURUSD")
+        self.assertEqual(btc.currency, btc2.currency)
+        self.assertRaises(ValueError, Forex.from_symbol, "ABCD")
+
         self.assertEqual("EUR/USD", btc.symbol)
         self.assertEqual(Currency("USD"), btc.currency)
         v = btc.serialize()

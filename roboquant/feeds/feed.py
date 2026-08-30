@@ -17,7 +17,7 @@ class Feed(ABC):
     """
 
     @abstractmethod
-    def play(self, timeframe: Timeframe| None = None) -> Iterator[Event]: # Generator[Event, Any, None]:
+    def play(self, timeframe: Timeframe| None = None) -> Iterator[Event]:
         """
         (Re-)play the events contained in the feed.
 

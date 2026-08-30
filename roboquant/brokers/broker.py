@@ -35,7 +35,6 @@ class Broker(ABC):
 
         Returns:
             The latest state of the account.
-
         """
         ...
 

@@ -83,3 +83,4 @@ class CryptoFeed(InMemoryFeed):
         return Crypto.from_symbol(symbol)
 
 
+

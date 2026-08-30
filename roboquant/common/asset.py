@@ -152,8 +152,12 @@ class Crypto(Asset):
         Returns:
             Crypto: The created crypto asset.
         """
-        currency = re.split(r"[^a-zA-Z0-9\s]", symbol)[-1]
-        return Crypto(symbol, Currency(currency))
+        parts = re.split(r"[^a-zA-Z0-9\s]", symbol)
+        if len(parts) == 2:
+            return Crypto(symbol, Currency(parts[1]))
+        if len(parts) == 1 and len(symbol) == 6:
+            return Crypto(symbol, Currency(symbol[-3:]))
+        raise ValueError("Cannot convert symbol %s to Forex", symbol)
 
 
 @dataclass(frozen=True, slots=True)
@@ -169,17 +173,21 @@ class Forex(Asset):
 
     @staticmethod
     def from_symbol(symbol: str) -> "Forex":
-        """Create a `Forex` asset from a symbol string. The last part of the symbol is assumed to be the
-        currency. Any non alfanumeric character is considered to be a separator.
+        """Create a `Forex` asset from a symbol string.
+        The last part of the symbol name is assumed to be the quote currency.
+        Any non alfanumeric character is considered to be a separator.
 
         Args:
             symbol (str): The symbol string of the forex asset.
         Returns:
             Forex: The created asset of the type Forex.
         """
-        currency = re.split(r"[^a-zA-Z0-9\s]", symbol)[-1]
-        return Forex(symbol, Currency(currency))
-
+        parts = re.split(r"[^a-zA-Z0-9\s]", symbol)
+        if len(parts) == 2:
+            return Forex(symbol, Currency(parts[1]))
+        if len(parts) == 1 and len(symbol) == 6:
+            return Forex(symbol, Currency(symbol[-3:]))
+        raise ValueError("Cannot convert symbol %s to Forex", symbol)
 
 @dataclass(frozen=True, slots=True)
 class Option(Asset):

@@ -3,6 +3,7 @@ from queue import SimpleQueue
 from queue import Empty, Full
 from typing import Iterator, override
 
+from roboquant.common.asset import Asset
 from roboquant.common.event import Event
 from roboquant.common.timeframe import Timeframe, utcnow
 from .feed import Feed
@@ -28,6 +29,7 @@ class LiveFeed(Feed):
         self.__last_time = datetime.fromisoformat("1900-01-01T00:00:00+00:00")
         self.increment = timedelta(microseconds=1)
         self.heartbeat_timeout: float = 10.0
+        self._registry: dict[str, Asset] = {}
 
     @override
     def play(self, timeframe: Timeframe | None = None) -> Iterator[Event]:
@@ -70,3 +72,16 @@ class LiveFeed(Feed):
                 self.__queue.put(event)
             except Full:
                 pass
+
+    def register(self, symbol: str, asset: Asset):
+        """Register an asset for a symbol name"""
+        self._registry[symbol] = asset
+
+    def get_asset(self, symbol: str) -> Asset | None:
+        """Get the asset (if any) for the provided symbol name"""
+        return self._registry.get(symbol)
+
+    @override
+    def assets(self) -> list[Asset]:
+        return list(self._registry.values())
+

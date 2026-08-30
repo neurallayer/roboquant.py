@@ -29,7 +29,6 @@ class TickerAllBroker(LiveBroker):
     A new order with a `limit` price is placed as a pending limit order; a new order whose `limit` is
     `None` (`is_mkt_order`) is placed as a market order.
 
-    Note that roboquant models one net position per asset, which maps to a MetaTrader **netting** account.
     Stop-loss / take-profit are not expressible in roboquant's order model and are out of scope.
 
     There are two ways to construct the broker:
@@ -185,7 +184,7 @@ class TickerAllBroker(LiveBroker):
             asset = _to_asset(o.symbol, self.__quote_currency(o.symbol), currency)
             # Decimal via str(), not float, keeps the size exact (see _sync_positions).
             size = abs(Decimal(str(o.volume)))
-            position_id = str(o.ticket)
+            position_id = o.ticket
             if o.side.upper() == "SELL":
                 orders.append(self._sell_order(o.ticket, asset, size, limit, 0, position_id=position_id))
             else:

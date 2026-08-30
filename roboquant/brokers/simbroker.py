@@ -18,6 +18,8 @@ logger = logging.getLogger(__name__)
 
 class SimBroker(Broker):
     """Implementation of a Broker that simulates order execution and can be used in back tests.
+    It implements a Netting position strategy, meaning there is always maximum one open position
+    per asset.
 
     This class can be extended to support different types of use-cases, like margin trading.
     """

@@ -132,7 +132,7 @@ class FlexTrader(Trader):
     max_position_pct: float = 0.1
     price_type: str = "DEFAULT"
     shuffle_signals: bool = False
-    limit_offset_pct: float | None = 0.0
+    limit_offset_pct: float | None = None
     limit_rounding: int = 2
     tif: Literal["DAY", "GTC"] = "DAY"
 

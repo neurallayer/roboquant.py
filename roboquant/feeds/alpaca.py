@@ -93,18 +93,25 @@ class AlpacaLiveFeed(LiveFeed):
         event = Event(time, [item])
         self._put(event)
 
+    def __get_asset(self, symbol: str, asset_class: AssetClass):
+        asset = self.get_asset(symbol)
+        if asset is None:
+            asset = _get_asset(symbol, asset_class)
+            self.register(symbol, asset)
+        return asset
+
     async def __handle_trades(self, data: AlpacaTrade | Any):
-        asset = _get_asset(data.symbol, self.asset_class)
+        asset = self.__get_asset(data.symbol, self.asset_class)
         item = TradePrice(asset, data.price, data.size)
         self.__put_item(data.timestamp, item)
 
     async def __handle_bars(self, data: AlpacaBar | Any):
-        asset = _get_asset(data.symbol, self.asset_class)
+        asset = self.__get_asset(data.symbol, self.asset_class)
         item = Bar(asset, array("f", [data.open, data.high, data.low, data.close, data.volume]), self.__one_minute)
         self.__put_item(data.timestamp, item)
 
     async def __handle_quotes(self, data: AlpacaQuote | Any):
-        asset = _get_asset(data.symbol, self.asset_class)
+        asset = self.__get_asset(data.symbol, self.asset_class)
         item = Quote(asset, array("f", [data.ask_price, data.ask_size, data.bid_price, data.bid_size]))
         self.__put_item(data.timestamp, item)
 
