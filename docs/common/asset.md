@@ -22,11 +22,11 @@ All asset types extend the common base class, {cl}`Asset`, which provides:
 
 Subclasses can add type-specific attributes and methods.
 
-The combination of **asset class**, **symbol** and **currency** has to be unique.
-If you deal with scenarios where this is not the case, a solution is to extend the symbol name. 
+The **symbol** has to be unique accross all assets and this is enforced. If you create a new asset
+with the same symbol name as an existing asset but with other attributes, it will raise an exception.
 
-For example, you want to differentiate between crypto-pairs on different exchanges,
-add the exchange name to the symbol name:
+If you deal with scenarios where there are conflicting symbol names, a solution is to extend the symbol name. For example,
+you want to differentiate between crypto-pairs on different exchanges, add the exchange name to the symbol name:
 
 ```{code-cell} python
 from roboquant import Crypto, USD
@@ -38,7 +38,7 @@ assert asset1 != asset2
 ```
 
 ## Asset Classes
-roboquant support the following asset types out of the box:
+roboquant supports the following asset types out of the box:
 
 | Asset Type      | Subclass       | Typical Use Case                |
 | :-------------- | :------------- | :------------------------------ |
@@ -48,14 +48,16 @@ roboquant support the following asset types out of the box:
 | `CRYPTO`        | `Crypto`       | Crypto spot (BTC/USDT)          |
 
 
-But you easily add your own asset classes by extending {cl}`Asset` class.
+You add your own asset classes by extending {cl}`Asset` class.
 
 ## Instantiation
+Although most commonly the Assets are created by the `Feed` you use, you
+can also create your own instances.
 
 ```{code-cell} python
 :tags: [hide-output]
 import pprint
-from roboquant import Stock, Crypto, Forex, Option, EUR
+from roboquant import Asset, Stock, Crypto, Forex, Option, EUR
 
 # Create a simple stock with the default currency (USD)
 aapl = Stock("AAPL")
@@ -76,4 +78,17 @@ print(btc)
 # Options using the OCC notation
 option = Option("TSLA250228C00100000")
 pprint.pp(option.decode_occ_symbol())
+```
+
+## Inspection
+It is possible to see which assets has been created so far in
+your application.
+
+```{code-cell} python
+:tags: [hide-output]
+# print all unique assets instantiated so far
+pprint.pp(Asset.assets())
+
+# print only the unique Stocks
+pprint.pp(Stock.assets())
 ```
