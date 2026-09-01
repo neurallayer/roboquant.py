@@ -23,7 +23,7 @@ class TestBigFeed(unittest.TestCase):
         print(f"throughput = {n_assets / load_time:.0f} files/s")
         print(f"run time   = {runtime:.1f}s")
         print(f"candles    = {candles:.1f}M")
-        print(f"throughput = {throughput:.1f}M candles/s")
+        print(f"throughput = {throughput:.2f}M candles/s")
         print()
 
     def _run(self, feed: rq.Feed, journal: rq.journals.BasicJournal):

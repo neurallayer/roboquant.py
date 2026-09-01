@@ -29,13 +29,5 @@ class TestParquetFeed(unittest.TestCase):
         run_price_item_feed(feed, origin_feed.assets(), self, timeframe=feed.timeframe().split(2)[0])
         db_file.unlink(missing_ok=True)
 
-    def test_predefined_feed(self):
-        feed = ParquetFeed.us_stocks_10()
-        symbols = "MSFT,NVDA,AAPL,AMZN,META,GOOGL,AVGO,JPM,XOM,TSLA".split(",")
-        feed_symbols = {asset.symbol for asset in feed.assets()}
-        self.assertEqual(set(feed_symbols), set(symbols))
-        run_price_item_feed(feed, feed.assets(), self)
-
-
 if __name__ == "__main__":
     unittest.main()

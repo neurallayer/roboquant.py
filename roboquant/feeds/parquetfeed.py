@@ -41,15 +41,6 @@ class ParquetFeed(HistoricFeed):
         self.parquet_path = parquet_path
         logger.info("parquet feed path=%s", parquet_path)
 
-    @staticmethod
-    def us_stocks_10():
-        """Return a ParquetFeed with the market data for the following 10 popular S&P 500 companies for 10 years:
-        MSFT,NVDA,AAPL,AMZN,META,GOOGL,AVGO,JPM,XOM,TSLA.
-        This is included for demo purposes and should not be relied upon for serious back testing.
-        """
-        path = os.path.join(os.path.dirname(__file__), "resources", "us10.parquet")
-        return ParquetFeed(path)
-
     def exists(self) -> bool:
         """Check if the parquet file exists"""
         return os.path.exists(self.parquet_path)

@@ -4,11 +4,12 @@ import re
 from abc import ABC
 from dataclasses import dataclass
 from decimal import Decimal
-from typing import Any, Type, override
+from typing import Any, ClassVar, Type, override
 
 from roboquant.common.monetary import USD, Amount, Currency
 
 logger = logging.getLogger(__name__)
+
 
 
 @dataclass(frozen=True, slots=True)
@@ -26,6 +27,25 @@ class Asset(ABC):
 
     currency: Currency = USD
     """The currency of the asset, default is `USD`"""
+
+    __registry: ClassVar[dict[str, "Asset"]] = {}
+    """Keeps track of all created assets and their symbol name"""
+
+    def __post_init__(self):
+        """Ensure unique symbol accross different assets and keep track of all unique assets created"""
+        if self.symbol in Asset.__registry:
+            asset = Asset.__registry[self.symbol]
+            assert self == asset, f"detected same symbol for different assets {asset} != {self}"
+        else:
+            Asset.__registry[self.symbol] = self
+
+    @classmethod
+    def assets(cls):
+        """Return all assets for the class or subclass
+
+        For example `Stock.assets()` returns all so far created Stock assets.
+        """
+        return [asset for asset in Asset.__registry.values() if isinstance(asset, cls)]
 
     def value(self, size: Decimal, price: float) -> float:
         """Return the total value given the provided size and price.
@@ -58,28 +78,11 @@ class Asset(ABC):
         value = self.value(size, price)
         return Amount(self.currency, value)
 
-    def __eq__(self, value: object) -> bool:
-        """Check if two assets are equal based on their class, symbol and currency.
-
-        Args:
-            value (object): The other asset to compare with.
-
-        Returns:
-            bool: True if the assets are equal, False otherwise.
-        """
-        if value is self:
-            return True
-
-        if isinstance(value, self.__class__):
-            return self.symbol == value.symbol and self.currency == value.currency
-
-        return False
-
     def __hash__(self) -> int:
-        """Return the hash of the asset based on its symbol.
+        """Calculate the hash of the asset based on its symbol.
 
         Returns:
-            int: The hash value of the asset.
+            The hash value of the asset.
         """
         return hash(self.symbol)
 
@@ -94,12 +97,13 @@ class Asset(ABC):
 
     def serialize(self) -> str:
         """Serialize the asset to a string representation that can be used to reconstruct the asset later on.
-        The default implementation generates `"{self.asset_class}:{self.symbol}:{self.currency}"`
+        The default implementation generates `"{self.asset_class}{self.symbol}{self.currency}"` using the
+        ASCII unit seperator (code 31) to separate the attributes.
 
         Returns:
             str: The serialized string representation of the asset.
         """
-        return f"{self.asset_class}:{self.symbol}:{self.currency}"
+        return f"{self.asset_class}{self.symbol}{self.currency}"
 
     @classmethod
     def deserialize(cls, value:str) -> "Asset":
@@ -112,7 +116,7 @@ class Asset(ABC):
         Returns:
             Asset: The deserialized asset.
         """
-        asset_class, symbol, curr = value.split(":")
+        asset_class, symbol, curr = value.split("")
         result = cls(symbol, Currency(curr))
         assert asset_class == result.asset_class
         return result
@@ -296,14 +300,14 @@ def deserialize_to_asset(value: str) -> Asset:
     Under the hood is uses caching to improve performance when repeatedly deserializing the same asset strings.
 
     Args:
-        value (str): The serialized string representation of the asset.
+        The serialized string representation of the asset.
 
     Returns:
-        Asset: The deserialized asset.
+        The deserialized asset.
     """
     asset = __cache.get(value)
     if not asset:
-        asset_class, _ = value.split(":", 1)
+        asset_class, _ = value.split("", 1)
         asset = __asset_classes[asset_class].deserialize(value)
         __cache[value] = asset
     return asset

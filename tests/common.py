@@ -1,3 +1,4 @@
+from functools import lru_cache
 import math
 import pathlib
 from datetime import date, datetime, timedelta
@@ -11,9 +12,9 @@ from roboquant.feeds.feed import Feed
 from roboquant.common.signal import Signal
 from roboquant.strategies.strategy import Strategy
 
-
+@lru_cache
 def get_feed() -> CSVFeed:
-    """Return a CSV feed based on some stock data in Yahoo format"""
+    """Return a CSV feed based on some stock data in Yahoo Finance file format"""
     root = pathlib.Path(__file__).parent.resolve().joinpath("data", "yahoo")
     return CSVFeed.yahoo(str(root))
 

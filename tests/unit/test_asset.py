@@ -6,6 +6,7 @@ import unittest
 from roboquant.common.asset import Crypto, Stock, Option, Forex, Asset
 from roboquant.common.monetary import USD, Currency
 
+SEP = ""
 
 class TestAsset(unittest.TestCase):
 
@@ -13,10 +14,14 @@ class TestAsset(unittest.TestCase):
         tesla = Stock("TSLA")
         self.assertEqual("TSLA", tesla.symbol)
         self.assertEqual(USD, tesla.currency)
+
+        self.assertIn(tesla, Stock.assets())
+        self.assertIn(tesla, Asset.assets())
+        self.assertNotIn(tesla, Forex.assets())
         v = tesla.serialize()
         tesla2 = Stock.deserialize(v)
         self.assertEqual(tesla, tesla2)
-        self.assertRaises(AssertionError, Stock.deserialize, "Stock2:GOOG:USD")
+        self.assertRaises(AssertionError, Stock.deserialize, f"Stock2{SEP}GOOG{SEP}USD")
 
         cv = tesla.value(Decimal(100), 150.0)
         self.assertEqual(cv, 100*150.0)
@@ -29,7 +34,8 @@ class TestAsset(unittest.TestCase):
         v = btc.serialize()
         tesla2 = Crypto.deserialize(v)
         self.assertEqual(btc, tesla2)
-        self.assertRaises(AssertionError, Crypto.deserialize, "Crypto2:BTC/USDT:USDT")
+
+        self.assertRaises(AssertionError, Crypto.deserialize, f"Crypto2{SEP}BTC/USDT{SEP}USDT")
 
     def test_forex(self):
         btc = Forex.from_symbol("EUR/USD")
@@ -42,7 +48,7 @@ class TestAsset(unittest.TestCase):
         v = btc.serialize()
         tesla2 = Forex.deserialize(v)
         self.assertEqual(btc, tesla2)
-        self.assertRaises(AssertionError, Forex.deserialize, "Forex2:EUR/USD:USD")
+        self.assertRaises(AssertionError, Forex.deserialize, f"Forex2{SEP}EUR/USD{SEP}USD")
 
     def test_option(self):
         tesla = Option("TSLA250228C00100000")
@@ -51,7 +57,7 @@ class TestAsset(unittest.TestCase):
         v = tesla.serialize()
         tesla2 = Option.deserialize(v)
         self.assertEqual(tesla, tesla2)
-        self.assertRaises(AssertionError, Option.deserialize, "Option2:TSLA250228C00100000:USD")
+        self.assertRaises(AssertionError, Option.deserialize, f"Option2{SEP}TSLA250228C00100000{SEP}USD")
 
         cv = tesla.value(Decimal(100), 150.0)
         self.assertEqual(cv, 100*150.0*100)
@@ -69,12 +75,12 @@ class TestAsset(unittest.TestCase):
 
             @override
             def serialize(self) -> str:
-                return f"CustomAsset:{self.symbol}:{self.currency}:{self.multiplier}"
+                return f"CustomAsset{SEP}{self.symbol}{SEP}{self.currency}{SEP}{self.multiplier}"
 
             @classmethod
             @override
             def deserialize(cls, value: str) -> "CustomAsset":
-                _, symbol, currency_name, multiplier = value.split(":")
+                _, symbol, currency_name, multiplier = value.split(SEP)
                 return CustomAsset(symbol, Currency(currency_name), int(multiplier))
 
         a = CustomAsset("TEST/XYZ", Currency("XYZ"), 4)
@@ -82,6 +88,9 @@ class TestAsset(unittest.TestCase):
         self.assertEqual(v, 100 * 150.0 * 4)
         serialized = a.serialize()
         self.assertEqual(a, CustomAsset.deserialize(serialized))
+
+        assets = CustomAsset.assets()
+        self.assertListEqual(assets, [a])
 
 
 if __name__ == "__main__":
