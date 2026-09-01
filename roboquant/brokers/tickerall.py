@@ -154,13 +154,18 @@ class TickerAllBroker(LiveBroker):
         balance = financials.balance
         buying_power = Amount(currency, free_margin if free_margin is not None else balance)
         cash = Wallet(Amount(currency, balance))
-        positions = self.__sync_positions(detail.positions, currency)
-        orders = self.__sync_orders(currency)
+        positions = self.__sync_positions(detail.positions)
+        orders = self.__sync_orders()
         return Account(
-            buying_power=buying_power, cash=cash, positions=positions, orders=orders, trades=[], last_update=utcnow()
+            buying_power=buying_power,
+            cash=cash,
+            positions=positions,
+            orders=orders,
+            trades=[],
+            last_update=utcnow()
         )
 
-    def __sync_positions(self, positions: list[TaPosition], currency: Currency) -> list[Position]:
+    def __sync_positions(self, positions: list[TaPosition]) -> list[Position]:
         portfolio = []
         for p in positions:
             if not p.symbol or p.volume is None:
@@ -170,18 +175,21 @@ class TickerAllBroker(LiveBroker):
                 size = -size
             entry = p.entry_price or 0.0
             mkt = p.current_price if p.current_price is not None else float("nan")
-            asset = _to_asset(p.symbol, self.__quote_currency(p.symbol), currency)
-            pos = Position(asset, size, entry, mkt, id=str(p.ticket))
+            asset = _to_asset(p.symbol, self.__quote_currency(p.symbol))
+            ticket = str(p.ticket)
+            pos = Position(asset, size, entry, mkt, id=ticket)
             portfolio.append(pos)
+
+        # assert all(p.id for p in portfolio), "positions expected to have id"
         return portfolio
 
-    def __sync_orders(self, currency: Currency) -> list[Order]:
+    def __sync_orders(self) -> list[Order]:
         orders: list[Order] = []
         for o in self._client.orders.list_pending(self._account_id):
             if not o.symbol or o.volume is None or o.ticket is None:
                 continue
             limit = o.limit_price
-            asset = _to_asset(o.symbol, self.__quote_currency(o.symbol), currency)
+            asset = _to_asset(o.symbol, self.__quote_currency(o.symbol))
             # Decimal via str(), not float, keeps the size exact (see _sync_positions).
             size = abs(Decimal(str(o.volume)))
             position_id = o.ticket

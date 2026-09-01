@@ -3,7 +3,6 @@ import logging
 from typing import override
 
 from roboquant.common.account import Account
-from roboquant.common.asset import Asset
 from roboquant.common.event import Event
 from roboquant.common.monetary import Amount
 from roboquant.common.order import Order
@@ -55,7 +54,7 @@ class BudgetTrader(Trader):
         order_budget: Amount = Amount(base_currency, self.order_value)
         order_assets = {o.asset for o in account.orders}
 
-        result: dict[Asset, Order] = {}
+        result: list[Order] = []
 
         for signal in signals:
             asset = signal.asset
@@ -73,17 +72,17 @@ class BudgetTrader(Trader):
                 logger.info("no price found")
                 continue
 
-            pos = account.get_position(asset)
-            if signal.is_increase_position(pos):
+            pos_size = account.position_size(asset)
+            if signal.is_increase_position(pos_size):
                 if buying_power < self.order_value:
                     logger.info("not enough buying_power remaining")
                     continue
 
-                if pos.size.is_zero() and signal.is_sell and not self.shorting:
+                if pos_size.is_zero() and signal.is_sell and not self.shorting:
                     logger.info("shorting not allowed")
                     continue
 
-                pos_value = account.contract_value(asset, pos.size, price)
+                pos_value = account.contract_value(asset, pos_size, price)
                 if pos_value >= self.position_value:
                     logger.info("max position value reached")
                     continue
@@ -93,11 +92,13 @@ class BudgetTrader(Trader):
                 order_size = round_down((asset_budget / asset_cost) * signal.rating, self.ndigits)
                 if order_size:
                     order = Order(asset, order_size)
-                    result[asset] = order
+                    result.append(order)
                     value = order.remaining_amount(price).convert_to(base_currency, event.time)
                     buying_power -= abs(value)
             else:
-                assert pos.size, "position size should be non-zero"
-                result[asset] = pos.close_order()
+                assert pos_size, "position size should be non-zero"
+                for pos in account.positions:
+                    if pos.asset == asset and signal.is_close_position(pos.size):
+                        result.append(pos.close_order())
 
-        return list(result.values())
+        return result

@@ -1,5 +1,4 @@
 import logging
-import re
 from array import array
 from datetime import datetime, timezone
 from typing import Any, Self, override
@@ -7,7 +6,7 @@ from typing import Any, Self, override
 from tickerall import Tickerall, TickerallStream
 from tickerall.types import BrokerName, TerminalType, Timeframe
 
-from roboquant.common.asset import Asset, Currency, Forex, USD
+from roboquant.common.asset import Asset, Currency, Forex
 from roboquant.common.event import Bar, Event, Quote
 from roboquant.common.timeframe import utcnow
 from roboquant.feeds.in_memory_feed import InMemoryFeed
@@ -16,7 +15,7 @@ from roboquant.feeds.livefeed import LiveFeed
 logger = logging.getLogger(__name__)
 
 
-def _to_asset(symbol: str, quote_currency: Currency | None = None, fallback_currency: Currency = USD) -> Asset:
+def _to_asset(symbol: str, quote_currency: Currency | None = None) -> Asset:
     """Map a MetaTrader symbol to a roboquant `Forex` asset.
 
     The asset's currency is the instrument's quote currency. It is taken from `quote_currency` when the
@@ -28,13 +27,13 @@ def _to_asset(symbol: str, quote_currency: Currency | None = None, fallback_curr
     """
     if quote_currency is not None:
         return Forex(symbol, quote_currency)
-    core = re.sub(r"[^A-Za-z]", "", symbol).upper()
-    # strip a single trailing broker suffix letter that leaves a 6-letter pair (e.g. EURUSDm -> EURUSD)
-    if len(core) == 7:
-        core = core[:6]
-    if len(core) == 6:
-        return Forex(symbol, Currency(core[3:6]))
-    return Forex(symbol, fallback_currency)
+
+    if len(symbol) >= 7:
+        brokerSuffix = symbol[6:]
+        if brokerSuffix.isalpha() and brokerSuffix.islower():
+            symbol = symbol[:6]
+
+    return Forex.from_symbol(symbol)
 
 
 class _SymbolCurrency:
@@ -51,18 +50,22 @@ class _SymbolCurrency:
     def __init__(self, client: Tickerall, account_id: str) -> None:
         self._client = client
         self._account_id = account_id
-        self._cache: dict[str, Currency] | None = None
+        self._cache: dict[str, Currency] = self.fill()
+
+
+    def fill(self) -> dict[str, Currency]:
+        """Load the symbol specs and fill the cache with all known quote currencies."""
+        result = {}
+        for spec in self._client.accounts.symbol_specs(self._account_id):
+            code = getattr(spec, "base_currency", None)
+            if spec.name and code:
+                result[spec.name] = Currency(code)
+
+        logger.info("loaded %d symbol specs for account %s", len(result), self._account_id)
+        return result
 
     def get(self, symbol: str) -> Currency | None:
-        if self._cache is None:
-            self._cache = {}
-            try:
-                for spec in self._client.accounts.symbol_specs(self._account_id):
-                    code = getattr(spec, "profit_currency", None)
-                    if spec.name and code:
-                        self._cache[spec.name] = Currency(code)
-            except Exception:
-                logger.warning("failed to load symbol specs for currency resolution", exc_info=True)
+        """Return the symbol's quote currency from broker metadata, or None to fall back to inference."""
         return self._cache.get(symbol)
 
 

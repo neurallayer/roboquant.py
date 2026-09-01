@@ -3,7 +3,6 @@ import logging
 from typing import override
 
 from roboquant.common.account import Account
-from roboquant.common.asset import Asset
 from roboquant.common.event import Event
 from roboquant.common.monetary import Amount
 from roboquant.common.order import Order
@@ -46,7 +45,7 @@ class SimpleTrader(Trader):
         else:
             order_budget = Amount(account.buying_power.currency, 0.0)
 
-        result: dict[Asset, Order] = {}
+        result: list[Order] = []
 
         for signal in signals:
             asset = signal.asset
@@ -64,8 +63,8 @@ class SimpleTrader(Trader):
                 logger.info("no price found")
                 continue
 
-            pos = account.get_position(asset)
-            if signal.is_open_position(pos):
+            pos_size = account.position_size(asset)
+            if signal.is_open_position(pos_size):
 
                 if remaining_positions <= 0:
                     logger.info("no remaining positions")
@@ -79,9 +78,11 @@ class SimpleTrader(Trader):
                 asset_cost = asset.value(Decimal(1), price)
                 size = int((asset_budget / asset_cost) * signal.rating)
                 if size:
-                    result[asset] = Order(asset, Decimal(size))
+                    result.append(Order(asset, Decimal(size)))
                     remaining_positions -= 1
-            elif signal.is_close_position(pos):
-                result[asset] = pos.close_order()
+            elif signal.is_close_position(pos_size):
+                 for pos in account.positions:
+                    if pos.asset == asset and signal.is_close_position(pos.size):
+                        result.append(pos.close_order())
 
-        return list(result.values())
+        return result

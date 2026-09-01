@@ -1,8 +1,8 @@
 from dataclasses import dataclass
+from decimal import Decimal
 from enum import Flag, auto
 
 from roboquant.common.asset import Asset
-from roboquant.common.position import Position
 
 
 class SignalType(Flag):
@@ -123,30 +123,30 @@ class Signal:
         """
         return SignalType.EXIT in self.type
 
-    def is_close_position(self, pos: Position) -> bool:
+    def is_close_position(self, pos: Decimal) -> bool:
         """Return True if this is close of a position, False otherwise
         """
-        if not self.is_exit or pos.is_closed:
+        if not self.is_exit or pos.is_zero():
             return False
-        return self.is_buy if pos.is_short else self.is_sell
+        return self.is_buy if pos < 0 else self.is_sell
 
-    def is_open_position(self, pos: Position) -> bool:
+    def is_open_position(self, pos: Decimal) -> bool:
         """Return True if this signal would be an opening of a position,
         False otherwise.
         Opening a position can be both Short and Long.
         """
-        return self.is_entry and pos.is_closed
+        return self.is_entry and pos.is_zero()
 
-    def is_increase_position(self, pos: Position) -> bool:
+    def is_increase_position(self, pos: Decimal) -> bool:
         """Return True if this an increase into a position, False otherwise.
         """
         if not self.is_entry:
             return False
-        if pos.is_closed:
+        if pos.is_zero():
             return True
-        return self.is_buy if pos.is_long else self.is_sell
+        return self.is_buy if pos > 0 else self.is_sell
 
-    def is_shorting(self, pos: Position) -> bool:
+    def is_shorting(self, pos: Decimal) -> bool:
         """Return True if this an entry into a position, False otherwise.
         """
-        return self.is_entry and pos.size <= 0 and self.is_sell
+        return self.is_entry and pos <= 0 and self.is_sell

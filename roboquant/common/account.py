@@ -170,21 +170,18 @@ class Account:
 
     def position_size(self, asset: Asset) -> Decimal:
         """
-        Return the net position size for an asset, or zero if there is no open position for that asset.
+        Return the net position size for an asset. Will return 0 if the asset is not in the open positions.
 
         Args:
-            asset (Asset): The asset for which to get the position size.
+            The asset for which to get the position size.
 
         Returns:
-            Decimal: The position size as a Decimal.
+            The net position size as a Decimal.
         """
-        result = Decimal()
-        for pos in self.positions:
-            if pos.asset == asset:
-                result += pos.size
-        return result
+        return sum(pos.size for pos in self.positions if pos.asset == asset) or Decimal()
 
-    def get_position(self, asset: Asset) -> Position:
+
+    def get_positions(self, asset: Asset) -> list[Position]:
         """
         Return the net position for an asset, or an empty position
         if the asset is not in the open positions.
@@ -196,7 +193,7 @@ class Account:
         Returns:
             Decimal: The position size as a Decimal.
         """
-        return Position(asset, self.position_size(asset))
+        return [pos for pos in self.positions if pos.asset == asset]
 
 
     def unrealized_pnl(self, *assets: Asset) -> Wallet:
