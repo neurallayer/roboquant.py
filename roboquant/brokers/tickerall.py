@@ -1,3 +1,4 @@
+from tickerall import TickerallValidationError
 import logging
 from decimal import Decimal
 from typing import Self, override
@@ -221,16 +222,19 @@ class TickerAllBroker(LiveBroker):
             logger.info("closed position order=%s result=%s", order, result)
             return
 
-        result = self._client.orders.place(
-            self._account_id,
-            type="market" if is_market else "limit",
-            symbol=order.asset.symbol,
-            side="BUY" if order.is_buy else "SELL",
-            volume=abs(float(order.size)),
-            price=None if is_market else order.limit,
-            comment=order.get_info("comment"),
-        )
-        logger.info("placed order=%s result=%s", order, result)
+        try:
+            result = self._client.orders.place(
+                self._account_id,
+                type="market" if is_market else "limit",
+                symbol=order.asset.symbol,
+                side="BUY" if order.is_buy else "SELL",
+                volume=abs(float(order.size)),
+                price=None if is_market else order.limit,
+                comment=order.get_info("comment"),
+            )
+            logger.info("placed order=%s result=%s", order, result)
+        except TickerallValidationError as e:
+            logger.exception("error placing order=%s with message=%s", order, e.message)
 
     def __symbol_spec(self, symbol: str):
         """Lazily fetch + cache the broker's symbol specs, keyed by symbol name."""

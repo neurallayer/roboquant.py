@@ -51,12 +51,12 @@ class TickerAllHedging(Trader):
                 if price is None:
                     continue
                 positions = [pos for pos in account.positions if pos.get_info("comment") == name and pos.asset == asset]
-                if not positions and signal.is_entry:
+                if not positions:
                     if size := get_order_size(signal, price, self.order_amount, event.time, ndigits=2):
                         orders.append(rq.Order(asset, size, info={"comment": name}))
                 else:
                     for pos in positions:
-                        if signal.is_close_position(pos.size):
+                        if (pos.is_long and signal.is_sell) or (pos.is_short and signal.is_buy):
                             orders.append(pos.close_order())
 
         return orders
@@ -76,7 +76,7 @@ try:
         broker.place_orders(orders)
 
     # Start a 10 minute run with the TickerAllHedging trader and subscribe to multiple assets
-    feed.subscribe("BTCUSD", "EURUSD", "LTCUSD", "ADAUSD", "BNBUSD", "DOTUSD", "UNIUSD", "SOLUSD")
+    feed.subscribe("BTCUSD", "EURUSD", "LTCUSD", "ADAUSD", "BNBUSD")
     tf = rq.Timeframe.next("10 minutes")
     trader = TickerAllHedging()
     rq.run(feed, strategy=None, trader=trader, broker=broker, timeframe=tf)

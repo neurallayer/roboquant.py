@@ -1,3 +1,4 @@
+from roboquant.traders._util import SignalImpact
 from decimal import Decimal
 import logging
 from typing import override
@@ -73,12 +74,14 @@ class BudgetTrader(Trader):
                 continue
 
             pos_size = account.position_size(asset)
-            if signal.is_increase_position(pos_size):
+            si = SignalImpact(signal, pos_size)
+
+            if si.is_increase():
                 if buying_power < self.order_value:
                     logger.info("not enough buying_power remaining")
                     continue
 
-                if pos_size.is_zero() and signal.is_sell and not self.shorting:
+                if si.is_shorting() and not self.shorting:
                     logger.info("shorting not allowed")
                     continue
 
@@ -97,8 +100,7 @@ class BudgetTrader(Trader):
                     buying_power -= abs(value)
             else:
                 assert pos_size, "position size should be non-zero"
-                for pos in account.positions:
-                    if pos.asset == asset and signal.is_close_position(pos.size):
-                        result.append(pos.close_order())
+                for pos in si.close_positions(account.positions):
+                    result.append(pos.close_order())
 
         return result
