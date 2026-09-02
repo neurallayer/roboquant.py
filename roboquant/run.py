@@ -53,8 +53,7 @@ def run(
             if journal:
                 journal.track(event, account, signals, orders)
     except __StopRun as e:
-        logger.info("early stop of the run", e.message)
-        pass
+        logger.warning("early stop of the run: %s", e.message)
 
     return broker.sync()
 

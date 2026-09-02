@@ -2,11 +2,15 @@ from datetime import datetime, timedelta
 from queue import SimpleQueue
 from queue import Empty, Full
 from typing import Iterator, override
+import logging
 
 from roboquant.common.asset import Asset
 from roboquant.common.event import Event
 from roboquant.common.timeframe import Timeframe, utcnow
 from .feed import Feed
+
+
+logger = logging.getLogger(__name__)
 
 
 class LiveFeed(Feed):
@@ -60,12 +64,18 @@ class LiveFeed(Feed):
     def _put(self, event: Event):
         """Put an event onto the queue.
 
-        Subclasses should call this method to publish an event.
-        If the event is not monotonic in time, it will be corrected.
-        Subclasses should call this method to publish new live events.
+        Subclasses should call this method to publish an event. It also takes care of:
+        - ensuring that the events are monotonic in time. If the event is not monotonic in time, it will be corrected.
+        - ensuring that the event is not too far in the future. If it is, it will be corrected to the current time.
         """
         if self.__queue:
             try:
+                now = utcnow()
+                if event.time > now + timedelta(seconds=60):
+                    logger.warning(
+                        "event %s is more than 60 seconds in the future, using current time instead", event
+                    )
+                    event.time = now
                 if event.time <= self.__last_time:
                     event.time = self.__last_time + self.increment
                 self.__last_time = event.time
@@ -84,4 +94,3 @@ class LiveFeed(Feed):
     @override
     def assets(self) -> list[Asset]:
         return list(self._registry.values())
-

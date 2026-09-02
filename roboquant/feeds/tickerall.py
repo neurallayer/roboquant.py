@@ -73,7 +73,7 @@ def _parse_tick_time(value: str) -> datetime:
     """Parse a tick timestamp (an ISO-8601 string like `2026-07-30T07:26:26.000Z`) into a datetime."""
     if isinstance(value, str):
         try:
-            return datetime.fromisoformat(value.replace("Z", "+00:00"))
+            return datetime.fromisoformat(value).astimezone(timezone.utc)
         except ValueError:
             pass
     return utcnow()
