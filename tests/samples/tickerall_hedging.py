@@ -18,12 +18,10 @@ load_dotenv()
 # TickerAll API key
 KEY = os.environ["TICKERALL_API_KEY"]
 
-# Your Broker details
+# Your MT Broker details
 MT5_SERVER = os.environ["MT5_SERVER"]
 MT5_ACCOUNT = os.environ["MT5_ACCOUNT"]
 MT5_PASSWORD = os.environ["MT5_PASSWORD"]
-
-
 
 # %%
 class TickerAllHedging(Trader):
@@ -42,15 +40,15 @@ class TickerAllHedging(Trader):
             print(80 * "=", account, sep="\n", flush=True)
             self.last_update = account.last_update
 
-    def create_orders(self, signals: list[Signal], event: Event, account: Account) -> list[Order]:
+    def create_orders(self, signals : list[Signal], event: Event, account: Account) -> list[Order]:
+
         self.print(account)
         orders = []
         for name, strategy in self.strategies.items():
-            _signals = strategy.create_signals(event)
-            for signal in _signals:
+            for signal in strategy.create_signals(event):
                 asset = signal.asset
                 price = event.get_price(asset)
-                if not price:
+                if price is None:
                     continue
                 positions = [pos for pos in account.positions if pos.get_info("comment") == name and pos.asset == asset]
                 if not positions and signal.is_entry:
@@ -66,19 +64,19 @@ class TickerAllHedging(Trader):
 
 # %%
 ECBConversion().register()
+
 broker = TickerAllBroker.connect(api_key=KEY, broker="mt5", server=MT5_SERVER, account=MT5_ACCOUNT, password=MT5_PASSWORD)
 feed = TickerAllLiveFeed(api_key=KEY, account_id=broker.account_id)
 
 try:
-    account = broker.sync()
-
     # Cleanup existing orders and positions
+    account = broker.sync()
     orders = [order.cancel() for order in account.orders] + [pos.close_order() for pos in account.positions]
     if orders:
         broker.place_orders(orders)
 
     # Start a 10 minute run with the TickerAllHedging trader and subscribe to multiple assets
-    feed.subscribe("BTCUSD", "EURUSD", "XAUUSD", "ETHUSD", "GBPUSD", "AUDUSD", "USDCAD", "NZDUSD")
+    feed.subscribe("BTCUSD", "EURUSD", "LTCUSD", "ADAUSD", "BNBUSD", "DOTUSD", "UNIUSD", "SOLUSD")
     tf = rq.Timeframe.next("10 minutes")
     trader = TickerAllHedging()
     rq.run(feed, strategy=None, trader=trader, broker=broker, timeframe=tf)
