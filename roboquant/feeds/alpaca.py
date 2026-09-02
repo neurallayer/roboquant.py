@@ -27,6 +27,7 @@ from alpaca.trading.enums import AssetClass
 
 from roboquant.common.asset import Asset, Crypto, Option, Stock
 from roboquant.common.event import Bar, Event, PriceItem, Quote, TradePrice
+from roboquant.common.monetary import USD
 from roboquant.feeds.in_memory_feed import InMemoryFeed
 from roboquant.feeds.livefeed import LiveFeed
 
@@ -41,11 +42,11 @@ def _get_asset(symbol: str, asset_class: AssetClass) -> Asset:
 
     match asset_class:
         case AssetClass.US_EQUITY:
-            return Stock(symbol)
+            return Stock(symbol, USD)
         case AssetClass.CRYPTO:
             return Crypto.from_symbol(symbol)
         case AssetClass.US_OPTION:
-            return Option(symbol)
+            return Option(symbol, USD)
         case AssetClass.CRYPTO_PERP:
             return Crypto.from_symbol(symbol)
 

@@ -55,7 +55,9 @@ class AlpacaBroker(LiveBroker):
             if p.side == PositionSide.SHORT:
                 size = -size
             asset = _get_asset(p.symbol, p.asset_class)
-            new_pos = Position(asset, size, float(p.avg_entry_price), float(p.current_price or "nan"))
+            info = {"asset_id" : p.asset_id}
+            price = float(p.current_price or p.lastday_price or "nan")
+            new_pos = Position(asset, size, float(p.avg_entry_price), price, info=info)
             positions.append(new_pos)
         return positions
 

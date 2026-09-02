@@ -59,9 +59,6 @@ class Order:
     """When was the order placed at the exchange, so typically the first trading day after the order was submitted
     to the broker. This is also used to determine when a DAY order has expired."""
 
-    position_id: str | None = None
-    """Linking order to a position, can be used for hedging broker accounts"""
-
     def __post_init__(self):
         if self.size.is_zero():
             assert id != ""
@@ -108,6 +105,13 @@ class Order:
         assert self.is_mkt_order == new_order.is_mkt_order, "Cannot swap limit and market orders"
         return new_order
 
+    def get_info(self, key: str, default: Any = None) -> Any:
+        """
+        Get the value of a key in the info dictionary. If the key is not present, the default value is returned.
+        """
+        if self.info is None:
+            return default
+        return self.info.get(key, default)
 
     def remaining_amount(self, price: float) -> Amount:
         """

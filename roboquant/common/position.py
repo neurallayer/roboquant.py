@@ -1,6 +1,6 @@
 from dataclasses import dataclass
 from decimal import Decimal
-from typing import Literal
+from typing import Any, Literal
 
 from roboquant.common.asset import Asset
 from roboquant.common.monetary import Amount
@@ -26,9 +26,8 @@ class Position:
     mkt_price: float = float("nan")
     """Latest market price denoted in the currency of the asset. This is updated at every step in a run."""
 
-    id: str | None = None
-    """Identifier for the position, can be used for hedging accounts thatcan have
-    multiple positions for a single asset."""
+    info: dict[str, Any] | None = None
+    """Optional dictionary with additional information about the position"""
 
     @property
     def is_short(self):
@@ -64,5 +63,16 @@ class Position:
         return self.asset.amount(self.size, self.mkt_price - self.avg_price)
 
     def close_order(self, limit : float|None = None, tif: Literal['GTC', 'DAY'] = "DAY") -> Order:
-        """Create a close order for this position, optionally provide a limit and Time In Force."""
-        return Order(self.asset, - self.size, limit=limit, tif=tif, position_id=self.id)
+        """Create a close order for this position, optionally provide a limit and Time In Force.
+        Any info stored in the position will be copied to the order.
+        """
+        return Order(self.asset, - self.size, limit=limit, tif=tif, info=self.info)
+
+    def get_info(self, key: str, default: Any = None) -> Any:
+        """
+        Get the value of a key in the info dictionary. If the key is not present, the default value is returned.
+        """
+        if self.info is None:
+            return default
+        return self.info.get(key, default)
+

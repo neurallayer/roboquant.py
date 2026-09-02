@@ -149,8 +149,9 @@ class IBKRBroker(LiveBroker):
             conid = pos_info["conid"]
             if asset := self._mapper.get_asset(conid):
                 if size := pos_info["position"]:
+                    info = {"conid": conid}
                     position = roboquant.common.position.Position(
-                        asset, Decimal(size), pos_info["avgPrice"], pos_info["mktPrice"]
+                        asset, Decimal(size), pos_info["avgPrice"], pos_info["mktPrice"], info=info
                     )
                     result.append(position)
             else:
@@ -163,8 +164,8 @@ class IBKRBroker(LiveBroker):
         Returns None if the order is not a limit order, order is already closed,
         or if the asset cannot be mapped.
         """
-        if info["orderType"].upper() != "LIMIT":
-            logger.warning("ignoring order that is not a limit order %s", info)
+        if info["orderType"].upper() not in {"LIMIT", "MARKET", "LMT", "MKT"}:
+            logger.warning("ignoring order type %s", info)
             return None
 
         if info["status"] in {"Cancelled", "Filled", "Rejected", "Inactive"}:
@@ -176,7 +177,7 @@ class IBKRBroker(LiveBroker):
             size = info["totalSize"]
             fill = info["filledQuantity"]
             order_id = info["orderId"]
-            limit = info["price"]
+            limit = info.get("price")
             tif = "DAY" if info["timeInForce"] == "CLOSE" else "GTC"
 
             if info["side"] == "SELL":
@@ -215,18 +216,21 @@ class IBKRBroker(LiveBroker):
         return cash, bp
 
     def _create_order_request(self, order: rq.Order) -> OrderRequest:
-        conid = self._mapper.get_conid(order.asset)
+        conid = order.get_info("conid")
         if conid is None:
-            raise ValueError(f"Cannot determine contract-id for asset {order.asset}")
+            conid = self._mapper.get_conid(order.asset)
+            if conid is None:
+                raise ValueError(f"Cannot determine contract-id for asset {order.asset}")
 
         qty = float(abs(order.size))
         side = "BUY" if order.size > 0 else "SELL"
         info = order.info or {}
+        order_type = "LMT" if order.is_limit_order else "MKT"
         return OrderRequest(
             conid=conid,
             side=side,
             quantity=qty,
-            order_type="LMT",
+            order_type=order_type,
             acct_id=self.client.account_id or "",
             price=order.limit,
             tif=order.tif,

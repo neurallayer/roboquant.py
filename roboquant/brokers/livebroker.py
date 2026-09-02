@@ -10,7 +10,7 @@ import time
 from abc import abstractmethod
 from datetime import timedelta
 from decimal import Decimal
-from typing import Literal, override
+from typing import Any, Literal, override
 
 
 class LiveBroker(Broker):
@@ -109,7 +109,7 @@ class LiveBroker(Broker):
         limit: Decimal|float|str|None,
         fill:Decimal | str | int | float,
         tif: Literal['GTC', 'DAY'] = "DAY",
-        position_id: str | None = None
+        info: dict[str, Any] | None = None
         ) -> Order:
         """
         Create a roboquant SELL order for the given asset. This method assumes the order is a sell order, meaning the size
@@ -123,7 +123,7 @@ class LiveBroker(Broker):
             tif=tif,
             fill=Decimal(fill),
             id = str(id),
-            position_id=position_id
+            info=info
         )
 
         return order
@@ -136,7 +136,7 @@ class LiveBroker(Broker):
         limit: Decimal|float|str|None,
         fill:Decimal | str | int | float,
         tif: Literal['GTC', 'DAY'] = "DAY",
-        position_id: str | None = None
+        info: dict[str, Any] | None = None
         ) -> Order :
         """
         Create a buy order for the given asset. Typically used to create an order based on the state of an existing order at
@@ -149,7 +149,7 @@ class LiveBroker(Broker):
             tif=tif,
             fill=Decimal(fill),
             id = str(id),
-            position_id=position_id
+            info=info
         )
         return order
 

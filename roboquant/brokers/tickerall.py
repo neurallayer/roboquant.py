@@ -176,8 +176,8 @@ class TickerAllBroker(LiveBroker):
             entry = p.entry_price or 0.0
             mkt = p.current_price if p.current_price is not None else float("nan")
             asset = _to_asset(p.symbol, self.__quote_currency(p.symbol))
-            ticket = str(p.ticket)
-            pos = Position(asset, size, entry, mkt, id=ticket)
+            info = {"ticket": p.ticket, "comment" : p.comment}
+            pos = Position(asset, size, entry, mkt, info=info)
             portfolio.append(pos)
 
         # assert all(p.id for p in portfolio), "positions expected to have id"
@@ -192,17 +192,17 @@ class TickerAllBroker(LiveBroker):
             asset = _to_asset(o.symbol, self.__quote_currency(o.symbol))
             # Decimal via str(), not float, keeps the size exact (see _sync_positions).
             size = abs(Decimal(str(o.volume)))
-            position_id = o.ticket
+            info = {"ticket": o.ticket}
             if o.side.upper() == "SELL":
-                orders.append(self._sell_order(o.ticket, asset, size, limit, 0, position_id=position_id))
+                orders.append(self._sell_order(o.ticket, asset, size, limit, 0, info=info))
             else:
-                orders.append(self._buy_order(o.ticket, asset, size, limit, 0, position_id=position_id))
+                orders.append(self._buy_order(o.ticket, asset, size, limit, 0, info=info ))
         return orders
 
-    def __get_pos_size(self, position_id: str) -> Decimal:
+    def __get_pos_size(self, ticket: int) -> Decimal:
         assert self._account
         for p in self._account.positions:
-            if p.id == position_id:
+            if p.get_info("ticket") == ticket:
                 return p.size
         return Decimal()
 
@@ -211,15 +211,14 @@ class TickerAllBroker(LiveBroker):
         """Place an order straight through to the broker (the original, netting-account behavior)."""
         is_market = order.is_mkt_order
 
-        if order.position_id:
-            pos_size = self.__get_pos_size(order.position_id)
+        if ticket := order.get_info("ticket"):
+            pos_size = self.__get_pos_size(ticket)
             assert pos_size == -order.size
-            ticket = int(order.position_id)
             result = self._client.positions.close(
                 self._account_id,
                 ticket,
             )
-            logger.info("closed position symbol=%s ticket=%s", order.asset.symbol, result.ticket)
+            logger.info("closed position order=%s result=%s", order, result)
             return
 
         result = self._client.orders.place(
@@ -229,8 +228,9 @@ class TickerAllBroker(LiveBroker):
             side="BUY" if order.is_buy else "SELL",
             volume=abs(float(order.size)),
             price=None if is_market else order.limit,
+            comment=order.get_info("comment"),
         )
-        logger.info("placed order symbol=%s ticket=%s", order.asset.symbol, result.ticket)
+        logger.info("placed order=%s result=%s", order, result)
 
     def __symbol_spec(self, symbol: str):
         """Lazily fetch + cache the broker's symbol specs, keyed by symbol name."""
