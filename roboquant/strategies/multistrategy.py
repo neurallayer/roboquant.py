@@ -1,3 +1,4 @@
+from roboquant.common.asset import Asset
 from itertools import groupby
 from statistics import mean
 from typing import Literal, override
@@ -46,7 +47,9 @@ class MultiStrategy(Strategy):
                 return list(d.values())
             case "mean":
                 result: list[Signal] = []
-                for key, group in groupby(signals, lambda signal: signal.asset):
+                def __group_asset(signal: Signal) -> Asset:
+                    return signal.asset
+                for key, group in groupby(signals, __group_asset):
                     rating = mean(signal.rating for signal in group)
                     if rating:
                         result.append(Signal(key, rating))

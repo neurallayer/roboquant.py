@@ -86,7 +86,7 @@ class TradingEnv(gym.Env[Any, Any]):
         return self.reward_feature.calc(account)[0]
 
     @override
-    def step(self, action: Any):
+    def step(self, action: Any) -> tuple[Any, Any, bool, bool, dict[Any, Any]]:
         """Take a step"""
         assert self.event is not None
         assert self.account is not None
@@ -117,7 +117,7 @@ class TradingEnv(gym.Env[Any, Any]):
         return None, 0.0, True, False, {}
 
     @override
-    def reset(self, *, seed : int | None=None, options : dict[str, None] | None=None):
+    def reset(self, *, seed : int | None=None, options : dict[str, None] | None=None) -> tuple[Any, dict[Any, Any]]:
         super().reset(seed=seed, options=options)
         self.broker.reset()
         self.obs_feature.reset()

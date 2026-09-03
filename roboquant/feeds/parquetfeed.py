@@ -1,3 +1,4 @@
+from typing import Any
 from datetime import datetime
 import logging
 import os.path
@@ -50,7 +51,7 @@ class ParquetFeed(HistoricFeed):
         # pylint: disable=too-many-locals
         with pq.ParquetFile(self.parquet_path) as dataset:
             last_time: datetime | None = None
-            items = []
+            items: list[PriceItem] = []
 
             row_group_indexes = self.__get_row_group_indexes(timeframe)
 
@@ -182,7 +183,7 @@ class ParquetFeed(HistoricFeed):
         """
 
         with pq.ParquetWriter(self.parquet_path, schema=ParquetFeed.__schema, use_dictionary=True) as writer:
-            items = []
+            items: list[dict[str, Any]] = []
             for event in feed.play(timeframe):
                 t = event.time
 

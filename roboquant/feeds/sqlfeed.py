@@ -118,7 +118,7 @@ class SQLFeed(HistoricFeed):
         """Play back the data in the database to the channel"""
         with sqlite3.connect(self.db_file) as con:
             t_old = ""
-            items = []
+            items: list[PriceItem] = []
             cursor = self.__get_cursor(con, timeframe)
 
             for row in cursor:
@@ -156,7 +156,7 @@ class SQLFeed(HistoricFeed):
             cur.execute(create_sql)
             price_type = self.price_type
 
-            data = []
+            data:list[Any] = []
             for event in feed.play(timeframe):
                 t = event.time
                 for item in event.items:

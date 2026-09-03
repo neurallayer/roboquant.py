@@ -319,8 +319,8 @@ class Account:
             labels = ["cash"]
             sizes = [self.convert(self.cash)]
         else:
-            labels = []
-            sizes = []
+            labels: list[str] = []
+            sizes: list[float] = []
 
         assets = set(p.asset for p in self.positions)
         labels = labels + [asset.symbol for asset in assets]

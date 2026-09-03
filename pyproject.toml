@@ -31,8 +31,8 @@ project-excludes = ["tests/samples"]
 preset = "strict"
 
 [tool.pyrefly.errors]
-implicit-any-empty-container = false
-implicit-any-lambda = false
+# implicit-any-empty-container = false
+# implicit-any-lambda = false
 
 [project]
 name = "roboquant"

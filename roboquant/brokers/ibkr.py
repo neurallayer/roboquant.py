@@ -121,7 +121,7 @@ class IBKRBroker(LiveBroker):
         ok = client.check_health()
         assert ok, "health not ok"
 
-        accounts = {}
+        accounts: Any = {}
         while not accounts:
             sleep(1)
             logger.info("trying to retrieve available brokerage accounts")
