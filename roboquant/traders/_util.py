@@ -41,7 +41,7 @@ def is_close(signal: Signal, position: Position):
 
 class Sizing:
     """Determine signal impact on the position sizing.
-    Takes into account the Signal type and rating and existing net Position size.
+    Takes into account the Signal type (entry/exit), buy or sell and the existing net position size.
     """
 
     def __init__(self, signal: Signal, pos_size: Decimal):
@@ -54,7 +54,7 @@ class Sizing:
             return False
         return self.signal.is_buy if self.size < 0 else self.signal.is_sell
 
-    def is_open(self) -> bool:
+    def is_enter(self) -> bool:
         """Return True if this signal would be an opening of a position,
         False otherwise.
         Opening a position can be both Short and Long.

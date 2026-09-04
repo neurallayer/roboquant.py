@@ -478,7 +478,7 @@ class UnrealizedPNLFeature(Feature[Account]):
 
 
 class DayOfWeekFeature(Feature[Event]):
-    """Calculate a day of the week where Monday == 0 and Sunday == 6.
+    """Calculate the day of the week where Monday == 0 and Sunday == 6.
     The result can be one-hot encoded or not, depending on the `one_hot_encoded` parameter.
     If `one_hot_encoded` is True, the result will be a 7-element array
     else the result will be a single value representing the day of the week (0-6).
@@ -509,7 +509,7 @@ class DayOfWeekFeature(Feature[Event]):
 
 
 class DayOfMonthFeature(Feature[Event]):
-    """Calculate a day of month where the first day of the month is 0 and the last day is 30.
+    """Calculate the day of month where the first day of the month is 0 and the last day is 30.
     Result can be one-hot encoded or not, depending on the `one_hot_encoded` parameter.
     If `one_hot_encoded` is True, the result will be a 30-element array else the result will be a single value.
 
@@ -540,7 +540,7 @@ class DayOfMonthFeature(Feature[Event]):
 
 
 class MonthOfYearFeature(Feature[Event]):
-    """Calculate a month of year where January == 0 and December == 11.
+    """Calculate the month of year where January == 0 and December == 11.
     Result can be one-hot encoded or not, depending on the `one_hot_encoded` parameter.
     If `one_hot_encoded` is True, the result will be a 12-element array else the result will be a single value.
     For example, if the event time is in March, the result will be:

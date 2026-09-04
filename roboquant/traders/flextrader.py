@@ -63,8 +63,9 @@ class FlexTrader(Trader):
     default configuration is designed to be safe and conservative, but it can be configured to be more aggressive by changing
     the parameters. The configurable parameters include:
 
+    Attributes:
     - one_order_only: don't create new orders for an asset if there is already an open orders for that same asset
-    - size_fractions: enable fractional order sizes (if size_fractions is larger than 0), default is 0
+    - step_size: order step sizes for optional fractional order sizes.
     - safety_margin_pct: the safety margin as percentage of equity that should remain available (to avoid margin calls),
     default is 0.05 (5%)
     - max_position_pct: the max percentage of the equity to allocate to a single position, default is 0.1 (10%)

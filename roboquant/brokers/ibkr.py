@@ -106,7 +106,7 @@ class IBKRBroker(LiveBroker):
     It supports operations such as retrieving account information, managing positions, placing
     and modifying orders, and fetching orders. Currently, it only supports stock assets.
 
-    It can be extended to support other asset classes like options, futures, etc or different order types.
+    It can be extended to support other asset classes like options, futures, etc. or different order types.
     """
 
     def __init__(self, account_id: str | None = None, ibkr_client: IbkrClient | None = None):

@@ -81,8 +81,8 @@ class LiveBroker(Broker):
 
     @abstractmethod
     def _get_account(self) -> Account:
-        """subclasses should implement this method and return an new Account object that reflects the
-        latest state of the cash, buyingpower, orders, positions and optionally the trades.
+        """subclasses should implement this method and return a new Account object that reflects the
+        latest state of the cash, buying-power, orders, positions and optionally the trades.
         """
         pass
 

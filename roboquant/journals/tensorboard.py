@@ -18,7 +18,7 @@ class TensorboardJournal(Journal):
     """Record metrics to a Tensorboard compatible file.
 
     Overall it is similar to the `MetricsJournal`, but rather than keeping
-    it in memory for futher inspection, it is saved to a file. You can use
+    it in memory for further inspection, it is saved to a file. You can use
     Tensorboard to view this file while the `run` is executing.
 
     The wall time is set to the event time, so with the right configuration
@@ -27,7 +27,7 @@ class TensorboardJournal(Journal):
     This can be used outside the realm of machine learning, but requires
     the tensorboard library to be installed.
 
-    Example
+    Example:
     ```
     from tensorboard.summary import Writer
     writer = Writer("./runs")

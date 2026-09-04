@@ -52,13 +52,15 @@ def run(
             if journal:
                 journal.track(event, account, signals, orders)
     except __StopRun as e:
-        logger.warning("early stop of the run: %s", e.message)
+        logger.info("early stop of the run: %s", e.message)
 
     return broker.sync()
 
 
 
 class __StopRun(Exception):
+    """This exception can be raised to force a run to be stopped while still
+    regularly returning the account object."""
 
     def __init__(self, message: str) -> None:
         super().__init__()
@@ -86,8 +88,9 @@ def _derive_simple_trader(assets: list[Asset], account: Account) -> Trader:
     return SimpleTrader(max_positions)
 
 def demo_run(journal: Journal | None = None) -> Account:
-    """Small demo run for testing purposes.
-    Optional a journal can be provided.
+    """Small demo run for testing purposes only .Optional a journal can be provided.
+    It will retrieve some stocks from Yahoo Finance and run a single back test using the
+    EMA crossover strategy from 2022 till the end of 2025.
     """
     feed = YahooFeed.us_stocks_10(start_date="2022-01-01", end_date="2026-01-01")
     strategy = EMACrossover()
