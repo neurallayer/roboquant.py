@@ -1,15 +1,16 @@
-from decimal import Decimal
+import os
 import time
 import unittest
-import os
-from alpaca.data.timeframe import TimeFrame
+from decimal import Decimal
 
-from roboquant.feeds.alpaca import AlpacaHistoricCryptoFeed, AlpacaHistoricStockFeed
+from alpaca.data.timeframe import TimeFrame
+from dotenv import load_dotenv
+
+from roboquant.brokers.alpaca import AlpacaBroker
 from roboquant.common.asset import Crypto, Stock
 from roboquant.common.order import Order
-from roboquant.brokers.alpaca import AlpacaBroker
+from roboquant.feeds.alpaca import AlpacaHistoricCryptoFeed, AlpacaHistoricStockFeed
 from tests.common import run_price_item_feed
-from dotenv import load_dotenv
 
 load_dotenv()
 

@@ -11,19 +11,20 @@ be a demo account. A free TickerAll account can connect a broker demo and run th
 
 import os
 import time
-from typing import Any
 import unittest
 from decimal import Decimal
+from typing import Any
+
 from dotenv import load_dotenv
 
 import roboquant as rq
+from roboquant.brokers.tickerall import TickerAllBroker
 from roboquant.common.asset import Forex
 from roboquant.common.event import Bar, Quote
 from roboquant.common.monetary import USD, ECBConversion
 from roboquant.common.order import Order
 from roboquant.common.timeframe import Timeframe
 from roboquant.feeds.tickerall import TickerAllHistoricFeed, TickerAllLiveFeed, _to_asset
-from roboquant.brokers.tickerall import TickerAllBroker
 from roboquant.journals.basicjournal import BasicJournal
 from roboquant.strategies.ema_crossover import EMACrossover
 from roboquant.traders.budgettrader import BudgetTrader

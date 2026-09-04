@@ -1,12 +1,13 @@
 import time
 import unittest
-from decimal import Decimal
 from dataclasses import replace
+from decimal import Decimal
+
+from dotenv import load_dotenv
 
 from roboquant import Order
 from roboquant.common.asset import Stock
 from roboquant.common.monetary import Amount, One2OneConversion
-from dotenv import load_dotenv
 
 load_dotenv()
 

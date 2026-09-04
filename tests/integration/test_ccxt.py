@@ -1,14 +1,14 @@
-import unittest
 import os
-import ccxt
+import unittest
 from datetime import datetime
 
+import ccxt
+from dotenv import load_dotenv
+
+from roboquant.brokers.crypto import CryptoBroker
 from roboquant.common.asset import Crypto
 from roboquant.feeds.crypto import CryptoFeed
-from roboquant.brokers.crypto import CryptoBroker
 from tests.common import run_price_item_feed
-
-from dotenv import load_dotenv
 
 load_dotenv()
 

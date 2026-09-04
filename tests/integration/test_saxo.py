@@ -1,12 +1,13 @@
-from decimal import Decimal
+import os
 import time
 import unittest
-import os
+from decimal import Decimal
 
+from dotenv import load_dotenv
+
+from roboquant.brokers.saxo import SaxoBroker
 from roboquant.common.asset import Stock
 from roboquant.common.order import Order
-from roboquant.brokers.saxo import SaxoBroker
-from dotenv import load_dotenv
 
 load_dotenv()
 
