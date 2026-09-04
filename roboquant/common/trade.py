@@ -1,10 +1,8 @@
-from roboquant.common.asset import Asset
-
-
 from dataclasses import dataclass
 from datetime import datetime
 from decimal import Decimal
 
+from roboquant.common.asset import Asset
 from roboquant.common.monetary import Amount
 
 

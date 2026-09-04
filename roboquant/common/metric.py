@@ -1,10 +1,9 @@
+from abc import ABC, abstractmethod
+
 from roboquant.common.account import Account
 from roboquant.common.event import Event
 from roboquant.common.order import Order
 from roboquant.common.signal import Signal
-
-
-from abc import ABC, abstractmethod
 
 
 class Metric(ABC):

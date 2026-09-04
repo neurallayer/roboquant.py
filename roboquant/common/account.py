@@ -1,16 +1,16 @@
-from dataclasses import dataclass, asdict, replace
+from dataclasses import asdict, dataclass, replace
 from datetime import datetime
 from decimal import Decimal
 from typing import Any
 
+import pandas as pd
 from matplotlib import pyplot as plt
 from matplotlib.axes import Axes
-import pandas as pd
 
-from roboquant.common.position import Position
 from roboquant.common.asset import Asset
 from roboquant.common.monetary import USD, Amount, Currency, Wallet
 from roboquant.common.order import Order
+from roboquant.common.position import Position
 from roboquant.common.timeframe import utcnow
 from roboquant.common.trade import Trade
 

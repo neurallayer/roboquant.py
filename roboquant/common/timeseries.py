@@ -1,10 +1,10 @@
 from datetime import datetime
 from typing import Any
 
-from matplotlib.axes import Axes
 import numpy as np
 import pandas as pd
 from matplotlib import pyplot as plt
+from matplotlib.axes import Axes
 
 from roboquant.common.timeframe import Timeframe
 

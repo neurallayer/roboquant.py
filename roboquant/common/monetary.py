@@ -1,7 +1,6 @@
 import io
 import logging
 import os
-from time import time
 import zipfile
 from abc import ABC, abstractmethod
 from bisect import bisect_left
@@ -10,10 +9,10 @@ from csv import reader
 from dataclasses import dataclass
 from datetime import datetime, timezone
 from pathlib import Path
-from typing import ClassVar, Any, Dict, List, Self, override
+from time import time
+from typing import Any, ClassVar, Dict, List, Self, override
 
 import requests
-
 
 logger = logging.getLogger(__name__)
 
