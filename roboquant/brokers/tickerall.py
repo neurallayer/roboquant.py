@@ -1,7 +1,7 @@
 from tickerall import TickerallValidationError
 import logging
 from decimal import Decimal
-from typing import Self, override
+from typing import Self, override, Any
 
 from tickerall import Tickerall
 from tickerall.types import BrokerName, Position as TaPosition, SymbolSpec, TerminalType
@@ -177,7 +177,9 @@ class TickerAllBroker(LiveBroker):
             entry = p.entry_price or 0.0
             mkt = p.current_price if p.current_price is not None else float("nan")
             asset = _to_asset(p.symbol, self.__quote_currency(p.symbol))
-            info = {"ticket": p.ticket, "comment" : p.comment}
+            info: dict[str, Any] = {"ticket": p.ticket}
+            if p.comment:
+                info["comment"] = p.comment
             pos = Position(asset, size, entry, mkt, info=info)
             portfolio.append(pos)
 

@@ -1,6 +1,6 @@
 # %%
 import os
-
+import pprint
 from dotenv import load_dotenv
 
 import roboquant as rq
@@ -37,11 +37,11 @@ class TickerAllHedging(Trader):
 
     def print(self, account: Account):
         if account.last_update != self.last_update:
-            print(80 * "=", account, sep="\n", flush=True)
+            print(40 * "=", "Positions", 40 * "=")
+            pprint.pp(account.positions)
             self.last_update = account.last_update
 
     def create_orders(self, signals : list[Signal], event: Event, account: Account) -> list[Order]:
-
         self.print(account)
         orders = []
         for name, strategy in self.strategies.items():
@@ -59,6 +59,9 @@ class TickerAllHedging(Trader):
                         if (pos.is_long and signal.is_sell) or (pos.is_short and signal.is_buy):
                             orders.append(pos.close_order())
 
+        if orders:
+            print(40 * "=", "Orders", 40 * "=")
+            pprint.pp(orders)
         return orders
 
 
@@ -76,7 +79,7 @@ try:
         broker.place_orders(orders)
 
     # Start a 10 minute run with the TickerAllHedging trader and subscribe to multiple assets
-    feed.subscribe("BTCUSD", "EURUSD", "LTCUSD", "ADAUSD", "BNBUSD")
+    feed.subscribe("BTCUSD", "EURUSD", "ETHUSD", "LTCUSD", "ADAUSD", "BNBUSD")
     tf = rq.Timeframe.next("10 minutes")
     trader = TickerAllHedging()
     rq.run(feed, strategy=None, trader=trader, broker=broker, timeframe=tf)
