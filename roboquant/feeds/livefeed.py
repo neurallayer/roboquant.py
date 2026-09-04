@@ -1,14 +1,13 @@
-from datetime import datetime, timedelta
-from queue import SimpleQueue
-from queue import Empty, Full
-from typing import Iterator, override
 import logging
+from datetime import datetime, timedelta
+from queue import Empty, Full, SimpleQueue
+from typing import Iterator, override
 
 from roboquant.common.asset import Asset
 from roboquant.common.event import Event
 from roboquant.common.timeframe import Timeframe, utcnow
-from .feed import Feed
 
+from .feed import Feed
 
 logger = logging.getLogger(__name__)
 

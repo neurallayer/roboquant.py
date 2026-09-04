@@ -1,12 +1,11 @@
-from roboquant.common.asset import Asset
-from roboquant.common.event import Event, PriceItem
-from roboquant.feeds.historicfeed import HistoricFeed
-from roboquant.common.timeframe import Timeframe
-
-
 from datetime import datetime
 from itertools import chain
 from typing import Iterator, override
+
+from roboquant.common.asset import Asset
+from roboquant.common.event import Event, PriceItem
+from roboquant.common.timeframe import Timeframe
+from roboquant.feeds.historicfeed import HistoricFeed
 
 
 class InMemoryFeed(HistoricFeed):

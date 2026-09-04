@@ -5,9 +5,9 @@ from typing import Any, Iterator, Literal, override
 import pandas as pd
 
 from roboquant.common.asset import Asset
-from roboquant.common.event import Event, Bar, TradePrice, Quote
+from roboquant.common.event import Bar, Event, Quote, TradePrice
 from roboquant.common.timeframe import Timeframe
-from .feed import Feed
+from roboquant.feeds.feed import Feed
 
 
 class BarAggregatorFeed(Feed):

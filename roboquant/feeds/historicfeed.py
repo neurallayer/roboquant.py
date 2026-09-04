@@ -2,17 +2,16 @@ from abc import ABC
 from datetime import datetime
 from typing import Any, Iterable
 
+import matplotlib.pyplot as plt
 from matplotlib.axes import Axes
 
-from roboquant.common.trade import Trade
 from roboquant.common.asset import Asset
 from roboquant.common.event import Bar
+from roboquant.common.metric import Metric
 from roboquant.common.timeframe import Timeframe
 from roboquant.common.timeseries import TimeSeries
-from roboquant.common.metric import Metric
-from .feed import Feed
-
-import matplotlib.pyplot as plt
+from roboquant.common.trade import Trade
+from roboquant.feeds.feed import Feed
 
 
 class HistoricFeed(Feed, ABC):

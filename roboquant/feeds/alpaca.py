@@ -12,9 +12,12 @@ from alpaca.data.historical.stock import StockHistoricalDataClient
 from alpaca.data.live.crypto import CryptoDataStream
 from alpaca.data.live.option import OptionDataStream
 from alpaca.data.live.stock import StockDataStream
-from alpaca.data.models.bars import BarSet, Bar as AlpacaBar
-from alpaca.data.models.quotes import QuoteSet, Quote as AlpacaQuote
-from alpaca.data.models.trades import TradeSet, Trade as AlpacaTrade
+from alpaca.data.models.bars import Bar as AlpacaBar
+from alpaca.data.models.bars import BarSet
+from alpaca.data.models.quotes import Quote as AlpacaQuote
+from alpaca.data.models.quotes import QuoteSet
+from alpaca.data.models.trades import Trade as AlpacaTrade
+from alpaca.data.models.trades import TradeSet
 from alpaca.data.requests import (
     CryptoBarsRequest,
     CryptoTradesRequest,
@@ -30,7 +33,6 @@ from roboquant.common.event import Bar, Event, PriceItem, Quote, TradePrice
 from roboquant.common.monetary import USD
 from roboquant.feeds.in_memory_feed import InMemoryFeed
 from roboquant.feeds.livefeed import LiveFeed
-
 
 logger = logging.getLogger(__name__)
 
@@ -305,4 +307,3 @@ class AlpacaHistoricCryptoFeed(_AlpacaHistoricFeed):
         assert isinstance(res, TradeSet)
         self._process_trades(res, AssetClass.CRYPTO)
         self._update()
-

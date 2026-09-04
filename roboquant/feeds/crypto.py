@@ -1,8 +1,9 @@
 import logging
-from typing import Any
-import ccxt
 from array import array
 from datetime import date, datetime, timezone
+from typing import Any
+
+import ccxt
 
 from roboquant.common.asset import Asset, Crypto
 from roboquant.common.event import Bar
@@ -81,6 +82,3 @@ class CryptoFeed(InMemoryFeed):
         asset of the type Crypto.
         Subclasses can override this method to provide a different asset type."""
         return Crypto.from_symbol(symbol)
-
-
-

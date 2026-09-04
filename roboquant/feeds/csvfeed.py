@@ -1,9 +1,9 @@
 import csv
-from dataclasses import dataclass
 import logging
 import os
 import pathlib
 from array import array
+from dataclasses import dataclass
 from datetime import datetime, time, timezone
 from typing import Callable, override
 

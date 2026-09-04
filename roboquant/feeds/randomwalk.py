@@ -1,13 +1,13 @@
-from array import array
 import random
 import string
+from array import array
 from datetime import datetime, timedelta, timezone
 from typing import Literal
 
 import numpy as np
 
 from roboquant.common.asset import Asset, Stock
-from roboquant.common.event import Bar, TradePrice, Quote
+from roboquant.common.event import Bar, Quote, TradePrice
 from roboquant.feeds.in_memory_feed import InMemoryFeed
 
 

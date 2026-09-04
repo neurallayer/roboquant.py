@@ -1,17 +1,16 @@
 import logging
 import os.path
-from pathlib import Path
 import sqlite3
 from array import array
 from datetime import datetime
+from pathlib import Path
 from typing import Any, Iterator, Literal, override
 
-from roboquant.common.asset import deserialize_to_asset, Asset
-from roboquant.common.event import Bar, PriceItem, Quote
-from roboquant.common.event import Event
-from roboquant.feeds.historicfeed import HistoricFeed
+from roboquant.common.asset import Asset, deserialize_to_asset
+from roboquant.common.event import Bar, Event, PriceItem, Quote
 from roboquant.common.timeframe import Timeframe
 from roboquant.feeds.feed import Feed
+from roboquant.feeds.historicfeed import HistoricFeed
 
 logger = logging.getLogger(__name__)
 

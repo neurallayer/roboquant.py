@@ -1,20 +1,19 @@
-from typing import Any
-from datetime import datetime
 import logging
 import os.path
 from array import array
+from datetime import datetime
 from pathlib import Path
-from typing import Callable, Iterable, Iterator, override
+from typing import Any, Callable, Iterable, Iterator, override
 
 import pyarrow as pa
 import pyarrow.parquet as pq
 
-from roboquant.common.event import PriceItem, Quote, Bar, TradePrice
-from roboquant.common.event import Event
-from roboquant.feeds.feed import Feed
-from roboquant.common.asset import deserialize_to_asset, Asset
-from .historicfeed import HistoricFeed
+from roboquant.common.asset import Asset, deserialize_to_asset
+from roboquant.common.event import Bar, Event, PriceItem, Quote, TradePrice
 from roboquant.common.timeframe import Timeframe
+from roboquant.feeds.feed import Feed
+
+from .historicfeed import HistoricFeed
 
 logger = logging.getLogger(__name__)
 
