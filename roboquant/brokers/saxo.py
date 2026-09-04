@@ -118,7 +118,7 @@ class SaxoBroker(LiveBroker):
 
 
     def _load_assets(self):
-        """Load assets from a included file"""
+        """Load assets from the included file"""
         json_str = importlib.resources.read_text(self.__module__, "__saxo_assets.json")
         data: list[tuple[str,str,int,str]] = json.loads(json_str)
 

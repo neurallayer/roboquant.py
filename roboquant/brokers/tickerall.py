@@ -26,7 +26,7 @@ class TickerAllBroker(LiveBroker):
     positions, and places/updates/cancels orders against it.
 
     Following roboquant's order model, an order without an `id` is a new order, an order with an `id` and a
-    non-zero size updates that resting pending order, and an order with an `id` and a zero size cancels it.
+    non-zero size updates that resting pending order, and an order with an `id` and zero size cancels it.
     A new order with a `limit` price is placed as a pending limit order; a new order whose `limit` is
     `None` (`is_mkt_order`) is placed as a market order.
 

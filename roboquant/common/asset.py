@@ -32,7 +32,7 @@ class Asset(ABC):
     """Keeps track of all created assets and their symbol name"""
 
     def __post_init__(self):
-        """Ensure unique symbol accross different assets and keep track of all unique assets created"""
+        """Ensure unique symbol across different assets and keep track of all unique assets created"""
         if self.symbol in Asset.__registry:
             asset = Asset.__registry[self.symbol]
             assert self == asset, f"detected same symbol for different assets {asset} != {self}"
@@ -179,7 +179,7 @@ class Forex(Asset):
     def from_symbol(symbol: str) -> "Forex":
         """Create a `Forex` asset from a symbol string.
         The last part of the symbol name is assumed to be the quote currency.
-        Any non alfanumeric character is considered to be a separator.
+        Any non-alphanumeric character is considered to be a separator.
 
         Args:
             symbol (str): The symbol string of the forex asset.

@@ -121,7 +121,7 @@ class SimBroker(Broker):
         """Return the execution price to use for an order based on the price item.
 
         The default implementation is a fixed slippage percentage based on the configured price_type.
-        But is the price-item is a `Quote`, it will use the ask- en bid-price instead without
+        But is the price-item is a `Quote`, it will use the ask- and bid-price instead without
         any additional slippage.
         """
         if isinstance(item, Quote):

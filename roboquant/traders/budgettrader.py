@@ -1,4 +1,4 @@
-from roboquant.traders._util import SignalImpact, round_number
+from roboquant.traders._util import Sizing, round_number
 from decimal import Decimal
 import logging
 from typing import override
@@ -73,7 +73,7 @@ class BudgetTrader(Trader):
                 continue
 
             pos_size = account.position_size(asset)
-            si = SignalImpact(signal, pos_size)
+            si = Sizing(signal, pos_size)
 
             if si.is_increase():
                 if buying_power < self.order_value:

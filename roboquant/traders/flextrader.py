@@ -2,7 +2,6 @@ from dataclasses import dataclass
 from datetime import datetime
 import logging
 from decimal import Decimal
-from enum import Flag, auto
 import random
 from typing import Any, Literal, override
 
@@ -10,49 +9,12 @@ from roboquant.common.asset import Asset
 from roboquant.common.event import Event
 from roboquant.common.order import Order
 from roboquant.common.signal import Signal
-from roboquant.traders._util import round_number
+from roboquant.traders._util import round_number, Sizing
 from .trader import Trader
 from ..common.account import Account
 from ..common.event import PriceItem
 
 logger = logging.getLogger(__name__)
-
-
-class _PositionChange(Flag):
-    """representing the four types of changes to the positions in the account.
-    This class is used to make the logic in `FlexTrader` easier to understand.
-    """
-
-    ENTRY_LONG = auto()
-    ENTRY_SHORT = auto()
-    EXIT_LONG = auto()
-    EXIT_SHORT = auto()
-
-    _ENTRY = ENTRY_LONG | ENTRY_SHORT
-    _EXIT = EXIT_LONG | EXIT_SHORT
-
-    @property
-    def is_entry(self) -> bool:
-        """Return True is the status is open, False otherwise"""
-        return self in _PositionChange._ENTRY
-
-    @property
-    def is_exit(self) -> bool:
-        """Return True is the status is closed, False otherwise"""
-        return self in _PositionChange._EXIT
-
-    @staticmethod
-    def get_change(is_buy: bool, pos_size: Decimal) -> "_PositionChange":
-        """Determine the kind of change a certain action would have on the position"""
-        if pos_size.is_zero():
-            return _PositionChange.ENTRY_LONG if is_buy else _PositionChange.ENTRY_SHORT
-        if pos_size > 0:
-            return _PositionChange.ENTRY_LONG if is_buy else _PositionChange.EXIT_LONG
-
-        return _PositionChange.EXIT_SHORT if is_buy else _PositionChange.ENTRY_SHORT
-
-    def __repr__(self) -> str:
-        return self.name.split(".")[-1]  # type: ignore
 
 
 class _Context:
@@ -162,11 +124,12 @@ class FlexTrader(Trader):
         for signal in signals:
             asset = signal.asset
             pos_size = account.position_size(asset)
-            change = _PositionChange.get_change(signal.is_buy, pos_size)
+
+            change = Sizing(signal, pos_size)
+
+            # change = _PositionChange.get_change(signal.is_buy, pos_size)
 
             ctx.log_received(signal=signal, position=pos_size, available=available)
-
-            # logger.info("==> received signal available=%s signal=%s pos=%s change=%s", available, signal, pos_size, change)
 
             if self.one_order_only and asset in order_assets:
                 ctx.log_rule("one order only")
@@ -179,15 +142,11 @@ class FlexTrader(Trader):
 
             price = item.price(self.price_type)
 
-            if not self.shorting and change == _PositionChange.ENTRY_SHORT:
+            if not self.shorting and change.is_shorting():
                 ctx.log_rule("no shorting")
                 continue
 
-            if change.is_exit:
-                # Closing orders don't require or use buying power
-                if not signal.is_exit:
-                    ctx.log_rule("no exit signal")
-                    continue
+            if change.is_exit():
 
                 rounded_size = round_number(-pos_size * abs(Decimal(signal.rating)), self.step_size)
                 if rounded_size.is_zero():
@@ -195,14 +154,7 @@ class FlexTrader(Trader):
                     continue
                 new_orders = self._get_orders(asset, rounded_size, item, signal, event.time)
                 orders += new_orders
-            else:
-                if available < 0:
-                    ctx.log_rule("no more available buying power")
-                    continue
-
-                if not signal.is_entry:
-                    ctx.log_rule("no entry signal")
-                    continue
+            elif change.is_increase():
 
                 if available < min_order_value:
                     ctx.log_rule("available buying power below minimum order value")

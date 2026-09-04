@@ -30,7 +30,7 @@ CRITERION = Callable[[torch.Tensor, torch.Tensor], torch.Tensor]
 
 class FeatureStrategy(Strategy):
     """Abstract base class for strategies that use event features as input.
-    Typically these features are used to create input data for machine learning models,
+    Typically, these features are used to create input data for machine learning models,
     which can then be used to generate signals.
     """
 

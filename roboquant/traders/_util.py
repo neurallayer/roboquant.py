@@ -7,9 +7,9 @@ from roboquant.common.monetary import Amount
 from roboquant.common.signal import Signal
 
 
-def round_number(value: float | str | decimal.Decimal | int, base: str | Decimal, rounding : str | None = decimal.ROUND_DOWN):
+def round_number(value: float | str | decimal.Decimal | int, base: str | Decimal, rounding: str | None = decimal.ROUND_DOWN):
     """
-    Flexible rounding of a number to a multiple of the provided base. By default it will round down (towards zero).
+    Flexible rounding of a number to a multiple of the provided base. By default, it will round down (towards zero).
     Internally used for the rounding order sizes and limits.
 
     For example:
@@ -22,9 +22,8 @@ def round_number(value: float | str | decimal.Decimal | int, base: str | Decimal
     base = Decimal(base)
     return base * (value / base).quantize(1, rounding=rounding)
 
-def get_order_size(
-    signal: Signal, price: float, order_amount: Amount, time: datetime, step_size: str
-) -> decimal.Decimal:
+
+def get_order_size(signal: Signal, price: float, order_amount: Amount, time: datetime, step_size: str) -> decimal.Decimal:
     """Calculate the order size based on the signal rating, asset price, order amount.
     Time is used when a conversion is needed between the asset currency and the order amount currency.
     """
@@ -40,24 +39,20 @@ def is_close(signal: Signal, position: Position):
     return (position.is_long and signal.is_sell) or (position.is_short and signal.is_buy)
 
 
-class SignalImpact:
-    """Some small utilities for determining signal impact based on position size"""
+class Sizing:
+    """Determine signal impact on the position sizing.
+    Takes into account the Signal type and rating and existing net Position size.
+    """
 
     def __init__(self, signal: Signal, pos_size: Decimal):
         self.signal = signal
         self.size = pos_size
 
     def is_exit(self) -> bool:
-        """Return True if this is close of a position, False otherwise
-        """
+        """Return True if this is close of a position, False otherwise"""
         if not self.signal.is_exit or self.size.is_zero():
             return False
         return self.signal.is_buy if self.size < 0 else self.signal.is_sell
-
-    def is_close(self) -> bool:
-        if self.size.is_zero():
-            return False
-        return self.signal.is_sell if self.size > 0 else self.signal.is_buy
 
     def is_open(self) -> bool:
         """Return True if this signal would be an opening of a position,
@@ -67,8 +62,7 @@ class SignalImpact:
         return self.signal.is_entry and self.size.is_zero()
 
     def is_increase(self) -> bool:
-        """Return True if this an increase into a position size, False otherwise.
-        """
+        """Return True if this an increase into a position size, False otherwise."""
         if not self.signal.is_entry:
             return False
         if self.size.is_zero():
@@ -76,12 +70,11 @@ class SignalImpact:
         return self.signal.is_buy if self.size > 0 else self.signal.is_sell
 
     def is_shorting(self) -> bool:
-        """Return True if this an opening or increasing a short position, False otherwise.
-        """
+        """Return True if this an opening or increasing a short position, False otherwise."""
         return self.signal.is_entry and self.size <= 0 and self.signal.is_sell
 
     def close_positions(self, positions: list[Position]) -> list[Position]:
-        """Get all positions that this signal would close"""
+        """Get all positions that this signal would exit"""
         result = []
         if not self.signal.is_exit:
             return []
@@ -89,4 +82,3 @@ class SignalImpact:
             if is_close(self.signal, pos):
                 result.append(pos)
         return result
-

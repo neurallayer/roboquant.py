@@ -100,10 +100,10 @@ class AssetBuffers(UserDict[Asset, OHLCVBuffer]):
 
     def add_event(self, event: Event) -> set[Asset]:
         """Add a new event and return all the assets that:
-        - had a priceitem of the type `Bar` (so have been added)
+        - had a price-item of the type `Bar` (so have been added)
         - and are ready to be processed (so a full buffer)
 
-        Note that `PriceItems` in the event that are not of the type `Bar`
+        Note that price-items in the event that are not of the type `Bar`
         are ignored.
         """
         assets: set[Asset] = set()

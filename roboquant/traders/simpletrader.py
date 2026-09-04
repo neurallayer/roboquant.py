@@ -1,4 +1,4 @@
-from roboquant.traders._util import SignalImpact
+from roboquant.traders._util import Sizing
 from decimal import Decimal
 import logging
 from typing import override
@@ -65,7 +65,7 @@ class SimpleTrader(Trader):
                 continue
 
             pos_size = account.position_size(asset)
-            si = SignalImpact(signal, pos_size)
+            si = Sizing(signal, pos_size)
             if si.is_open():
 
                 if remaining_positions <= 0:

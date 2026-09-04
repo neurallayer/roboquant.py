@@ -10,7 +10,7 @@ from typing import List, override
 
 
 class Scorecard(Journal):
-    """Tracks progress of a run so it can be plotted using matplotlib charts afterwards.
+    """Tracks progress of a run so it can be plotted using matplotlib charts afterward.
     It will track the following aspects:
     - the price and volume of the assets
     - the trades for the asset as markers on the price chart
