@@ -4,8 +4,8 @@ from typing import override
 from roboquant.common.asset import Asset
 from roboquant.common.event import Event
 from roboquant.common.signal import Signal
-from roboquant.util.buffer import AssetBuffers, OHLCVBuffer
 from roboquant.strategies.strategy import Strategy
+from roboquant.util.buffer import AssetBuffers, OHLCVBuffer
 
 
 class IndicatorStrategy(Strategy):

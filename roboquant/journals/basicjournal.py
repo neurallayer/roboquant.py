@@ -2,11 +2,11 @@ import logging
 from dataclasses import dataclass
 from typing import override
 
-from roboquant.common.order import Order
-from roboquant.common.signal import Signal
 from roboquant.common.account import Account
 from roboquant.common.asset import Asset
 from roboquant.common.event import Event
+from roboquant.common.order import Order
+from roboquant.common.signal import Signal
 from roboquant.journals.journal import Journal
 
 logger = logging.getLogger(__name__)

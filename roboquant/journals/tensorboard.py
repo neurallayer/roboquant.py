@@ -2,10 +2,10 @@ from typing import Protocol, override
 
 from roboquant.common.account import Account
 from roboquant.common.event import Event
-from roboquant.journals.journal import Journal
 from roboquant.common.metric import Metric
 from roboquant.common.order import Order
 from roboquant.common.signal import Signal
+from roboquant.journals.journal import Journal
 
 
 class Writer(Protocol):
@@ -70,5 +70,3 @@ class TensorboardJournal(Journal):
                 self.__writer.add_scalar(name, value, self._step, wall_time=time)
 
         self._step += 1
-
-

@@ -1,7 +1,7 @@
 from typing import override
 
-from roboquant.common.signal import Signal
 from roboquant.common.event import Bar, Event
+from roboquant.common.signal import Signal
 from roboquant.strategies.strategy import Strategy
 
 

@@ -13,7 +13,6 @@ feed = rq.feeds.YahooFeed("IBM", "JPM", "MSFT", "TSLA", "INTC", start_date="2020
 data = feed.to_timeseries(*feed.assets())
 print("Asset correlations:\n", data.corr())
 
-
 # %%
 strategy = rq.strategies.EMACrossover()
 account = rq.run(feed, strategy)

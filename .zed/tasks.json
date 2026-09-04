@@ -8,6 +8,11 @@
     "show_command": false,
   },
   {
+    "label": "run ty",
+    "command": "uvx ty check",
+    "show_command": false,
+  },
+  {
     "label": "run pyrefly",
     "command": "uvx pyrefly check",
     "show_command": false,
@@ -20,6 +25,11 @@
   {
     "label": "uv sync",
     "command": "uv sync --all-extras --dev",
+    "show_command": false,
+  },
+  {
+    "label": "verify",
+    "command": "uvx ruff check && uvx ty check && uvx pyrefly check && uv run python -m unittest discover -s tests/unit",
     "show_command": false,
   },
   {

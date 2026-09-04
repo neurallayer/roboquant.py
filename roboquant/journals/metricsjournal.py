@@ -1,18 +1,17 @@
-from typing import Any, Self, override
 from datetime import datetime
+from typing import Any, Dict, List, Self, override
 
 from matplotlib.axes import Axes
 
+from roboquant.common.account import Account
+from roboquant.common.event import Event
 from roboquant.common.metric import Metric
+from roboquant.common.order import Order
+from roboquant.common.signal import Signal
+from roboquant.common.timeseries import TimeSeries
 from roboquant.journals.journal import Journal
 from roboquant.util.metrics import PNLMetric
-from roboquant.common.account import Account
-from roboquant.common.signal import Signal
-from roboquant.common.event import Event
-from roboquant.common.order import Order
-from typing import Dict, List
 
-from roboquant.common.timeseries import TimeSeries
 
 class MetricsJournal(Journal):
     """

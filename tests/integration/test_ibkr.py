@@ -6,7 +6,6 @@ from dataclasses import replace
 from roboquant import Order
 from roboquant.common.asset import Stock
 from roboquant.common.monetary import Amount, One2OneConversion
-from roboquant.feeds import YahooFeed
 from dotenv import load_dotenv
 
 load_dotenv()
@@ -22,21 +21,9 @@ class TestIBKR(unittest.TestCase):
         print(account)
         self.assertTrue(account.equity_value() > 0)
 
-    def _get_last_price(self, asset: Stock):
-        feed = YahooFeed(asset.symbol)
-        last_event = feed.get_last_event()
-        if last_event is None:
-            raise ValueError(f"No data available for {asset.symbol}")
-        price = last_event.get_price(asset, "CLOSE")
-        if price is None:
-            raise ValueError(f"No price available for {asset.symbol}")
-        return round(price, 2)
-
-
     def test_ibkr_order(self):
         Amount.register_converter(One2OneConversion())
         asset = Stock("JPM")
-        limit = self._get_last_price(asset)
 
         broker = IBKRBroker()
         account = broker.sync()
@@ -45,7 +32,7 @@ class TestIBKR(unittest.TestCase):
         existing_orders = {order.id for order in account.orders}
 
         # Place an order
-        order = Order(asset, Decimal(10), limit)
+        order = Order(asset, Decimal(10))
         broker.place_orders([order])
         self.assertEqual(broker.metrics["new"], 1)
         time.sleep(5)
@@ -60,15 +47,8 @@ class TestIBKR(unittest.TestCase):
             order_id = new_order.id or -1
 
             self.assertEqual(new_order.size, Decimal(10))
-            self.assertEqual(new_order.limit, limit)
+            self.assertEqual(new_order.limit, None)
             self.assertEqual(asset, new_order.asset)
-
-            # Update an order
-            new_limit = limit - 1.0
-            update_order = new_order.modify(Decimal(5), new_limit)
-            broker.place_orders([update_order])
-            self.assertEqual(broker.metrics["update"], 1)
-            time.sleep(5)
 
             account = broker.sync()
             print(account)
@@ -79,7 +59,7 @@ class TestIBKR(unittest.TestCase):
             # self.assertEqual(new_order.limit, new_limit)
 
             # Cancel an order
-            cancel_order = update_order.cancel()
+            cancel_order = new_order.cancel()
             broker.place_orders([cancel_order])
             self.assertEqual(broker.metrics["cancel"], 1)
             time.sleep(5)

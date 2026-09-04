@@ -65,24 +65,6 @@ class InMemoryFeed(HistoricFeed):
             self.__assets = {item.asset for item in price_items}
             self.__modified = False
 
-    def get_first_event(self) -> Event | None:
-        """Return the first event in this feed, or None if no events are available"""
-        if not self.__data:
-            return None
-
-        first_time = next(iter(self.__data.keys()))
-        items = self.__data[first_time]
-        return Event(first_time, items)
-
-    def get_last_event(self) -> Event | None:
-        """Return the last event in this feed, or None if no events are available"""
-        if not self.__data:
-            return None
-
-        last_time = next(reversed(self.__data.keys()))
-        items = self.__data[last_time]
-        return Event(last_time, items)
-
     @override
     def play(self, timeframe: Timeframe | None = None) -> Iterator[Event]:
         for k, v in self.__data.items():

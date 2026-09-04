@@ -2,14 +2,15 @@ from dataclasses import dataclass
 from datetime import datetime
 from typing import override
 
+from roboquant.common.account import Account
 from roboquant.common.asset import Asset
+from roboquant.common.event import Event
 from roboquant.common.order import Order
 from roboquant.common.signal import Signal
-from roboquant.common.account import Account
-from roboquant.common.event import Event
-from roboquant.journals.journal import Journal
 from roboquant.common.timeframe import Timeframe
 from roboquant.common.timeseries import TimeSeries
+from roboquant.journals.journal import Journal
+
 
 @dataclass
 class SignalOrderTracker(Journal):

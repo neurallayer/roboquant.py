@@ -1,8 +1,8 @@
-from roboquant.common.asset import Asset
 from itertools import groupby
 from statistics import mean
 from typing import Literal, override
 
+from roboquant.common.asset import Asset
 from roboquant.common.event import Event
 from roboquant.common.signal import Signal
 from roboquant.strategies.strategy import Strategy
