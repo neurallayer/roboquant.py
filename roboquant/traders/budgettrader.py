@@ -1,4 +1,4 @@
-from roboquant.traders._util import SignalImpact
+from roboquant.traders._util import SignalImpact, round_number
 from decimal import Decimal
 import logging
 from typing import override
@@ -9,7 +9,6 @@ from roboquant.common.monetary import Amount
 from roboquant.common.order import Order
 from roboquant.common.signal import Signal
 from roboquant.traders.trader import Trader
-from roboquant.traders._util import round_down
 
 
 logger = logging.getLogger(__name__)
@@ -28,14 +27,14 @@ class BudgetTrader(Trader):
         position_value: float,
         shorting: bool = False,
         price_type: str = "DEFAULT",
-        ndigits: int = 0
+        step_size: str = "1"
     ) -> None:
         super().__init__()
         self.shorting = shorting
         self.price_type = price_type
         self.order_value: float = order_value
         self.position_value: float = position_value
-        self.ndigits = ndigits
+        self.step_size = step_size
 
     @override
     def create_orders(self, signals: list[Signal], event: Event, account: Account) -> list[Order]:
@@ -92,7 +91,7 @@ class BudgetTrader(Trader):
 
                 asset_budget = order_budget.convert_to(asset.currency, event.time)
                 asset_cost = asset.value(Decimal(1), price)
-                order_size = round_down((asset_budget / asset_cost) * signal.rating, self.ndigits)
+                order_size = round_number((asset_budget / asset_cost) * signal.rating, self.step_size)
                 if order_size:
                     order = Order(asset, order_size)
                     result.append(order)

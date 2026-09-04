@@ -52,7 +52,7 @@ class TickerAllHedging(Trader):
                     continue
                 positions = [pos for pos in account.positions if pos.get_info("comment") == name and pos.asset == asset]
                 if not positions:
-                    if size := get_order_size(signal, price, self.order_amount, event.time, ndigits=2):
+                    if size := get_order_size(signal, price, self.order_amount, event.time, step_size="0.05"):
                         orders.append(rq.Order(asset, size, info={"comment": name}))
                 else:
                     for pos in positions:

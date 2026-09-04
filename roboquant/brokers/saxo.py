@@ -1,4 +1,4 @@
-from dataclasses import replace
+from collections import defaultdict
 from decimal import Decimal
 import logging
 import json
@@ -54,7 +54,6 @@ class SaxoBroker(LiveBroker):
         self._client_key = client_key or default_client_key
         self._last_prices = {}
         self._load_assets()
-        self.__simplify_assets()
 
     def reset_session(self):
         """Close the old session and start a new one"""
@@ -89,7 +88,7 @@ class SaxoBroker(LiveBroker):
         """Return the current known assets with this broker"""
         return list(self._asset_mapping.keys())
 
-    def _refresh_all_stocks(self):
+    def _refresh_all_assets(self):
         def get_relevant_data(result: dict[str, Any]):
             keys = ["Symbol", "CurrencyCode", "Identifier", "AssetType"]
             r = []
@@ -117,12 +116,22 @@ class SaxoBroker(LiveBroker):
         with open('__saxo_assets.json', 'w') as f:
             json.dump(data, f)
 
+
     def _load_assets(self):
         """Load assets from a included file"""
         json_str = importlib.resources.read_text(self.__module__, "__saxo_assets.json")
         data: list[tuple[str,str,int,str]] = json.loads(json_str)
+
+        symbols = defaultdict(list)
+        for symbol, *_ in data:
+            simplified_symbol = symbol.split(":")[0]
+            symbols[simplified_symbol].append(symbol)
+
         for row in data:
             symbol, currencyCode, uic, asset_type = row
+            simplified_symbol = symbol.split(":")[0]
+            if len(symbols[simplified_symbol]) == 1:
+                symbol = simplified_symbol
             currency = Currency(currencyCode)
             match asset_type:
                 case "Stock" | "Etf" | "Fund":
@@ -137,32 +146,6 @@ class SaxoBroker(LiveBroker):
             self._asset_mapping[asset] = (uic, asset_type)
 
         logger.info("loaded %s assets", len(self._asset_mapping))
-
-    def __simplify_assets(self):
-        """Use simpler symbol names if there is no clash.
-        This makes it easier to map feed assets and order assets
-        """
-        tmp: set[Asset] = set()
-        duplicate: set[Asset] = set()
-        for asset in self._asset_mapping.keys():
-            simplified_symbol = asset.symbol.split(":")[0]
-            a = replace(asset, symbol = simplified_symbol)
-            if a in tmp:
-                duplicate.add(a)
-            else:
-                tmp.add(a)
-
-        result: dict[Asset, tuple[int, str]] = {}
-        for asset, v in self._asset_mapping.items():
-            simplified_symbol = asset.symbol.split(":")[0]
-            a = replace(asset, symbol = simplified_symbol)
-            if a in duplicate:
-                result[asset] = v
-            else:
-                result[a] = v
-
-        assert len(result) == len(self._asset_mapping)
-        self._asset_mapping = result
 
     def __request(
         self,
@@ -278,7 +261,7 @@ class SaxoBroker(LiveBroker):
         )
 
     def match_asset(self, asset: Asset) -> Asset | None:
-        """Tries to match an asset, even if not 100% matching symbol name."""
+        """Tries to find a matching an asset, even if not 100% matching symbol name."""
         for key in self._asset_mapping.keys():
             short_symbol = key.symbol.split(":")[0]
             if short_symbol == asset.symbol and key.currency == asset.currency and key.asset_class == asset.asset_class:
@@ -330,3 +313,4 @@ class SaxoBroker(LiveBroker):
         )
 
         logger.info("placed order=%s resp=%s", order, resp)
+

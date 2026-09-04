@@ -7,24 +7,29 @@ from roboquant.common.monetary import Amount
 from roboquant.common.signal import Signal
 
 
-def round_down(value: float | str | decimal.Decimal | int, ndigits: int) -> decimal.Decimal:
-    """round a value to a number of decimals but always down (towards zero)"""
+def round_number(value: float | str | decimal.Decimal | int, base: str | Decimal, rounding = decimal.ROUND_DOWN):
+    """
+    Flexible rounding of a number to a multiple of the provided base.
+    Used mainly for rounding order sizes and limits.
 
-    with decimal.localcontext() as ctx:
-        d = decimal.Decimal(value)
-        ctx.rounding = decimal.ROUND_DOWN
-        return decimal.Decimal(round(d, ndigits))
-
+    For example:
+    ```
+    round_number(3.1234, "0.05")
+    ```
+    """
+    value = Decimal(value)
+    base = Decimal(base)
+    return base * (value / base).quantize(1, rounding=rounding)
 
 def get_order_size(
-    signal: Signal, price: float, order_amount: Amount, time: datetime, ndigits: int
+    signal: Signal, price: float, order_amount: Amount, time: datetime, step_size: str
 ) -> decimal.Decimal:
     """Calculate the order size based on the signal rating, asset price, order amount.
     Time is used when a conversion is needed between the asset currency and the order amount currency.
     """
     one_contract_value = signal.asset.amount(decimal.Decimal(1), price).convert_to(order_amount.currency, time)
     size = signal.rating * order_amount.value / one_contract_value
-    return round_down(size, ndigits)
+    return round_number(size, step_size)
 
 
 def is_opposite(signal: Signal, position: Position):
@@ -49,7 +54,9 @@ class SignalImpact:
         return self.signal.is_buy if self.size < 0 else self.signal.is_sell
 
     def is_opposite(self) -> bool:
-        return (self.size > 0 and self.signal.is_sell) or (self.size  < 0 and self.signal.is_buy)
+        if self.size.is_zero():
+            return False
+        return self.signal.is_sell if self.size > 0 else self.signal.is_buy
 
     def is_entry(self) -> bool:
         """Return True if this signal would be an opening of a position,

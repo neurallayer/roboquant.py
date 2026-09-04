@@ -10,7 +10,7 @@ from roboquant.common.asset import Asset
 from roboquant.common.event import Event
 from roboquant.common.order import Order
 from roboquant.common.signal import Signal
-from roboquant.traders._util import round_down
+from roboquant.traders._util import round_number
 from .trader import Trader
 from ..common.account import Account
 from ..common.event import PriceItem
@@ -124,7 +124,7 @@ class FlexTrader(Trader):
     """
 
     one_order_only: bool = True
-    size_fractions: int = 0
+    step_size: str = "1"
     safety_margin_pct: float = 0.05
     shorting: bool = False
     max_order_pct: float = 0.05
@@ -139,7 +139,7 @@ class FlexTrader(Trader):
     def _get_order_size(self, rating: float, contract_price: float, max_order_value: float) -> Decimal:
         """Return the order size"""
         size = Decimal(rating * max_order_value / contract_price)
-        return round_down(size, self.size_fractions)
+        return round_number(size, self.step_size)
 
     @override
     def create_orders(self, signals: list[Signal], event: Event, account: Account) -> list[Order]:
@@ -189,7 +189,7 @@ class FlexTrader(Trader):
                     ctx.log_rule("no exit signal")
                     continue
 
-                rounded_size = round(-pos_size * abs(Decimal(signal.rating)), self.size_fractions)
+                rounded_size = round_number(-pos_size * abs(Decimal(signal.rating)), self.step_size)
                 if rounded_size.is_zero():
                     ctx.log_rule("cannot exit with order size zero")
                     continue

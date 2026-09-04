@@ -1,9 +1,11 @@
+from decimal import Decimal
 from typing import override
 import unittest
 
 from roboquant.common.account import Account
 from roboquant.common.monetary import Amount, USD, Wallet
 from roboquant.common.signal import Signal
+from roboquant.traders._util import round_number
 from roboquant.traders.flextrader import FlexTrader
 from roboquant.traders.simpletrader import SimpleTrader
 from tests.common import get_feed
@@ -42,6 +44,15 @@ class TestTrader(unittest.TestCase):
             self.assertEqual(len(signals), len(orders))
             self.assertEqual(signals[0].asset, orders[0].asset)
             self.assertEqual(signals[0].is_buy, orders[0].is_buy)
+
+    def test_rounding(self):
+        self.assertEqual(round_number(3.1428, "0.01"), Decimal("3.14"))
+        self.assertEqual(round_number(3.1501, "0.05"), Decimal("3.15"))
+        self.assertEqual(round_number(3.1428, "0.5"), Decimal("3.0"))
+        self.assertEqual(round_number("2.99999999999999", "0.01"), Decimal("2.99"))
+        self.assertEqual(round_number(-3.1428, "0.5"), Decimal("-3.0"))
+        self.assertEqual(round_number(-3.1428, "1"), Decimal("-3"))
+        self.assertEqual(round_number(152, "5"), Decimal("150"))
 
 
 if __name__ == "__main__":

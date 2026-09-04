@@ -110,7 +110,7 @@ class TestTickerAllIT(unittest.TestCase):
                 order_value = 5_000,
                 position_value= 1_000_000,
                 shorting= True,
-                ndigits = 2
+                step_size = "0.05"
             )
             tf = rq.Timeframe.next("60 minutes")
             journal = BasicJournal()
