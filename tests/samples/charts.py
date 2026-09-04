@@ -15,12 +15,7 @@ import matplotlib.pyplot as plt
 
 # %% [markdown]
 # Configure matplotlib with some defaults
-rq.set_light_style()
-bg_color = "#F8FFF8"
-plt.rcParams["figure.facecolor"] = bg_color
-plt.rcParams["axes.facecolor"] = bg_color
-plt.rcParams["savefig.facecolor"] = bg_color
-
+rq.set_dark_style()
 
 # %% [markdown]
 # We create a feedwith with also some ETF's mixed in to get a more diversified mix of assets

@@ -27,10 +27,10 @@ journal.plot("pnl/equity")
 report.add_current_figure()
 
 df = account.trades_to_dataframe().round(2)
-top_trades = df.sort_values("pnl", ascending=False)[:25]
+top_trades = df.sort_values("pnl", ascending=False).head(25)
 report.add_df(top_trades, "top 25 winners")
 
-down_trades = df.sort_values("pnl", ascending=True)[:25]
+down_trades = df.sort_values("pnl", ascending=True).head(25)
 report.add_df(down_trades, "top 25 losers")
 
 report.save_as_pdf("/tmp/report.pdf")
