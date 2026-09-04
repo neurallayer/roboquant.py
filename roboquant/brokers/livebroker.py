@@ -1,16 +1,15 @@
-from roboquant.common.account import Account
-from roboquant.common.asset import Asset
-from roboquant.brokers.broker import Broker
-from roboquant.common.event import Event
-from roboquant.common.order import Order
-from roboquant.common.timeframe import Timeframe, utcnow
-
-
 import time
 from abc import abstractmethod
 from datetime import timedelta
 from decimal import Decimal
 from typing import Any, Literal, override
+
+from roboquant.brokers.broker import Broker
+from roboquant.common.account import Account
+from roboquant.common.asset import Asset
+from roboquant.common.event import Event
+from roboquant.common.order import Order
+from roboquant.common.timeframe import Timeframe, utcnow
 
 
 class LiveBroker(Broker):

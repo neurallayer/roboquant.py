@@ -1,7 +1,7 @@
 {
   "languages": {
     "Python": {
-      "language_servers": ["pyright"],
+      "language_servers": ["!pyrefly", "!ty", "pyright"],
       "tasks": {
         "variables": {
           "TEST_RUNNER": "unittest",

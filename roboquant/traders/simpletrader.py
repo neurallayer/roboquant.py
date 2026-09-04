@@ -1,6 +1,5 @@
-from roboquant.traders._util import Sizing
-from decimal import Decimal
 import logging
+from decimal import Decimal
 from typing import override
 
 from roboquant.common.account import Account
@@ -8,8 +7,8 @@ from roboquant.common.event import Event
 from roboquant.common.monetary import Amount
 from roboquant.common.order import Order
 from roboquant.common.signal import Signal
+from roboquant.traders._util import Sizing
 from roboquant.traders.trader import Trader
-
 
 logger = logging.getLogger(__name__)
 

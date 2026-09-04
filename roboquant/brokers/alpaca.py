@@ -1,4 +1,12 @@
+from decimal import Decimal
 from typing import override
+
+from alpaca.trading.client import TradingClient
+from alpaca.trading.enums import OrderSide, PositionSide, QueryOrderStatus, TimeInForce
+from alpaca.trading.models import Order as AOrder
+from alpaca.trading.models import Position as APosition
+from alpaca.trading.models import TradeAccount
+from alpaca.trading.requests import GetOrdersRequest, LimitOrderRequest, MarketOrderRequest, ReplaceOrderRequest
 
 from roboquant.brokers.livebroker import LiveBroker
 from roboquant.common.account import Account
@@ -7,15 +15,6 @@ from roboquant.common.order import Order
 from roboquant.common.position import Position
 from roboquant.common.timeframe import utcnow
 from roboquant.feeds.alpaca import _get_asset, logger
-
-
-from alpaca.trading.client import TradingClient
-from alpaca.trading.enums import OrderSide, PositionSide, QueryOrderStatus, TimeInForce
-from alpaca.trading.models import Order as AOrder, Position as APosition, TradeAccount
-from alpaca.trading.requests import GetOrdersRequest, LimitOrderRequest, MarketOrderRequest, ReplaceOrderRequest
-
-
-from decimal import Decimal
 
 
 class AlpacaBroker(LiveBroker):

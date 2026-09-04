@@ -8,8 +8,13 @@
     "show_command": false,
   },
   {
-    "label": "run pyright",
-    "command": "uv run pyright tests roboquant",
+    "label": "run pyrefly",
+    "command": "uvx pyrefly check",
+    "show_command": false,
+  },
+  {
+    "label": "fix imports",
+    "command": "uvx ruff check --select I --fix $ZED_FILE",
     "show_command": false,
   },
   {
@@ -20,11 +25,6 @@
   {
     "label": "uv ruff",
     "command": "uvx ruff check",
-    "show_command": false,
-  },
-  {
-    "label": "run pyright",
-    "command": "uv run pyright tests roboquant",
     "show_command": false,
   },
 ]

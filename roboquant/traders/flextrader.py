@@ -1,5 +1,6 @@
 from dataclasses import dataclass
 from datetime import datetime
+import decimal
 import logging
 from decimal import Decimal
 import random
@@ -10,9 +11,9 @@ from roboquant.common.event import Event
 from roboquant.common.order import Order
 from roboquant.common.signal import Signal
 from roboquant.traders._util import round_number, Sizing
-from .trader import Trader
-from ..common.account import Account
-from ..common.event import PriceItem
+from roboquant.traders.trader import Trader
+from roboquant.common.account import Account
+from roboquant.common.event import PriceItem
 
 logger = logging.getLogger(__name__)
 
@@ -96,7 +97,7 @@ class FlexTrader(Trader):
     price_type: str = "DEFAULT"
     shuffle_signals: bool = False
     limit_offset_pct: float | None = None
-    limit_rounding: int = 2
+    limit_step_size: str = "0.01"
     tif: Literal["DAY", "GTC"] = "DAY"
 
     def _get_order_size(self, rating: float, contract_price: float, max_order_value: float) -> Decimal:
@@ -205,8 +206,8 @@ class FlexTrader(Trader):
             return None
         multiplier = 1.0 - self.limit_offset_pct if size > 0 else 1.0 + self.limit_offset_pct
         price = item.price(self.price_type) * multiplier
-        limit = round(price, self.limit_rounding)
-        return limit
+        limit = round_number(price, self.limit_step_size, decimal.ROUND_HALF_EVEN)
+        return float(limit)
 
     def _get_orders(self, asset: Asset, size: Decimal, item: PriceItem, signal: Signal, time: datetime) -> list[Order]:
         # pylint: disable=unused-argument

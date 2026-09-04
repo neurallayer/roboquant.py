@@ -1,9 +1,9 @@
-from roboquant.common.position import Position
-from decimal import Decimal
-from datetime import datetime
 import decimal
+from datetime import datetime
+from decimal import Decimal
 
 from roboquant.common.monetary import Amount
+from roboquant.common.position import Position
 from roboquant.common.signal import Signal
 
 

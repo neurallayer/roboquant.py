@@ -1,3 +1,7 @@
+from typing import Any, override
+
+import ccxt
+
 from roboquant.brokers.livebroker import LiveBroker
 from roboquant.common.account import Account
 from roboquant.common.asset import Crypto
@@ -7,12 +11,6 @@ from roboquant.common.order import Order
 from roboquant.common.position import Position
 from roboquant.common.timeframe import utcnow
 from roboquant.feeds.crypto import logger
-
-
-import ccxt
-
-
-from typing import Any, override
 
 
 class CryptoBroker(LiveBroker):

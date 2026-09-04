@@ -16,9 +16,9 @@ logger = logging.getLogger(__name__)
 
 class BudgetTrader(Trader):
     """
-    Trader will create orders based on a set amount per order and per position.
-    All budgets are expressed in absolute float values and are expected in the same
-    currency as the account.
+    This `Trader` implementation will create orders based on a set amount per order and per position.
+    All budgets are expressed in absolute float values and are expected to be in the same
+    currency as the base currency of the account.
     """
 
     def __init__(
