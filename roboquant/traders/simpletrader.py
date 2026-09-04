@@ -66,7 +66,7 @@ class SimpleTrader(Trader):
 
             pos_size = account.position_size(asset)
             si = SignalImpact(signal, pos_size)
-            if si.is_entry():
+            if si.is_open():
 
                 if remaining_positions <= 0:
                     logger.info("no remaining positions")

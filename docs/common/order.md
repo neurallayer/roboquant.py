@@ -71,7 +71,7 @@ class Order:
 
     info: dict[str, Any] | None = None
     """Any additional information about the order.
-    Enables to pass information to the broker if required.
+    Enables to pass additional information to the broker if required.
     """
 
     id: str = ""
@@ -141,7 +141,19 @@ the number of decimal places:
    fractional sizes.
 2. Number of decimals allowed for setting the **limit price**.
 
-Most {cl}`Trader` implementations that come with *roboquant* allow you to configure this behavior and if you
+There is `round_number` method that perform the rounding (by default rounding down) and return the rounded Decimal: 
+
+```{code-cell} python
+from roboquant.traders._util import round_number
+
+# For stocks that don't allow fractional sizes
+print(round_number(100.123, "1"))
+
+# For crypto that allow for 0.05 increments
+print(round_number(100.123, "0.05"))
+```
+
+Most {cl}`Trader` implementations that come with *roboquant* allow you to configure this behavior (named `step_size`) and if you
 want to use them in Forex or Crypto, you likely will have to change the defaults.
 
 :::{tip} Market Orders can be dangerous

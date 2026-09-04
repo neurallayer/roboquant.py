@@ -7,14 +7,15 @@ from roboquant.common.monetary import Amount
 from roboquant.common.signal import Signal
 
 
-def round_number(value: float | str | decimal.Decimal | int, base: str | Decimal, rounding = decimal.ROUND_DOWN):
+def round_number(value: float | str | decimal.Decimal | int, base: str | Decimal, rounding : str | None = decimal.ROUND_DOWN):
     """
-    Flexible rounding of a number to a multiple of the provided base.
-    Used mainly for rounding order sizes and limits.
+    Flexible rounding of a number to a multiple of the provided base. By default it will round down (towards zero).
+    Internally used for the rounding order sizes and limits.
 
     For example:
     ```
-    round_number(3.1234, "0.05")
+    round_number(3.1899, "0.01") # 3.18
+    round_number(3.1899, "0.05") # 3.15
     ```
     """
     value = Decimal(value)
@@ -32,7 +33,7 @@ def get_order_size(
     return round_number(size, step_size)
 
 
-def is_opposite(signal: Signal, position: Position):
+def is_close(signal: Signal, position: Position):
     """Is the signal opposite to the position"""
     if signal.asset != position.asset:
         return False
@@ -53,12 +54,12 @@ class SignalImpact:
             return False
         return self.signal.is_buy if self.size < 0 else self.signal.is_sell
 
-    def is_opposite(self) -> bool:
+    def is_close(self) -> bool:
         if self.size.is_zero():
             return False
         return self.signal.is_sell if self.size > 0 else self.signal.is_buy
 
-    def is_entry(self) -> bool:
+    def is_open(self) -> bool:
         """Return True if this signal would be an opening of a position,
         False otherwise.
         Opening a position can be both Short and Long.
@@ -66,7 +67,7 @@ class SignalImpact:
         return self.signal.is_entry and self.size.is_zero()
 
     def is_increase(self) -> bool:
-        """Return True if this an increase into a position, False otherwise.
+        """Return True if this an increase into a position size, False otherwise.
         """
         if not self.signal.is_entry:
             return False
@@ -85,7 +86,7 @@ class SignalImpact:
         if not self.signal.is_exit:
             return []
         for pos in positions:
-            if is_opposite(self.signal, pos):
+            if is_close(self.signal, pos):
                 result.append(pos)
         return result
 
