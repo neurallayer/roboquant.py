@@ -170,7 +170,9 @@ class Account:
 
     def position_size(self, asset: Asset) -> Decimal:
         """
-        Return the net position size for an asset. Will return 0 if the asset is not in the open positions.
+        Return the net position size for an asset.
+        This will return `Decimal(0)` if the asset has not have
+        any open positions.
 
         Args:
             The asset for which to get the position size.
@@ -183,15 +185,16 @@ class Account:
 
     def get_positions(self, asset: Asset) -> list[Position]:
         """
-        Return the net position for an asset, or an empty position
-        if the asset is not in the open positions.
-        The avg price and mkt price are not set.
+        Return the open positions for an asset, or an empty list
+        if the asset doesn't have open positions.
+        For net positioning accounts this will return zero or one position,
+        but for hedging accounts it can return multiple positions.
 
         Args:
             asset (Asset): The asset for which to get the position size.
 
         Returns:
-            Decimal: The position size as a Decimal.
+            The matching positions.
         """
         return [pos for pos in self.positions if pos.asset == asset]
 
@@ -199,10 +202,10 @@ class Account:
     def unrealized_pnl(self, *assets: Asset) -> Wallet:
         """
         Return the sum of the unrealized profit and loss for positions in the account.
-        If one or more asset is provided, limit it to those assets, otherwise include all assets.
+        If one or more assets are provided, limit it to those assets, otherwise include all assets.
 
         Returns:
-            Wallet: The unrealized profit and loss.
+            The total unrealized profit and loss, no currency conversions will be performed.
         """
         result = Wallet()
         for pos in self.positions:
@@ -285,8 +288,8 @@ class Account:
         return [order for order in self.orders if order.asset == asset]
 
     def positions_for_asset(self, asset: Asset) -> list[Position]:
-            """Get all the positions for the provided asset"""
-            return [pos for pos in self.positions if pos.asset == asset]
+        """Get all the positions for the provided asset"""
+        return [pos for pos in self.positions if pos.asset == asset]
 
     def positions_to_dataframe(self) -> pd.DataFrame:
         """Return the positions as a dataframe"""

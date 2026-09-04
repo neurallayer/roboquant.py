@@ -13,6 +13,11 @@
     "show_command": false,
   },
   {
+    "label": "run Jupyter Book",
+    "command": "./bin/run_jupyter_book.sh",
+    "show_command": false
+  },
+  {
     "label": "run pyrefly",
     "command": "uvx pyrefly check",
     "show_command": false,
