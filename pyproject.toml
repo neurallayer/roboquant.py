@@ -17,7 +17,9 @@ missing-type-argument = "error"
 
 [tool.pyright]
 typeCheckingMode = "standard"
-# reportPrivateImportUsage = "none" 
+# reportPrivateImportUsage = "none"
+# reportMissingTypeStubs = "none"
+# reportUnknownMemberType = "none"
 # typeCheckingMode = "strict"
 
 [tool.uv.build-backend]

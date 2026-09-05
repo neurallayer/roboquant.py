@@ -52,7 +52,7 @@ class CryptoFeed(InMemoryFeed):
 
                 while not done:
                     # fetch_ohlcv returns a list of lists, each containing [timestamp, open, high, low, close, volume]
-                    rows: list[list[Any]] = exchange.fetch_ohlcv(
+                    rows: list[tuple[Any]] = exchange.fetch_ohlcv(
                         symbol=symbol,
                         timeframe=interval,
                         since=since,

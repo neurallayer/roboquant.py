@@ -8,17 +8,17 @@ from typing import Any, Callable, Iterable, Iterator, override
 import pyarrow as pa
 import pyarrow.parquet as pq
 
-from roboquant.common.asset import Asset, deserialize_to_asset
+from roboquant.common.asset import Asset
 from roboquant.common.event import Bar, Event, PriceItem, Quote, TradePrice
 from roboquant.common.timeframe import Timeframe
 from roboquant.feeds.feed import Feed
+from roboquant.feeds.persistentfeed import PersistentFeed
 
-from .historicfeed import HistoricFeed
 
 logger = logging.getLogger(__name__)
 
 
-class ParquetFeed(HistoricFeed):
+class ParquetFeed(PersistentFeed):
     """PriceItems stored in a single Parquet file, supports a mix of `Bar`, `Trade`, and `Quote` price-items.
     Parquet files provide a good balance between speed, memory-size and disk-size, making it a great option to store
     large volume of historic market data for back testing.
@@ -73,7 +73,7 @@ class ParquetFeed(HistoricFeed):
                         last_time = now
                         items = []
 
-                    asset = deserialize_to_asset(a.as_py())
+                    asset = self._deserialize_to_asset(a.as_py())
                     match t.as_py():
                         case 1:
                             item = Quote(asset, array("f", p.as_py()))
@@ -143,7 +143,7 @@ class ParquetFeed(HistoricFeed):
         result_table = pq.read_table(self.parquet_path, columns=["asset"], schema=ParquetFeed.__schema)
         assets_list = result_table["asset"].to_pylist()
         assets_set = set(assets_list)
-        return list({deserialize_to_asset(s) for s in assets_set})
+        return list({self._deserialize_to_asset(s) for s in assets_set})
 
     def meta(self):
         """Return the metadata of the parquet file"""
@@ -191,7 +191,7 @@ class ParquetFeed(HistoricFeed):
                         continue
                     if priceitem_filter and not priceitem_filter(item):
                         continue
-                    asset_str = item.asset.serialize()
+                    asset_str = self._serialize_asset(item.asset)
                     match item:
                         case Quote():
                             items.append({"time": t, "type": 1, "asset": asset_str, "prices": item.data.tolist()})

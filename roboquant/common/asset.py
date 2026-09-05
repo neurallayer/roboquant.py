@@ -4,12 +4,11 @@ from abc import ABC
 from dataclasses import dataclass
 from datetime import date
 from decimal import Decimal
-from typing import Any, ClassVar, Type, override
+from typing import Any, ClassVar, override
 
 from roboquant.common.monetary import USD, Amount, Currency
 
 logger = logging.getLogger(__name__)
-
 
 
 @dataclass(frozen=True, slots=True)
@@ -27,6 +26,9 @@ class Asset(ABC):
 
     currency: Currency = USD
     """The currency of the asset, default is `USD`"""
+
+    info: dict[str, Any] | None = None
+    """Additional info that can be accessed"""
 
     __registry: ClassVar[dict[str, "Asset"]] = {}
     """Keeps track of all created assets and their symbol name"""
@@ -95,32 +97,6 @@ class Asset(ABC):
         """
         return self.__class__.__name__
 
-    def serialize(self) -> str:
-        """Serialize the asset to a string representation that can be used to reconstruct the asset later on.
-        The default implementation generates `"{self.asset_class}{self.symbol}{self.currency}"` using the
-        ASCII unit seperator (code 31) to separate the attributes.
-
-        Returns:
-            str: The serialized string representation of the asset.
-        """
-        return f"{self.asset_class}{self.symbol}{self.currency}"
-
-    @classmethod
-    def deserialize(cls, value:str) -> "Asset":
-        """Deserialize a string value to an asset.
-        This method should be able to deserialize the string that was created using the `serialize` method.
-
-        Args:
-            value (str): The serialized string representation of the asset.
-
-        Returns:
-            Asset: The deserialized asset.
-        """
-        asset_class, symbol, curr = value.split("")
-        result = cls(symbol, Currency(curr))
-        assert asset_class == result.asset_class
-        return result
-
 
 @dataclass(frozen=True, slots=True)
 class Stock(Asset):
@@ -132,7 +108,6 @@ class Stock(Asset):
     is needed. Stocks default to being denominated in `USD`, but a different
     `Currency` can be provided for non-US listings.
     """
-
 
 @dataclass(frozen=True, slots=True)
 class Crypto(Asset):
@@ -275,46 +250,3 @@ class Option(Asset):
             raise ValueError(f"Unexpected strike length: {len(strike_str)}")
 
         return {"underlying": root, "expiration": expiration, "option_type": option_type, "strike": strike}
-
-
-# Keep the registered asset classes in a dictionary so they can be deserialized later on
-__asset_classes: dict[str, Type[Asset]] = {}
-__cache: dict[str, Asset] = {}
-
-
-def register_asset_class(clazz: Type[Asset]) -> None:
-    """Register an asset class so it can be deserialized later on.
-
-    Args:
-        clazz (Type[Asset]): The asset class to register.
-    """
-    __asset_classes[clazz.__name__] = clazz
-    logging.info("registered asset class %s", clazz.__name__)
-
-
-
-def deserialize_to_asset(value: str) -> Asset:
-    """Based on the provided string value, deserialize it to the correct asset. The asset class needs to be registered
-    first using the `register_asset_class` method.
-
-    Under the hood is uses caching to improve performance when repeatedly deserializing the same asset strings.
-
-    Args:
-        The serialized string representation of the asset.
-
-    Returns:
-        The deserialized asset.
-    """
-    asset = __cache.get(value)
-    if not asset:
-        asset_class, _ = value.split("", 1)
-        asset = __asset_classes[asset_class].deserialize(value)
-        __cache[value] = asset
-    return asset
-
-
-# Register the default included asset classes
-register_asset_class(Stock)
-register_asset_class(Option)
-register_asset_class(Crypto)
-register_asset_class(Forex)

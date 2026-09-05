@@ -6,16 +6,16 @@ from datetime import datetime
 from pathlib import Path
 from typing import Any, Iterator, Literal, override
 
-from roboquant.common.asset import Asset, deserialize_to_asset
+from roboquant.common.asset import Asset
 from roboquant.common.event import Bar, Event, PriceItem, Quote
 from roboquant.common.timeframe import Timeframe
 from roboquant.feeds.feed import Feed
-from roboquant.feeds.historicfeed import HistoricFeed
+from roboquant.feeds.persistentfeed import PersistentFeed
 
 logger = logging.getLogger(__name__)
 
 
-class SQLFeed(HistoricFeed):
+class SQLFeed(PersistentFeed):
     """SQLFeed supports recording price-items from another feed and then play them back during a run.
     There is support for Bars and Quotes. It is also possible to append values to an existing database.
 
@@ -85,13 +85,13 @@ class SQLFeed(HistoricFeed):
         with sqlite3.connect(self.db_file) as con:
             result = con.execute(SQLFeed._sql_select_assets).fetchall()
             con.commit()
-            assets = {deserialize_to_asset(columns[0]) for columns in result}
+            assets = {self._deserialize_to_asset(columns[0]) for columns in result}
             return list(assets)
 
     def _get_item(self, row: list[Any]) -> PriceItem:
         """Get a PriceItem from a row in the database"""
         asset_str = row[1]
-        asset = deserialize_to_asset(asset_str)
+        asset = self._deserialize_to_asset(asset_str)
         if self.is_bar:
             prices = row[2:7]
             freq = row[7]
@@ -159,11 +159,13 @@ class SQLFeed(HistoricFeed):
             for event in feed.play(timeframe):
                 t = event.time
                 for item in event.items:
+                    asset_str = self._serialize_asset(item.asset)
+                    time = t.isoformat()
                     if isinstance(item, Bar) and price_type == "bar":
-                        elem = (t.isoformat(), item.asset.serialize(), *item.ohlcv, item.frequency)
+                        elem = (time, asset_str, *item.ohlcv, item.frequency)
                         data.append(elem)
                     elif isinstance(item, Quote) and price_type == "quote":
-                        elem = (t.isoformat(), item.asset.serialize(), *item.data)
+                        elem = (time, asset_str, *item.data)
                         data.append(elem)
                 if len(data) >= batch_size:
                     cur.executemany(insert_sql, data)

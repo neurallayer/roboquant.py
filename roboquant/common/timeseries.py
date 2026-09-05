@@ -49,8 +49,8 @@ class TimeSeries(pd.DataFrame):
         if len(self) == 0:
             return Timeframe.EMPTY
 
-        start = self.index[0].to_pydatetime(warn=False) # type: ignore
-        end = self.index[-1].to_pydatetime(warn=False) # type: ignore
+        start: datetime = self.index[0].to_pydatetime(warn=False) # type: ignore
+        end: datetime = self.index[-1].to_pydatetime(warn=False) # type: ignore
         return Timeframe(start, end, True)
 
     def plot_without_timeline(self, *args: Any, **kwargs: Any) -> Axes:

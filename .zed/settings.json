@@ -12,7 +12,7 @@
   ],
   "languages": {
     "Python": {
-      "language_servers": ["!pyrefly", "!ty", "pyright"],
+      "language_servers": ["ruff", "!pyrefly", "!ty", "pyright"],
       "tasks": {
         "variables": {
           "TEST_RUNNER": "unittest",
@@ -22,6 +22,13 @@
   },
   "lsp": {
     "pyright": {
+      "settings": {
+        "python": {
+          "pythonPath": ".venv/bin/python",
+        },
+      },
+    },
+    "pyrefly": {
       "settings": {
         "python": {
           "pythonPath": ".venv/bin/python",

@@ -6,8 +6,18 @@ from roboquant.common.order import Order
 
 
 class Broker(ABC):
-    """A broker accepts orders and communicates its latest state through returning the `Account` object when
+    """A broker accepts orders and reports its current state via the `Account` object returned from the
     the `sync` method is invoked.
+
+    A broker is responsible for the actual execution of orders and for keeping track of the
+    current state of the account, including cash balances, positions, and open orders.
+
+    Typical use cases are:
+    - Paper trading or back-testing, where a simulated broker fills orders based on market data.
+    - Live trading, where a broker forwards orders to an external exchange or broker/dealer API.
+
+    Implementations should be careful to preserve the exact order semantics defined in
+    `place_orders`, since strategies rely on those semantics to open, update, and cancel orders.
     """
 
     @abstractmethod
@@ -37,5 +47,3 @@ class Broker(ABC):
             The latest state of the account.
         """
         ...
-
-

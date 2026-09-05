@@ -23,8 +23,9 @@ flowchart LR
 
 (broker_def)=
 ## Overview
-The broker handles the placed orders, either real or simulated during a back-test.
-It is also the component that owns the {cl}`Account` object. 
+The broker is the component responsible for executing orders. It can be a real broker that trades live in the market, or a simulated one used during back-testing. It also manages the lifecycle of orders — from submission, to (partial) fills, to expiration or cancellation.
+
+It is also the component that owns and manages the {cl}`Account` object. The {cl}`Account` serves as the authoritative record of the broker's current state — including available cash, open positions, pending orders, and completed trades. Every time the broker is synchronized via `sync()`, this account is updated and returned, so you can always inspect the latest trading state.
 
 ## API
 
@@ -109,4 +110,4 @@ third party brokers.
 
 ## Live Broker
 If developing your own Broker implementation, you can use the `LiveBroker` as a base-class.
-To get started, best to look at some existing implementations like the `AlpacaBroker`. 
+To get started, best to look at some existing implementations like the `AlpacaBroker`.

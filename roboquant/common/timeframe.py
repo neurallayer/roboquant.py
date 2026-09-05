@@ -87,7 +87,7 @@ class Timeframe:
             tf = Timeframe.previous(days=365)
         """
         if isinstance(duration, str):
-                duration = pd.to_timedelta(duration)
+            duration = pd.to_timedelta(duration)
 
         end = datetime.now(timezone.utc)
         start = end - duration

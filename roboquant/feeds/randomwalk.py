@@ -2,7 +2,7 @@ import random
 import string
 from array import array
 from datetime import datetime, timedelta, timezone
-from typing import Literal
+from typing import Literal, Any
 
 import numpy as np
 
@@ -58,11 +58,11 @@ class RandomWalk(InMemoryFeed):
         self._update()
 
     @staticmethod
-    def __get_trade(asset: Asset, price: float, volume: float, _):
+    def __get_trade(asset: Asset, price: float, volume: float, _: Any) -> TradePrice:
         return TradePrice(asset, price, volume)
 
     @staticmethod
-    def __get_bar(asset: Asset, price: float, volume: float, spread_dev: float):
+    def __get_bar(asset: Asset, price: float, volume: float, spread_dev: float) -> Bar:
         high = price * (1.0 + abs(random.gauss(mu=0.0, sigma=spread_dev)))
         low = price * (1.0 - abs(random.gauss(mu=0.0, sigma=spread_dev)))
         close = random.uniform(low, high)
@@ -70,7 +70,7 @@ class RandomWalk(InMemoryFeed):
         return Bar(asset, prices)
 
     @staticmethod
-    def __get_quote(asset: Asset, price: float, volume: float, spread_dev: float):
+    def __get_quote(asset: Asset, price: float, volume: float, spread_dev: float) -> Quote:
         spread = abs(random.gauss(mu=0.0, sigma=spread_dev)) * price / 2.0
         ask = price + spread
         bid = price - spread
@@ -86,7 +86,7 @@ class RandomWalk(InMemoryFeed):
         Overwrite this method if you want to generate different asset classes or
         use different currencies.
         """
-        assets = set()
+        assets: set[Asset] = set()
         alphabet = np.array(list(string.ascii_uppercase))
         while len(assets) < n_symbols:
             symbol = "".join(self._rnd.choice(alphabet, size=symbol_len))

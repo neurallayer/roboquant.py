@@ -7,7 +7,7 @@ from roboquant.common.position import Position
 from roboquant.common.signal import Signal
 
 
-def round_number(value: float | str | decimal.Decimal | int, base: str | Decimal, rounding: str | None = decimal.ROUND_DOWN):
+def round_number(value: float | str | Decimal | int, base: str | Decimal, rounding: str | None = decimal.ROUND_DOWN):
     """
     Flexible rounding of a number to a multiple of the provided base. By default, it will round down (towards zero).
     Internally used for the rounding order sizes and limits.
@@ -23,7 +23,7 @@ def round_number(value: float | str | decimal.Decimal | int, base: str | Decimal
     return base * (value / base).quantize(1, rounding=rounding)
 
 
-def get_order_size(signal: Signal, price: float, order_amount: Amount, time: datetime, step_size: str) -> decimal.Decimal:
+def get_order_size(signal: Signal, price: float, order_amount: Amount, time: datetime, step_size: str) -> Decimal:
     """Calculate the order size based on the signal rating, asset price, order amount.
     Time is used when a conversion is needed between the asset currency and the order amount currency.
     """

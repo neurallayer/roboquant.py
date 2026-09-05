@@ -7,15 +7,19 @@ kernelspec:
 # First Steps
 
 ## Introduction
-This page shows how to run a simple back test using *roboquant*. 
 
-A back test is a simulation of a trading strategy using historical data. It allows you to see how the strategy
-would have performed in the past. And it can help you to identify any potential issues with the strategy
-before you start trading with real money.
+This page walks through how to run a simple back test using *roboquant*.
 
-There are many more advanced features in *roboquant*, like live trading, paper trading, multi-asset trading,
-multi-currency trading, and more. But this page is meant to be a simple introduction to the basic
-concepts of back testing.
+A back test is a simulation of a trading strategy using historical data. It lets you evaluate how the strategy would have performed in the past and can help surface potential issues before you risk real money.
+
+The core pieces of any *roboquant* run are:
+
+- **{cl}`Feed`** – provides historical or live market data.
+- **{cl}`Strategy`** – decides when to buy and sell based on that data.
+- **{cl}`Trader`** – turns the strategy's signals into actionable orders.
+- **{cl}`Broker`** – executes those orders against a simulated (or real) account.
+
+*Roboquant* also supports more advanced features, including live trading, paper trading, multi-asset trading, and multi-currency trading. This page, however, focuses on the fundamentals of back testing so you can get started quickly. 
 
 ---
 ## Import

@@ -64,6 +64,7 @@ class YahooFeed(InMemoryFeed):
                 )[columns]
 
                 assert df is not None
+                assert isinstance(df, DataFrame)
 
                 if len(df) == 0:
                     logger.warning("no data retrieved for symbol=%s", symbol)

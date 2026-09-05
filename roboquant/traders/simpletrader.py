@@ -1,5 +1,5 @@
+from roboquant.traders._util import get_order_size
 import logging
-from decimal import Decimal
 from typing import override
 
 from roboquant.common.account import Account
@@ -71,15 +71,12 @@ class SimpleTrader(Trader):
                     logger.info("no remaining positions")
                     continue
 
-                if not self.shorting and signal.is_sell:
+                if not self.shorting and si.is_shorting():
                     logger.info("shorting not allowed")
                     continue
 
-                asset_budget = order_budget.convert_to(asset.currency, event.time)
-                asset_cost = asset.value(Decimal(1), price)
-                size = int((asset_budget / asset_cost) * signal.rating)
-                if size:
-                    result.append(Order(asset, Decimal(size)))
+                if order_size := get_order_size(signal, price, order_budget, event.time, "1"):
+                    result.append(Order(asset, order_size))
                     remaining_positions -= 1
             elif si.is_exit():
                 for pos in si.close_positions(account.positions):
