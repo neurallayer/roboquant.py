@@ -1,13 +1,14 @@
 # %%
 import logging
 from typing import override
-from torch import nn
+
 import torch.nn.functional as F
+from torch import nn
 
 import roboquant as rq
-from roboquant.journals.basicjournal import BasicJournal
 from roboquant.ai.features import BarFeature, FeatureSet, MaxReturnFeature, PriceFeature, SMAFeature, VolumeFeature
 from roboquant.ai.strategies import TimeSeriesStrategy, logger
+from roboquant.journals.basicjournal import BasicJournal
 
 
 # %%

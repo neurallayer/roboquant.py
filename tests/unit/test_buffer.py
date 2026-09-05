@@ -1,5 +1,6 @@
-from array import array
 import unittest
+from array import array
+
 import numpy as np
 
 from roboquant.util.buffer import NumpyBuffer, OHLCVBuffer

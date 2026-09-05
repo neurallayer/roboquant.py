@@ -1,10 +1,10 @@
 import unittest
 
 from roboquant.journals import MetricsJournal
-from roboquant.util.metrics import AssetMetric, PNLMetric, RunMetric
-from roboquant.strategies.ema_crossover import EMACrossover
-from roboquant.run import run
 from roboquant.journals.scorecard import Scorecard
+from roboquant.run import run
+from roboquant.strategies.ema_crossover import EMACrossover
+from roboquant.util.metrics import AssetMetric, PNLMetric, RunMetric
 from tests.common import get_feed
 
 

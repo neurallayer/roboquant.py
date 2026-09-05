@@ -1,5 +1,6 @@
 # %%
 import pandas as pd
+
 import roboquant as rq
 
 pd.set_option('display.width', 1000)

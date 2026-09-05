@@ -1,14 +1,14 @@
+import sys
 from abc import abstractmethod
 from dataclasses import dataclass
-import sys
 from typing import Tuple, override
 
 import numpy as np
 
 from roboquant.common.account import Account
-from roboquant.common.metric import Metric
 from roboquant.common.asset import Asset
 from roboquant.common.event import Bar, Event
+from roboquant.common.metric import Metric
 from roboquant.common.order import Order
 from roboquant.common.signal import Signal
 from roboquant.strategies.strategy import Strategy

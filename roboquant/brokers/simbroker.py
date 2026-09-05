@@ -1,16 +1,16 @@
+import logging
+from dataclasses import replace
 from datetime import datetime, timezone
 from decimal import Decimal
-from dataclasses import replace
-import logging
 from typing import override
 
-from roboquant.common.account import Account
-from roboquant.common.position import Position
-from roboquant.common.asset import Asset
 from roboquant.brokers.broker import Broker
-from roboquant.common.event import Event, Quote, PriceItem
+from roboquant.common.account import Account
+from roboquant.common.asset import Asset
+from roboquant.common.event import Event, PriceItem, Quote
+from roboquant.common.monetary import USD, Amount, Wallet
 from roboquant.common.order import Order
-from roboquant.common.monetary import Amount, Wallet, USD
+from roboquant.common.position import Position
 from roboquant.common.trade import Trade
 
 logger = logging.getLogger(__name__)

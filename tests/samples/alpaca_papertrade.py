@@ -1,12 +1,14 @@
 # %%
-from datetime import timedelta
-import os
 import logging
-import roboquant as rq
-from roboquant.feeds.alpaca import AlpacaLiveFeed
+import os
+from datetime import timedelta
+
 from dotenv import load_dotenv
 
+import roboquant as rq
 from roboquant.brokers.alpaca import AlpacaBroker
+from roboquant.feeds.alpaca import AlpacaLiveFeed
+
 load_dotenv()
 
 # %%

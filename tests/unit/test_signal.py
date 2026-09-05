@@ -1,7 +1,7 @@
 import unittest
-from roboquant.common.signal import Signal, SignalType
-from roboquant.common.asset import Stock
 
+from roboquant.common.asset import Stock
+from roboquant.common.signal import Signal, SignalType
 
 apple = Stock("AAPL")
 

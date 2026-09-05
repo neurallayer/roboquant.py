@@ -3,34 +3,25 @@ The `roboquant` package contains the `run` method and imports
 many useful classes and functions form sub-packages.
 """
 
-from roboquant.common.position import Position
+import platform
+from importlib.metadata import version
+
+from roboquant import brokers, common, feeds, journals, strategies, traders, util
+from roboquant.brokers import SimBroker
 from roboquant.common.account import Account
-from roboquant.common.event import Event, PriceItem, Bar, TradePrice, Quote
-from roboquant.common.signal import Signal, SignalType
+from roboquant.common.asset import Asset, Crypto, Forex, Option, Stock
+from roboquant.common.event import Bar, Event, PriceItem, Quote, TradePrice
+from roboquant.common.monetary import EUR, USD, Amount, Currency, Wallet
 from roboquant.common.order import Order
-from roboquant.common.trade import Trade
-from roboquant.common.monetary import Amount, Wallet, USD, EUR, Currency
-from roboquant.common.asset import Asset, Stock, Crypto, Forex, Option
+from roboquant.common.position import Position
+from roboquant.common.signal import Signal, SignalType
 from roboquant.common.timeframe import Timeframe, utcnow
 from roboquant.common.timeseries import TimeSeries
+from roboquant.common.trade import Trade
 from roboquant.feeds import Feed
+from roboquant.run import demo_run, run, stop_run
 from roboquant.strategies import Strategy
-
-
-from roboquant import brokers
-from roboquant import feeds
-from roboquant import journals
-from roboquant import strategies
-from roboquant import traders
-from roboquant import common
-from roboquant import util
-
-from roboquant.util import indicators, Report, set_dark_style, set_light_style
-from roboquant.run import run, stop_run, demo_run
-from roboquant.brokers import SimBroker
-
-from importlib.metadata import version
-import platform
+from roboquant.util import Report, indicators, set_dark_style, set_light_style
 
 __version__ = version("roboquant")
 

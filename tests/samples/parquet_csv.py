@@ -5,6 +5,7 @@
 
 # %%
 import os
+
 import roboquant as rq
 from roboquant.feeds.parquetfeed import ParquetFeed
 

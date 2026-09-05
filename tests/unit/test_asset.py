@@ -1,9 +1,9 @@
+import unittest
 from dataclasses import dataclass
 from decimal import Decimal
 from typing import override
-import unittest
 
-from roboquant.common.asset import Crypto, Stock, Option, Forex, Asset
+from roboquant.common.asset import Asset, Crypto, Forex, Option, Stock
 from roboquant.common.monetary import USD, Currency
 
 SEP = ""

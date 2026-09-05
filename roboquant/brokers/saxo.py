@@ -1,20 +1,19 @@
+import importlib.resources
+import json
+import logging
 from collections import defaultdict
 from decimal import Decimal
-import logging
-import json
-import importlib.resources
 from typing import Any, Mapping, override
 
 import requests
 
+from roboquant.brokers._saxo_types import NetPositionsResponse, OpenOrdersResponse
 from roboquant.brokers.livebroker import LiveBroker
 from roboquant.common.account import Account
 from roboquant.common.asset import Asset, Forex, Stock
 from roboquant.common.monetary import Amount, Currency, Wallet
 from roboquant.common.order import Order
 from roboquant.common.position import Position
-
-from roboquant.brokers._saxo_types import NetPositionsResponse, OpenOrdersResponse
 from roboquant.common.timeframe import utcnow
 
 logger = logging.getLogger(__name__)

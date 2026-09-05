@@ -1,10 +1,11 @@
 # %%
 from sb3_contrib import RecurrentPPO
 from sb3_contrib.common.recurrent.policies import RecurrentActorCriticPolicy
+
 from roboquant import run
+from roboquant.ai.features import BarFeature, EquityFeature, FeatureSet, PriceFeature, SMAFeature
+from roboquant.ai.rl import SB3PolicyStrategy, TradingEnv
 from roboquant.feeds.yahoofeed import YahooFeed
-from roboquant.ai.features import BarFeature, EquityFeature, FeatureSet, SMAFeature, PriceFeature
-from roboquant.ai.rl import TradingEnv, SB3PolicyStrategy
 
 # %%
 symbols = ["IBM", "JPM", "MSFT", "BA"]

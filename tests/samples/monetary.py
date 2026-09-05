@@ -7,9 +7,9 @@
 
 # %% tags=["input-hide"]
 from datetime import datetime, timedelta
-from roboquant import utcnow
-from roboquant.common.monetary import Currency, EUR, USD, JPY, ECBConversion, Amount, Wallet
 
+from roboquant import utcnow
+from roboquant.common.monetary import EUR, JPY, USD, Amount, Currency, ECBConversion, Wallet
 
 # %% [markdown]
 # ## Currency

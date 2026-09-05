@@ -9,8 +9,8 @@
 
 
 # %%
-from multiprocessing import get_context
 from itertools import product
+from multiprocessing import get_context
 
 import roboquant as rq
 

@@ -1,8 +1,11 @@
 # %%
 import os
-from roboquant.feeds.alpaca import AlpacaLiveFeed
-from roboquant import Timeframe
+
 from dotenv import load_dotenv
+
+from roboquant import Timeframe
+from roboquant.feeds.alpaca import AlpacaLiveFeed
+
 load_dotenv()
 
 # %%

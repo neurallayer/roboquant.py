@@ -10,13 +10,13 @@
 # %%
 from typing import Any, override
 
-from numpy.typing import NDArray
-import torch
-from matplotlib import pyplot as plt
-import roboquant as rq
 import numpy as np
+import torch
 from chronos import ChronosBoltPipeline
+from matplotlib import pyplot as plt
+from numpy.typing import NDArray
 
+import roboquant as rq
 from roboquant.util.buffer import OHLCVBuffer
 
 # %%

@@ -1,17 +1,17 @@
-from datetime import datetime
 import unittest
+from datetime import datetime
 
 from roboquant.common.monetary import (
-    NoConversion,
-    One2OneConversion,
-    Wallet,
-    Amount,
-    USD,
     EUR,
-    StaticConversion,
     GBP,
     JPY,
+    USD,
+    Amount,
     ECBConversion,
+    NoConversion,
+    One2OneConversion,
+    StaticConversion,
+    Wallet,
 )
 
 

@@ -1,5 +1,5 @@
-from typing import override
 import unittest
+from typing import override
 
 from roboquant.common.asset import Asset
 from roboquant.common.signal import Signal

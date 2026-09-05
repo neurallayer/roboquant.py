@@ -1,21 +1,21 @@
-from datetime import datetime, timezone
 import unittest
+from datetime import datetime, timezone
 
 import numpy as np
-from roboquant.common.event import Event
 
 from roboquant.ai.features import (
     CacheFeature,
+    DayOfWeekFeature,
     FeatureSet,
+    FixedValueFeature,
+    MaxReturnFeature,
     NormalizeFeature,
     PriceFeature,
-    SMAFeature,
     ReturnFeature,
+    SMAFeature,
     VolumeFeature,
-    FixedValueFeature,
-    DayOfWeekFeature,
-    MaxReturnFeature
 )
+from roboquant.common.event import Event
 from tests.common import get_feed
 
 

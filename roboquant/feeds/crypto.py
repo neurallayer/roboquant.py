@@ -13,8 +13,10 @@ logger = logging.getLogger(__name__)
 
 
 class CryptoFeed(InMemoryFeed):
-    """retrieve historic crypto market data using the CCXT library. By default, it will retrieve daily data, but
-    you can specify a different interval."""
+    """Retrieve historic crypto market data using the CCXT library.
+    By default, it will retrieve daily data, but you can specify a
+    different interval.
+    """
 
     def __init__(
         self,

@@ -1,19 +1,18 @@
-from dataclasses import dataclass
-from datetime import datetime
 import decimal
 import logging
-from decimal import Decimal
 import random
+from dataclasses import dataclass
+from datetime import datetime
+from decimal import Decimal
 from typing import Any, Literal, override
 
+from roboquant.common.account import Account
 from roboquant.common.asset import Asset
-from roboquant.common.event import Event
+from roboquant.common.event import Event, PriceItem
 from roboquant.common.order import Order
 from roboquant.common.signal import Signal
-from roboquant.traders._util import round_number, Sizing
+from roboquant.traders._util import Sizing, round_number
 from roboquant.traders.trader import Trader
-from roboquant.common.account import Account
-from roboquant.common.event import PriceItem
 
 logger = logging.getLogger(__name__)
 

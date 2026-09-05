@@ -1,27 +1,26 @@
 import logging
 from typing import Any, Callable, Iterator, override
+
 import gymnasium as gym
+import numpy as np
 from gymnasium import spaces
 from gymnasium.envs.registration import register
-from stable_baselines3.common.policies import BasePolicy
-from stable_baselines3.common.base_class import BaseAlgorithm
-
-import numpy as np
 from numpy.typing import NDArray
-from roboquant.common.account import Account
+from stable_baselines3.common.base_class import BaseAlgorithm
+from stable_baselines3.common.policies import BasePolicy
 
-from roboquant.common.asset import Asset
+from roboquant.ai.features import Feature
 from roboquant.brokers.simbroker import SimBroker
+from roboquant.common.account import Account
+from roboquant.common.asset import Asset
 from roboquant.common.event import Event
+from roboquant.common.signal import Signal
+from roboquant.common.timeframe import Timeframe
 from roboquant.feeds.feed import Feed
 from roboquant.journals.journal import Journal
-from roboquant.ai.features import Feature
-from roboquant.common.signal import Signal
 from roboquant.strategies.strategy import Strategy
-from roboquant.common.timeframe import Timeframe
 from roboquant.traders.flextrader import FlexTrader
 from roboquant.traders.trader import Trader
-
 
 register(id="roboquant/StrategyEnv-v0", entry_point="roboquant.ai.envs:StrategyEnv")
 logger = logging.getLogger(__name__)

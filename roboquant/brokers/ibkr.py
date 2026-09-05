@@ -1,18 +1,16 @@
-from decimal import Decimal
 import logging
+from decimal import Decimal
 from time import sleep
 from typing import Any, override
 
-from roboquant.common.order import Order
-from roboquant.common.monetary import Currency, Wallet
-import roboquant.common.position
-from roboquant.brokers.livebroker import LiveBroker
+from ibind import IbkrClient, OrderRequest, QuestionType, StockQuery  # noqa: E402
+
 import roboquant as rq
-from roboquant.brokers._ibkr_types import AccountInfo, ContractInfo, PositionInfo, OrderInfo
-
-
-from ibind import IbkrClient, StockQuery, OrderRequest, QuestionType  # noqa: E402
-
+import roboquant.common.position
+from roboquant.brokers._ibkr_types import AccountInfo, ContractInfo, OrderInfo, PositionInfo
+from roboquant.brokers.livebroker import LiveBroker
+from roboquant.common.monetary import Currency, Wallet
+from roboquant.common.order import Order
 
 logger = logging.getLogger(__name__)
 

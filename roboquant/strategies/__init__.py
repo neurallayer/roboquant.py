@@ -1,8 +1,8 @@
-from .indicator_strategy import IndicatorStrategy, MultiAssetIndicatorStrategy
+from .buyholdstrategy import BuyHoldStrategy
 from .ema_crossover import EMACrossover
 from .ibsstrategy import IBSStrategy
+from .indicator_strategy import IndicatorStrategy, MultiAssetIndicatorStrategy
 from .multistrategy import MultiStrategy
-from .buyholdstrategy import BuyHoldStrategy
 from .strategy import Strategy
 
 __all__ = [

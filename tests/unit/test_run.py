@@ -1,9 +1,9 @@
+import math
 import unittest
 from datetime import timedelta
 from typing import override
 
 import roboquant as rq
-import math
 from tests.common import get_feed
 
 

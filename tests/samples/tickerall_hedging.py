@@ -1,11 +1,12 @@
 # %%
 import os
 import pprint
+
 from dotenv import load_dotenv
 
 import roboquant as rq
+from roboquant import USD, Account, Event, Order, Signal
 from roboquant.brokers.tickerall import TickerAllBroker
-from roboquant import Event, Account, Signal, Order, USD
 from roboquant.common.monetary import ECBConversion
 from roboquant.feeds.tickerall import TickerAllLiveFeed
 from roboquant.strategies.ema_crossover import EMACrossover

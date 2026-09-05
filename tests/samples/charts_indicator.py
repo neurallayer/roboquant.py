@@ -11,12 +11,12 @@
 
 from typing import override
 
-import roboquant as rq
 import matplotlib.pyplot as plt
 
-from roboquant.util.metrics import IndicatorMetric, SignalRatingMetric
-from roboquant.util.indicators import BBANDS, RSI
+import roboquant as rq
 from roboquant.util.buffer import OHLCVBuffer
+from roboquant.util.indicators import BBANDS, RSI
+from roboquant.util.metrics import IndicatorMetric, SignalRatingMetric
 
 # Setup some defaults for matplotlib
 rq.set_dark_style()

@@ -7,13 +7,12 @@ from typing import Any, Callable, override
 import numpy as np
 import torch
 from numpy.typing import NDArray
-
 from torch.optim import Optimizer
 from torch.utils.data import DataLoader, Dataset
 
+from roboquant.ai.features import Feature, NormalizeFeature
 from roboquant.common.asset import Asset
 from roboquant.common.event import Event
-from roboquant.ai.features import Feature, NormalizeFeature
 from roboquant.common.signal import Signal
 from roboquant.common.timeframe import Timeframe
 from roboquant.feeds.feed import Feed

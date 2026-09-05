@@ -1,9 +1,12 @@
 # %%
-import os
 import logging
+import os
+
+from dotenv import load_dotenv
+
 import roboquant as rq
 from roboquant.feeds.alpaca import AlpacaLiveFeed
-from dotenv import load_dotenv
+
 load_dotenv()
 
 # %%

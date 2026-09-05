@@ -1,5 +1,6 @@
 # %%
 from tensorboard.summary import Writer
+
 import roboquant as rq
 from roboquant.journals import TensorboardJournal
 from roboquant.util.metrics import AlphaBeta, PNLMetric, RunMetric

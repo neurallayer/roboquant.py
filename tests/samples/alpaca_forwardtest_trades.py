@@ -1,10 +1,13 @@
 # %%
+import logging
 import os
 from datetime import timedelta
-import logging
+
+from dotenv import load_dotenv
+
 import roboquant as rq
 from roboquant.feeds.alpaca import AlpacaLiveFeed
-from dotenv import load_dotenv
+
 load_dotenv()
 
 # %%

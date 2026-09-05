@@ -1,14 +1,15 @@
 # %%
 import logging
 from typing import override
+
 import torch
 from torch import nn
 
 import roboquant as rq
+from roboquant.ai.features import BarFeature, DayOfMonthFeature, FeatureSet, MaxReturnFeature, PriceFeature, SMAFeature
+from roboquant.ai.strategies import TimeSeriesStrategy, logger
 from roboquant.common.asset import Stock
 from roboquant.journals.basicjournal import BasicJournal
-from roboquant.ai.features import BarFeature, FeatureSet, MaxReturnFeature, PriceFeature, SMAFeature, DayOfMonthFeature
-from roboquant.ai.strategies import TimeSeriesStrategy, logger
 
 
 # %%

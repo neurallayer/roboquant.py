@@ -1,14 +1,14 @@
-from typing import Any, override
 import unittest
+from typing import Any, override
 
-from torch import nn
-import torch.nn.functional as F
 import numpy as np
+import torch.nn.functional as F
+from torch import nn
 
 import roboquant as rq
-from roboquant.common.asset import Stock
 from roboquant.ai.features import BarFeature, FeatureSet, PriceFeature, SMAFeature
-from roboquant.ai.strategies import TimeSeriesStrategy, SequenceDataset
+from roboquant.ai.strategies import SequenceDataset, TimeSeriesStrategy
+from roboquant.common.asset import Stock
 from tests.common import get_feed
 
 

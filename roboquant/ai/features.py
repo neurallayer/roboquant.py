@@ -1,14 +1,14 @@
 from abc import abstractmethod
 from collections import deque
 from datetime import datetime, timezone
-from typing import Any, TypeVar, Generic, override
+from typing import Any, Generic, TypeVar, override
 
 import numpy as np
-from numpy.typing import NDArray, ArrayLike
+from numpy.typing import ArrayLike, NDArray
 
 from roboquant.common.account import Account
 from roboquant.common.asset import Asset
-from roboquant.common.event import Event, Bar, Quote
+from roboquant.common.event import Bar, Event, Quote
 from roboquant.util.buffer import OHLCVBuffer
 
 T = TypeVar("T")

@@ -2,7 +2,7 @@ from collections import UserDict
 from typing import Any, Sequence
 
 import numpy as np
-from numpy.typing import NDArray, DTypeLike
+from numpy.typing import DTypeLike, NDArray
 
 from roboquant.common.asset import Asset
 from roboquant.common.event import Bar, Event

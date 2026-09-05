@@ -1,9 +1,9 @@
+import unittest
 from decimal import Decimal
 from typing import override
-import unittest
 
 from roboquant.common.account import Account
-from roboquant.common.monetary import Amount, USD, Wallet
+from roboquant.common.monetary import USD, Amount, Wallet
 from roboquant.common.signal import Signal
 from roboquant.traders._util import round_number
 from roboquant.traders.flextrader import FlexTrader

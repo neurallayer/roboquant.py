@@ -1,8 +1,8 @@
 import unittest
 from datetime import timedelta
 
-from roboquant.feeds.util import BarAggregatorFeed, TimeGroupingFeed
 from roboquant.feeds.randomwalk import RandomWalk
+from roboquant.feeds.util import BarAggregatorFeed, TimeGroupingFeed
 from tests.common import run_price_item_feed
 
 

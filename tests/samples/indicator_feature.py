@@ -1,11 +1,12 @@
 # %%
 from typing import override
 
-from roboquant.util.indicators import RSI
 import roboquant as rq
-from roboquant.common.asset import Asset
 from roboquant.ai.features import IndicatorFeature
+from roboquant.common.asset import Asset
 from roboquant.util.buffer import OHLCVBuffer
+from roboquant.util.indicators import RSI
+
 
 # %%
 class RSIFeature(IndicatorFeature):

@@ -1,14 +1,12 @@
-from matplotlib.figure import Figure
+import base64
+import io
+from pathlib import Path
 from typing import Any
 
 import matplotlib.pyplot as plt
 from matplotlib.backends.backend_pdf import PdfPages
-from pathlib import Path
-import base64
-import io
-
+from matplotlib.figure import Figure
 from pandas import DataFrame
-
 
 _open_html_snippet = """
 <!DOCTYPE html>

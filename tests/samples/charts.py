@@ -10,8 +10,9 @@
 # simple EMA Crossover strategy. The results are visualized using the `matplotlib` library
 # and the *roboquant* plotting capabilities.
 # %%
-import roboquant as rq
 import matplotlib.pyplot as plt
+
+import roboquant as rq
 
 # %% [markdown]
 # Configure matplotlib with some defaults

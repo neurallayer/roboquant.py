@@ -1,6 +1,6 @@
 import unittest
 
-from roboquant.strategies import EMACrossover, MultiStrategy, IBSStrategy
+from roboquant.strategies import EMACrossover, IBSStrategy, MultiStrategy
 from tests.common import run_strategy
 
 

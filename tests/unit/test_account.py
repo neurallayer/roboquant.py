@@ -1,10 +1,10 @@
 import unittest
 from decimal import Decimal
 
-from roboquant.common.position import Position
 from roboquant.common.account import Account
 from roboquant.common.asset import Stock
-from roboquant.common.monetary import Wallet, Amount, USD
+from roboquant.common.monetary import USD, Amount, Wallet
+from roboquant.common.position import Position
 from roboquant.common.timeframe import utcnow
 
 

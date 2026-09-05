@@ -5,10 +5,11 @@
 # %%
 from typing import override
 
-from roboquant.util.indicators import RSI, BBANDS
 import roboquant as rq
 from roboquant.strategies import IndicatorStrategy
 from roboquant.util import OHLCVBuffer
+from roboquant.util.indicators import BBANDS, RSI
+
 
 # %%
 class MyStrategy(IndicatorStrategy):

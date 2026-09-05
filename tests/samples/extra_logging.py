@@ -6,6 +6,7 @@
 
 # %%
 import logging
+
 import roboquant as rq
 
 logging.basicConfig()

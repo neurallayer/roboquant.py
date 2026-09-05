@@ -1,13 +1,15 @@
 # %%
 import os
-from sb3_contrib import RecurrentPPO
-from roboquant import run
-from roboquant.feeds.alpaca import AlpacaHistoricStockFeed
-from roboquant.common.asset import Stock
-from roboquant.ai.features import EquityFeature, QuoteFeature
-from roboquant.ai.rl import TradingEnv, SB3PolicyStrategy
-from roboquant.common.timeframe import Timeframe
+
 from dotenv import load_dotenv
+from sb3_contrib import RecurrentPPO
+
+from roboquant import run
+from roboquant.ai.features import EquityFeature, QuoteFeature
+from roboquant.ai.rl import SB3PolicyStrategy, TradingEnv
+from roboquant.common.asset import Stock
+from roboquant.common.timeframe import Timeframe
+from roboquant.feeds.alpaca import AlpacaHistoricStockFeed
 
 load_dotenv()
 

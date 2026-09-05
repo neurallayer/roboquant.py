@@ -1,4 +1,5 @@
-from typing import Any, TypedDict, List
+from typing import Any, List, TypedDict
+
 
 class NetPositionBase(TypedDict):
     AccountId: str

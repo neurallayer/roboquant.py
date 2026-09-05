@@ -1,11 +1,12 @@
 """Set of wrappers for the streaming version of the ta-lib indicators that makes them discoverable and typed.
 """
 
-import talib._ta_lib as __ta_lib
-import numpy as np
 import logging
 from enum import Enum
 from typing import Tuple
+
+import numpy as np
+import talib._ta_lib as __ta_lib
 from numpy.typing import NDArray
 
 logger = logging.getLogger(__name__)

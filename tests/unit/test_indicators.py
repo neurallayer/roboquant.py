@@ -1,14 +1,15 @@
-from typing import override
 import unittest
+from typing import override
+
+import numpy as np
 
 from roboquant.common.asset import Asset
 from roboquant.common.signal import Signal
-from roboquant.util.buffer import OHLCVBuffer
 from roboquant.strategies.indicator_strategy import IndicatorStrategy
+from roboquant.util.buffer import OHLCVBuffer
 from roboquant.util.indicators import SMA
-import numpy as np
-
 from tests.common import run_strategy
+
 
 class _MyStrategy(IndicatorStrategy):
     """Example using TaStrategy as a baseclass to create a custom strategy
