@@ -1,4 +1,15 @@
 {
+  "file_scan_exclusions": [
+    "**/.venv",
+    "**/.vscode",
+    "**/__pycache__",
+    "dist/",
+    "**/*.egg-info",
+    "**/.DS_Store",
+    ".idea",
+    "**/.*_cache",
+    "**/.git"
+  ],
   "languages": {
     "Python": {
       "language_servers": ["!pyrefly", "!ty", "pyright"],
