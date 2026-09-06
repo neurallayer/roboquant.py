@@ -311,13 +311,14 @@ class LongReturnsFeature(Feature[T]):
         super().__init__()
         self.history: deque[NPFloatArray] = deque(maxlen=period)
         self.feature: Feature[T] = feature
+        self.period = period
 
     @override
     def calc(self, value: T) -> NPFloatArray:
         values = self.feature.calc(value)
         h = self.history
 
-        if len(h) < h.maxlen:  # type: ignore
+        if len(h) < self.period:
             h.append(values)
             return self._full_nan()
 
@@ -345,6 +346,7 @@ class MaxReturnFeature(Feature[T]):
         assert feature.size() == 1
         self.history: deque[NPFloatArray] = deque(maxlen=period)
         self.feature: Feature[T] = feature
+        self.period = period
 
     @override
     def calc(self, value: T) -> NPFloatArray:
@@ -352,7 +354,7 @@ class MaxReturnFeature(Feature[T]):
         h = self.history
         h.append(values)
 
-        if len(h) < h.maxlen:  # type: ignore
+        if len(h) < self.period:
             return self._full_nan()
 
         r = max(h) / h[0] - 1.0
@@ -377,6 +379,7 @@ class MinReturnFeature(Feature[T]):
         super().__init__()
         self.history: deque[NPFloatArray] = deque(maxlen=period)
         self.feature: Feature[T] = feature
+        self.period = period
 
     @override
     def calc(self, value: T) -> NPFloatArray:
@@ -384,7 +387,7 @@ class MinReturnFeature(Feature[T]):
         h = self.history
         h.append(values)
 
-        if len(h) < h.maxlen:  # type: ignore
+        if len(h) < self.period:
             return self._full_nan()
 
         r = min(h) / h[0] - 1.0

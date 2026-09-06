@@ -34,7 +34,7 @@
   },
   {
     "label": "verify",
-    "command": "uvx ruff check && uvx ty check && uvx pyrefly check && uv run python -m unittest discover -s tests/unit",
+    "command": "uvx ruff check && uvx pyrefly check && uv run python -m unittest discover -s tests/unit",
     "show_command": false,
   },
   {

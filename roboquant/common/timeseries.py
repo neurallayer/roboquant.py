@@ -34,7 +34,7 @@ class TimeSeries(pd.DataFrame):
         """Create a TimeSeries from a timeline and a dictionary of named data.
         The keys of the dictionary are used as column names and the values are used
         as the data for each column."""
-        result : TimeSeries = TimeSeries.from_dict(data) # type: ignore
+        result : TimeSeries = TimeSeries.from_dict(data)
         result.index = timeline
         return result
 
@@ -49,8 +49,8 @@ class TimeSeries(pd.DataFrame):
         if len(self) == 0:
             return Timeframe.EMPTY
 
-        start: datetime = self.index[0].to_pydatetime(warn=False) # type: ignore
-        end: datetime = self.index[-1].to_pydatetime(warn=False) # type: ignore
+        start: datetime = self.index[0].to_pydatetime(warn=False)
+        end: datetime = self.index[-1].to_pydatetime(warn=False)
         return Timeframe(start, end, True)
 
     def plot_without_timeline(self, *args: Any, **kwargs: Any) -> Axes:

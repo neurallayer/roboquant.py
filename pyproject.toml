@@ -108,4 +108,5 @@ dev = [
   "jupyter-book>=2.1.6",
   "pip>=26.2.1",
   "pyrefly>=1.2.0",
+  "pandas-stubs>=3.0.5.260730",
 ]
