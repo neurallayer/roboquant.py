@@ -1,3 +1,4 @@
+from abc import abstractmethod
 from decimal import Decimal
 from roboquant.common.monetary import Currency
 from roboquant.common.asset import Stock, Crypto, Forex, Option
@@ -192,16 +193,40 @@ class AssetSerializer:
         asset = self.__cache.get(value)
         if not asset:
             asset_class, symbol, code, *args = value.split("")
+            currency = Currency(code)
             match asset_class:
                 case "Stock":
-                    asset = Stock(symbol, Currency(code))
+                    asset = Stock(symbol, currency)
                 case "Crypto":
-                    asset = Crypto(symbol, Currency(code))
+                    asset = Crypto(symbol, currency)
                 case "Crypto":
-                    asset = Crypto(symbol, Currency(code))
+                    asset = Crypto(symbol, currency)
                 case "Forex":
-                    asset = Forex(symbol, Currency(code), None, Decimal(args[-1]))
+                    asset = Forex(symbol, currency, None, Decimal(args[-1]))
                 case _:
                     raise ValueError(f"unsupported asset class {value}")
             self.__cache[value] = asset
         return asset
+
+
+class AssetRegistry:
+    """@TODO better implement"""
+
+    def __init__(self):
+        self.__registry: dict[str, Asset] = {}
+
+    def register(self, symbol: str, asset: Asset):
+        """Register an asset for a symbol name"""
+        self.__registry[symbol] = asset
+
+    def _get_asset(self, symbol: str, *args: Any) -> Asset:
+        """Get the asset (if any) for the provided symbol name"""
+        asset = self.__registry.get(symbol)
+        if asset is None:
+            asset = self._create_asset(symbol, *args)
+            self.__registry[symbol] = asset
+        return asset
+
+    @abstractmethod
+    def _create_asset(self, symbol: str, *args: Any) -> Asset:
+        ...

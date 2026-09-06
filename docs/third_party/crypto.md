@@ -59,7 +59,7 @@ exchange = ccxt.binance()
 feed = CryptoFeed(exchange, "BTC/USDT", "ETH/USDT", start_date="2020-01-01 00:00:00", interval="1d")
 
 strategy = rq.strategies.EMACrossover()
-trader = rq.traders.FlexTrader(size_fractions=4, max_order_pct=0.2, max_position_pct=0.5, shorting=True)
+trader = rq.traders.FlexTrader(step_size="0.001", max_order_pct=0.2, max_position_pct=0.5, shorting=True)
 broker = rq.brokers.SimBroker(deposit=10_000@USDT)
 account = rq.run(feed, strategy, trader=trader, broker=broker)
 print(account)

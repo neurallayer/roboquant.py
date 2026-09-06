@@ -11,7 +11,7 @@ from roboquant.common.monetary import USD, Amount, Currency
 logger = logging.getLogger(__name__)
 
 
-@dataclass(frozen=True, slots=True)
+@dataclass(frozen=True, slots=True, eq=False)
 class Asset(ABC):
     """Abstract base class for all types of assets, ranging from stocks to cryptocurrencies.
     Every asset has always at least a `symbol` and `currency` defined. Assets are immutable.
@@ -28,10 +28,11 @@ class Asset(ABC):
     """The currency of the asset, default is `USD`"""
 
     info: dict[str, Any] | None = None
-    """Additional info that can be accessed"""
+    """Additional info that can be set"""
 
     __registry: ClassVar[dict[str, "Asset"]] = {}
     """Keeps track of all created assets and their symbol name"""
+
 
     def __post_init__(self):
         """Ensure unique symbol across different assets and keep track of all unique assets created"""
@@ -103,7 +104,7 @@ class Asset(ABC):
         return self.__class__.__name__
 
 
-@dataclass(frozen=True, slots=True, eq=False)
+@dataclass(frozen=True, slots=True)
 class Stock(Asset):
     """Tradable stock or equity asset.
 

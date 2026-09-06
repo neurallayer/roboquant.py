@@ -10,6 +10,12 @@ def utcnow() -> datetime:
     return datetime.now(timezone.utc)
 
 def value_to_utc(value: int|str|datetime) -> datetime:
+    """Convert a value to a datatime with timezone UTC.
+    The value is expected to be:
+    - a year (int)
+    - an ISO 8601 formated string
+    - a datetime object
+    """
     if isinstance(value, int):
         value = f"{value}0101"
     value = datetime.fromisoformat(value) if isinstance(value,str) else value
