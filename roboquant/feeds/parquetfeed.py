@@ -1,3 +1,5 @@
+from roboquant.feeds.util import AssetSerializer
+from roboquant.feeds.historicfeed import HistoricFeed
 import logging
 import os.path
 from array import array
@@ -12,13 +14,12 @@ from roboquant.common.asset import Asset
 from roboquant.common.event import Bar, Event, PriceItem, Quote, TradePrice
 from roboquant.common.timeframe import Timeframe
 from roboquant.feeds.feed import Feed
-from roboquant.feeds.persistentfeed import PersistentFeed
 
 
 logger = logging.getLogger(__name__)
 
 
-class ParquetFeed(PersistentFeed):
+class ParquetFeed(HistoricFeed, AssetSerializer):
     """PriceItems stored in a single Parquet file, supports a mix of `Bar`, `Trade`, and `Quote` price-items.
     Parquet files provide a good balance between speed, memory-size and disk-size, making it a great option to store
     large volume of historic market data for back testing.

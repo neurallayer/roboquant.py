@@ -1,3 +1,6 @@
+from decimal import Decimal
+from roboquant.common.monetary import Currency
+from roboquant.common.asset import Stock, Crypto, Forex, Option
 from array import array
 from datetime import timedelta
 from typing import Any, Iterator, Literal, override
@@ -144,3 +147,61 @@ class TimeGroupingFeed(Feed):
     @override
     def assets(self) -> list[Asset]:
         return self.feed.assets()
+
+
+
+class AssetSerializer:
+    """Class for feeds that require (de-)serializing assets
+    """
+
+    def __init__(self):
+        self.__cache: dict[str, Asset] = {}
+
+    def _serialize_asset(self, asset: Asset) -> str:
+        """Serialize an asset to a string representation.
+
+        Args:
+            asset (Asset): The asset to serialize.
+
+        Returns:
+            The serialized string representation of the asset.
+        """
+
+        match asset:
+            case Stock() | Crypto() | Option():
+                result = f"{asset.asset_class}{asset.symbol}{asset.currency}"
+            case Forex():
+                result = f"{asset.asset_class}{asset.symbol}{asset.currency}{asset.contract_size}"
+            case _:
+                raise ValueError(f"unsupported asset type {type(asset)}")
+
+        return result
+
+    def _deserialize_to_asset(self, value: str) -> Asset:
+        """Based on the provided string value, deserialize it to the corresponding asset.
+        The asset class needs to be registered first using the `register_asset_class` method.
+
+        Under the hood is uses caching to improve performance when repeatedly deserializing the same asset strings.
+
+        Args:
+            The serialized string representation of the asset.
+
+        Returns:
+            The deserialized asset.
+        """
+        asset = self.__cache.get(value)
+        if not asset:
+            asset_class, symbol, code, *args = value.split("")
+            match asset_class:
+                case "Stock":
+                    asset = Stock(symbol, Currency(code))
+                case "Crypto":
+                    asset = Crypto(symbol, Currency(code))
+                case "Crypto":
+                    asset = Crypto(symbol, Currency(code))
+                case "Forex":
+                    asset = Forex(symbol, Currency(code), None, Decimal(args[-1]))
+                case _:
+                    raise ValueError(f"unsupported asset class {value}")
+            self.__cache[value] = asset
+        return asset

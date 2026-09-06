@@ -1,3 +1,5 @@
+from roboquant.feeds.util import AssetSerializer
+from roboquant.feeds.historicfeed import HistoricFeed
 import logging
 import os.path
 import sqlite3
@@ -10,12 +12,11 @@ from roboquant.common.asset import Asset
 from roboquant.common.event import Bar, Event, PriceItem, Quote
 from roboquant.common.timeframe import Timeframe
 from roboquant.feeds.feed import Feed
-from roboquant.feeds.persistentfeed import PersistentFeed
 
 logger = logging.getLogger(__name__)
 
 
-class SQLFeed(PersistentFeed):
+class SQLFeed(HistoricFeed, AssetSerializer):
     """SQLFeed supports recording price-items from another feed and then play them back during a run.
     There is support for Bars and Quotes. It is also possible to append values to an existing database.
 
