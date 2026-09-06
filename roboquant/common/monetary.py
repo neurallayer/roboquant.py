@@ -12,6 +12,7 @@ from pathlib import Path
 from time import time
 from typing import Any, ClassVar, Dict, List, Self, override
 
+from fsspec.core import re
 import requests
 
 logger = logging.getLogger(__name__)
@@ -28,6 +29,28 @@ class Currency(str):
     amount3 = USD(100)
     ```
     """
+
+    @staticmethod
+    def from_symbol(symbol: str, default: "Currency | None | str" = None) -> "Currency | None":
+        """Create a Currency from a symbol string. It will try to extract
+        the quote currency from the symbol, which is assumed to be the
+        last part of the symbol name.
+
+        Args:
+            symbol: The symbol string of the crypto asset.
+            default: A default currency in case it could not be converte
+
+        Returns:
+            The Currency or None if not possible and no default is given
+        """
+        parts = re.split(r"[^a-zA-Z0-9\s]", symbol)
+        if len(parts) == 2:
+            # Something like "EUR/USD" or "BTC_USDT"
+            return Currency(parts[1].upper)
+        if len(parts) == 1 and len(symbol) == 6:
+            # Something like EURUSD
+            return Currency(symbol[-3:].upper)
+        return Currency(default) if isinstance(default, str) else default
 
     def __rmatmul__(self, other: float | int) -> "Amount":
         """Create a new `Amount` using this currency and the provided `other` value.

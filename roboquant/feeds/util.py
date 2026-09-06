@@ -59,7 +59,7 @@ class BarAggregatorFeed(Feed):
                 bars[symbol] = Bar(symbol, array("f", [price, price, price, price, volume]), freq)
 
     def __get_continued_bars(self, bars: dict[Asset, Bar]) -> dict[Asset, Bar]:
-        result = {}
+        result: dict[Asset, Bar] = {}
         for symbol, item in bars.items():
             p = item.price("CLOSE")
             v = 0.0 if self.price_type == "trade" else float("nan")

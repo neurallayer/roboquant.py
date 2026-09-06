@@ -88,6 +88,11 @@ class Asset(ABC):
         """
         return hash(self.symbol)
 
+    def __eq__(self, value: object) -> bool:
+        if isinstance(value, self.__class__):
+            return self.symbol == value.symbol and self.currency == value.currency
+        return False
+
     @property
     def asset_class(self) -> str:
         """Return the class of the asset, the default implementation returns the Python class name of the instance.
@@ -98,7 +103,7 @@ class Asset(ABC):
         return self.__class__.__name__
 
 
-@dataclass(frozen=True, slots=True)
+@dataclass(frozen=True, slots=True, eq=False)
 class Stock(Asset):
     """Tradable stock or equity asset.
 
@@ -149,6 +154,12 @@ class Forex(Asset):
     asset currency. Use `from_symbol` for standard pair notation so the quote
     currency can be inferred automatically.
     """
+
+    contract_size: Decimal = Decimal(1)
+
+    @override
+    def value(self, size: Decimal, price: float) -> float:
+        return float(size) * price * float(self.contract_size)
 
     @staticmethod
     def from_symbol(symbol: str) -> "Forex":
