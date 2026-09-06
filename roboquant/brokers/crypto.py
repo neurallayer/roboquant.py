@@ -36,7 +36,7 @@ class CryptoBroker(LiveBroker):
     def _place_order(self, order: Order) -> None:
         # Default implementation for placing an order
         side = "buy" if order.is_buy else "sell"
-        result = self.__exchange.create_order(
+        result: dict[str, Any] = self.__exchange.create_order(
             symbol=order.asset.symbol,
             type="limit",
             side=side,
@@ -54,12 +54,21 @@ class CryptoBroker(LiveBroker):
         - fetch_open_orders
         - fetch_positions
         """
+        balance: dict[str, Any] = self.__exchange.fetch_balance()
+        cash = Wallet()
+        for currency, value in balance["free"].items():
+            if value > 0:
+                cash += Amount(currency, value)
+
+        info: dict[str, Any] = balance["info"]
+        bp = Amount(info["currency"], float(info["buying_power"]))
+
         return Account(
-            buying_power=self._get_buying_power(),
+            buying_power=bp,
             positions= self._get_positions(),
             orders = self._get_open_orders(),
             last_update=utcnow(),
-            cash = self._get_balance(),
+            cash = cash,
             trades = []
         )
 
@@ -71,23 +80,9 @@ class CryptoBroker(LiveBroker):
         logger.info("Cancelled order order_id=%s result=%s", order_id, result)
         return result
 
-    def _get_balance(self) -> Wallet:
-        # Default implementation for retrieving account balance
-        result = self.__exchange.fetch_balance()
-        w = Wallet()
-        for currency, balance in result["free"].items():
-            if balance > 0:
-                w += Amount(currency, balance)
-        return w
-
-    def _get_buying_power(self) -> Amount:
-        # Default implementation for retrieving account balance
-        info = self.__exchange.fetch_balance()["info"]  # type: ignore
-        return Amount(info["currency"], float(info["buying_power"]))
-
     def _get_open_orders(self) -> list[Order]:
         # Default implementation for retrieving open orders
-        orders = self.__exchange.fetch_open_orders()
+        orders: list[dict[str, Any]] = self.__exchange.fetch_open_orders()
         result = []
         for order in orders:
             asset = Crypto.from_symbol(order["symbol"])
@@ -100,9 +95,9 @@ class CryptoBroker(LiveBroker):
         return result
 
     def _get_positions(self) -> list[Position]:
-        result = []
+        result: list[Position] = []
         try:
-            positions = self.__exchange.fetch_positions()
+            positions: list[dict[str, Any]] = self.__exchange.fetch_positions()
         except ccxt.NotSupported as e:
             logger.error(e)
             return result

@@ -12,7 +12,7 @@
   ],
   "languages": {
     "Python": {
-      "language_servers": ["ruff", "!pyrefly", "!ty", "pyright"],
+      "language_servers": ["ruff", "pyrefly", "!ty", "!pyright"],
       "tasks": {
         "variables": {
           "TEST_RUNNER": "unittest",

@@ -1,5 +1,5 @@
 from decimal import Decimal
-from typing import override
+from typing import cast, override
 
 from alpaca.trading.client import TradingClient
 from alpaca.trading.enums import OrderSide, PositionSide, QueryOrderStatus, TimeInForce
@@ -31,15 +31,17 @@ class AlpacaBroker(LiveBroker):
     def __sync_orders(self):
         orders = []
         request = GetOrdersRequest(status=QueryOrderStatus.OPEN)
-        alpaca_orders: list[AOrder] = self.__client.get_orders(request)  # type: ignore
+        alpaca_orders: list[AOrder] = cast(list[AOrder], self.__client.get_orders(request))
         for alpaca_order in alpaca_orders:
-            asset = _get_asset(alpaca_order.symbol, alpaca_order.asset_class)  # type: ignore
+            asset = _get_asset(alpaca_order.symbol, alpaca_order.asset_class)
             id = str(alpaca_order.id)
             tif = "GTC" if alpaca_order.time_in_force == TimeInForce.GTC else "DAY"
+            qty = alpaca_order.qty or 0
+            fill = alpaca_order.filled_qty or 0
             if alpaca_order.side == OrderSide.SELL:
-                order = self._sell_order(id, asset, alpaca_order.qty,alpaca_order.limit_price,alpaca_order.filled_qty, tif)  # type: ignore
+                order = self._sell_order(id, asset, qty,alpaca_order.limit_price,fill, tif)
             else:
-                order = self._buy_order(id, asset, alpaca_order.qty, alpaca_order.limit_price,alpaca_order.filled_qty, tif)  # type: ignore
+                order = self._buy_order(id, asset, qty, alpaca_order.limit_price,fill, tif)
 
             orders.append(order)
 
@@ -47,7 +49,7 @@ class AlpacaBroker(LiveBroker):
 
     def __sync_positions(self):
         positions = []
-        open_pos: list[APosition] = self.__client.get_all_positions()  # type: ignore
+        open_pos: list[APosition] = cast(list[APosition], self.__client.get_all_positions())
 
         for p in open_pos:
             size = Decimal(p.qty)
@@ -62,7 +64,7 @@ class AlpacaBroker(LiveBroker):
 
     @override
     def _get_account(self) -> Account:
-        acc: TradeAccount = self.__client.get_account()  # type: ignore
+        acc: TradeAccount = cast(TradeAccount, self.__client.get_account())
         return Account(
             buying_power=Amount(USD, float(acc.buying_power or 0.0)),
             positions= self.__sync_positions(),

@@ -1,3 +1,4 @@
+from typing import cast
 import logging
 from decimal import Decimal
 from time import sleep
@@ -51,7 +52,7 @@ class _AssetMapper:
         contract_filter = {"isUS": True} if asset.currency == rq.USD else  {"isUS": False}
 
         query = StockQuery(asset.symbol, contract_conditions=contract_filter)
-        data : dict = self.client.security_stocks_by_symbol([query], default_filtering=False).data  # type: ignore
+        data : dict[str, Any] = self.client.security_stocks_by_symbol([query], default_filtering=False).data
         if contract_info := data.get(asset.symbol):
             if len(contract_info) == 1 and len(contract_info[0]["contracts"]) == 1:
                 conid = contract_info[0]["contracts"][0]["conid"]
@@ -70,7 +71,7 @@ class _AssetMapper:
         if asset := self._conid_2_asset.get(conid):
             return asset
 
-        contract: ContractInfo = self.client.contract_information_by_conid(conid).data  # type: ignore
+        contract: ContractInfo = cast(ContractInfo, self.client.contract_information_by_conid(str(conid)).data)
 
         match contract["instrument_type"]:
             case "STK":
