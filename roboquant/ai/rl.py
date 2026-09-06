@@ -1,5 +1,5 @@
 import logging
-from typing import Any, Callable, Iterator, override
+from typing import Any, Callable, Iterator, cast, override
 
 import gymnasium as gym
 import numpy as np
@@ -169,7 +169,8 @@ class SB3PolicyStrategy(Strategy):
 
     @classmethod
     def from_model(cls, model: BaseAlgorithm):
-        env: TradingEnv = model.env  # type: ignore
+        env: TradingEnv = cast(TradingEnv, model.env)
+        assert isinstance(env, TradingEnv)
         return cls(env.obs_feature, env.assets, model.policy)
 
     @override

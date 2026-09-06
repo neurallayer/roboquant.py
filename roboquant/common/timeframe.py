@@ -9,6 +9,11 @@ def utcnow() -> datetime:
     """Return the current datetime in the UTC timezone."""
     return datetime.now(timezone.utc)
 
+def value_to_utc(value: int|str|datetime) -> datetime:
+    if isinstance(value, int):
+        value = f"{value}0101"
+    value = datetime.fromisoformat(value) if isinstance(value,str) else value
+    return value.astimezone(timezone.utc)
 
 class Timeframe:
     """A timeframe represents a period in time with a specific start- and end-datetime. Timeframes are immutable.

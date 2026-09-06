@@ -33,14 +33,16 @@ from roboquant.common.event import Bar, Event, PriceItem, Quote, TradePrice
 from roboquant.common.monetary import USD
 from roboquant.feeds.in_memory_feed import InMemoryFeed
 from roboquant.feeds.livefeed import LiveFeed
+from roboquant.common.timeframe import value_to_utc
 
 logger = logging.getLogger(__name__)
 
 
-def _get_asset(symbol: str, asset_class: AssetClass) -> Asset:
+def _get_asset(symbol: str | None, asset_class: AssetClass | None) -> Asset:
     """Convert an Alpaca asset to a roboquant asset based on
     its symbol name and asset class.
     """
+    assert symbol and asset_class, "no symbol found or asset class found"
 
     match asset_class:
         case AssetClass.US_EQUITY:
@@ -218,9 +220,11 @@ class AlpacaHistoricStockFeed(_AlpacaHistoricFeed):
             resolution (TimeFrame, optional): The resolution of the data. Defaults to None.
             adjustment (Adjustment, optional): The adjustment type. Defaults to Adjustment.ALL.
         """
-        resolution = resolution or TimeFrame(amount=1, unit=TimeFrameUnit.Day)  # type: ignore
+        resolution = resolution or TimeFrame(amount=1, unit=TimeFrameUnit(TimeFrameUnit.Day))
+        start = value_to_utc(start) if start is not None else start
+        end = value_to_utc(end) if end is not None else end
         req = StockBarsRequest(
-            symbol_or_symbols=list(symbols), timeframe=resolution, start=start, end=end, adjustment=adjustment, feed=self.feed # type: ignore
+            symbol_or_symbols=list(symbols), timeframe=resolution, start=start, end=end, adjustment=adjustment, feed=self.feed
         )
         res = self.client.get_stock_bars(req)
         assert isinstance(res, BarSet)
@@ -235,7 +239,9 @@ class AlpacaHistoricStockFeed(_AlpacaHistoricFeed):
             start (datetime, optional): The start time for the data. Defaults to None.
             end (datetime, optional): The end time for the data. Defaults to None.
         """
-        req = StockTradesRequest(symbol_or_symbols=list(symbols), start=start, end=end, feed=self.feed)  # type: ignore
+        start = value_to_utc(start) if start is not None else start
+        end = value_to_utc(end) if end is not None else end
+        req = StockTradesRequest(symbol_or_symbols=list(symbols), start=start, end=end, feed=self.feed)
         res = self.client.get_stock_trades(req)
         assert isinstance(res, TradeSet)
         self._process_trades(res, AssetClass.US_EQUITY)
@@ -249,7 +255,9 @@ class AlpacaHistoricStockFeed(_AlpacaHistoricFeed):
             start (datetime, optional): The start time for the data. Defaults to None.
             end (datetime, optional): The end time for the data. Defaults to None.
         """
-        req = StockQuotesRequest(symbol_or_symbols=list(symbols), start=start, end=end, feed=self.feed)  # type: ignore
+        start = value_to_utc(start) if start is not None else start
+        end = value_to_utc(end) if end is not None else end
+        req = StockQuotesRequest(symbol_or_symbols=list(symbols), start=start, end=end, feed=self.feed)
         res = self.client.get_stock_quotes(req)
         assert isinstance(res, QuoteSet)
         self._process_quotes(res, AssetClass.US_EQUITY)
@@ -286,8 +294,10 @@ class AlpacaHistoricCryptoFeed(_AlpacaHistoricFeed):
             end (datetime, optional): The end time for the data. Defaults to None.
             resolution (TimeFrame, optional): The resolution of the data. Defaults to None.
         """
-        resolution = resolution or TimeFrame(amount=1, unit=TimeFrameUnit.Day)  # type: ignore
-        req = CryptoBarsRequest(symbol_or_symbols=list(symbols), timeframe=resolution, start=start, end=end)  # type: ignore
+        start = value_to_utc(start) if start is not None else start
+        end = value_to_utc(end) if end is not None else end
+        resolution = resolution or TimeFrame(amount=1, unit=TimeFrameUnit(TimeFrameUnit.Day))
+        req = CryptoBarsRequest(symbol_or_symbols=list(symbols), timeframe=resolution, start=start, end=end)
         res = self.client.get_crypto_bars(req)
         assert isinstance(res, BarSet)
         freq = str(resolution)
@@ -302,7 +312,9 @@ class AlpacaHistoricCryptoFeed(_AlpacaHistoricFeed):
             start (datetime, optional): The start time for the data. Defaults to None.
             end (datetime, optional): The end time for the data. Defaults to None.
         """
-        req = CryptoTradesRequest(symbol_or_symbols=list(symbols), start=start, end=end)  # type: ignore
+        start = value_to_utc(start) if start is not None else start
+        end = value_to_utc(end) if end is not None else end
+        req = CryptoTradesRequest(symbol_or_symbols=list(symbols), start=start, end=end)
         res = self.client.get_crypto_trades(req)
         assert isinstance(res, TradeSet)
         self._process_trades(res, AssetClass.CRYPTO)
