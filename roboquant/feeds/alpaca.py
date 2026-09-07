@@ -42,7 +42,7 @@ def _get_asset(symbol: str | None, asset_class: AssetClass | None) -> Asset:
     """Convert an Alpaca asset to a roboquant asset based on
     its symbol name and asset class.
     """
-    assert symbol and asset_class, "no symbol found or asset class found"
+    assert symbol and asset_class, "no symbol found or asset class parsed"
 
     match asset_class:
         case AssetClass.US_EQUITY:

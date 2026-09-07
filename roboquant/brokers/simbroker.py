@@ -77,7 +77,8 @@ class SimBroker(Broker):
 
     def __update_position(self, asset: Asset, fill: Decimal, price: float) -> float:
         """update position based on a fill and return the realized pnl"""
-        assert fill != 0, "fill cannot be zero"
+        if fill == 0:
+           raise ValueError("fill cannot be zero")
 
         pos = self._positions.get(asset, Position(asset))
 
@@ -166,10 +167,12 @@ class SimBroker(Broker):
         Orders placed at time `t`, will be processed during time `t+1`. This protects against future bias.
         """
         for order in orders:
-            assert order.asset in self._prices, "can only trade in assets that have had price-items"
+            if order.asset not in self._prices:
+               raise ValueError("can only trade in assets that have had price-items")
 
             if not order.id:
-                assert order.size != 0, "order size of a new order cannot be zero"
+                if order.size == 0:
+                    raise  ValueError("order size of a new order cannot be zero")
                 order = replace(order, id=self.__next_order_id())
 
             if order.is_cancellation:

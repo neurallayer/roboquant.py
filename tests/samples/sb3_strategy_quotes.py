@@ -37,7 +37,7 @@ model = RecurrentPPO("MlpLstmPolicy", env)
 
 # %%
 steps = feed.count_events(timeframe=train_tf) * 5
-model.learn(total_timesteps=steps, progress_bar=False)
+model.learn(total_timesteps=steps, progress_bar=True)
 model.policy.save("/tmp/jpm_quotes.zip")
 
 # %%

@@ -343,7 +343,8 @@ class MaxReturnFeature(Feature[T]):
 
     def __init__(self, feature: Feature[T], period: int) -> None:
         super().__init__()
-        assert feature.size() == 1
+        if feature.size() != 1:
+            raise ValueError("Feature size needs to be 1")
         self.history: deque[NPFloatArray] = deque(maxlen=period)
         self.feature: Feature[T] = feature
         self.period = period

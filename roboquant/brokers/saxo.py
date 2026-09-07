@@ -36,7 +36,8 @@ class SaxoBroker(LiveBroker):
         self._client_key : str | None = None
         self._asset_mapping: dict[Asset, tuple[int, str]] = {}
 
-        assert simulator, "right now only simulator mode is supported"
+        if not simulator:
+           raise ValueError("right now only simulator mode is supported")
         self._base_url = "https://gateway.saxobank.com/sim/openapi" if simulator else "https://gateway.saxobank.com/openapi"
 
         self._session: requests.Session = requests.Session()
@@ -312,4 +313,3 @@ class SaxoBroker(LiveBroker):
         )
 
         logger.info("placed order=%s resp=%s", order, resp)
-

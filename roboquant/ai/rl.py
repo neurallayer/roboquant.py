@@ -1,12 +1,11 @@
 import logging
-from typing import Any, Callable, Iterator, cast, override
+from typing import Any, Callable, Iterator, override
 
 import gymnasium as gym
 import numpy as np
 from gymnasium import spaces
 from gymnasium.envs.registration import register
 from numpy.typing import NDArray
-from stable_baselines3.common.base_class import BaseAlgorithm
 from stable_baselines3.common.policies import BasePolicy
 
 from roboquant.ai.features import Feature
@@ -50,7 +49,8 @@ class TradingEnv(gym.Env[Any, Any]):
         timeframe: Timeframe | None = None,
         journal_factory: Callable[[str], Journal] | None = None
     ):
-        assert(reward_feature.size() == 1), "Reward feature must return a single value"
+        if reward_feature.size() != 1:
+           raise ValueError("Reward feature must return a single value")
         self.broker: SimBroker = broker or SimBroker()
         self.feed = feed
 
@@ -166,12 +166,6 @@ class SB3PolicyStrategy(Strategy):
     @classmethod
     def from_env(cls, env: TradingEnv, policy: BasePolicy):
         return cls(env.obs_feature, env.assets, policy)
-
-    @classmethod
-    def from_model(cls, model: BaseAlgorithm):
-        env: TradingEnv = cast(TradingEnv, model.env)
-        assert isinstance(env, TradingEnv)
-        return cls(env.obs_feature, env.assets, model.policy)
 
     @override
     def create_signals(self, event: Event) -> list[Signal]:

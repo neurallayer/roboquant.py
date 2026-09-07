@@ -28,7 +28,7 @@ model = RecurrentPPO("MlpLstmPolicy", env)
 
 # %%
 # Train the model and save the policy
-model.learn(total_timesteps=20_000, progress_bar=False)
+model.learn(total_timesteps=5_000, progress_bar=True)
 model.policy.save(path)
 
 # %%

@@ -17,7 +17,8 @@ logger = logging.getLogger(__name__)
 @dataclass(frozen=True, slots=True)
 class CSVColumns:
     """Define the columns in a CSV file that contains historic market data.
-    args:
+
+    Arguments:
     - date: the column name for the date or datetime
     - open: the column name for the open price
     - high: the column name for the high price
@@ -50,15 +51,15 @@ class CSVColumns:
 
 class CSVFeed(InMemoryFeed):
     """Use CSV files with historic market data as a feed.
-    args:
-    - path: the path to the CSV file or directory with CSV files
-    - columns: the columns in the CSV file, the default one is for Yahoo Finance
-    - time_offset: the time offset to apply to the data, default is None
-    - date_fmt: the date format to use, or None if the date is in ISO format
-    - time_fmt: the time format to use, or None if the time is in ISO format
-    - endswith: the file extension to use to select the files
-    - frequency: the frequency of the data, use as part of the `Bar` object but no functional impact
-    - asset_filter: optionally, filter a subset of the assets to use.
+    Args:
+        path: the path to the CSV file or directory with CSV files
+        columns: the columns in the CSV file, the default one is for Yahoo Finance
+        time_offset: the time offset to apply to the data, default is None
+        date_fmt: the date format to use, or None if the date is in ISO format
+        time_fmt: the time format to use, or None if the time is in ISO format
+        endswith: the file extension to use to select the files
+        frequency: the frequency of the data, use as part of the `Bar` object but no functional impact
+        asset_filter: optionally, filter a subset of the assets to use.
     """
 
     def __init__(
@@ -102,6 +103,12 @@ class CSVFeed(InMemoryFeed):
         return Stock(symbol)
 
     def _parse_csvfiles(self, filenames: list[str]):
+        """
+        Parse provided CSV files
+
+        Args:
+            filenames: the names of the CSV files to be parsed.
+        """
         # pylint: disable=too-many-locals
         get_ohlcv = self.columns.get_ohlcv
         adj_close_column = self.columns.adj_close

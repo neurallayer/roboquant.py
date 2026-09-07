@@ -216,7 +216,8 @@ class TickerAllBroker(LiveBroker):
 
         if ticket := order.get_info("ticket"):
             pos_size = self.__get_pos_size(ticket)
-            assert pos_size == -order.size
+            if pos_size != -order.size:
+                raise ValueError("Can only completely close existing positions")
             result = self._client.positions.close(
                 self._account_id,
                 ticket,

@@ -52,11 +52,16 @@ class Currency(str):
             return Currency(symbol[-3:].upper)
         return Currency(default) if isinstance(default, str) else default
 
-    def __rmatmul__(self, other: float | int) -> "Amount":
+    def __rmatmul__(self, other: float | int ) -> "Amount":
         """Create a new `Amount` using this currency and the provided `other` value.
 
+        For example:
+        ```
+        a = 100@USD
+        ```
+
         Args:
-            other (float | int): The monetary value.
+            other (float | int): The value to use.
 
         Returns:
             Amount: The resulting Amount object.
@@ -67,8 +72,7 @@ class Currency(str):
         amount2 = -99.95@EUR
         ```
         """
-        assert isinstance(other, (float, int))
-        return Amount(self, other)
+        return Amount(self, float(other))
 
     def __call__(self, other: float | int) -> "Amount":
         """Create a new `Amount` using this currency and the provided value.
@@ -85,7 +89,7 @@ class Currency(str):
         amount2 = EUR(-99.95)
         ```
         """
-        return Amount(self, other)
+        return Amount(self, float(other))
 
 
 # Commonly used currencies

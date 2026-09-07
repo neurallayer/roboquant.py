@@ -38,7 +38,8 @@ class Asset(ABC):
         """Ensure unique symbol across different assets and keep track of all unique assets created"""
         if self.symbol in Asset.__registry:
             asset = Asset.__registry[self.symbol]
-            assert self == asset, f"detected same symbol for different assets {asset} != {self}"
+            if self != asset:
+               raise ValueError(f"detected same symbol for different assets {asset} != {self}")
         else:
             Asset.__registry[self.symbol] = self
 

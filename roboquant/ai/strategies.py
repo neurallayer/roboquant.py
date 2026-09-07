@@ -79,7 +79,8 @@ class SequenceDataset(Dataset[DS_TYPE]):
         target_transform : Callable[[NDArray[Any]], NDArray[Any]] | None =None,
         target_squeeze: bool=True,
     ):
-        assert len(input_data) == len(target_data), "input_data and target_data must have the same length"
+        if len(input_data) != len(target_data):
+           raise ValueError("input_data and target_data must have the same length")
         self.input_data = input_data
         self.target_data = target_data
         self.input_sequences = input_sequences

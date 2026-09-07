@@ -60,8 +60,8 @@ class Order:
     to the broker. This is also used to determine when a DAY order has expired."""
 
     def __post_init__(self):
-        if self.size.is_zero():
-            assert id != ""
+        if self.size.is_zero() and id == "":
+                raise ValueError("Can only Cancel orders with an Id")
 
     def cancel(self) -> "Order":
         """
@@ -71,8 +71,11 @@ class Order:
         Returns:
             Order: A new order with the same properties but size set to zero.
         """
-        assert self.id, "Can only cancel orders with an already assigned id"
-        assert self.size, "Cannot cancel a cancellation order, size has to be non-zero"
+        if self.id == "":
+            raise ValueError("Can only cancel orders with an already assigned id")
+
+        if self.size.is_zero():
+            raise ValueError("Cannot cancel a cancellation order, size has to be non-zero")
 
         return replace(self, size=Decimal())
 

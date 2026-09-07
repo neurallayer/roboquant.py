@@ -118,7 +118,8 @@ class IBKRBroker(LiveBroker):
         super().__init__()
         client = ibkr_client or IbkrClient()
         ok = client.check_health()
-        assert ok, "health not ok"
+        if not ok:
+           raise ValueError("health not ok")
 
         accounts: Any = {}
         while not accounts:

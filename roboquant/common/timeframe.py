@@ -50,7 +50,8 @@ class Timeframe:
         self.end: datetime = end.astimezone(timezone.utc)
         self.inclusive: bool = inclusive
 
-        assert self.start <= self.end, "start > end"
+        if self.start > self.end:
+            raise ValueError("start > end")
 
     @classmethod
     def fromisoformat(cls, start: str, end: str, inclusive : bool =False):
