@@ -7,10 +7,10 @@ from typing import Any, Mapping, override
 
 import requests
 
-from roboquant.brokers._saxo_types import NetPositionsResponse, OpenOrdersResponse
+from roboquant.brokers._saxo_types import InstrumentDetail, NetPositionsResponse, OpenOrdersResponse
 from roboquant.brokers.livebroker import LiveBroker
 from roboquant.common.account import Account
-from roboquant.common.asset import Asset, Forex, Stock
+from roboquant.common.asset import Asset, Crypto, Forex, Stock
 from roboquant.common.monetary import Amount, Currency, Wallet
 from roboquant.common.order import Order
 from roboquant.common.position import Position
@@ -70,17 +70,31 @@ class SaxoBroker(LiveBroker):
             }
         )
 
+    def __create_assset(self, detail: InstrumentDetail) -> Asset:
+        symbol = detail["Symbol"]
+        currency = Currency(detail["CurrencyCode"])
+        contract_size = Decimal(detail.get("LotSize", 1))
+        match detail["AssetType"]:
+            case "Stock" | "Etf":
+                return Stock(symbol, currency)
+            case "FxSpot":
+                return Forex(symbol, currency, contract_size=contract_size)
+            case "FxCrypto":
+                return Crypto(symbol, currency, contract_size=contract_size)
+            case _:
+                raise Exception("Unsupported asset", detail)
+
     def __get_asset(self, uic: int, assetType: str) -> Asset:
         for k, v in self._asset_mapping.items():
             if v[0] == uic and v[1] == assetType:
                 return k
-        data = self.__request("GET", f"/ref/v1/instruments/details/{uic}/{assetType}")
-        symbol = data["Symbol"]
-        asset = Stock(symbol, Currency(data["CurrencyCode"]))
+        detail: InstrumentDetail = self.__request("GET", f"/ref/v1/instruments/details/{uic}/{assetType}")
+        asset = self.__create_assset(detail)
         self._asset_mapping[asset] = (uic, assetType)
         return asset
 
     def __get_defaults(self) -> tuple[str, str]:
+        """Return client key and default account key"""
         data = self.__request("GET", "/port/v1/clients/me")
         return data["ClientKey"], data["DefaultAccountKey"]
 
@@ -226,7 +240,6 @@ class SaxoBroker(LiveBroker):
         orders: list[Order] = []
         for item in data.get("Data", []):
             asset = self.__get_asset(item["Uic"], item["AssetType"])
-            assert asset
             is_mkt = item["OpenOrderType"] == "Market"
             is_buy = item["BuySell"] == "Buy"
             tif = "GTC" if item["Duration"]["DurationType"] == "GoodTillCancel" else "DAY"
@@ -306,10 +319,11 @@ class SaxoBroker(LiveBroker):
     @override
     def _place_order(self, order: Order):
         """Place a single market or limit order."""
+        payload = self.__order_payload(order)
         resp = self.__request(
             "POST",
             "/trade/v2/orders",
-            json=self.__order_payload(order),
+            json=payload,
         )
 
-        logger.info("placed order=%s resp=%s", order, resp)
+        logger.info("placed order=%s payload=%s resp=%s", order, payload, resp)

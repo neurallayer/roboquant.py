@@ -16,13 +16,13 @@ class Asset(ABC):
     """Abstract base class for all types of assets, ranging from stocks to cryptocurrencies.
     Every asset has always at least a `symbol` and `currency` defined. Assets are immutable.
 
-    The combination of the class, symbol, and currency has to be unique for each asset. If that is
+    The symbol by itself should be unique across assets and asset types. If that is
     not the case, the symbol could be extended with some additional information to make it unique.
-    For example, for stocks, the exchange could be added to the symbol.
+    For example, for stocks, the exchange could be added to the symbol name.
     """
 
     symbol: str
-    """The symbol name of the asset, for example, AAPL"""
+    """The unique symbol name of the asset, for example, AAPL"""
 
     currency: Currency = USD
     """The currency of the asset, default is `USD`"""
@@ -126,6 +126,13 @@ class Crypto(Asset):
     formats so the currency can be derived from the symbol automatically.
     """
 
+    contract_size: Decimal = Decimal(1)
+    """contract or lot size"""
+
+    @override
+    def value(self, size: Decimal, price: float) -> float:
+        return float(size) * price * float(self.contract_size)
+
     @staticmethod
     def from_symbol(symbol: str) -> "Crypto":
         """Create a Crypto asset from a symbol string. It will automatically extract
@@ -158,6 +165,7 @@ class Forex(Asset):
     """
 
     contract_size: Decimal = Decimal(1)
+    """contract or lot size"""
 
     @override
     def value(self, size: Decimal, price: float) -> float:

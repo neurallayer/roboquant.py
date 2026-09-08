@@ -22,11 +22,9 @@ All asset types extend the common base class, {cl}`Asset`, which provides:
 
 Subclasses can add type-specific attributes and methods.
 
-The **symbol** has to be unique accross all assets and this is enforced. If you create a new asset
-with the same symbol name as an existing asset but with other attributes, it will raise an exception.
+The **symbol** has to be unique accross all assets and this is enforced. If you create a new asset with the same symbol name as an existing asset but with other attributes, it will raise an exception.
 
-If you deal with scenarios where there are conflicting symbol names, a solution is to extend the symbol name. For example,
-you want to differentiate between crypto-pairs on different exchanges, add the exchange name to the symbol name:
+If you deal with scenarios where there are conflicting symbol names, a solution is to extend the symbol name. For example, you want to differentiate between crypto-pairs on different exchanges, add the exchange name to the symbol name:
 
 ```{code-cell} python
 from roboquant import Crypto, USD
@@ -36,6 +34,13 @@ asset2 = Crypto("BTCUSD.BINANCE", USD)
 
 assert asset1 != asset2
 ```
+
+For assets to function correctly, it is important that (next to the unique symbol name):
+- The currency is set correctly so conversions happen is required.
+- The `value()` is be correctly calculated, especially if an asset class 
+  has different contract sizes like is the case with stock options and forex. 
+
+
 
 ## Asset Classes
 roboquant supports the following asset types out of the box:

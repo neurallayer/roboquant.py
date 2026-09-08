@@ -1,4 +1,7 @@
-from typing import Any, List, TypedDict
+from typing import Any, List, Literal, NotRequired, TypedDict
+
+# The AssetTypes supported right now
+AssetType = Literal["Stock", "FxSpot", "Etf", "Fund", "FxCrypto"]
 
 
 class NetPositionBase(TypedDict):
@@ -6,7 +9,7 @@ class NetPositionBase(TypedDict):
     Amount: int
     AmountLong: int
     AmountShort: int
-    AssetType: str
+    AssetType: AssetType
     CanBeClosed: bool
     ClientId: str
     HasForceOpenPositions: bool
@@ -78,7 +81,7 @@ class OpenOrderItem(TypedDict):
     AccountKey: str
     AdviceNote: str
     Amount: int
-    AssetType: str
+    AssetType: AssetType
     BuySell: str
     CalculationReliability: str
     ClientId: str
@@ -112,3 +115,65 @@ class OpenOrderItem(TypedDict):
 class OpenOrdersResponse(TypedDict):
     __count: int
     Data: List[OpenOrderItem]
+
+
+class ExchangeSummary(TypedDict):
+    CountryCode: str
+    ExchangeId: str
+    Name: str
+
+
+class Format(TypedDict):
+    Decimals: int
+    Format: str
+    OrderDecimals: int
+
+
+class OrderDistances(TypedDict):
+    EntryDefaultDistance: float          # can also be float, but here it's 0
+    EntryDefaultDistanceType: str
+    LimitDefaultDistance: float
+    LimitDefaultDistanceType: str
+    StopLimitDefaultDistance: float
+    StopLimitDefaultDistanceType: str
+    StopLossDefaultDistance: float
+    StopLossDefaultDistanceType: str
+    StopLossDefaultEnabled: bool
+    StopLossDefaultOrderType: str
+    TakeProfitDefaultDistance: float
+    TakeProfitDefaultDistanceType: str
+    TakeProfitDefaultEnabled: bool
+
+
+class InstrumentDetail(TypedDict):
+    AmountDecimals: int
+    AssetType: AssetType
+    CurrencyCode: str
+    DefaultAmount: int
+    DefaultSlippage: float
+    DefaultSlippageType: str
+    Description: str
+    Exchange: ExchangeSummary
+    Format: Format
+    FxForwardMaxForwardDate: str      # ISO 8601 date string
+    FxForwardMinForwardDate: str
+    GroupId: int
+    IncrementSize: int
+    IsRedemptionByAmounts: bool
+    IsTradable: bool
+    LotSize: NotRequired[float]
+    NonTradableReason: str
+    OrderDistances: OrderDistances
+    StandardAmounts: List[int]
+    SupportedOrderTypes: List[str]
+    Symbol: str
+    TickSize: float
+    TradableAs: List[str]
+    TradableOn: List[str]
+    TradingStatus: str
+    Uic: int
+
+
+class DetailedInstrumentInfoResponse(TypedDict):
+    __next: str                       # note the double underscore
+    Data: List[InstrumentDetail]

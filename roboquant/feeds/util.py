@@ -169,9 +169,9 @@ class AssetSerializer:
         """
 
         match asset:
-            case Stock() | Crypto() | Option():
+            case Stock() | Option():
                 result = f"{asset.asset_class}{asset.symbol}{asset.currency}"
-            case Forex():
+            case Forex() | Crypto():
                 result = f"{asset.asset_class}{asset.symbol}{asset.currency}{asset.contract_size}"
             case _:
                 raise ValueError(f"unsupported asset type {type(asset)}")
@@ -198,9 +198,7 @@ class AssetSerializer:
                 case "Stock":
                     asset = Stock(symbol, currency)
                 case "Crypto":
-                    asset = Crypto(symbol, currency)
-                case "Crypto":
-                    asset = Crypto(symbol, currency)
+                    asset = Crypto(symbol, currency, None, Decimal(args[-1]))
                 case "Forex":
                     asset = Forex(symbol, currency, None, Decimal(args[-1]))
                 case _:
