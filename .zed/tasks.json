@@ -23,6 +23,11 @@
     "show_command": false,
   },
   {
+    "label": "run basedpyright",
+    "command": "uvx basedpyright roboquant tests",
+    "show_command": false,
+  },
+  {
     "label": "fix imports",
     "command": "uvx ruff check --select I --fix $ZED_FILE",
     "show_command": false,

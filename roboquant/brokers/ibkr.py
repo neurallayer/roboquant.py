@@ -52,7 +52,7 @@ class _AssetMapper:
         contract_filter = {"isUS": True} if asset.currency == rq.USD else  {"isUS": False}
 
         query = StockQuery(asset.symbol, contract_conditions=contract_filter)
-        data : dict[str, Any] = self.client.security_stocks_by_symbol([query], default_filtering=False).data
+        data : Any = self.client.security_stocks_by_symbol([query], default_filtering=False).data
         if contract_info := data.get(asset.symbol):
             if len(contract_info) == 1 and len(contract_info[0]["contracts"]) == 1:
                 conid = contract_info[0]["contracts"][0]["conid"]

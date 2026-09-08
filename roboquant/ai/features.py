@@ -185,19 +185,21 @@ class NormalizeFeature(Feature[T]):
         super().__init__()
         self.feature = feature
         self.min_count = min_count
-        self.existing_aggregate = (self._zero_int(), self._zeros(), self._zeros())
+
+        # count, mean, m2
+        self._aggregates = (self._zero_int(), self._zeros(), self._zeros())
 
     def _zero_int(self) -> NPIntArray:
         return np.zeros((self.size(),), dtype="int64")
 
     def denormalize(self, value : NPFloatArray) -> NPFloatArray:
         """Denormalize the value"""
-        (count, mean, m2) = self.existing_aggregate
+        (count, mean, m2) = self._aggregates
         stdev = np.sqrt(m2 / count) # - 1e-12
         return value * stdev + mean
 
     def __update(self, new_value: NPFloatArray):
-        (count, mean, m2) = self.existing_aggregate
+        (count, mean, m2) = self._aggregates
         mask = ~np.isnan(new_value)
         count[mask] += 1
         delta = new_value - mean
@@ -206,7 +208,7 @@ class NormalizeFeature(Feature[T]):
         m2[mask] += delta[mask] * delta2[mask]
 
     def __normalize_values(self, values: NPFloatArray) -> NPFloatArray:
-        (count, mean, m2) = self.existing_aggregate
+        (count, mean, m2) = self._aggregates
         stdev = self._full_nan()
         mask = count >= self.min_count
         stdev[mask] = np.sqrt(m2[mask] / count[mask]) + 1e-12
@@ -224,7 +226,7 @@ class NormalizeFeature(Feature[T]):
 
     @override
     def reset(self):
-        self.existing_aggregate = (self._zero_int(), self._zeros(), self._zeros())
+        self._aggregates = (self._zero_int(), self._zeros(), self._zeros())
         self.feature.reset()
 
 
