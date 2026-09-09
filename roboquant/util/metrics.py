@@ -138,15 +138,20 @@ class PriceMetric(Metric):
 
     def __init__(self, *assets: Asset, price_type: str = "DEFAULT", volume_type: str = "DEFAULT") -> None:
         """Initialize PriceMetric with specified symbols and price/volume types.
+
         Args:
             *assets: Variable length argument list of assets to track. If none are provided,
-            all encountered assets will be included.
+                all encountered assets will be included.
             price_type: Type of price to use for calculations. Defaults to "DEFAULT".
             volume_type: Type of volume to use for calculations. Defaults to "DEFAULT".
+
         Returns:
             None
+
         Examples:
-            >>> metric = PriceMetric("AAPL", "MSFT", price_type="CLOSE")
+        ```
+        metric = PriceMetric("AAPL", "MSFT", price_type="CLOSE")
+        ```
         """
 
         super().__init__()
@@ -251,9 +256,10 @@ class AlphaBeta(Metric):
 
     def __init__(self, window_size: int, price_type: str = "DEFAULT", risk_free_return: float = 0.0) -> None:
         """
-        window_size: the rolling window_size to use. The alpha and beta are only calculated once the window is filled.
-        price_type: the type of price to use to calculate the market returns, default is "DEFAULT"
-        risk_free_return: the risk-free return rate, default is 0.0
+        Args:
+            window_size: the rolling window_size to use. The alpha and beta are only calculated once the window is filled.
+            price_type: the type of price to use to calculate the market returns, default is "DEFAULT"
+                risk_free_return: the risk-free return rate, default is 0.0
         """
 
         # data stores both portfolio return and market return

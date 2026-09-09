@@ -38,16 +38,11 @@ class SaxoBroker(LiveBroker):
 
         if not simulator:
            raise ValueError("right now only simulator mode is supported")
+
         self._base_url = "https://gateway.saxobank.com/sim/openapi" if simulator else "https://gateway.saxobank.com/openapi"
 
-        self._session: requests.Session = requests.Session()
-        self._session.headers.update(
-            {
-                "Authorization": f"Bearer {self._access_token}",
-                "Accept": "application/json",
-                "Content-Type": "application/json",
-            }
-        )
+        self._session: requests.Session
+        self.reset_session()
 
         default_client_key, default_acc_key = self.__get_defaults()
         self._account_key = account_key or default_acc_key
@@ -58,7 +53,8 @@ class SaxoBroker(LiveBroker):
     def reset_session(self):
         """Close the old session and start a new one"""
         try:
-            self._session.close()
+            if self._session:
+                self._session.close()
         except: # noqa: E722
             pass
         self._session = requests.Session()

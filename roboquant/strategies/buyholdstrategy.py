@@ -6,9 +6,16 @@ from roboquant.strategies.strategy import Strategy
 
 
 class BuyHoldStrategy(Strategy):
-    """Create buy signals for the assets found in the events.
-    You can compare a custom strategy to this one to see possible
-    differences in performance.
+    """A simple buy-and-hold strategy.
+
+    It generates a buy signal for every asset it encounters in an event.
+    Use it as a baseline to compare other strategies against.
+
+    Params:
+        wait: The number of events to skip before emitting the first
+            buy signals. This is useful when a strategy should not act on
+            the very first events, for example while prices or other data
+            are still warming up.
     """
 
     def __init__(self, wait: int = 0) -> None:

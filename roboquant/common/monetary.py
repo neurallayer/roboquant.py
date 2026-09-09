@@ -38,7 +38,7 @@ class Currency(str):
 
         Args:
             symbol: The symbol string of the crypto asset.
-            default: A default currency in case it could not be converte
+            default: A optional default currency in case it could not be converted
 
         Returns:
             The Currency or None if not possible and no default is given

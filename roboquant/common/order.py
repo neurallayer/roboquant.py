@@ -110,7 +110,8 @@ class Order:
 
     def get_info(self, key: str, default: Any = None) -> Any:
         """
-        Get the value of a key in the info dictionary. If the key is not present, the default value is returned.
+        Get the value of a key in the info dictionary.
+        If the key is not present, the default value is returned.
         """
         if self.info is None:
             return default

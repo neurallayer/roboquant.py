@@ -26,7 +26,7 @@ def set_dark_style():
     __set_defaults()
 
 def set_light_style():
-    """Set a llight style for matplotlib plots. This function modifies the default
+    """Set a light style for matplotlib plots. This function modifies the default
     matplotlib style to use a dark background.
 
     It also sets some default parameters for the grid, figure size,

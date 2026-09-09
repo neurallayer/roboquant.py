@@ -201,6 +201,8 @@ class AssetSerializer:
                     asset = Crypto(symbol, currency, None, Decimal(args[-1]))
                 case "Forex":
                     asset = Forex(symbol, currency, None, Decimal(args[-1]))
+                case "Option":
+                    asset = Option(symbol, currency)
                 case _:
                     raise ValueError(f"unsupported asset class {value}")
             self.__cache[value] = asset

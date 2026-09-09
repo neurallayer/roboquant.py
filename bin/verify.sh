@@ -8,8 +8,11 @@ uv sync --quiet --all-extras --dev
 echo "Running ruff" 
 uvx ruff check || exit 1
 
-echo "Running ty" 
-uvx ty check roboquant tests docs/notebooks|| exit 1
+# echo "Running ty" 
+# uvx ty check roboquant tests docs/notebooks|| exit 1
+
+echo "Running PyreFly" 
+uvx pyrefly check || exit 1
 
 # echo "Running pyright" 
 # uv run pyright tests roboquant || exit 1
