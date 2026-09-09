@@ -14,6 +14,6 @@ account = rq.run(feed, strategy)
 print(account)
 
 # %%
-trades = sorted(account.trades, key=lambda t: t.pnl)
-print(f"Biggest looser: {trades[0]}")
-print(f"Biggest winner: {trades[-1]}")
+df = account.trades_to_dataframe().round(2)
+print(f"Big looser: {df[df.pnl < -200_000]}")
+print(f"Big winner: {df[df.pnl > 200_000]}")

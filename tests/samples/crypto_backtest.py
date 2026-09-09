@@ -2,6 +2,8 @@
 # This example shows how to use the crypto feed with a simple EMA Crossover strategy.
 
 # %%
+from roboquant.common import utcnow
+from roboquant.common.trade import Trade
 import ccxt
 
 import roboquant as rq
@@ -25,7 +27,10 @@ account = rq.run(feed, strategy, trader=trader, broker=broker)
 print(account)
 
 # %%
-trades = sorted(account.trades, key=lambda t: t.pnl)
+def sort(trade: Trade):
+    return trade.pnl_amount().convert_to(USDT, utcnow())
+
+trades = sorted(account.trades, key=sort)
 if trades:
     print(f"Biggest looser: {trades[0].pnl:.2f}")
     print(f"Biggest winner: {trades[-1].pnl:.2f}")

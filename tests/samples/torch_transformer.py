@@ -3,7 +3,7 @@ import logging
 from typing import override
 
 import torch
-from torch import nn
+from torch import Tensor, nn
 
 import roboquant as rq
 from roboquant.ai.features import BarFeature, DayOfMonthFeature, FeatureSet, MaxReturnFeature, PriceFeature, SMAFeature
@@ -21,7 +21,15 @@ class TimeSeriesTransformer(nn.Module):
     """
 
     def __init__(
-        self, feature_size, num_layers=2, d_model=64, nhead=8, dim_feedforward=256, dropout=0.1, seq_length=30, label_size=1
+        self,
+        feature_size: int,
+        num_layers: int = 2,
+        d_model: int = 64,
+        nhead: int = 8,
+        dim_feedforward: int = 256,
+        dropout: float = 0.1,
+        seq_length: int = 30,
+        label_size: int = 1,
     ):
         super(TimeSeriesTransformer, self).__init__()
 
@@ -36,7 +44,7 @@ class TimeSeriesTransformer(nn.Module):
         self.fc_out = nn.Linear(d_model, label_size)
 
     @override
-    def forward(self, src):
+    def forward(self, src: Tensor):
         src = self.input_fc(src)
         src = src + self.pos_embedding
 

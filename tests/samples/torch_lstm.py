@@ -1,4 +1,5 @@
 # %%
+from torch import Tensor
 import logging
 from typing import override
 
@@ -22,7 +23,7 @@ class TimeSeriesLSTM(nn.Module):
         self.linear = nn.Linear(16, 1)
 
     @override
-    def forward(self, inputs):
+    def forward(self, inputs: Tensor):
         output, _ = self.lstm(inputs)
         output = F.relu(self.flatten(output[:, -1, :]))
         output = self.linear(output)

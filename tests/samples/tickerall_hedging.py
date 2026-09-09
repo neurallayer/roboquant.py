@@ -1,4 +1,6 @@
 # %%
+from typing import override
+from datetime import datetime
 import os
 import pprint
 
@@ -34,7 +36,7 @@ class TickerAllHedging(Trader):
     def __init__(self) -> None:
         self.strategies = {"ema_short": EMACrossover(2, 5), "ema_medium": EMACrossover(5, 10), "ema_long": EMACrossover(5, 20)}
         self.order_amount = 5_000@USD
-        self.last_update = None
+        self.last_update = datetime.fromisoformat("1900-01-01")
 
     def print(self, account: Account):
         if account.last_update != self.last_update:
@@ -42,9 +44,10 @@ class TickerAllHedging(Trader):
             pprint.pp(account.positions)
             self.last_update = account.last_update
 
+    @override
     def create_orders(self, signals : list[Signal], event: Event, account: Account) -> list[Order]:
         self.print(account)
-        orders = []
+        orders: list[Order] = []
         for name, strategy in self.strategies.items():
             for signal in strategy.create_signals(event):
                 asset = signal.asset

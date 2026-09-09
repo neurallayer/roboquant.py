@@ -29,7 +29,7 @@ module-name = "roboquant"
 [tool.pyrefly]
 infer-with-first-use = false
 min-severity = "info"
-project-excludes = ["tests/samples"]
+# project-excludes = ["tests/samples"]
 preset = "strict"
 
 [tool.pyrefly.errors]
