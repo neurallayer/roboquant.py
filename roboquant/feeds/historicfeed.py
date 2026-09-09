@@ -48,7 +48,7 @@ class HistoricFeed(Feed, ABC):
         if isinstance(asset, str):
             asset = self.get_asset(asset)
 
-        timeline = []
+        timeline: list[datetime] = []
         data: dict[str, list[float]] = {}
         keys = ["open", "high", "low", "close", "volume"]
         for key in keys:
@@ -103,7 +103,7 @@ class HistoricFeed(Feed, ABC):
             if not assets:
                 assets = tuple(self.assets())
 
-            timeline = []
+            timeline: list[datetime] = []
             result: dict[str, list[float]] = {asset.symbol: [] for asset in assets}
             for evt in self.play(timeframe):
                 timeline.append(evt.time)

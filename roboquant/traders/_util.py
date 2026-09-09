@@ -75,7 +75,7 @@ class Sizing:
 
     def close_positions(self, positions: list[Position]) -> list[Position]:
         """Get all positions that this signal would exit"""
-        result = []
+        result: list[Position] = []
         if not self.signal.is_exit:
             return []
         for pos in positions:

@@ -83,7 +83,7 @@ class CryptoBroker(LiveBroker):
     def _get_open_orders(self) -> list[Order]:
         # Default implementation for retrieving open orders
         orders: list[dict[str, Any]] = self.__exchange.fetch_open_orders()
-        result = []
+        result: list[Order] = []
         for order in orders:
             asset = Crypto.from_symbol(order["symbol"])
             size = order["amount"]

@@ -7,7 +7,7 @@ from typing import Any, override
 from ibind import IbkrClient, OrderRequest, QuestionType, StockQuery  # noqa: E402
 
 import roboquant as rq
-import roboquant.common.position
+from roboquant.common import Position
 from roboquant.brokers._ibkr_types import AccountInfo, ContractInfo, OrderInfo, PositionInfo
 from roboquant.brokers.livebroker import LiveBroker
 from roboquant.common.monetary import Currency, Wallet
@@ -141,16 +141,16 @@ class IBKRBroker(LiveBroker):
         self._mapper = _AssetMapper(client)
 
 
-    def __get_positions(self) -> list[roboquant.common.position.Position]:
+    def __get_positions(self) -> list[Position]:
         """Return all the open positions"""
-        result = []
+        result: list[Position] = []
         positions: list[PositionInfo] = self.client.positions().data or []  # type: ignore
         for pos_info in positions:
             conid = pos_info["conid"]
             if asset := self._mapper.get_asset(conid):
                 if size := pos_info["position"]:
                     info = {"conid": conid}
-                    position = roboquant.common.position.Position(
+                    position = Position(
                         asset, Decimal(size), pos_info["avgPrice"], pos_info["mktPrice"], info=info
                     )
                     result.append(position)

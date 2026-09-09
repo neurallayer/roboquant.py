@@ -191,8 +191,8 @@ class TimeSeriesStrategy(FeatureStrategy):
 
     def __get_xy(self, feed: Feed, timeframe: Timeframe | None = None, warmup: int = 0) -> tuple[FLOAT_ARRAY, FLOAT_ARRAY]:
         """Extract input and label features from the feed."""
-        x = []
-        y = []
+        x: list[FLOAT_ARRAY] = []
+        y: list[FLOAT_ARRAY] = []
         for evt in feed.play(timeframe):
             x_data = self.input_feature.calc(evt)
             y_data = self.label_feature.calc(evt)

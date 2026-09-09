@@ -101,12 +101,12 @@ class SaxoBroker(LiveBroker):
     def _refresh_all_assets(self):
         def get_relevant_data(result: dict[str, Any]):
             keys = ["Symbol", "CurrencyCode", "Identifier", "AssetType"]
-            r = []
+            r: list[Any] = []
             for row in result["Data"]:
                 r.append([row[k] for k in keys ])
             return r
 
-        data = []
+        data: list[Any] = []
         result = self.__request(
             "GET",
             "/ref/v1/instruments",
@@ -165,7 +165,7 @@ class SaxoBroker(LiveBroker):
         params: Mapping[str, Any] | None = None,
         json: Mapping[str, Any] | None = None
     ) -> Any:
-        query = {}
+        query: dict[str,str] = {}
         if self._account_key:
             query["AccountKey"] = self._account_key
         if self._client_key:
@@ -207,7 +207,7 @@ class SaxoBroker(LiveBroker):
             params={"FieldGroups": "NetPositionBase,NetPositionView"},
         )
 
-        positions = []
+        positions: list[Position] = []
 
         for item in data.get("Data", []):
             view = item.get("NetPositionView", {})

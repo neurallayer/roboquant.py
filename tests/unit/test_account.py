@@ -29,7 +29,7 @@ class TestAccount(unittest.TestCase):
 
     def test_account_with_positions(self):
         now = utcnow()
-        positions = []
+        positions: list[Position] = []
         for i in range(5):
             asset = Stock(f"AA{i}")
             positions.append(Position(asset, Decimal(10), 10.0, 11.0))

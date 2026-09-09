@@ -28,8 +28,8 @@ class AlpacaBroker(LiveBroker):
         super().__init__()
         self.__client = TradingClient(api_key, secret_key)
 
-    def __sync_orders(self):
-        orders = []
+    def __sync_orders(self) -> list[Order]:
+        orders: list[Order] = []
         request = GetOrdersRequest(status=QueryOrderStatus.OPEN)
         alpaca_orders: list[AOrder] = cast(list[AOrder], self.__client.get_orders(request))
         for alpaca_order in alpaca_orders:
@@ -47,8 +47,8 @@ class AlpacaBroker(LiveBroker):
 
         return orders
 
-    def __sync_positions(self):
-        positions = []
+    def __sync_positions(self) -> list[Position]:
+        positions: list[Position] = []
         open_pos: list[APosition] = cast(list[APosition], self.__client.get_all_positions())
 
         for p in open_pos:

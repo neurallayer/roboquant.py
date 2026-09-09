@@ -36,7 +36,7 @@ class TestDelay(unittest.TestCase):
 
         timeframe = Timeframe.next(timedelta(minutes=1))
 
-        delays = []
+        delays: list[float] = []
         n = 0
         for event in feed.play(timeframe):
             if event.items:

@@ -256,7 +256,7 @@ class SimBroker(Broker):
         """Close the open positions in the account using last known market price.
         Existing open orders will be disguarded.
         """
-        orders = []
+        orders: list[Order] = []
         for asset, pos in self._positions.items():
             order = Order(asset, - pos.size)
             orders.append(order)

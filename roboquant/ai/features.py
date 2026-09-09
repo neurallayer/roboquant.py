@@ -615,7 +615,7 @@ class IndicatorFeature(Feature[Event]):
 
     @override
     def calc(self, value: Event) -> NPFloatArray:
-        result = []
+        result : list[float] = []
         nan = float("nan")
         for asset in self.assets:
             v = nan

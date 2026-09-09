@@ -167,7 +167,7 @@ class TickerAllBroker(LiveBroker):
         )
 
     def __sync_positions(self, positions: list[TaPosition]) -> list[Position]:
-        portfolio = []
+        portfolio:list[Position] = []
         for p in positions:
             if not p.symbol or p.volume is None:
                 continue

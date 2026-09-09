@@ -91,7 +91,7 @@ class CSVFeed(InMemoryFeed):
         if pathlib.Path(path).is_file():
             return [str(path)]
 
-        files = []
+        files: list[str] = []
         for dirpath, _, filenames in os.walk(path):
             selected_files = [os.path.join(dirpath, f) for f in filenames if f.endswith(self.endswith)]
             files.extend(selected_files)

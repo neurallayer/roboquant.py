@@ -55,7 +55,7 @@ class _SymbolCurrency:
 
     def fill(self) -> dict[str, Currency]:
         """Load the symbol specs and fill the cache with all known quote currencies."""
-        result = {}
+        result: dict[str, Currency] = {}
         specs = self._client.accounts.symbol_specs(self._account_id)
         for spec in specs:
             code = getattr(spec, "profit_currency", None)
