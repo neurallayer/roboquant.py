@@ -27,7 +27,7 @@ account = rq.run(feed, strategy, trader=trader, broker=broker)
 print(account)
 
 # %%
-def sort(trade: Trade):
+def sort(trade: Trade) -> float:
     return trade.pnl_amount().convert_to(USDT, utcnow())
 
 trades = sorted(account.trades, key=sort)

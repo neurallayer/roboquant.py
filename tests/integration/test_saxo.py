@@ -14,7 +14,6 @@ load_dotenv()
 
 class TestSaxoBroker(unittest.TestCase):
 
-
     def validate(self, broker: SaxoBroker, order: Order) -> Order:
         broker.place_orders([order])
         time.sleep(2)

@@ -14,7 +14,7 @@ from roboquant.feeds.parquetfeed import ParquetFeed
 symbols_str = "MSFT,NVDA,AAPL,AMZN,META,GOOGL,AVGO,JPM,XOM,TSLA"
 symbols = set(symbols_str.split(","))
 
-def asset_filter(asset: rq.Asset):
+def asset_filter(asset: rq.Asset) -> bool:
     return asset.symbol in symbols
 
 path = os.path.expanduser("~/data/daily/us/")

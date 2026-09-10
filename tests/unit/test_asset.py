@@ -6,7 +6,6 @@ from typing import override
 from roboquant.common.asset import Asset, Crypto, Forex, Option, Stock
 from roboquant.common.monetary import USD, Currency
 
-SEP = ""
 
 class TestAsset(unittest.TestCase):
 

@@ -4,14 +4,12 @@ kernelspec:
   display_name: Python 3
 ---
 
-
 ```{code-cell} python
 :tags: [remove-input]
 import roboquant as rq
 import pprint
 account = rq.demo_run()
 ```
-
 
 # Position
 

@@ -12,7 +12,7 @@ class _MyStrategy(IndicatorStrategy):
     """Example using TaStrategy as a baseclass to create a custom strategy"""
 
     @override
-    def _create_signal(self, asset: Asset, ohlcv: OHLCVBuffer):
+    def _create_signal(self, asset: Asset, ohlcv: OHLCVBuffer) -> Signal | None:
         close = ohlcv.close
         sma12 = close[-12:].mean()
         sma26 = close[-26:].mean()

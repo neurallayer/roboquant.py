@@ -1,5 +1,6 @@
+from torch import Tensor
 import unittest
-from typing import Any, override
+from typing import override
 
 import numpy as np
 import torch.nn.functional as F
@@ -22,7 +23,7 @@ class _MyModel(nn.Module):
         self.linear = nn.Linear(8, 1)
 
     @override
-    def forward(self, inputs: Any):
+    def forward(self, inputs: Tensor) -> Tensor:
         output, _ = self.lstm(inputs)
         output = F.relu(self.flatten(output[:, -1, :]))
         output = self.linear(output)

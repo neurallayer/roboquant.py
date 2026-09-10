@@ -1,6 +1,9 @@
+from matplotlib.axes import Axes
+from pandas import DataFrame
 import unittest
 
 from tests.common import get_feed
+from roboquant.common.timeseries import TimeSeries
 
 
 class TestTimeSeries(unittest.TestCase):
@@ -19,11 +22,13 @@ class TestTimeSeries(unittest.TestCase):
         # beginning till end in the feed
         self.assertEqual(ts.timeframe(), feed.timeframe())
 
+        self.assertIsInstance(ts, DataFrame)
         ts3 = ts[10:20]
         self.assertEqual(len(ts3), 10)
+        self.assertIsInstance(ts3, TimeSeries)
 
-        ts3.plot()
-
+        ax = ts3.plot()
+        self.assertIsInstance(ax, Axes)
 
 
 if __name__ == "__main__":
