@@ -39,7 +39,8 @@ class CSVColumns:
     time: str | None = None
 
     def get_ohlcv(self, row: dict[str, str]) -> array[float]:
-        """Return an array containing the open, high, low, close, and volume from a row in the CSV file"""
+        """Return an array containing the open, high, low, close,
+        and volume from a row in the CSV file"""
 
         if self.volume is None:
             data = [row[self.open], row[self.high], row[self.low], row[self.close], "nan"]
@@ -51,6 +52,7 @@ class CSVColumns:
 
 class CSVFeed(MemoryFeed):
     """Use CSV files with historic market data as a feed.
+
     Args:
         path: the path to the CSV file or directory with CSV files
         columns: the columns in the CSV file, the default one is for Yahoo Finance
@@ -97,9 +99,16 @@ class CSVFeed(MemoryFeed):
             files.extend(selected_files)
         return files
 
-    def _get_asset(self, filename: str) -> Asset:
-        """Return the symbol based on the filename"""
-        symbol = pathlib.Path(filename).stem.upper()
+    def _get_symbol(self, filename: str) -> str:
+        """Return the symbol based on the file name"""
+        return pathlib.Path(filename).stem.upper()
+
+    def _get_asset(self, symbol: str) -> Asset:
+        """Return the asset based on the symbol.
+        If a registered asset is found, return it. Otherwise, return a Stock asset.
+        """
+        if asset := Asset.get_asset(symbol):
+            return asset
         return Stock(symbol)
 
     def _parse_csvfiles(self, filenames: list[str]):
@@ -120,7 +129,8 @@ class CSVFeed(MemoryFeed):
         time_offset = self.time_offset
 
         for filename in filenames:
-            asset = self._get_asset(filename)
+            symbol = self._get_symbol(filename)
+            asset = self._get_asset(symbol)
             if self.asset_filter and not self.asset_filter(asset):
                 continue
             with open(filename, encoding="utf8") as csvfile:
@@ -165,11 +175,11 @@ class CSVFeed(MemoryFeed):
                 )
 
             @override
-            def _get_asset(self, filename: str):
+            def _get_symbol(self, filename: str):
                 base = pathlib.Path(filename).stem
                 symbol = base.split(".")[0].upper()
                 symbol = symbol.replace("-", ".")
-                return Stock(symbol)
+                return symbol
 
         return StooqDailyFeed()
 
@@ -192,11 +202,11 @@ class CSVFeed(MemoryFeed):
                 super().__init__(path, columns=columns, endswith=".txt", asset_filter=asset_filter)
 
             @override
-            def _get_asset(self, filename: str):
+            def _get_symbol(self, filename: str):
                 base = pathlib.Path(filename).stem
                 symbol = base.split(".")[0].upper()
                 symbol = symbol.replace("-", ".")
-                return Stock(symbol)
+                return symbol
 
         return StooqIntradayFeed()
 

@@ -80,8 +80,10 @@ class CryptoFeed(MemoryFeed):
         self._update()
 
     def _get_asset(self, symbol: str) -> Asset:
-        """Get the asset for the given symbol. The default implementation will return an
-        asset of the type Crypto.
+        """Get the asset for the given symbol.
+        If a registered asset is found, use that. Otherwise return an asset of
+        the type Crypto.
+
         Subclasses can override this method to provide a different asset type."""
         if asset := Asset.get_asset(symbol):
             return asset

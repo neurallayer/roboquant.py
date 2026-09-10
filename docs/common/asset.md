@@ -22,7 +22,7 @@ All asset types extend the common base class, {cl}`Asset`, which provides:
 
 Subclasses can add type-specific attributes and methods.
 
-The **symbol** has to be unique accross all assets and this is enforced. If you create a new asset with the same symbol name as an existing asset but with other attributes, it will raise an exception.
+The **symbol** should be unique accross all assets. 
 
 If you deal with scenarios where there are conflicting symbol names, a solution is to extend the symbol name. For example, you want to differentiate between crypto-pairs on different exchanges, add the exchange name to the symbol name:
 
@@ -85,15 +85,20 @@ option = Option("TSLA250228C00100000")
 pprint.pp(option.decode_occ_symbol())
 ```
 
-## Inspection
-It is possible to see which assets has been created so far in
-your application.
+## Register an Asset
+
+You can register an Asset upfront. Feeds will then pick
+the registered asset to publish events rather then their own logic.
 
 ```{code-cell} python
-:tags: [hide-output]
-# print all unique assets instantiated so far
-pprint.pp(Asset.assets())
+import roboquant as rq
 
-# print only the unique Stocks
-pprint.pp(Stock.assets())
+# Ensure that YahooFeed will use 
+# the asset with the currency set to EUR and 
+# named just plain ASML instead of ASML.AS
+
+Stock("ASML", EUR).register("ASML.AS")
+feed = rq.feeds.YahooFeed("ASML.AS")
+
+print(feed.assets())
 ```
