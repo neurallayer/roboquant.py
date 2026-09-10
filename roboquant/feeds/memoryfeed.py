@@ -8,7 +8,7 @@ from roboquant.common.timeframe import Timeframe
 from roboquant.feeds.historicfeed import HistoricFeed
 
 
-class InMemoryFeed(HistoricFeed):
+class MemoryFeed(HistoricFeed):
     """
     Implementation of a HistoricFeed that keeps all the data in-memory.
     It is fast for back testing (once loaded), but has a higher memory usage.

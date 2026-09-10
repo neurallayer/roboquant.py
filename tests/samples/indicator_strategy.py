@@ -13,9 +13,9 @@ from roboquant.util.indicators import BBANDS, RSI
 
 # %%
 class MyStrategy(IndicatorStrategy):
-    """Example using ta-lib to create a combined RSI/BollingerBand strategy:
-    1. BUY if `RSI < 30 and close < lower band`
-    2. SELL if `RSI > 70 and close > upper band`
+    """Example using TA-Lib to create a combined RSI/BollingerBand strategy:
+    1. BUY if `RSI < 30 and last close < lower band`
+    2. SELL if `RSI > 70 and last close > upper band`
     3. Otherwise do nothing
     """
 

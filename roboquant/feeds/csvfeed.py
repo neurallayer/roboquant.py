@@ -9,7 +9,7 @@ from typing import Callable, override
 
 from roboquant.common.asset import Asset, Stock
 from roboquant.common.event import Bar
-from roboquant.feeds.in_memory_feed import InMemoryFeed
+from roboquant.feeds.memoryfeed import MemoryFeed
 
 logger = logging.getLogger(__name__)
 
@@ -49,7 +49,7 @@ class CSVColumns:
         return array("f", [float(x) for x in data])
 
 
-class CSVFeed(InMemoryFeed):
+class CSVFeed(MemoryFeed):
     """Use CSV files with historic market data as a feed.
     Args:
         path: the path to the CSV file or directory with CSV files

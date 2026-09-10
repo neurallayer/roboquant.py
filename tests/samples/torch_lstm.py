@@ -15,6 +15,11 @@ from roboquant.journals.basicjournal import BasicJournal
 # %%
 # PyTorch LSTM Model
 class TimeSeriesLSTM(nn.Module):
+    """A PyTorch LSTM model for time series prediction.
+
+    The model takes a sequence of input features and predicts a single
+    output value (e.g., the max return over a future period).
+    """
 
     def __init__(self, feature_size: int) -> None:
         super().__init__()

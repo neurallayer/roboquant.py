@@ -16,8 +16,9 @@ from roboquant.journals.basicjournal import BasicJournal
 # Create a PyTorch Transformer Model
 class TimeSeriesTransformer(nn.Module):
     """
-    A Transformer model for time series forecasting, inspired by CodeTrading YouTube channel.
-    https://www.youtube.com/watch?v=TT_D-4z-4zY
+    A Transformer model for time series forecasting,
+    inspired by CodeTrading YouTube channel.
+    See also https://www.youtube.com/watch?v=TT_D-4z-4zY
     """
 
     def __init__(

@@ -9,7 +9,7 @@ from tickerall.types import BrokerName, TerminalType, Timeframe
 from roboquant.common.asset import Asset, Currency, Forex
 from roboquant.common.event import Bar, Event, Quote
 from roboquant.common.timeframe import utcnow
-from roboquant.feeds.in_memory_feed import InMemoryFeed
+from roboquant.feeds.memoryfeed import MemoryFeed
 from roboquant.feeds.livefeed import LiveFeed
 
 logger = logging.getLogger(__name__)
@@ -212,7 +212,7 @@ class TickerAllLiveFeed(LiveFeed):
         self._client.close()
 
 
-class TickerAllHistoricFeed(InMemoryFeed):
+class TickerAllHistoricFeed(MemoryFeed):
     """Load historic OHLC candles for a TickerAll broker account as roboquant `Bar` price-items.
 
     Built on the official `tickerall` Python SDK. Call `retrieve` for one or more symbols; the bars are kept

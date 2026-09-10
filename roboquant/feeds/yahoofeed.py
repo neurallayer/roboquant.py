@@ -8,12 +8,12 @@ from pandas import DataFrame
 
 from roboquant.common.asset import Asset, Stock
 from roboquant.common.event import Bar
-from roboquant.feeds.in_memory_feed import InMemoryFeed
+from roboquant.feeds.memoryfeed import MemoryFeed
 
 logger = logging.getLogger(__name__)
 
 
-class YahooFeed(InMemoryFeed):
+class YahooFeed(MemoryFeed):
     """A feed using the Yahoo Finance to retrieve historic market data.
 
     By default, the feed will retrieve daily data, but you can

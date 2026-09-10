@@ -7,12 +7,12 @@ import ccxt
 
 from roboquant.common.asset import Asset, Crypto
 from roboquant.common.event import Bar
-from roboquant.feeds.in_memory_feed import InMemoryFeed
+from roboquant.feeds.memoryfeed import MemoryFeed
 
 logger = logging.getLogger(__name__)
 
 
-class CryptoFeed(InMemoryFeed):
+class CryptoFeed(MemoryFeed):
     """Retrieve historic crypto market data using the CCXT library.
     By default, it will retrieve daily data, but you can specify a
     different interval.

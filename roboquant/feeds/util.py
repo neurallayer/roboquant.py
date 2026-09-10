@@ -210,7 +210,10 @@ class AssetSerializer:
 
 
 class AssetRegistry:
-    """@TODO better implement"""
+    """
+    Allow to register assets with a certain symbol name.
+    @TODO better implement
+    """
 
     def __init__(self):
         self.__registry: dict[str, Asset] = {}

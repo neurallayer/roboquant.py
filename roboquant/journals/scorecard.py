@@ -5,7 +5,7 @@ from roboquant.common.event import Event
 from roboquant.common.metric import Metric
 from roboquant.common.order import Order
 from roboquant.common.signal import Signal
-from roboquant.feeds.in_memory_feed import InMemoryFeed
+from roboquant.feeds.memoryfeed import MemoryFeed
 from roboquant.journals.journal import Journal
 from roboquant.journals.metricsjournal import MetricsJournal
 
@@ -29,7 +29,7 @@ class Scorecard(Journal):
         self._volume_type = volume_type
         self._step = 0
         self.metrics = metrics
-        self._feed = InMemoryFeed()
+        self._feed = MemoryFeed()
         self._trades = []
         self._journal = MetricsJournal(*metrics)
 
