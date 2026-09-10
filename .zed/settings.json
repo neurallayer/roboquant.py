@@ -8,11 +8,17 @@
     "**/.DS_Store",
     ".idea",
     "**/.*_cache",
-    "**/.git"
+    "**/.git",
   ],
   "languages": {
     "Python": {
-      "language_servers": ["ruff", "pyrefly", "!ty", "!pyright", "!basedpyright"],
+      "language_servers": [
+        "ruff",
+        "pyrefly",
+        "!ty",
+        "!pyright",
+        "!basedpyright",
+      ],
       "tasks": {
         "variables": {
           "TEST_RUNNER": "unittest",
@@ -36,6 +42,10 @@
       },
     },
     "pyrefly": {
+      "binary": {
+        "path": ".venv/bin/pyrefly",
+        "arguments": ["lsp"],
+      },
       "settings": {
         "python": {
           "pythonPath": ".venv/bin/python",
