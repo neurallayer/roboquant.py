@@ -18,7 +18,7 @@ class Order:
     The `gtd` (good till date) is optional, and if not set implies the order is valid
     for the DAY. The `info` can hold any arbitrary properties set on the order.
 
-    The `id`, `fill` and `time` properties are managed by the `Broker`.
+    The `id`, `fill` and `time` properties should only be set by the `Broker`.
     """
 
     asset: Asset
@@ -46,7 +46,7 @@ class Order:
     """Any additional information about the order"""
 
     id: str = ""
-    """The unique id of the order. This is set by the broker only and should not be updated by the user.
+    """The unique id of the order. This is set by the broker only and should not be updated elsewhere.
     The id is an empty string for new orders and set to a non-empty string when the order is placed with the broker.
     The id is used to identify the order when modifying or cancelling it.
     """
@@ -81,12 +81,15 @@ class Order:
 
     def modify(self, size: Decimal | None = None, limit: float | None = None) -> "Order":
         """
-        Create a modify-order. You can update the size and/or the limit of an order.
+        Create a modify-order.
+        You can update the size and/or the limit of an order, assuming the order has an id assigned and
+        your broker supports order modification.
+
         The returned order has the same id as the original order.
         You can only update existing orders that have an id assigned.
 
         If you want to cancel an order, use the `cancel` method instead.
-        The size of an order cannot be modified to zero.
+        The size of an order cannot be changed to zero using this method.
 
         Args:
             size: The new size of the order.

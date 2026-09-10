@@ -30,26 +30,19 @@ class Asset(ABC):
     info: dict[str, Any] | None = None
     """Additional info that can be set"""
 
-    __registry: ClassVar[dict[str, "Asset"]] = {}
+    _registry: ClassVar[dict[str, "Asset"]] = {}
     """Keeps track of all created assets and their symbol name"""
 
-
-    def __post_init__(self):
-        """Ensure unique symbol across different assets and keep track of all unique assets created"""
-        if self.symbol in Asset.__registry:
-            asset = Asset.__registry[self.symbol]
-            if self != asset:
-               raise ValueError(f"detected same symbol for different assets {asset} != {self}")
-        else:
-            Asset.__registry[self.symbol] = self
+    def register(self, symbol: str | None = None):
+        """Register the asset with the given symbol. If no symbol is provided, use the asset's symbol.
+        Other components like the Feed can use the registry to look up assets by symbol.
+        """
+        Asset._registry[symbol or self.symbol] = self
 
     @classmethod
-    def assets(cls):
-        """Return all assets for the class or subclass
-
-        For example `Stock.assets()` returns all so far created Stock assets.
-        """
-        return [asset for asset in Asset.__registry.values() if isinstance(asset, cls)]
+    def get_asset(cls, symbol: str, default: "Asset | None" = None) -> "Asset | None":
+        """Return the asset for the given symbol. If no asset is found, return the default value."""
+        return Asset._registry.get(symbol, default)
 
     def value(self, size: Decimal, price: float) -> float:
         """Return the total value given the provided size and price.

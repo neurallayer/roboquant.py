@@ -95,7 +95,7 @@ class YahooFeed(MemoryFeed):
         Subclasses can override this method to support different asset classes
         or currencies.
         """
-        return Stock(symbol)
+        return Asset.get_asset(symbol) or Stock(symbol)
 
     @staticmethod
     def us_stocks_10(

@@ -44,6 +44,9 @@ def _get_asset(symbol: str | None, asset_class: AssetClass | None) -> Asset:
     """
     assert symbol and asset_class, "no symbol found or asset class parsed"
 
+    if asset := Asset.get_asset(symbol):
+        return asset
+
     match asset_class:
         case AssetClass.US_EQUITY:
             return Stock(symbol, USD)

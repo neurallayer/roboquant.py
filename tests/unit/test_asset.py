@@ -11,13 +11,11 @@ class TestAsset(unittest.TestCase):
 
     def test_stock(self):
         tesla = Stock("TSLA")
+        tesla.register()
         self.assertEqual("TSLA", tesla.symbol)
         self.assertEqual(USD, tesla.currency)
 
-        self.assertIn(tesla, Stock.assets())
-        self.assertIn(tesla, Asset.assets())
-        self.assertNotIn(tesla, Forex.assets())
-
+        self.assertEqual(tesla, Stock.get_asset("TSLA"))
         cv = tesla.value(Decimal(100), 150.0)
         self.assertEqual(cv, 100*150.0)
 
@@ -56,11 +54,11 @@ class TestAsset(unittest.TestCase):
                 return super().value(size, price) * self.multiplier
 
         a = CustomAsset("TEST/XYZ", Currency("XYZ"), multiplier=4)
+        a.register()
         v = a.value(Decimal(100), 150.0)
         self.assertEqual(v, 100 * 150.0 * 4)
 
-        assets = CustomAsset.assets()
-        self.assertListEqual(assets, [a])
+        self.assertEqual(a, CustomAsset.get_asset("TEST/XYZ"))
 
 
 if __name__ == "__main__":

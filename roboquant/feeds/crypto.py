@@ -83,4 +83,6 @@ class CryptoFeed(MemoryFeed):
         """Get the asset for the given symbol. The default implementation will return an
         asset of the type Crypto.
         Subclasses can override this method to provide a different asset type."""
+        if asset := Asset.get_asset(symbol):
+            return asset
         return Crypto.from_symbol(symbol)

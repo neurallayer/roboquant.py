@@ -25,6 +25,10 @@ def _to_asset(symbol: str, quote_currency: Currency | None = None) -> Asset:
     a recognizable pair does it fall back to `fallback_currency` (never silently the account currency for a
     symbol whose real currency is known).
     """
+
+    if asset := Asset.get_asset(symbol):
+        return asset
+
     if quote_currency is not None:
         return Forex(symbol, quote_currency)
 
