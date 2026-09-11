@@ -86,17 +86,17 @@ class LiveBroker(Broker):
         pass
 
     @abstractmethod
-    def _cancel_order(self, order: Order):
+    def _cancel_order(self, order: Order) -> None:
         """subclasses should implement this method"""
         pass
 
     @abstractmethod
-    def _update_order(self, order: Order):
+    def _update_order(self, order: Order) -> None:
         """subclasses should implement this method"""
         pass
 
     @abstractmethod
-    def _place_order(self, order: Order):
+    def _place_order(self, order: Order) -> None:
         """subclasses should implement this method"""
         pass
 
@@ -153,7 +153,7 @@ class LiveBroker(Broker):
         return order
 
     @override
-    def place_orders(self, orders: list[Order]):
+    def place_orders(self, orders: list[Order]) -> None:
         if not orders:
             return
 

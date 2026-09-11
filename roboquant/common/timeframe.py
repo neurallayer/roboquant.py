@@ -54,9 +54,10 @@ class Timeframe:
             raise ValueError("start > end")
 
     @classmethod
-    def fromisoformat(cls, start: str, end: str, inclusive : bool =False):
+    def fromisoformat(cls, start: str, end: str, inclusive : bool =False) -> "Timeframe":
         """
         Create an instance of Timeframe based on a start- and end-datetime in ISO 8601 format.
+        Like all Timeframes, the resulting timeframe will have the timezone set to UTC.
 
         Args:
             start (str): Start datetime in ISO 8601 format.

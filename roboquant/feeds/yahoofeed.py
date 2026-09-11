@@ -1,6 +1,5 @@
 import logging
 import math
-import warnings
 from array import array
 from datetime import date, datetime, timezone
 
@@ -46,10 +45,6 @@ class YahooFeed(MemoryFeed):
         except ImportError as e:
             logger.warning("Couldn't import yfinance package, perhaps it is not installed?")
             raise e
-
-        # Disable some yfinance warnings
-        warnings.simplefilter(action="ignore", category=FutureWarning)
-        warnings.simplefilter(action="ignore", category=DeprecationWarning)
 
         columns = ["Open", "High", "Low", "Close", "Volume", "Adj Close"]
 

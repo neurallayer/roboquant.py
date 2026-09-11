@@ -75,17 +75,17 @@ class AlpacaBroker(LiveBroker):
         )
 
     @override
-    def _cancel_order(self, order: Order):
+    def _cancel_order(self, order: Order) -> None:
         self.__client.cancel_order_by_id(order.id)
 
     @override
-    def _update_order(self, order: Order):
+    def _update_order(self, order: Order) -> None:
         req = ReplaceOrderRequest(qty=int(abs(float(order.size))), limit_price=order.limit)
         result = self.__client.replace_order_by_id(order.id, req)
         logger.info("result update order oder=%s result=%s", order, result)
 
     @override
-    def _place_order(self, order: Order):
+    def _place_order(self, order: Order) -> None:
         req = self._get_order_request(order)
         result = self.__client.submit_order(req)
         logger.info("result place order oder=%s result=%s", order, result)

@@ -209,7 +209,6 @@ class SimBroker(Broker):
 
         prices = event.price_items
         time = event.time
-
         orders: dict[str, Order] = {}
 
         for order in self._orders.values():
@@ -238,7 +237,6 @@ class SimBroker(Broker):
         Orders that reduce position size don't reserve buying power."""
         result = Wallet()
         for order in self._orders.values():
-            assert order.remaining
             if self.__is_increase_position(order):
                 price = self._prices[order.asset].price(self.price_type)
                 result += order.remaining_amount(price)
@@ -253,8 +251,8 @@ class SimBroker(Broker):
         return reserved
 
     def close_positions(self) -> Account:
-        """Close the open positions in the account using last known market price.
-        Existing open orders will be disguarded.
+        """Close the open positions in the account using last known market prices.
+        Existing open orders will be disguarded and the updated account will be returned.
         """
         orders: list[Order] = []
         for asset, pos in self._positions.items():
@@ -288,7 +286,11 @@ class SimBroker(Broker):
     @override
     def sync(self, event: Event | None = None) -> Account:
         """This will perform the order-execution simulation for the open orders and
-        return the updated the account as a result."""
+        return the updated the account as a result.
+
+        If no event is passed, no orders will be processed and only a new copy of
+        the account will be returned.
+        """
 
         if event:
             self._prices = self._prices | event.price_items

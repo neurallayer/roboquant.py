@@ -35,13 +35,15 @@ class Asset(ABC):
 
     def register(self, symbol: str | None = None):
         """Register the asset with the given symbol. If no symbol is provided, use the asset's symbol.
-        Other components like the Feed can use the registry to look up assets by symbol.
+        Other components like the Feed use the registry to look up assets by symbol and use the corresponding
+        asset.
         """
         Asset._registry[symbol or self.symbol] = self
 
     @classmethod
     def get_asset(cls, symbol: str, default: "Asset | None" = None) -> "Asset | None":
-        """Return the asset for the given symbol. If no asset is found, return the default value."""
+        """Return the registered asset for the given symbol.
+        If no asset is found, return the default value."""
         return Asset._registry.get(symbol, default)
 
     def value(self, size: Decimal, price: float) -> float:
