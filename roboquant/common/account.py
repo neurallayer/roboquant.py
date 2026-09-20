@@ -1,6 +1,7 @@
 from dataclasses import asdict, dataclass, replace
 from datetime import datetime
 from decimal import Decimal
+from functools import cached_property
 from typing import Any
 
 import pandas as pd
@@ -15,7 +16,7 @@ from roboquant.common.timeframe import utcnow
 from roboquant.common.trade import Trade
 
 
-@dataclass(slots=True, frozen=True)
+@dataclass(slots=False, frozen=True)
 class Account:
     """Represents a trading account and is managed by the broker.
     It keeps track of the cash, positions, orders and trades.
@@ -180,8 +181,19 @@ class Account:
         Returns:
             The net position size as a Decimal.
         """
-        return sum(pos.size for pos in self.positions if pos.asset == asset) or Decimal()
+        return self.net_positions_sizes.get(asset) or Decimal()
 
+    @cached_property
+    def net_positions_sizes(self) -> dict[Asset, Decimal]:
+        """
+        Return the net position sizes for all the open positions.
+        The result will be cached.
+        """
+        result: dict[Asset, Decimal] = {}
+        for pos in self.positions:
+            size = result.get(pos.asset) or Decimal()
+            result[pos.asset] = size + pos.size
+        return result
 
     def get_positions(self, asset: Asset) -> list[Position]:
         """

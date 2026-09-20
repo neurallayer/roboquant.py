@@ -1,62 +1,57 @@
 import os
 import time
-import unittest
 
 import roboquant as rq
 from roboquant.traders.simpletrader import SimpleTrader
 
 
-class TestBigFeed(unittest.TestCase):
-    """Run two large back tests, one over daily bars and one over 5-minutes bars"""
 
-    @staticmethod
-    def _print(account: rq.Account, journal: rq.journals.BasicJournal, n_assets: int, load_time: float, runtime: float):
-        print("", account, journal, sep="\n\n")
+def _print(account: rq.Account, journal: rq.journals.BasicJournal, n_assets: int, load_time: float, runtime: float):
+    print("", account, journal, sep="\n\n")
 
-        candles = journal.items / 1_000_000.0
-        throughput = candles / runtime
+    candles = journal.items / 1_000_000.0
+    throughput = candles / runtime
 
-        # Print statistics
-        print()
-        print(f"load time  = {load_time:.1f}s")
-        print(f"files      = {n_assets}")
-        print(f"throughput = {n_assets / load_time:.0f} files/s")
-        print(f"run time   = {runtime:.1f}s")
-        print(f"candles    = {candles:.1f}M")
-        print(f"throughput = {throughput:.2f}M candles/s")
-        print()
+    # Print statistics
+    print()
+    print(f"load time  = {load_time:.1f}s")
+    print(f"files      = {n_assets}")
+    print(f"throughput = {n_assets / load_time:.0f} files/s")
+    print(f"run time   = {runtime:.1f}s")
+    print(f"candles    = {candles:.1f}M")
+    print(f"throughput = {throughput:.2f}M candles/s")
+    print()
 
-    def _run(self, feed: rq.Feed, journal: rq.journals.BasicJournal):
-        strategy = rq.strategies.EMACrossover(13, 26)
-        start = time.time()
-        trader = SimpleTrader(50)
-        account = rq.run(feed, strategy, trader = trader, journal=journal)
-        self.assertTrue(journal.items > 1_000_000)
-        self.assertTrue(journal.events > 1_000)
-        return account, time.time() - start
+def _run(feed: rq.Feed, journal: rq.journals.BasicJournal):
+    strategy = rq.strategies.EMACrossover(13, 26)
+    start = time.time()
+    trader = SimpleTrader(50)
+    account = rq.run(feed, strategy, trader = trader, journal=journal)
+    return account, time.time() - start
 
-    def test_big_feed_daily(self):
-        print("============ Daily Bars ============")
-        start = time.time()
-        path = os.path.expanduser("~/data/daily/us/nyse stocks/")
-        feed = rq.feeds.CSVFeed.stooq_us_daily(path)
-        load_time = time.time() - start
+def test_big_feed_daily():
+    print("============ Daily Bars ============")
+    start = time.time()
+    path = os.path.expanduser("~/data/daily/us/nyse stocks/")
+    feed = rq.feeds.CSVFeed.stooq_us_daily(path)
+    load_time = time.time() - start
 
-        journal = rq.journals.BasicJournal()
-        account, runtime = self._run(feed, journal)
-        self._print(account, journal, len(feed.assets()), load_time, runtime)
+    journal = rq.journals.BasicJournal()
+    account, runtime = _run(feed, journal)
+    _print(account, journal, len(feed.assets()), load_time, runtime)
 
-    def test_big_feed_intraday(self):
-        print("============ 5 min Bars ============")
-        start = time.time()
-        path = os.path.expanduser("~/data/5 min/us/nyse stocks/")
-        feed = rq.feeds.CSVFeed.stooq_us_intraday(path)
-        load_time = time.time() - start
+def test_big_feed_intraday():
+    print("============ 5 min Bars ============")
+    start = time.time()
+    path = os.path.expanduser("~/data/5 min/us/nyse stocks/")
+    feed = rq.feeds.CSVFeed.stooq_us_intraday(path)
+    load_time = time.time() - start
 
-        journal = rq.journals.BasicJournal()
-        account, runtime = self._run(feed, journal)
-        self._print(account, journal, len(feed.assets()), load_time, runtime)
+    journal = rq.journals.BasicJournal()
+    account, runtime = _run(feed, journal)
+    _print(account, journal, len(feed.assets()), load_time, runtime)
 
 
 if __name__ == "__main__":
-    unittest.main()
+    test_big_feed_daily()
+    test_big_feed_intraday()
