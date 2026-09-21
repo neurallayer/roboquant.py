@@ -9,7 +9,7 @@ from roboquant.common.asset import Asset
 from roboquant.common.event import Bar
 from roboquant.common.metric import Metric
 from roboquant.common.timeframe import Timeframe
-from roboquant.common.timeseries import TimeSeries
+from roboquant.common.timeseries import TimeSeries, Timeline
 from roboquant.common.trade import Trade
 from roboquant.feeds.feed import Feed
 
@@ -48,7 +48,7 @@ class HistoricFeed(Feed, ABC):
         if isinstance(asset, str):
             asset = self.get_asset(asset)
 
-        timeline: list[datetime] = []
+        timeline: Timeline = Timeline()
         data: dict[str, list[float]] = {}
         keys = ["open", "high", "low", "close", "volume"]
         for key in keys:
@@ -103,7 +103,7 @@ class HistoricFeed(Feed, ABC):
             if not assets:
                 assets = tuple(self.assets())
 
-            timeline: list[datetime] = []
+            timeline: Timeline = Timeline()
             result: dict[str, list[float]] = {asset.symbol: [] for asset in assets}
             for evt in self.play(timeframe):
                 timeline.append(evt.time)
@@ -195,7 +195,7 @@ class HistoricFeed(Feed, ABC):
         """
         from roboquant.common.account import Account
 
-        timeline: list[datetime] = []
+        timeline: Timeline = Timeline()
         account = Account.empty()
         data: dict[str, list[float]] = {}
 

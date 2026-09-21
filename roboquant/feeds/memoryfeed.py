@@ -5,6 +5,7 @@ from typing import Iterator, override
 from roboquant.common.asset import Asset
 from roboquant.common.event import Event, PriceItem
 from roboquant.common.timeframe import Timeframe
+from roboquant.common.timeseries import Timeline
 from roboquant.feeds.historicfeed import HistoricFeed
 
 
@@ -42,9 +43,9 @@ class MemoryFeed(HistoricFeed):
         """Return the list of unique assets available in this feed"""
         return list(self.__assets)
 
-    def timeline(self) -> list[datetime]:
+    def timeline(self) -> Timeline:
         """Return the timeline of this feed as a list of datatime objects"""
-        return list(self.__data.keys())
+        return Timeline(self.__data.keys())
 
     def timeframe(self) -> Timeframe:
         """Return the timeframe of this feed"""

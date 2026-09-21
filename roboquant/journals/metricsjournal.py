@@ -8,7 +8,7 @@ from roboquant.common.event import Event
 from roboquant.common.metric import Metric
 from roboquant.common.order import Order
 from roboquant.common.signal import Signal
-from roboquant.common.timeseries import TimeSeries
+from roboquant.common.timeseries import TimeSeries, Timeline
 from roboquant.journals.journal import Journal
 from roboquant.util.metrics import PNLMetric
 
@@ -43,7 +43,7 @@ class MetricsJournal(Journal):
 
     def get_metrics(self, *metric_names: str) -> TimeSeries:
         """Return the ccaptured metrics of oen or more metrics as a TimeSeries"""
-        timeline: list[datetime] = []
+        timeline: Timeline = Timeline()
         values: dict[str, list[float]] = {name: [] for name in metric_names}
         for time, metrics in self._history:
             for name in metric_names:

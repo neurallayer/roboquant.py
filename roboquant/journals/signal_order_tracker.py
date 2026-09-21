@@ -8,7 +8,7 @@ from roboquant.common.event import Event
 from roboquant.common.order import Order
 from roboquant.common.signal import Signal
 from roboquant.common.timeframe import Timeframe
-from roboquant.common.timeseries import TimeSeries
+from roboquant.common.timeseries import TimeSeries, Timeline
 from roboquant.journals.journal import Journal
 
 
@@ -31,7 +31,7 @@ class SignalOrderTracker(Journal):
         """Get the order limits for an asset within the given timeframe. Cancel or modify
             orders are ignored.
         """
-        timeline : list[datetime]= []
+        timeline : Timeline = Timeline()
         data : list[float] = []
         for time, orders in self.orders.items():
             if not timeframe or time in timeframe:
@@ -45,7 +45,7 @@ class SignalOrderTracker(Journal):
         """Get the order size for an asset within the given timeframe. Cancel or modify
         orders are ignored.
         """
-        timeline : list[datetime]= []
+        timeline : Timeline = Timeline()
         data : list[float] = []
         for time, orders in self.orders.items():
             if not timeframe or time in timeframe:
@@ -60,7 +60,7 @@ class SignalOrderTracker(Journal):
         If there is more than one signal at a given time, it returns
         the rating of the first signal.
         """
-        timeline : list[datetime]= []
+        timeline : Timeline = Timeline()
         data : list[float] = []
         for time, signals in self.signals.items():
             if not timeframe or time in timeframe:

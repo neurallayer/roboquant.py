@@ -1,3 +1,4 @@
+from collections import UserList
 from datetime import datetime
 from typing import Any
 
@@ -9,8 +10,13 @@ from matplotlib.axes import Axes
 from roboquant.common.timeframe import Timeframe
 
 Data = list[float]
-Timeline = list[datetime]
 
+class Timeline(UserList[datetime]):
+
+    def timeframe(self) -> Timeframe:
+        if not self:
+            return Timeframe.EMPTY
+        return Timeframe(self[0], self[-1], True)
 
 class TimeSeries(pd.DataFrame):
     """A multivariate time-series that contains a timeline and named values.
