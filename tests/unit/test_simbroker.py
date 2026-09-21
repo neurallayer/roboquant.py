@@ -35,10 +35,8 @@ class TestSimbroker(unittest.TestCase):
         broker = SimBroker()
         account = run(feed, strategy, broker=broker)
         equity = account.equity()[USD]
-        equity2 = (account.pnl() + broker.deposit)[USD]
         self.assertTrue(math.isfinite(equity))
         self.assertTrue(equity != 0)
-        self.assertAlmostEqual(equity, equity2)
 
     def test_simbroker(self):
         broker = SimBroker()

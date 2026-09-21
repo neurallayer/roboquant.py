@@ -58,11 +58,10 @@ class SimBroker(Broker):
         self._orders: dict[str, Order] = {}
         self._cash = Wallet(self.deposit)
         self._buying_power = self.deposit
-        self._trades = []
         self._prices : dict [Asset, PriceItem] = {}
         self._positions: dict[Asset, Position] = {}
         self._order_id = 0
-        self._last_update = datetime.fromisoformat("1900-01-01T00:00:00+00:00")
+        self._last_update : datetime = datetime.fromisoformat("1900-01-01T00:00:00+00:00")
 
     def _fee(self, asset: Asset, fill: Decimal, price: float, time: datetime) -> float:
         """Calculate any additional fee or commission, the default is zero.
@@ -106,17 +105,14 @@ class SimBroker(Broker):
 
         return pnl
 
-    def __process_fill(self, asset: Asset, fill: Decimal, price: float, time: datetime) -> None:
+    def __process_fill(self, asset: Asset, fill: Decimal, price: float, time: datetime) -> Trade:
         """Update the account positions, trades and cash based on a new fill"""
-        if not fill:
-            return
-
         self._cash -= asset.amount(fill, price)
         fee = self._fee(asset, fill, price, time)
         self._cash -= Amount(asset.currency, fee)
         pnl = self.__update_position(asset, fill, price) - fee
         trade = Trade(asset, time, fill, price, pnl)
-        self._trades.append(trade)
+        return trade
 
     def _get_execution_price(self, order: Order, item: PriceItem) -> float:
         """Return the execution price to use for an order based on the price item.
@@ -179,7 +175,7 @@ class SimBroker(Broker):
                 if order.id in self._orders:
                     del self._orders[order.id]
                 else:
-                    logging.warning("cancelled order doesn't exist %s", order)
+                    logger.warning("cancelled order doesn't exist %s", order)
             else:
                 self._orders[order.id] = order
 
@@ -197,7 +193,7 @@ class SimBroker(Broker):
 
         return exchange_date > order_date
 
-    def __process_orders(self, event: Event) -> None:
+    def __process_orders(self, event: Event) -> list[Trade]:
         """
         Order processing only uses prices from the event, not prices stored in the
         history (`self._price`). So if there is no price in the event for an asset,
@@ -205,11 +201,12 @@ class SimBroker(Broker):
         """
 
         if not self._orders:
-            return
+            return []
 
         prices = event.price_items
         time = event.time
         orders: dict[str, Order] = {}
+        trades: list[Trade] = []
 
         for order in self._orders.values():
 
@@ -223,14 +220,17 @@ class SimBroker(Broker):
                 price = self._get_execution_price(order, item)
                 if order.is_executable(price):
                     fill = self._get_fill(order, price)
-                    logger.info("executed order=%s fill=%s", order, fill)
-                    order = replace(order, fill = order.fill + fill)
-                    self.__process_fill(order.asset, fill, price, time)
+                    if fill:
+                        logger.info("filled order=%s fill=%s", order, fill)
+                        order = replace(order, fill = order.fill + fill)
+                        trade = self.__process_fill(order.asset, fill, price, time)
+                        trades.append(trade)
 
             if order.remaining:
                 orders[order.id] = order
 
         self._orders = orders
+        return trades
 
     def _calculate_open_orders(self) -> Wallet:
         """Calculate the buying power required for the open orders.
@@ -291,11 +291,11 @@ class SimBroker(Broker):
         If no event is passed, no orders will be processed and only a new copy of
         the account will be returned.
         """
-
+        trades: list[Trade] = []
         if event:
             self._prices = self._prices | event.price_items
             self._last_update = event.time
-            self.__process_orders(event)
+            trades = self.__process_orders(event)
             self.__update_account_positions()
 
         return Account(
@@ -304,7 +304,7 @@ class SimBroker(Broker):
             orders= list(self._orders.values()),
             last_update=self._last_update,
             cash = self._cash,
-            trades=self._trades
+            trades=trades
         )
 
     def __repr__(self) -> str:
