@@ -65,9 +65,9 @@ class TimeSeries(pd.DataFrame):
         """
         return self.reset_index(drop=True).plot(*args, **kwargs)
 
-    def timeline(self) -> list[datetime]:
+    def timeline(self) -> Timeline:
         """Return the timeline of the time series as a list of datetime objects."""
-        return [t.to_pydatetime(warn=False) for t in self.index]
+        return Timeline(t.to_pydatetime(warn=False) for t in self.index)
 
     def limit_timeline(self, timeframe: Timeframe) -> "TimeSeries":
         """Limit the time series to a certain timeframe. If the timeframe is empty,
