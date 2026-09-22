@@ -1,9 +1,12 @@
+from datetime import timedelta
+
 from matplotlib.axes import Axes
 from pandas import DataFrame
 import unittest
 
+from roboquant.common.timeframe import Timeframe
 from tests.common import get_feed
-from roboquant.common.timeseries import TimeSeries
+from roboquant.common.timeseries import TimeSeries, Timeline
 
 
 class TestTimeSeries(unittest.TestCase):
@@ -29,6 +32,17 @@ class TestTimeSeries(unittest.TestCase):
 
         ax = ts3.plot()
         self.assertIsInstance(ax, Axes)
+
+    def test_timeline(self):
+        tf = Timeframe.fromisoformat("2020-01-01", "2020-06-01")
+        tl = Timeline.from_timeframe(tf, "1 day")
+        self.assertEqual(len(tl), 152)
+        self.assertEqual(tl[0], tf.start)
+        prev = tf.start - timedelta(days = 1)
+        for t in tl:
+            self.assertGreater(t, prev)
+            self.assertLessEqual(t, tf.end)
+            prev = t
 
 
 if __name__ == "__main__":

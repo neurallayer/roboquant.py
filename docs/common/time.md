@@ -46,7 +46,7 @@ assert len(tfs) == 100
 ```
 
 ## Timeline
-Timeline is not its own type but just defined as `list[datatime]`.
+Timeline implements a list of `datetime` object.
 
 
 ## TimeSeries
