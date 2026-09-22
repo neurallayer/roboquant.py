@@ -1,4 +1,5 @@
 from datetime import timedelta
+from typing import Any
 
 from matplotlib.axes import Axes
 from pandas import DataFrame
@@ -32,6 +33,14 @@ class TestTimeSeries(unittest.TestCase):
 
         ax = ts3.plot()
         self.assertIsInstance(ax, Axes)
+
+    def test_plot(self):
+        feed = get_feed()
+        asset = feed.get_asset("AAPL")
+        ax = feed.plot(asset)
+        dt: Any = ax.lines[0].get_xdata()
+        for a,b in zip(feed.timeline(), dt):
+            self.assertEqual(a,b)
 
     def test_timeline(self):
         tf = Timeframe.fromisoformat("2020-01-01", "2020-06-01")
