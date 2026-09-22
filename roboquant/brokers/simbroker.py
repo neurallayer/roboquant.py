@@ -60,6 +60,7 @@ class SimBroker(Broker):
         self._buying_power = self.deposit
         self._prices : dict [Asset, PriceItem] = {}
         self._positions: dict[Asset, Position] = {}
+        self._trades: list[Trade] = []
         self._order_id = 0
         self._last_update : datetime = datetime.fromisoformat("1900-01-01T00:00:00+00:00")
 
@@ -291,11 +292,11 @@ class SimBroker(Broker):
         If no event is passed, no orders will be processed and only a new copy of
         the account will be returned.
         """
-        trades: list[Trade] = []
+
         if event:
             self._prices = self._prices | event.price_items
             self._last_update = event.time
-            trades = self.__process_orders(event)
+            self._trades += self.__process_orders(event)
             self.__update_account_positions()
 
         return Account(
@@ -304,7 +305,7 @@ class SimBroker(Broker):
             orders= list(self._orders.values()),
             last_update=self._last_update,
             cash = self._cash,
-            trades=trades
+            trades=self._trades
         )
 
     def __repr__(self) -> str:

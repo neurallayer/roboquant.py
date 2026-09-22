@@ -3,7 +3,7 @@ from roboquant.journals.basicjournal import BasicJournal
 from roboquant.journals.journal import Journal
 from roboquant.journals.metricsjournal import MetricsJournal
 from roboquant.journals.scorecard import Scorecard
-from roboquant.journals.signal_order_tracker import SignalOrderTracker
+from roboquant.journals.trackerjournal import TrackerJournal
 from roboquant.journals.tensorboard import TensorboardJournal
 from roboquant.util.metrics import AlphaBeta, AssetMetric, PNLMetric, PriceMetric, RunMetric
 
@@ -19,5 +19,5 @@ __all__ = [
     "RunMetric",
     "TensorboardJournal",
     "Scorecard",
-    "SignalOrderTracker"
+    "TrackerJournal"
 ]

@@ -1,5 +1,5 @@
 from collections import UserList
-from datetime import datetime
+from datetime import datetime, timedelta
 from typing import Any
 
 import numpy as np
@@ -12,6 +12,24 @@ from roboquant.common.timeframe import Timeframe
 Data = list[float]
 
 class Timeline(UserList[datetime]):
+    """A list of sorted datetime objects."""
+
+    @staticmethod
+    def from_timeframe(timeframe: Timeframe, step: timedelta | str) -> "Timeline":
+        """
+        Create a timeline that is within the provided timeframe using step as is increment.
+        """
+
+        result = Timeline()
+
+        if isinstance(step, str):
+            step = pd.to_timedelta(step)
+
+        time = timeframe.start
+        while time in timeframe:
+            result.append(time)
+            time += step
+        return result
 
     def timeframe(self) -> Timeframe:
         if not self:
@@ -39,10 +57,12 @@ class TimeSeries(pd.DataFrame):
     def from_data(timeline: Timeline, data: dict[str, Data]) -> "TimeSeries":
         """Create a TimeSeries from a timeline and a dictionary of named data.
         The keys of the dictionary are used as column names and the values are used
-        as the data for each column."""
+        as the data for each column.
+        """
         result : TimeSeries = TimeSeries.from_dict(data)
         result.index = timeline
         return result
+
 
     @staticmethod
     def univariate(name: str, timeline: Timeline, data: Data) -> "TimeSeries":
@@ -64,6 +84,21 @@ class TimeSeries(pd.DataFrame):
         charts when only the values are important and not the absolute timeline.
         """
         return self.reset_index(drop=True).plot(*args, **kwargs)
+
+    def interp(self, timeline: Timeline) -> "TimeSeries":
+        """Return a new `TimeSeries` object for the provided timeline using interpolated
+        values for the data columns if required.
+
+        Under the hood this method uses the `numpy.interp` function.
+        """
+        x = [t.timestamp() for t in timeline]
+        xp = [t.timestamp() for t in self.timeline()]
+        data: dict[str, list[float]] = {}
+        for column in self.columns:
+            values = np.interp(x, xp, self[column])
+            data[column] = values.tolist()
+            assert len(values) == len(timeline)
+        return TimeSeries.from_data(timeline, data)
 
     def timeline(self) -> Timeline:
         """Return the timeline of the time series as a list of datetime objects."""

@@ -50,6 +50,7 @@
         "timeframes",
         "twinx",
         "VIXY",
+        "xdata",
         "yfinance",
         "yticks",
         "zorder"

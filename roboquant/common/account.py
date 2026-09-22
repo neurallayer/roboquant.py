@@ -157,8 +157,9 @@ class Account:
 
     def realized_pnl(self, *assets: Asset) -> Wallet:
         """
-        Return the sum of the realized profit and loss for trades executed in the account.
-        If one or more asset is provided, limit it to those assets, otherwise include all assets.
+        Return the sum of the realized profit and loss for trades executed.
+        If one or more asset is provided, limit it to those assets,
+        otherwise include all assets.
 
         Returns:
             Wallet: The realized profit and loss.
@@ -166,7 +167,7 @@ class Account:
         result = Wallet()
         for trade in self.trades:
             if not assets or trade.asset in assets:
-                result += Amount(trade.asset.currency, trade.pnl)
+                result += trade.pnl_amount()
         return result
 
     def position_size(self, asset: Asset) -> Decimal:

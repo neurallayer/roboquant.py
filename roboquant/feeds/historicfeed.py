@@ -1,6 +1,6 @@
 from abc import ABC
 from datetime import datetime
-from typing import Any
+from typing import Any, Iterable
 
 import matplotlib.pyplot as plt
 from matplotlib.axes import Axes
@@ -10,6 +10,7 @@ from roboquant.common.event import Bar
 from roboquant.common.metric import Metric
 from roboquant.common.timeframe import Timeframe
 from roboquant.common.timeseries import TimeSeries, Timeline
+from roboquant.common.trade import Trade
 from roboquant.feeds.feed import Feed
 
 
@@ -121,6 +122,7 @@ class HistoricFeed(Feed, ABC):
         volume_type: str = "DEFAULT",
         timeframe: Timeframe | None = None,
         ax: Axes | None = None,
+        trades: Iterable[Trade] | None = None,
         plot_volume: bool = True,
         **kwargs: Any,
     ) -> Axes:
@@ -131,11 +133,13 @@ class HistoricFeed(Feed, ABC):
         Args:
             asset (Asset | str): The asset or symbol for which to plot prices.
             price_type (str, optional): The type of price to plot, e.g., "OPEN" or "CLOSE". Defaults to "DEFAULT".
+            volume_type: The type of price to plot, defaults to "DEFAULT".
             timeframe (Timeframe | None, optional): The timeframe over which to plot prices. If None, the entire feed
                 timeframe is used. Defaults to None.
             ax (matplotlib.axes.Axes, optional): The matplotlib axis where the plot will be drawn. If not specified,
                 the default pyplot axis will be used.
-            trades: trades to be plotted as markers.
+            trades: trades to be plotted as markers. Trades of different assets and outside the timeframe will be ignored.
+            plot_volume: plot the volume in the same chart, defaults to True.
             **kwargs: Additional keyword arguments to pass to the `ax.plot()` function.
 
         Returns:
@@ -159,6 +163,8 @@ class HistoricFeed(Feed, ABC):
             _, ax = plt.subplots()
             ax.set_title(asset.symbol)
 
+        if not hasattr(ax, '_asset'):
+            setattr(ax, "_asset", asset)
 
         ax.plot(t, p, **kwargs)  # type: ignore
 
@@ -166,6 +172,22 @@ class HistoricFeed(Feed, ABC):
             ax2 = ax.twinx()
             ax2.grid(False)
             ax2.bar(t, v, alpha=0.3)  # type: ignore
+
+        if trades and t:
+            tf = Timeframe(t[0], t[-1], True)
+            trades = [t for t in trades if t.asset == asset and t.time in tf]
+
+            buy = [t for t in trades if t.size > 0]
+            if buy:
+                x = [t.time for t in buy]
+                y = [t.price for t in buy]
+                ax.scatter(x, y, marker="^", color="limegreen", zorder=10)  # type: ignore
+
+            sell = [t for t in trades if t.size < 0]
+            if sell:
+                x = [t.time for t in sell]
+                y = [t.price for t in sell]
+                ax.scatter(x, y, marker="v", color="red", zorder=10)  # type: ignore
 
         return ax
 

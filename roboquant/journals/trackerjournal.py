@@ -2,20 +2,23 @@ from dataclasses import dataclass
 from datetime import datetime
 from typing import override
 
+from roboquant.common.timeseries import Timeline
 from roboquant.common.account import Account
 from roboquant.common.asset import Asset
 from roboquant.common.event import Event
 from roboquant.common.order import Order
 from roboquant.common.signal import Signal
 from roboquant.common.timeframe import Timeframe
-from roboquant.common.timeseries import TimeSeries, Timeline
+from roboquant.common.timeseries import TimeSeries
 from roboquant.journals.journal import Journal
 
 
 @dataclass
-class SignalOrderTracker(Journal):
-    """Tracks the generated signals and created orders at each step
+class TrackerJournal(Journal):
+    """Tracks the generated signals, orders and trades at each step
     of the run.
+    It stores all tracked objects in memory, so for large back tests, this requires
+    enough memory being available.
     """
 
     def __init__(self) -> None:
@@ -69,4 +72,3 @@ class SignalOrderTracker(Journal):
                     timeline.append(time)
                     data.append(tmp[0])
         return TimeSeries.univariate(asset.symbol + "-signal-ratings", timeline, data)
-

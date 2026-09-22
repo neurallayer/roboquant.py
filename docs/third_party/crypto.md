@@ -65,7 +65,7 @@ account = rq.run(feed, strategy, trader=trader, broker=broker)
 print(account)
 
 for asset in feed.assets():
-    feed.plot(asset, trades=account.trades)
+    feed.plot(asset)
 ```
 ---
 ## Broker Integration
