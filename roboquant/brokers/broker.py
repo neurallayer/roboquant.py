@@ -6,7 +6,7 @@ from roboquant.common.order import Order
 
 
 class Broker(ABC):
-    """A broker accepts orders and reports its current state via the `Account` object returned when the
+    """A broker accepts orders and reports its current state via the `Account` object returned when
     the `sync` method is invoked.
 
     A broker is responsible for the actual execution of orders and for keeping track of the

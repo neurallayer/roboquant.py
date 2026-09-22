@@ -5,7 +5,6 @@ import roboquant as rq
 from roboquant.traders.simpletrader import SimpleTrader
 
 
-
 def _print(account: rq.Account, journal: rq.journals.BasicJournal, n_assets: int, load_time: float, runtime: float):
     print("", account, journal, sep="\n\n")
 

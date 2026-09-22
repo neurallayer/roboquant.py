@@ -42,7 +42,7 @@ class MetricsJournal(Journal):
             self._history.append((event.time, result))
 
     def get_metrics(self, *metric_names: str) -> TimeSeries:
-        """Return the ccaptured metrics of oen or more metrics as a TimeSeries"""
+        """Return the captured metrics of oen or more metrics as a TimeSeries"""
         timeline: Timeline = Timeline()
         values: dict[str, list[float]] = {name: [] for name in metric_names}
         for time, metrics in self._history:

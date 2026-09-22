@@ -15,8 +15,7 @@ from roboquant.journals.journal import Journal
 
 @dataclass
 class TrackerJournal(Journal):
-    """Tracks the generated signals, orders and trades at each step
-    of the run.
+    """Tracks the generated signals, orders at each step of the run.
     It stores all tracked objects in memory, so for large back tests, this requires
     enough memory being available.
     """

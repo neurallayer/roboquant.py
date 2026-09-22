@@ -130,7 +130,7 @@ class Format(TypedDict):
 
 
 class OrderDistances(TypedDict):
-    EntryDefaultDistance: float          # can also be float, but here it's 0
+    EntryDefaultDistance: float
     EntryDefaultDistanceType: str
     LimitDefaultDistance: float
     LimitDefaultDistanceType: str

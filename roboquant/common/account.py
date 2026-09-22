@@ -173,7 +173,7 @@ class Account:
     def position_size(self, asset: Asset) -> Decimal:
         """
         Return the net position size for an asset.
-        This will return `Decimal(0)` if the asset has not have
+        This will return `Decimal(0)` if the asset has not
         any open positions.
 
         Args:
