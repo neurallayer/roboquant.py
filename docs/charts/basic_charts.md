@@ -107,15 +107,6 @@ journal = rq.journals.MetricsJournal.pnl()
 account = rq.run(feed, strategy, journal=journal)
 ```
 
-### Trade Chart
-A trade chart is a price chart with added markers for when trades for that asset took place.
-A red up-pointing triangle for a SELL trade and a green down-pointing triangle for a BUY trade.
-
-```{code-cell} python
-tf = rq.Timeframe.previous("365 days")
-feed.plot("MSFT", timeframe=tf, trades=account.trades);
-```
-
 ### Metric Chart
 Equity is a good example of a metric that is useful to capture during a run.
 It provides insights how the total equity is evolving during a run and shows 
@@ -160,7 +151,7 @@ _, axs = plt.subplots(4, 2, figsize=(20, 30))
 
 for ax, asset in zip(axs.flatten(), feed.assets()):
     pnl = account.pnl(asset)
-    ax = feed.plot(asset, timeframe=tf, ax=ax, trades=account.trades)
+    ax = feed.plot(asset, timeframe=tf, ax=ax)
     ax.set_title(f"{asset.symbol} ({pnl:,.0f})")
 ```
 

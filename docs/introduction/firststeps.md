@@ -79,13 +79,6 @@ account = rq.run(feed, strategy)
 print(account)
 ```
 
-We can now also plot the trades that were executed during the back test. This is done by calling the `plot` method on the feed,
-and passing in the symbol of the asset we want to plot, as well as the trades that were executed.
-
-```{code-cell} python
-feed.plot("TSLA", trades = account.trades);
-```
-
 ---
 ## Next steps
 This page showed how to run a simple back test using *roboquant*. For each of the core components of a run, there are more advanced features available. 
