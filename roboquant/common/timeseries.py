@@ -9,7 +9,6 @@ from matplotlib.axes import Axes
 
 from roboquant.common.timeframe import Timeframe
 
-Data = list[float]
 
 class Timeline(UserList[datetime]):
     """A list of sorted datetime objects."""
@@ -54,7 +53,7 @@ class TimeSeries(pd.DataFrame):
         return TimeSeries
 
     @staticmethod
-    def from_data(timeline: Timeline, data: dict[str, Data]) -> "TimeSeries":
+    def from_data(timeline: Timeline, data: dict[str, list[float]]) -> "TimeSeries":
         """Create a TimeSeries from a timeline and a dictionary of named data.
         The keys of the dictionary are used as column names and the values are used
         as the data for each column.
@@ -65,7 +64,7 @@ class TimeSeries(pd.DataFrame):
 
 
     @staticmethod
-    def univariate(name: str, timeline: Timeline, data: Data) -> "TimeSeries":
+    def univariate(name: str, timeline: Timeline, data: list[float]) -> "TimeSeries":
         """Helper to create a TimeSeries based in single (univariate) dataset"""
         return TimeSeries.from_data(timeline, {name: data})
 
@@ -101,12 +100,12 @@ class TimeSeries(pd.DataFrame):
         return TimeSeries.from_data(timeline, data)
 
     def timeline(self) -> Timeline:
-        """Return the timeline of the time series as a list of datetime objects."""
+        """Return the timeline of the time series."""
         return Timeline(t.to_pydatetime(warn=False) for t in self.index)
 
     def limit_timeline(self, timeframe: Timeframe) -> "TimeSeries":
-        """Limit the time series to a certain timeframe. If the timeframe is empty,
-        an empty time series will be returned."""
+        """Limit the time series of this timeseries to a certain timeframe.
+        If the timeframe is empty, an empty time series will be returned."""
         result = self[self.index >= timeframe.start]
         if timeframe.inclusive:
             result = result[result.index <= timeframe.end]
