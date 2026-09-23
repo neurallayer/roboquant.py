@@ -28,6 +28,24 @@ feed = rq.feeds.YahooFeed("MSFT", "F", "GLD", "GSG", "BND", "LQD", "IBIT", "VIXY
 # Plot a price chart for one of the assets in the feed
 feed.plot("MSFT");
 
+
+# %% [markdown]
+# Plot with BBands om the price chart
+tf = rq.Timeframe.fromisoformat("2022-01-01", "2024-01-01")
+ford = feed.get_asset("F")
+ax = feed.plot(ford, plot_volume=False, timeframe=tf)
+bbands = rq.util.metrics.BBandsMetric(ford, timeperiod=20)
+timeseries = feed.track(bbands, timeframe=tf)
+timeseries.plot(ax=ax);
+
+
+# %% [markdown]
+# Plot with RSI on the price chart but with a different scale
+ax = feed.plot(ford, plot_volume=False, timeframe=tf)
+rsi = rq.util.metrics.RSIMetric(ford, timeperiod=20)
+timeseries = feed.track(rsi, timeframe=tf)
+timeseries.plot(ax=ax.twinx(), color="green", linewidth=0.5);
+
 # %%
 strategy = rq.strategies.EMACrossover()
 journal = rq.journals.MetricsJournal.pnl()
@@ -36,6 +54,9 @@ print(account)
 
 # %%
 account.plot_allocation(include_cash=True);
+
+# %%
+feed.plot("MSFT", trades = account.trades)
 
 
 # %% [markdown]
@@ -112,8 +133,8 @@ for timeframe in timeframes:
 
 # %% [markdown]
 # ## Correlation
-# Sometimes it is useful to inspect the correlation between assets.
-# There is a special plot that makes this visibe.
+# Sometimes it is useful to inspect the correlation between prices of different assets.
+# There is a special plot that makes this visible.
 
 # %%
 feed.to_timeseries().plot_corr(fontsize=7);

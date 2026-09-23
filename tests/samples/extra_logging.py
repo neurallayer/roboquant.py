@@ -20,7 +20,7 @@ logging.getLogger("roboquant").setLevel(logging.WARNING)
 rq.traders.flextrader.logger.setLevel(logging.INFO)
 
 # %% [markdown]
-# Run a badk test to see the results
+# Run a back test to see the results
 feed = rq.feeds.YahooFeed("AAPL", "MSFT", start_date="2024-01-01", end_date="2024-08-01")
 strategy = rq.strategies.EMACrossover()
 trader = rq.traders.FlexTrader()

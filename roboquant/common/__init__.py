@@ -6,7 +6,7 @@ from .order import Order
 from .position import Position
 from .signal import Signal, SignalType
 from .timeframe import Timeframe, utcnow
-from .timeseries import TimeSeries
+from .timeseries import TimeSeries, Timeline
 from .trade import Trade
 
 __all__ = [
@@ -30,5 +30,6 @@ __all__ = [
     "Signal",
     "Timeframe",
     "TimeSeries",
+    "Timeline",
     "utcnow"
 ]

@@ -13,6 +13,7 @@ from roboquant.common.order import Order
 from roboquant.common.signal import Signal
 from roboquant.strategies.strategy import Strategy
 from roboquant.util.buffer import OHLCVBuffer
+import roboquant.util.indicators as indicators
 
 
 class PNLMetric(Metric):
@@ -82,8 +83,10 @@ class PNLMetric(Metric):
 
 class IndicatorMetric(Metric):
     """
-    Based class for custom metrics that work on a OHLCV Buffer.
-    These make it easy to implement metrics using for example the
+    Base class for custom metrics that work on a OHLCV Buffer for
+    a single asset.
+
+    This make it easy to implement metrics using for example the
     TA-Lib indicators.
     """
 
@@ -104,6 +107,82 @@ class IndicatorMetric(Metric):
     def _calc(self, buffer: OHLCVBuffer) -> dict[str, float]:
         """Override this method in subclasses"""
         ...
+
+
+class RSIMetric(IndicatorMetric):
+    """Metric that calculates the Relative Strength Index (RSI) for a single asset.
+
+    The RSI is a momentum indicator that measures the magnitude of recent price
+    changes to evaluate overbought or oversold conditions. The value is computed
+    over a rolling window of `timeperiod` bars and is returned under the metric
+    name ``rsi``.
+
+    Attributes:
+        asset (Asset): The asset for which the RSI is calculated.
+        timeperiod (int): The number of bars used in the rolling calculation window.
+        buffer (OHLCVBuffer): The buffer holding the most recent OHLCV bars.
+
+    Example:
+        ```
+        metric = RSIMetric(asset, 14)
+        ```
+    """
+
+    @override
+    def _calc(self, buffer: OHLCVBuffer) -> dict[str, float]:
+        return {"rsi": indicators.RSI(buffer.close, self.timeperiod-1)}
+
+class BBandsMetric(IndicatorMetric):
+    """Metric that calculates the Bollinger Bands for a single asset.
+
+    Bollinger Bands consist of a middle band (a moving average) and an upper and
+    lower band placed a number of standard deviations away from the middle band.
+    They are used to measure market volatility and identify overbought or
+    oversold conditions. The values are computed over a rolling window of
+    `timeperiod` bars and are returned under the metric names ``bbands_lower``,
+    ``bbands_middle`` and ``bbands_upper``.
+
+    Attributes:
+        asset (Asset): The asset for which the Bollinger Bands are calculated.
+        timeperiod (int): The number of bars used in the rolling calculation window.
+        buffer (OHLCVBuffer): The buffer holding the most recent OHLCV bars.
+
+    Example:
+        ```
+        metric = BBandsMetric(asset, 20)
+        ```
+    """
+
+    @override
+    def _calc(self, buffer: OHLCVBuffer) -> dict[str, float]:
+        upper, middle, lower = indicators.BBANDS(buffer.close, timeperiod=self.timeperiod - 1)
+        return {"bbands_lower": lower, "bbands_middle": middle, "bbands_upper": upper}
+
+class MACDMetric(IndicatorMetric):
+    """Metric that calculates the Moving Average Convergence Divergence (MACD) for a single asset.
+
+    MACD is a trend-following momentum indicator that shows the relationship
+    between two moving averages of an asset's price. It consists of the MACD
+    line, a signal line (a moving average of the MACD line) and a histogram
+    (the difference between the two). The values are computed over a rolling
+    window of `timeperiod` bars and are returned under the metric names
+    ``macd``, ``macd_signal`` and ``macd_hist``.
+
+    Attributes:
+        asset (Asset): The asset for which the MACD is calculated.
+        timeperiod (int): The number of bars used in the rolling calculation window.
+        buffer (OHLCVBuffer): The buffer holding the most recent OHLCV bars.
+
+    Example:
+        ```
+        metric = MACDMetric(asset, 12)
+        ```
+    """
+
+    @override
+    def _calc(self, buffer: OHLCVBuffer) -> dict[str, float]:
+        macd, signal, hist = indicators.MACD(buffer.close, self.timeperiod-1)
+        return {"macd": macd, "macd_signal": signal, "macd_hist": hist}
 
 
 class SignalRatingMetric(Metric):

@@ -225,3 +225,8 @@ two guarantees for the events it publishes:
 Live feeds are typically paired with a live broker. Concrete implementations for specific brokers
 (e.g. Alpaca) can be found in the `roboquant.third_party` module.
 
+:::{note}
+It always advisable to find out if your market data provider introduces delays.
+It is not uncommon for (cheaper) US stock feeds to introduce a 15 minute delay. For risk management
+of open positions in volatile assets, this might be undesirable.
+:::

@@ -4,14 +4,15 @@ kernelspec:
   display_name: Python 3
 ---
 
-# Time & TimeSeries
+# Time
 
 ## Overview
 Time related data in *roboquant* uses the Python `datetime` object with
 teh timezone set to UTC.
 
 For example `event.time` is always in timezone UTC, even if the event originates
-from an exchange in a different timezone. 
+from an exchange in a different timezone. This makes it fast and robust when
+comparing dates.
 
 ## Timeframe
 (timeframe_def)=
@@ -46,8 +47,26 @@ assert len(tfs) == 100
 ```
 
 ## Timeline
-Timeline implements a list of `datetime` object.
+(timeline_def)=
+Timeline implements a list of `datetime` objects. Like the other time variables,
+the individual entries are Python `datetime` objects using the UTC timezone.
 
+Timeline entries should be added in ascending order. This makes it suitable
+to act as the index of a `TimeSeries`.
+
+```{code-cell} python
+from datetime import datetime, timezone
+import roboquant as rq
+
+timeline = rq.Timeline()
+timeline.append(datetime(2024, 1, 1, tzinfo=timezone.utc))
+timeline.append(datetime(2024, 1, 2, tzinfo=timezone.utc))
+print(len(timeline))
+print(timeline[0])
+```
+
+Typically you don't create timelines manually, but rather they are returned
+as the result of a method call.
 
 ## TimeSeries
 (timeseries_def)=

@@ -10,7 +10,7 @@ kernelspec:
 ## Overview
 Indicators are a thin wrapper around TA-Lib indicators that makes it easy
 to use them within *roboquant*. TA-Lib comes with 200 indicators that are all
-also available in *roboquant*. (Here)[https://ta-lib.org/functions/] you can find the complete list.
+also available in *roboquant*. [Here](https://ta-lib.org/functions/) you can find the complete list.
 
 :::{note}
 For those already familiar with the TA-Lib library: it is important to

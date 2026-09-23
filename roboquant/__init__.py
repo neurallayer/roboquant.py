@@ -16,7 +16,7 @@ from roboquant.common.order import Order
 from roboquant.common.position import Position
 from roboquant.common.signal import Signal, SignalType
 from roboquant.common.timeframe import Timeframe, utcnow
-from roboquant.common.timeseries import TimeSeries
+from roboquant.common.timeseries import TimeSeries, Timeline
 from roboquant.common.trade import Trade
 from roboquant.feeds import Feed
 from roboquant.run import demo_run, run, stop_run
@@ -89,6 +89,7 @@ __all__ = [
     "SimBroker",
     "Timeframe",
     "TimeSeries",
+    "Timeline",
     "Currency",
     "USD",
     "EUR",

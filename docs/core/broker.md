@@ -70,7 +70,19 @@ Most users will not implement {cl}`Broker` directly but instead use {cl}`SimBrok
 
 ## SimBroker
 (simbroker_def)=
-The default broker for back-testing is the SimBroker (short for Simulated Broker). It has several configuration parameters and can be subclassed to change even more of its behavior.
+The default broker for back-testing is the SimBroker (short for Simulated Broker). It has several configuration
+parameters and can be subclassed to change even more of its behavior.
+
+:::{note}
+SimBroker uses netting for calculation of the open positions. The average open price
+is the average of the execution prices. 
+
+For example:
+- current position ⇒ size is +10 and avg price is 100.00
+- new trade ⇒ size is +40 and execution price is110.00
+  
+{math}`new\ avg\ price = \frac{(10*100.00) + (40*110.00)}{10 + 40} = 108.00`
+:::
 
 ```{code-cell} python
 from datetime import timezone
@@ -104,7 +116,7 @@ Some of the implemented logic that might not be obvious at first:
   :::
 
 ## Third party Brokers
-Looks at [](../third_party/alpaca.md), [](../third_party/ibkr.md) and [](../third_party/crypto.md) for more details about
+Looks at [](../third_party/alpaca.md), [](../third_party/ibkr.md), [](../third_party/crypto.md) and [](../third_party/metatrader.md) for more details about
 third party brokers.
 
 

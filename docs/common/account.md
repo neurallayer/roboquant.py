@@ -37,10 +37,10 @@ The available cash is the amount of money currently not invested, minus any
 amount reserved by open orders. When margin is enabled, the buying power can be
 a multiple of the available cash.
 
-```{tip}
+:::{tip}
 A negative buying power typically means the account is using (too much) margin
 and may be subject to a margin call.
-```
+:::
 
 The following example shows the available cash and buying power of the account.
 
@@ -51,16 +51,16 @@ print("buying power:", account.buying_power)
 
 
 ## Positions
-One of the most important information in the account are the open positions.
-
-A position represents the current exposure of the account to a single asset. 
+(position_def)=
+A position is the quantity of an {cl}`Asset` currently held, representing its market exposure and risk at any given moment.
+Every time a trade is executed, a position is created or updated.
 
 Each {cl}`Position` contains:
 
-- the **symbol** of the asset,
-- the **size** (number of shares or units), and
-- the **average open price** and resulting **value**.
-- the last known **market price**.
+- the asset.
+- the **size** of the position (number of shares or units).
+- the **average open price**.
+- the last known **market price** for the underlying asset.
 
 The size can be positive (long) or negative (short). A position whose size is zero
 is considered closed and is not included in the account anymore.
@@ -68,7 +68,10 @@ is considered closed and is not included in the account anymore.
 (positions_hedging_netting)=
 ### Hedging versus netting
 When multiple orders are executed for the same asset, the broker has to decide how
-to combine them into positions. Roboquant supports two strategies:
+to combine them into positions. Often, stock brokers use netting while forex brokers
+use hedging.
+
+Roboquant supports both strategies:
 
 **Netting**
 : Only a single position per asset exists. A new order in the opposite direction
@@ -81,16 +84,20 @@ to combine them into positions. Roboquant supports two strategies:
   reduce each other. For positions to close, you typically need to refer to the position
   when placing the order. 
 
-```{tip}
-With netting the exposure to an asset is the net sum of all its trades, while with
-hedging the gross long and short exposure can be tracked separately.
-```
-
-The following example shows all open positions of the account as a Pandas dataframe, one
-row per position.
 
 ```{code-cell} python
-account.positions_to_dataframe()
+:tags: [hide-output]
+
+for position in account.positions:
+  print(position.asset, position.size, position.avg_price, position.mkt_price)
+
+# Total unrealized P&L in the open positions
+print(f"unrealized pnl {account.unrealized_pnl():_.2f}")
+
+# Total market value of all open positions combined
+print(f"market value {account.mkt_value():_.2f}")
+
+account.positions_to_dataframe().head()
 ```
 
 ## Trades
@@ -101,3 +108,9 @@ assets and what type of trades resulted in winers or losers.
 print(account.realized_pnl())
 account.trades_to_dataframe().sort_values(by='pnl').head()
 ```
+
+
+:::{note}
+Not all broker implementations return the executed trades. This functionality is optional,
+and most usefull in the context of back testing when using the {cl}`SimBroker`
+:::
