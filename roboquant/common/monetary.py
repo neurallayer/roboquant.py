@@ -1,6 +1,7 @@
 import io
 import logging
 import os
+import re
 import zipfile
 from abc import ABC, abstractmethod
 from bisect import bisect_left
@@ -12,7 +13,6 @@ from pathlib import Path
 from time import time
 from typing import Any, ClassVar, Dict, List, Self, override
 
-from fsspec.core import re
 import requests
 
 logger = logging.getLogger(__name__)

@@ -2,7 +2,7 @@
 line-length = 127
 
 [build-system]
-requires = ["uv_build>=0.11.28,<0.12"]
+requires = ["uv_build>=0.12.18,<0.13"]
 build-backend = "uv_build"
 
 [tool.ruff.lint]
@@ -38,7 +38,7 @@ preset = "strict"
 
 [project]
 name = "roboquant"
-version = "2.9.1"
+version = "2.9.2"
 authors = [{ name = "roboquant team", email = "info@roboquant.org" }]
 description = "A fast algorithmic trading platform with support for AI based strategies"
 readme = "README.md"
