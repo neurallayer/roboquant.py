@@ -65,24 +65,24 @@ Each {cl}`Position` contains:
 The size can be positive (long) or negative (short). A position whose size is zero
 is considered closed and is not included in the account anymore.
 
-(positions_hedging_netting)=
-### Hedging versus netting
+**Hedging versus netting**
+
 When multiple orders are executed for the same asset, the broker has to decide how
 to combine them into positions. Often, stock brokers use netting while forex brokers
 use hedging.
 
 Roboquant supports both strategies:
 
-**Netting**
-: Only a single position per asset exists. A new order in the opposite direction
-  first reduces the existing position, and only the remaining quantity opens a new
-  position in that direction (potentially flipping long to short and vice versa).
+1. **Netting:**
+only a single position per asset exists. A new order in the opposite direction
+first reduces the existing position, and only the remaining quantity opens a new
+position in that direction (potentially flipping long to short and vice versa).
 
-**Hedging**
-: Multiple positions per asset can exist at the same time, allowing a long and a
-  short position in the same asset to coexist. Opposite orders do not automatically
-  reduce each other. For positions to close, you typically need to refer to the position
-  when placing the order. 
+2. **Hedging:**
+multiple positions per asset can exist at the same time, allowing a long and a
+short position in the same asset to coexist. Opposite orders do not automatically
+reduce each other. For positions to close, you typically need to refer to the position
+when placing the order. 
 
 
 ```{code-cell} python

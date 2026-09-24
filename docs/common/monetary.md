@@ -19,7 +19,6 @@ Currencies are not limited to fiat currencies and can be used for cryptocurrenci
 Currencies are callable and then create an {cl}`Amount`. Or you can use the '@' operator to
 achieve the same.
 
-
 ```{code-cell} python
 from roboquant.common.monetary import USD, EUR, JPY, Currency
 
@@ -98,4 +97,3 @@ t1 = datetime.fromisoformat("2010-01-01")
 print(USD, wallet.convert_to(USD,t1))
 print(EUR, wallet.convert_to(EUR,t1))
 ```
-

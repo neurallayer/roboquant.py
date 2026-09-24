@@ -141,9 +141,20 @@ After the run you can access these orders and signals either directly or through
 some of the included convenience methods.
 
 ## Custom Journals
-There are several reasons you might want to implement a custom Journal. For example, you want to
-be notified on a messaging platform if something (like a new order) happens during a live
-trading session.
+There are several reasons you might want to implement a custom Journal. For example, you want to be notified on a messaging platform if something (like a new order) happens during a live trading session.
+
+```{code-cell} python
+import requests
+
+WEBHOOK_URL = "https://discord.com/api/webhooks/YOUR_WEBHOOK_ID/YOUR_WEBHOOK_TOKEN"
+
+class DiscordJournal(Journal):
+  
+    def track(self, event: Event, account: Account, signals: list[Signal], orders: list[Order]) -> None:
+        if orders:
+            msg = {"content": f"new orders {orders}"}
+            requests.post(WEBHOOK_URL, json=msg)
+```
 
 (guard-journal)=
 Another use case is a journal that guards some condition and stops the run if the condition is met.

@@ -70,12 +70,11 @@ Most users will not implement {cl}`Broker` directly but instead use {cl}`SimBrok
 
 ## SimBroker
 (simbroker_def)=
-The default broker for back-testing is the SimBroker (short for Simulated Broker). It has several configuration
-parameters and can be subclassed to change even more of its behavior.
+The default broker for back-testing is the SimBroker (short for Simulated Broker). It has several configuration parameters and can be subclassed to change even more of its behavior.
 
 :::{note}
-SimBroker uses netting for calculation of the open positions. The average open price
-is the average of the execution prices. 
+SimBroker uses netting for dealing with positions. So that mean there is at most one
+position per asset. When you place multiple orders for the same asset, the average open price is the average of the execution prices. 
 
 For example:
 - current position ⇒ size is +10 and avg price is 100.00
