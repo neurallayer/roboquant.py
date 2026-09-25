@@ -4,8 +4,22 @@ from datetime import timedelta
 from typing import override
 
 import roboquant as rq
+from roboquant.journals.journal import Journal
 from tests.common import get_feed
 
+
+
+class _MJ(Journal):
+
+    def __init__(self) -> None:
+        super().__init__()
+        self.cnt = 0
+
+    @override
+    def track(self, event: rq.Event, account: rq.Account, signals: list[rq.Signal], orders: list[rq.Order]) -> None:
+        self.cnt += 1
+        if self.cnt > 5:
+            rq.stop_run("Count > 5")
 
 class TestRoboquant(unittest.TestCase):
 
@@ -38,6 +52,12 @@ class TestRoboquant(unittest.TestCase):
         for tf in self.feed.timeframe().sample(10, timedelta(days=265)):
             account = rq.run(self.feed, rq.strategies.EMACrossover(), timeframe=tf)
             self.assertLessEqual(account.last_update, tf.end)
+
+
+    def test_stop_run(self):
+        journal = _MJ()
+        _ = rq.run(self.feed, rq.strategies.EMACrossover(), journal=journal)
+        self.assertEqual(journal.cnt, 6)
 
 
 if __name__ == "__main__":
