@@ -8,15 +8,10 @@
 # It shows how to use the `IndicatorMetric` and `SignalMetric` to track indicators and signals on a chart.
 # It uses the YahooFeed to get the data for TSLA and plots the price, Bollinger Bands, RSI, and buy/sell signals on a chart.
 # %%
-
-from typing import override
-
 import matplotlib.pyplot as plt
 
 import roboquant as rq
-from roboquant.util.buffer import OHLCVBuffer
-from roboquant.util.indicators import BBANDS, RSI
-from roboquant.util.metrics import IndicatorMetric, SignalRatingMetric
+from roboquant.util.metrics import SignalRatingMetric, BBandsMetric, RSIMetric
 
 # Setup some defaults for matplotlib
 rq.set_dark_style()
@@ -24,20 +19,6 @@ rq.set_dark_style()
 
 # %% [markdown]
 # Define the custom metrics we want to use
-
-# %%
-class RSIMetric(IndicatorMetric):
-
-    @override
-    def _calc(self, buffer: OHLCVBuffer):
-        return {"rsi": RSI(buffer.close, self.timeperiod-1)}
-
-class BBandsMetric(IndicatorMetric):
-
-    @override
-    def _calc(self, buffer: OHLCVBuffer):
-        upper, _, lower = BBANDS(buffer.close, timeperiod=self.timeperiod - 1)
-        return {"lower": lower, "upper": upper}
 
 # %%
 feed = rq.feeds.YahooFeed("TSLA", start_date="2025-01-01", end_date="2026-01-01")
@@ -53,7 +34,7 @@ fig, (ax1, ax2, ax3) = plt.subplots(nrows=3, sharex=True, height_ratios=[4,1,1])
 feed.plot(asset, ax = ax1 , plot_volume=False, label="price")
 metric = BBandsMetric(asset, timeperiod=10)
 bbands = feed.track(metric)
-ax1.fill_between(bbands.index, bbands["lower"], bbands["upper"], alpha=0.4, color="grey")  # type: ignore
+ax1.fill_between(bbands.index, bbands["bbands_lower"], bbands["bbands_upper"], alpha=0.4, color="grey")  # type: ignore
 ax1.set_title(asset.symbol)
 
 # Plot rsi chart

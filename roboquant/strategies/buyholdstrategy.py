@@ -6,7 +6,7 @@ from roboquant.strategies.strategy import Strategy
 
 
 class BuyHoldStrategy(Strategy):
-    """A simple buy-and-hold strategy.
+    """A buy-and-hold strategy.
 
     It generates a buy signal for every asset it encounters in an event.
     Use it as a baseline to compare other strategies against.

@@ -11,7 +11,7 @@ print("IBM Stock prices", df, sep="\n")
 
 # %%
 feed = rq.feeds.YahooFeed("IBM", "JPM", "MSFT", "TSLA", "INTC", start_date="2020-01-01")
-data = feed.to_timeseries(*feed.assets())
+data = feed.to_timeseries()
 print("Asset correlations:\n", data.corr())
 
 # %%
