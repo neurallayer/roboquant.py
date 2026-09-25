@@ -71,5 +71,6 @@
         "**/__pycache__": true,
         "**/.*": true,
         "**/*.egg-info": true
-    }
+    },
+    "cSpell.enabled": false
 }
