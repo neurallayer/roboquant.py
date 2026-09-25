@@ -96,7 +96,7 @@ class HistoricFeed(Feed, ABC):
         ) -> TimeSeries:
             """Return the prices of one or more assets as a multivariate TimeSeries.
             The name of each individual series is the symbol name.
-            If at a moment in time for an asset there is no known price, NaN will be stored.
+            If at a moment in time for an asset there is no known price, NaN will be used.
 
             If no assets are provided, all assets in the feed will be used.
             """
