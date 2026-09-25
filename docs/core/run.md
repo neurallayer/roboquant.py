@@ -184,6 +184,11 @@ for timeframe in timeframes:
 print(f"min={min(equities):.0f}, max={max(equities):.0f}")
 ```
 
+:::{note}
+A feed can be re-used accross multiple invocations of the run method. However
+other parameters like the strategy, broker and journal require an new instance since
+otherwise they might contain wrong state from a previous run.
+:::
 
 ## Live and paper-trade run
 A live or paper-trade run is only different from a back test in the implementation
@@ -225,5 +230,7 @@ invoke the `stop_run()` function. See also [journal](journal.md#guard-journal)
 Under the hood it will throw a special type of exception that is handled gracefully within
 the run loop. 
 
+:::{note}
 All other types of exceptions thrown during the execution of the run loop,
-will stop the run but will propagate that exception.
+will stop the run and will propagate that exception.
+:::

@@ -99,11 +99,12 @@ broker = SimBroker(
 Some of the implemented logic that might not be obvious at first:
 
 
-- When `place_orders()` is invoked, orders are given an `id`. However, the orders are NOT yet executed. That happens earliest in the next step
-  of the run when the `sync()` method is invoked. So orders places at time{sup}`t`, will be earliest executed at time{sup}`t+1`.
-- If there is no available price for an asset in the event, the corresponding orders will not be executed. They will stay in open state until
-  a price becomes available.
-- Only once there is a price available, the DAY time-in-force policy is started.
+- When `place_orders()` is invoked, orders are given an `id`. However, the orders are NOT yet executed.
+  That happens earliest in the next step of the run when the `sync()` method is invoked. So orders places at time{sup}`t`,
+  will be earliest executed at time{sup}`t+1`.
+- If there is no available price for an asset in the event, the corresponding orders will not be executed.
+  They will stay in open state until a price becomes available.
+- Only once there is a price available for the underlying asset, the DAY time-in-force policy is started.
 
   :::{note} Example
   Suppose you place a `DAY` order on Saturday. No market events arrive on Saturday or Sunday, so the order stays open (the DAY timer hasn't started yet).
@@ -120,5 +121,8 @@ third party brokers.
 
 
 ## Live Broker
-If developing your own Broker implementation, you can use the `LiveBroker` as a base-class.
-To get started, best to look at some existing implementations like the `AlpacaBroker`.
+If you are developing your own Broker implementation, you can use the `LiveBroker` as a base-class.
+Te main work is the mapping the roboquant classes like `Order` and `Position` to the broker you want to
+integrate with.
+
+To get started, best to look at some of the existing implementations like the `AlpacaBroker`.

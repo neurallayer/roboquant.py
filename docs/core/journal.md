@@ -166,5 +166,5 @@ class GuardJournal(Journal):
   
     def track(self, event: Event, account: Account, signals: list[Signal], orders: list[Order]) -> None:
         if account.cash_value() < 1_000:
-            stop_run()
+            stop_run("Not enough cash remaining")
 ```

@@ -24,13 +24,15 @@ flowchart LR
 
 (trader_def)=
 ## Overview
-A trader is responsible for creating orders. It can do this based on the signals it receives, but also based on the latest version of the account.
+A trader is responsible for creating orders and managing the risk. 
+It can create orders based on the signals it receives that are created by a {cl}`Strategy`, but it
+can also create orders based on the latest version of the account.
 
 ```{code-cell} python
 :tags: [remove-input]
 from decimal import Decimal
 import roboquant as rq
-from roboquant.common import Account, Event, Order, Signal
+from roboquant import Account, Event, Order, Signal, USD
 from roboquant.traders.trader import Trader
 ```
 
@@ -39,7 +41,6 @@ from roboquant.traders.trader import Trader
 The Trader API has 1 single method called `create_orders` that needs to be implemented:
 
 ```{code-cell} python
-
 class MyTrader(Trader):
 
     def create_orders(self, signals: list[Signal], event: Event, account: Account) -> list[Order]:
@@ -126,5 +127,16 @@ When using the account in a custom {cl}`Trader` it is important to use `buying_p
 to determine the available budget for orders.
 :::
 
+Below is an example how risk management could be implemented for open positions that are loosing too
+much money.  
 
-
+```{code-cell} python
+def close_loosing_positions(account: Account) -> list[Order]:
+    orders = []
+    for pos in account.positions:
+        amt = pos.unrealized_pnl().convert_to(USD, account.last_update)
+        if amt < -1000:
+            order = pos.close_order()
+            orders.append(order)
+    return orders
+```

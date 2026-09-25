@@ -75,7 +75,8 @@ class FlexTrader(Trader):
     - price_type: the price type to use when determining order value, for example "CLOSE". Default is "DEFAULT"
     - shuffle_signals: shuffle the signals before processing them, default is false
     - limit_offset_pct: the offset as percentage for the order limit price. A value of 0.01 means the limit price will be
-    1% below market price for buy orders and 1% above the market price for SELL orders. Default is 0.0.
+    1% below market price for buy orders and 1% above the market price for SELL orders. Default is None which implies
+    a market order will be created.
     - tif: the time-in-force policy to use, default is `DAY`
 
     It might be sometimes challenging to understand why a signal isn't converted into an order. The flex-trader logs
@@ -219,8 +220,8 @@ class FlexTrader(Trader):
         Overwrite this method if you want to implement different logic.
         """
         limit = self._get_limit(item, size)
-        result = [Order(asset, size, limit, self.tif)]
-        return result
+        order = Order(asset, size, limit, self.tif)
+        return [order]
 
     def __str__(self) -> str:
         attrs = " ".join([f"{k}={v}" for k, v in self.__dict__.items() if not k.startswith("_")])
