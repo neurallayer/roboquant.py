@@ -81,13 +81,13 @@ class SQLFeed(HistoricFeed, AssetSerializer):
             return Timeframe.EMPTY
 
     @override
-    def assets(self) -> list[Asset]:
+    def assets(self) -> set[Asset]:
         """Return all the assets in the database"""
         with sqlite3.connect(self.db_file) as con:
             result = con.execute(SQLFeed._sql_select_assets).fetchall()
             con.commit()
             assets = {self._deserialize_to_asset(columns[0]) for columns in result}
-            return list(assets)
+            return assets
 
     def _get_item(self, row: list[Any]) -> PriceItem:
         """Get a PriceItem from a row in the database"""

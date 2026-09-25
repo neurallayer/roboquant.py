@@ -32,7 +32,7 @@ obs_feature = QuoteFeature(asset).returns().normalize(20)
 reward_feature = EquityFeature().returns().normalize(20)
 
 train_tf = Timeframe.fromisoformat(start, border)
-env = TradingEnv(feed, obs_feature, reward_feature, [asset], timeframe=train_tf)
+env = TradingEnv(feed, obs_feature, reward_feature, {asset}, timeframe=train_tf)
 model = RecurrentPPO("MlpLstmPolicy", env)
 
 # %%

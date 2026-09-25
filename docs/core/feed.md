@@ -183,9 +183,10 @@ Databases can become very large if you record high-frequency market data over lo
 needing an internet connection.
 
 ```{code-cell} python
-feed = rq.feeds.RandomWalk(n_symbols=5, n_prices=1_000, price_type="trade")
+feed = rq.feeds.RandomWalk(n_assets=5, n_events=1_000, price_type="trade")
 assets = feed.assets()
-feed.plot(assets[0], plot_volume=False);
+asset = next(iter(assets))
+feed.plot(asset, plot_volume=False);
 ```
 
 ## Feed Transformations
@@ -198,7 +199,7 @@ given frequency. When trades are selected, the actual trade prices and volumes a
 are selected, the midpoint prices are used and volumes are not available.
 
 ```{code-cell} python
-trades = rq.feeds.RandomWalk(n_symbols=2, n_prices=10_000, price_type="trade")
+trades = rq.feeds.RandomWalk(n_assets=2, n_events=10_000, price_type="trade")
 bars = rq.feeds.BarAggregatorFeed(trades, frequency="15m", price_type="trade")
 ```
 
@@ -208,7 +209,7 @@ timestamps of the events to determine if they are close, based on a configurable
 useful to reduce the number of events when working with a chatty data source.
 
 ```{code-cell} python
-trades = rq.feeds.RandomWalk(n_symbols=2, n_prices=10_000, price_type="trade")
+trades = rq.feeds.RandomWalk(n_assets=2, n_events=10_000, price_type="trade")
 feed = rq.feeds.TimeGroupingFeed(trades, timeout=5.0)
 ```
 

@@ -206,7 +206,7 @@ A strategy is used by passing it to the {cl}`run` function, together with a {cl}
 (`Trader`, {cl}`Broker`, {cl}`Journal`) use sensible defaults when not specified.
 
 ```{code-cell} python
-feed = rq.feeds.RandomWalk(n_symbols=5, n_prices=1_000)
+feed = rq.feeds.RandomWalk(n_assets=5, n_events=1_000)
 strategy = rq.strategies.EMACrossover(13, 26)
 account = rq.run(feed, strategy)
 print(account)

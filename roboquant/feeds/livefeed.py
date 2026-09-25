@@ -91,5 +91,5 @@ class LiveFeed(Feed):
         return self._registry.get(symbol)
 
     @override
-    def assets(self) -> list[Asset]:
-        return list(self._registry.values())
+    def assets(self) -> set[Asset]:
+        return set(self._registry.values())

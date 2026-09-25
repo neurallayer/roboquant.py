@@ -75,7 +75,7 @@ def stop_run(message: str = "") -> NoReturn:
     raise __StopRun(message)
 
 
-def _derive_simple_trader(assets: list[Asset], account: Account) -> Trader:
+def _derive_simple_trader(assets: set[Asset], account: Account) -> Trader:
     """Derive SimpleTrader settings from provided list of assets
     and broker account
     """

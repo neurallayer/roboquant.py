@@ -23,4 +23,4 @@ feature = RSIFeature(*assets, timeperiod=11)
 
 for evt in feed.play():
     result = feature.calc(evt)
-    print(assets[0].symbol, result[0], assets[1].symbol, result[1])
+    print(result)

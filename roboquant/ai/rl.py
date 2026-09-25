@@ -43,7 +43,7 @@ class TradingEnv(gym.Env[Any, Any]):
         feed: Feed,
         obs_feature: Feature[Event],
         reward_feature: Feature[Account],
-        assets: list[Asset],
+        assets: set[Asset],
         trader: Trader | None = None,
         broker: SimBroker | None = None,
         timeframe: Timeframe | None = None,
@@ -156,7 +156,7 @@ class TradingEnv(gym.Env[Any, Any]):
 class SB3PolicyStrategy(Strategy):
     """A strategy that uses a Stable Baselines 3 policy to generate signals"""
 
-    def __init__(self, obs_feature: Feature[Event], assets: list[Asset], policy: BasePolicy):
+    def __init__(self, obs_feature: Feature[Event], assets: set[Asset], policy: BasePolicy):
         super().__init__()
         self.obs_feature = obs_feature
         self.assets = assets

@@ -93,7 +93,7 @@ class BarAggregatorFeed(Feed):
             yield evt
 
     @override
-    def assets(self) -> list[Asset]:
+    def assets(self) -> set[Asset]:
         return self.feed.assets()
 
 
@@ -145,7 +145,7 @@ class TimeGroupingFeed(Feed):
 
 
     @override
-    def assets(self) -> list[Asset]:
+    def assets(self) -> set[Asset]:
         return self.feed.assets()
 
 

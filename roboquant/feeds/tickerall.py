@@ -185,9 +185,9 @@ class TickerAllLiveFeed(LiveFeed):
         self._quote_currency(next(iter(symbols)))
 
     @override
-    def assets(self) -> list[Asset]:
+    def assets(self) -> set[Asset]:
         """The assets subscribed so far on this live feed."""
-        return [_to_asset(s, self._quote_currency(s)) for s in sorted(self._subscribed)]
+        return set(_to_asset(s, self._quote_currency(s)) for s in sorted(self._subscribed))
 
     def __on_tick(self, ev: Any) -> None:
         if ev.symbol is None or ev.bid is None or ev.ask is None:

@@ -1,12 +1,9 @@
-import os
 from cProfile import Profile
 from pstats import Stats, SortKey
 
 import roboquant as rq
 
-print("Loading large set of CSV files ...")
-path = os.path.expanduser("~/data/daily/us/nasdaq stocks/1")
-feed = rq.feeds.CSVFeed.stooq_us_daily(path)
+feed = rq.feeds.RandomWalk(n_assets=500, n_events=365*20, start_date="2000-01-01T17:00:00Z")
 print(f"timeframe: {feed.timeframe()}")
 print(f"number of assets: {len(feed.assets())}")
 

@@ -17,8 +17,8 @@ class RandomWalk(MemoryFeed):
 
     def __init__(
         self,
-        n_symbols: int = 10,
-        n_prices: int = 1_000,
+        n_assets: int = 10,
+        n_events: int = 1_000,
         price_type: Literal["bar", "trade", "quote"] = "bar",
         start_date: str | datetime = "2020-01-01T00:00:00+00:00",
         frequency: timedelta =timedelta(days=1),
@@ -33,12 +33,12 @@ class RandomWalk(MemoryFeed):
         # pylint: disable=too-many-locals
         super().__init__()
         self._rnd = np.random.default_rng(seed)
-        assets = self._get_assets(n_symbols, symbol_len)
-        assert len(assets) == n_symbols
+        assets = self._get_assets(n_assets, symbol_len)
+        assert len(assets) == n_assets
 
         start_date = start_date if isinstance(start_date, datetime) else datetime.fromisoformat(start_date)
         start_date = start_date.astimezone(timezone.utc)
-        timeline = [start_date + frequency * i for i in range(n_prices)]
+        timeline = [start_date + frequency * i for i in range(n_events)]
 
         match price_type:
             case "bar":
@@ -51,8 +51,8 @@ class RandomWalk(MemoryFeed):
                 raise ValueError("unsupported item_type", price_type)
 
         for asset in assets:
-            prices = self.__price_path(n_prices, price_dev, start_price_min, start_price_max)
-            for i in range(n_prices):
+            prices = self.__price_path(n_events, price_dev, start_price_min, start_price_max)
+            for i in range(n_events):
                 item = item_gen(asset, prices[i], volume, spread_dev)
                 self._add_item(timeline[i], item)
         self._update()

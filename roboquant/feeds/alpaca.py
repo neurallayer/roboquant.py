@@ -124,8 +124,8 @@ class AlpacaLiveFeed(LiveFeed):
         self.__put_item(data.timestamp, item)
 
     @override
-    def assets(self) -> list[Asset]:
-        return []
+    def assets(self) -> set[Asset]:
+        return set()
 
     def subscribe_trades(self, *symbols: str):
         """Subscribe to trade data for the given symbols.

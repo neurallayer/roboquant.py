@@ -39,9 +39,9 @@ class MemoryFeed(HistoricFeed):
             items.append(item)
 
     @override
-    def assets(self) -> list[Asset]:
+    def assets(self) -> set[Asset]:
         """Return the list of unique assets available in this feed"""
-        return list(self.__assets)
+        return self.__assets.copy()
 
     def timeline(self) -> Timeline:
         """Return the timeline of this feed as a list of datatime objects"""

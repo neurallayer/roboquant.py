@@ -136,15 +136,15 @@ class ParquetFeed(HistoricFeed, AssetSerializer):
         return Timeframe.EMPTY
 
     @override
-    def assets(self) -> list[Asset]:
+    def assets(self) -> set[Asset]:
         """return the list of unique assets available in this feed"""
         if not self.exists():
-            return []
+            return set()
 
         result_table = pq.read_table(self.parquet_path, columns=["asset"], schema=ParquetFeed.__schema)
         assets_list = result_table["asset"].to_pylist()
         assets_set = set(assets_list)
-        return list({self._deserialize_to_asset(s) for s in assets_set})
+        return {self._deserialize_to_asset(s) for s in assets_set}
 
     def meta(self):
         """Return the metadata of the parquet file"""
