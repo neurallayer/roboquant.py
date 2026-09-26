@@ -132,6 +132,7 @@ class RSIMetric(IndicatorMetric):
     def _calc(self, buffer: OHLCVBuffer) -> dict[str, float]:
         return {"rsi": indicators.RSI(buffer.close, self.timeperiod-1)}
 
+
 class BBandsMetric(IndicatorMetric):
     """Metric that calculates the Bollinger Bands for a single asset.
 
@@ -157,6 +158,7 @@ class BBandsMetric(IndicatorMetric):
     def _calc(self, buffer: OHLCVBuffer) -> dict[str, float]:
         upper, middle, lower = indicators.BBANDS(buffer.close, timeperiod=self.timeperiod - 1)
         return {"bbands_lower": lower, "bbands_middle": middle, "bbands_upper": upper}
+
 
 class MACDMetric(IndicatorMetric):
     """Metric that calculates the Moving Average Convergence Divergence (MACD) for a single asset.
@@ -208,8 +210,6 @@ class SignalRatingMetric(Metric):
                 result[metric_name] = float("nan")
 
         return result
-
-
 
 
 class PriceMetric(Metric):

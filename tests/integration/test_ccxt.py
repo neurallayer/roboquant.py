@@ -33,6 +33,8 @@ class TestCCXT(unittest.TestCase):
         run_price_item_feed(feed, assets, self)
 
     def test_alpaca_broker(self):
+        """Test Alpaca using the CCXT library and not Alpaca's own library"""
+
         key = os.getenv("ALPACA_API_KEY")
         secret = os.getenv("ALPACA_SECRET")
         assert(key is not None and secret is not None), "ALPACA_API_KEY and ALPACA_SECRET must be set"

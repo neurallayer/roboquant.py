@@ -21,6 +21,7 @@ def value_to_utc(value: int|str|datetime) -> datetime:
     value = datetime.fromisoformat(value) if isinstance(value,str) else value
     return value.astimezone(timezone.utc)
 
+
 class Timeframe:
     """A timeframe represents a period in time with a specific start- and end-datetime. Timeframes are immutable.
 
@@ -306,3 +307,16 @@ class Timeframe:
 
 Timeframe.EMPTY = Timeframe.fromisoformat("1900-01-01T00:00:00+00:00", "1900-01-01T00:00:00+00:00", False)
 Timeframe.INFINITE = Timeframe.fromisoformat("1900-01-01T00:00:00+00:00", "2200-01-01T00:00:00+00:00", True)
+
+
+class MarketMilestones:
+    """
+    This class containes the timeframes for some significant period in trading history that can be used
+    to run a back test against and see how a strategy would hold under such circunstances.
+    """
+
+    BLACK_MONDAY_1987 = Timeframe.fromisoformat("1987-10-19T14:30:00Z", "1987-10-19T21:00:00Z")
+    FINANCIAL_CRISIS_2008 = Timeframe.fromisoformat("2008-09-08T00:00:00Z", "2009-03-10T00:00:00Z")
+    TEN_YEAR_BULL_MARKET_2009 = Timeframe.fromisoformat("2009-03-10T00:00:00Z", "2019-03-10T00:00:00Z")
+    FLASH_CRASH_2010 = Timeframe.fromisoformat("2010-05-06T19:30:00Z", "2010-05-06T20:15:00Z")
+    CORONA_CRASH_2020 = Timeframe.fromisoformat("2020-02-17T00:00:00Z", "2020-03-17T00:00:00Z")

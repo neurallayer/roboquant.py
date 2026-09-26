@@ -15,7 +15,7 @@ from tests.common import run_price_item_feed
 load_dotenv()
 
 
-def _get_credentials():
+def _get_credentials() -> tuple[str, str]:
     return os.environ["ALPACA_API_KEY"], os.environ["ALPACA_SECRET"]
 
 class TestAlpaca(unittest.TestCase):

@@ -26,7 +26,8 @@ for asset in feed.assets():
 journal.plot("pnl/equity")
 report.add_current_figure()
 
-df = account.trades_to_dataframe().round(2)
+df = account.trades_to_dataframe()
+
 top_trades = df.sort_values("pnl", ascending=False).head(25)
 report.add_df(top_trades, "top 25 winners")
 
