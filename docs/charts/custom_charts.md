@@ -54,7 +54,7 @@ feed.plot(asset, ax=ax1 , plot_volume=False)
 metric = BBandsMetric(asset, timeperiod=10)
 bbands = feed.track(metric)
 
-ax1.fill_between(bbands.index, bbands["bbands_lower"], bbands["bbands_upper"], alpha=0.4, color="grey")
+ax1.fill_between(bbands.index, bbands["bbands/lower"], bbands["bbands/upper"], alpha=0.4, color="grey")
 ax1.set_title(asset.symbol)
 ```
 

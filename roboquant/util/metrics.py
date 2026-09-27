@@ -1,7 +1,7 @@
 import sys
 from abc import abstractmethod
 from dataclasses import dataclass
-from typing import Tuple, override
+from typing import Mapping, Tuple, override
 
 import numpy as np
 
@@ -36,7 +36,7 @@ class PNLMetric(Metric):
         self.min_equity: float = sys.float_info.max
 
     @override
-    def calc(self, event: Event, account: Account, signals: list[Signal], orders: list[Order]) -> dict[str, float]:
+    def calc(self, event: Event, account: Account, signals: list[Signal], orders: list[Order]) -> Mapping[str, float]:
         equity = account.equity_value()
 
         total, realized, unrealized = self.__get_pnl_values(equity, account)
@@ -96,7 +96,7 @@ class IndicatorMetric(Metric):
         self.buffer = OHLCVBuffer(timeperiod)
 
     @override
-    def calc(self, event: Event, account: Account, signals: list[Signal], orders: list[Order]) -> dict[str, float]:
+    def calc(self, event: Event, account: Account, signals: list[Signal], orders: list[Order]) -> Mapping[str, float]:
         item = event.price_items.get(self.asset)
         if isinstance(item, Bar):
             if self.buffer.append(item.ohlcv):
@@ -104,7 +104,7 @@ class IndicatorMetric(Metric):
         return {}
 
     @abstractmethod
-    def _calc(self, buffer: OHLCVBuffer) -> dict[str, float]:
+    def _calc(self, buffer: OHLCVBuffer) -> Mapping[str, float]:
         """Override this method in subclasses"""
         ...
 
@@ -129,7 +129,7 @@ class RSIMetric(IndicatorMetric):
     """
 
     @override
-    def _calc(self, buffer: OHLCVBuffer) -> dict[str, float]:
+    def _calc(self, buffer: OHLCVBuffer) -> Mapping[str, float]:
         return {"rsi": indicators.RSI(buffer.close, self.timeperiod-1)}
 
 
@@ -140,8 +140,8 @@ class BBandsMetric(IndicatorMetric):
     lower band placed a number of standard deviations away from the middle band.
     They are used to measure market volatility and identify overbought or
     oversold conditions. The values are computed over a rolling window of
-    `timeperiod` bars and are returned under the metric names ``bbands_lower``,
-    ``bbands_middle`` and ``bbands_upper``.
+    `timeperiod` bars and are returned under the metric names ``bbands/lower``,
+    ``bbands/middle`` and ``bbands/upper``.
 
     Attributes:
         asset (Asset): The asset for which the Bollinger Bands are calculated.
@@ -155,9 +155,9 @@ class BBandsMetric(IndicatorMetric):
     """
 
     @override
-    def _calc(self, buffer: OHLCVBuffer) -> dict[str, float]:
+    def _calc(self, buffer: OHLCVBuffer) -> Mapping[str, float]:
         upper, middle, lower = indicators.BBANDS(buffer.close, timeperiod=self.timeperiod - 1)
-        return {"bbands_lower": lower, "bbands_middle": middle, "bbands_upper": upper}
+        return {"bbands/lower": lower, "bbands/middle": middle, "bbands/upper": upper}
 
 
 class MACDMetric(IndicatorMetric):
@@ -168,7 +168,7 @@ class MACDMetric(IndicatorMetric):
     line, a signal line (a moving average of the MACD line) and a histogram
     (the difference between the two). The values are computed over a rolling
     window of `timeperiod` bars and are returned under the metric names
-    ``macd``, ``macd_signal`` and ``macd_hist``.
+    ``macd``, ``macd/signal`` and ``macd/hist``.
 
     Attributes:
         asset (Asset): The asset for which the MACD is calculated.
@@ -184,7 +184,7 @@ class MACDMetric(IndicatorMetric):
     @override
     def _calc(self, buffer: OHLCVBuffer) -> dict[str, float]:
         macd, signal, hist = indicators.MACD(buffer.close, self.timeperiod-1)
-        return {"macd": macd, "macd_signal": signal, "macd_hist": hist}
+        return {"macd": macd, "macd/signal": signal, "macd/hist": hist}
 
 
 class SignalRatingMetric(Metric):
@@ -198,7 +198,7 @@ class SignalRatingMetric(Metric):
         self.strategy = strategy
 
     @override
-    def calc(self, event: Event, account: Account, signals: list[Signal], orders: list[Order]) -> dict[str, float]:
+    def calc(self, event: Event, account: Account, signals: list[Signal], orders: list[Order]) -> Mapping[str, float]:
         signals = self.strategy.create_signals(event)
         d = {s.asset: s for s in signals}
         result:dict[str, float] = {}
@@ -239,7 +239,7 @@ class PriceMetric(Metric):
         self.volume_type = volume_type
 
     @override
-    def calc(self, event: Event, account: Account, signals: list[Signal], orders: list[Order]) -> dict[str, float]:
+    def calc(self, event: Event, account: Account, signals: list[Signal], orders: list[Order]) -> Mapping[str, float]:
         result: dict[str, float] = {}
         for asset, item in event.price_items.items():
             if asset in self.assets or not self.assets:
@@ -267,7 +267,7 @@ class RunMetric(Metric):
     signals: int = 0 # Total number of signals processed
 
     @override
-    def calc(self, event: Event, account: Account, signals: list[Signal], orders: list[Order]) -> dict[str, float]:
+    def calc(self, event: Event, account: Account, signals: list[Signal], orders: list[Order]) -> Mapping[str, float]:
         """
         Update the metrics based on the provided event, account, signals, and orders.
 
@@ -306,7 +306,7 @@ class AssetMetric(Metric):
         self._last_total: float = 1.0
 
     @override
-    def calc(self, event: Event, account: Account, signals: list[Signal], orders: list[Order]) -> dict[str, float]:
+    def calc(self, event: Event, account: Account, signals: list[Signal], orders: list[Order]) -> Mapping[str, float]:
         mkt_return: float = 0.0
         n: int = 0
         for asset, item in event.price_items.items():
@@ -364,7 +364,7 @@ class AlphaBeta(Metric):
         self.__last_prices.update(prices)
 
     @override
-    def calc(self, event: Event, account: Account, signals: list[Signal], orders: list[Order]) -> dict[str, float]:
+    def calc(self, event: Event, account: Account, signals: list[Signal], orders: list[Order]) -> Mapping[str, float]:
         prices = event.get_prices(self.price_type)
         equity = account.equity_value()
         if self.__last_equity is None:

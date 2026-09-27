@@ -34,7 +34,7 @@ fig, (ax1, ax2, ax3) = plt.subplots(nrows=3, sharex=True, height_ratios=[4,1,1])
 feed.plot(asset, ax = ax1 , plot_volume=False, label="price")
 metric = BBandsMetric(asset, timeperiod=10)
 bbands = feed.track(metric)
-ax1.fill_between(bbands.index, bbands["bbands_lower"], bbands["bbands_upper"], alpha=0.4, color="grey")  # type: ignore
+ax1.fill_between(bbands.index, bbands["bbands/lower"], bbands["bbands/upper"], alpha=0.4, color="grey")  # type: ignore
 ax1.set_title(asset.symbol)
 
 # Plot rsi chart
