@@ -10,7 +10,7 @@ from roboquant.common.order import Order
 @dataclass(slots=True, frozen=True)
 class Position:
     """The position of an asset in the account. The position prices are denoted in the
-    currency of the asset that is linked to this position.
+    currency of the asset.
 
     A position object is immutable and is managed only by the broker.
     """

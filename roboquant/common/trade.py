@@ -12,9 +12,12 @@ class Trade:
     Represents a (partially) executed order with its filled size and execution price.
     It is immutable and can be used to track the realized PNL.
 
+    Not all brokers implement this functionality.
+
     Attributes
     ----------
         asset (Asset): The asset that was traded.
+        time (datetime): the time that the trade was executed.
         size (Decimal): The size of the trade, positive for buy trades, negative for sell trades.
         price (float): The price at which the trade was executed, in the currency of the asset.
             So for a BUY, this is typically the asking price .

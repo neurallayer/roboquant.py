@@ -50,7 +50,7 @@ class Account:
     trades: list[Trade]
     """
     The trades that have been executed, each denoted in the currency of the asset.
-    Not all brokers might fill these.
+    Not all brokers support this functionality.
     """
 
     @property
@@ -60,7 +60,7 @@ class Account:
 
     @staticmethod
     def empty(currency : Currency = USD) -> "Account":
-        """Create an empty account"""
+        """Create an empty account with no cash and buying power."""
         return Account(
             buying_power=Amount(currency, 0),
             cash=Wallet(),
