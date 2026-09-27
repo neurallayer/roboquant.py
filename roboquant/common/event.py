@@ -279,10 +279,10 @@ class Event:
         is_empty() -> bool:
             Checks whether the event contains any items. Returns `True` if the event is empty,
             otherwise `False`.
-        price_items() -> dict[Asset, PriceItem]:
+        price_items() -> Mapping[Asset, PriceItem]:
             A cached property that returns a dictionary mapping each asset to its corresponding
             price item. This is useful for quickly accessing price-related data.
-        get_prices(price_type: str = "DEFAULT") -> dict[Asset, float]:
+        get_prices(price_type: str = "DEFAULT") -> Mapping[Asset, float]:
             Retrieves the prices of all assets in the event for a specified price type. Returns a
             dictionary mapping each asset to its price.
         get_price(asset: Asset, price_type: str = "DEFAULT") -> float | None:

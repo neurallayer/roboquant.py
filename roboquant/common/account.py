@@ -2,7 +2,7 @@ from dataclasses import asdict, dataclass, replace
 from datetime import datetime
 from decimal import Decimal
 from functools import cached_property
-from typing import Any
+from typing import Any, Mapping
 
 import pandas as pd
 from matplotlib import pyplot as plt
@@ -185,7 +185,7 @@ class Account:
         return self.net_positions_sizes.get(asset) or Decimal()
 
     @cached_property
-    def net_positions_sizes(self) -> dict[Asset, Decimal]:
+    def net_positions_sizes(self) -> Mapping[Asset, Decimal]:
         """
         Return the net position sizes for all the open positions.
         The result will be cached.
