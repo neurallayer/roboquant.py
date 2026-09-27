@@ -182,7 +182,7 @@ class MACDMetric(IndicatorMetric):
     """
 
     @override
-    def _calc(self, buffer: OHLCVBuffer) -> dict[str, float]:
+    def _calc(self, buffer: OHLCVBuffer) -> Mapping[str, float]:
         macd, signal, hist = indicators.MACD(buffer.close, self.timeperiod-1)
         return {"macd": macd, "macd/signal": signal, "macd/hist": hist}
 
@@ -350,7 +350,7 @@ class AlphaBeta(Metric):
         self.risk_free_return = risk_free_return
         self.price_type = price_type
 
-    def __get_market_value(self, prices: dict[Asset, float]) -> float:
+    def __get_market_value(self, prices: Mapping[Asset, float]) -> float:
         cnt = 0
         result = 0.0
         for asset in prices.keys():
@@ -359,7 +359,7 @@ class AlphaBeta(Metric):
                 result += prices[asset] / self.__last_prices[asset]
         return 1.0 if cnt == 0 else result / cnt
 
-    def __update(self, equity: float, prices: dict[Asset, float]) -> None:
+    def __update(self, equity: float, prices: Mapping[Asset, float]) -> None:
         self.__last_equity = equity
         self.__last_prices.update(prices)
 

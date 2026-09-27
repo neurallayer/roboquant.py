@@ -3,7 +3,7 @@ from array import array
 from dataclasses import dataclass
 from datetime import datetime, timezone
 from functools import cached_property
-from typing import Any, override
+from typing import Any, Mapping, override
 
 from roboquant.common.asset import Asset
 
@@ -327,7 +327,7 @@ class Event:
         return len(self.items) == 0
 
     @cached_property
-    def price_items(self) -> dict[Asset, PriceItem]:
+    def price_items(self) -> Mapping[Asset, PriceItem]:
         """Returns the price-items in this event for each asset.
         If there are multiple price-items for an asset, the last one will
         be returned.
@@ -340,7 +340,7 @@ class Event:
         """
         return {item.asset: item for item in self.items if isinstance(item, PriceItem)}
 
-    def get_prices(self, price_type: str = "DEFAULT") -> dict[Asset, float]:
+    def get_prices(self, price_type: str = "DEFAULT") -> Mapping[Asset, float]:
         """Return all the prices of a certain price_type.
 
         Args:

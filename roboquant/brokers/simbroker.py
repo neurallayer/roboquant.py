@@ -294,7 +294,7 @@ class SimBroker(Broker):
         """
 
         if event:
-            self._prices = self._prices | event.price_items
+            self._prices.update(event.price_items)
             self._last_update = event.time
             self._trades += self.__process_orders(event)
             self.__update_account_positions()
