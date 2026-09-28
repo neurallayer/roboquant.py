@@ -47,20 +47,21 @@ symbols = ["IBM", "JPM", "MSFT", "BA"]
 feed = YahooFeed(*symbols, start_date="2000-01-01", end_date="2020-12-31")
 assets = feed.assets()
 
-# Create the features
+# Create the input features
 obs_feature = FeatureSet(
     BarFeature(*assets),
     SMAFeature(PriceFeature(*assets), period=20),
     SMAFeature(PriceFeature(*assets), period=10)
 ).returns().normalize(20)
 
+# Create the reward feature
 reward_feature = EquityFeature().returns().normalize(20)
 
-# Create the environment
+# Create the trading environment
 env = TradingEnv(feed, obs_feature, reward_feature, assets)
 model = RecurrentPPO("MlpLstmPolicy", env)
 
-# Train the model and save the policy
+# Train the model and save the trained policy
 model.learn(total_timesteps=20_000, progress_bar=False)
 path = "/tmp/trained_recurrent_policy.zip"
 model.policy.save(path)

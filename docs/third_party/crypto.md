@@ -79,6 +79,7 @@ Before selecting a crypto exchange for algo-trading, better to do due diligence:
 - [x] does it have good paper-trading support?
 - [x] does it operate in your region?
 - [x] does it have enough volume to provide good execution prices?
+- [x] does it have a good CCXT implementation?
 :::
 
 

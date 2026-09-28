@@ -56,6 +56,28 @@ feed.retrieve_trades("BTC/USDT", start="2026-04-01", end="2026-04-10")
 print(feed)
 ```
 
+
+### Live feed
+A live feed works very similar to the Alpaca historic feed and uses the same crdentials.
+
+```{code} python
+from roboquant.feeds.alpaca import AlpacaLiveFeed
+
+feed = AlpacaLiveFeed(api_key, secret_key)
+feed.subscribe_quotes("F", "TSLA", "MSFT")
+
+# You can also track crypto prices
+# feed = AlpacaLiveFeed(api_key, secret_key, market="crypto")
+# feed.subscribe_trades("BTC/USD", "ETH/USD")
+
+timeframe = Timeframe.next("1 minute")
+for event in feed.play(timeframe):
+    if event.is_empty():
+        print("Are you sure the market is open?")
+    else:
+        print(event.time, event.items)
+```
+
 ---
 
 ## AlpacaBroker — Live & Paper Trading

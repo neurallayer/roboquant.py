@@ -1,4 +1,4 @@
-from abc import abstractmethod
+from abc import ABC, abstractmethod
 from collections import deque
 from datetime import datetime, timezone
 from typing import Any, Generic, TypeVar, override
@@ -16,7 +16,7 @@ NPFloatArray = NDArray[np.float32]
 NPIntArray = NDArray[np.int64]
 
 
-class Feature(Generic[T]):
+class Feature(ABC, Generic[T]):
     """Base class for different types of features. Features are the data building blocks for
     roboquant machine learning models and can be used to extract relevant information.
 
@@ -43,6 +43,7 @@ class Feature(Generic[T]):
     def reset(self):
         """Reset the state of the feature. This is called at the start of a new epoch.
         If the feature has no state, this can be left empty."""
+        pass
 
     def _shape(self) -> tuple[int]:
         """return the size of this feature as a shape tuple"""

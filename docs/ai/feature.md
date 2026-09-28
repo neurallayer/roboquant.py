@@ -20,7 +20,7 @@ and help to lower the learning curve.
 The following code snippet shows the essence of the Feature abstract base class:
 
 ```python
-class Feature(Generic[T]):
+class Feature(ABC, Generic[T]):
    
     @abstractmethod
     def calc(self, value: T) -> NDArray[np.float32]:
@@ -30,10 +30,16 @@ class Feature(Generic[T]):
     def size(self) -> int:
         ...
 
+    def reset(self):
+        pass
+
 ```
 As can be seen in the above snippet, a feature calculation always returns a Numpy array of the type float32.
 In fact, it is always a 1-dimensional float32 array and missing values are represented as float "NaN" values in
 that array. Every invocation should always return the same length array.
+
+If a feature has state, it should override the reset method and clear that state. So that during the training of the next
+epoch it starts fresh and doesn't carry over state from the previous epoch.
 
 ## Feature Types
 In *roboquant* there are three types of feature implementations included:
@@ -52,8 +58,8 @@ In *roboquant* there are three types of feature implementations included:
 | `DayOfMonthFeature` | Day of month when the event took place |
 | `MonthOfYearFeature` | Month of year when the event took place |
 | `TimeDifference` | Time difference between two events |
-| `IndicatorFeature` | Base class for own indicators |
-| `TrueRangeFeature` | Calculate True Range  |
+| `IndicatorFeature` | Base class for custom indicator features |
+| `TrueRangeFeature` | Calculate the True Range  |
 | `PriceFeature` | Extract the prices for one or more assets |
 | `BarFeature` | Extract the bar prices for one or more assets |
 | `QuoteFeature` | Extract the quotes for one or more assets |
@@ -97,7 +103,7 @@ class RSIFeature(IndicatorFeature):
 | `RandomFeature` | Feature that generates random values |
 | `FeatureSet` | Combine other features into a new feature |
 | `NormalizeFeature` | Normalize data over a certain period |
-| `FillFeature` | Fill in missing ("nan") values with last known value|
+| `FillFeature` | Fill in missing ("nan") values with the last known value|
 | `FillWithConstantFeature` | Fill missing values with a constant float value |
 | `ReturnFeature` | Calculate the next step return |
 | `LongReturnsFeature` | Calculate the return over a longer period |

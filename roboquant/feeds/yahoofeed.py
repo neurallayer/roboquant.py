@@ -86,9 +86,12 @@ class YahooFeed(MemoryFeed):
 
     def _get_asset(self, symbol: str) -> Asset:
         """Get the asset for a given symbol.
-        The default implementation will return a Stock denoted in USD.
-        Subclasses can override this method to support different asset classes
-        or currencies.
+        The default implementation will:
+        1. Check if there is already a registered asset with the symbol name
+        2. Otherwiese return a Stock asset denoted in USD.
+
+        Subclasses can override this method if required, although typically it is
+        sufficient to registed assets upfront.
         """
         return Asset.get_asset(symbol) or Stock(symbol)
 

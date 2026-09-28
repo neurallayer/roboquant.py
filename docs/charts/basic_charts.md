@@ -108,8 +108,10 @@ account = rq.run(feed, strategy, journal=journal)
 ```
 
 ### Trade Chart
-A trade chart is a price chart with added markers for when trades for that asset took place.
-A red up-pointing triangle for a SELL trade and a green down-pointing triangle for a BUY trade.
+A price chart can also show the trades with added markers for when trades for that asset took place.
+A red down-pointing triangle for a SELL trade and a green up-pointing triangle for a BUY trade.
+
+The `feed.plot` method will autimatically filter for the right asset and timeframe of the trades.
 
 ```{code-cell} python
 tf = rq.Timeframe.previous("365 days")
@@ -130,7 +132,7 @@ equity.plot();
 For larger number of open positions it is useful to see which percentage is allocated to which asset.
 
 Since assets can be denoted in different currencies, roboquant takes care of converting them to a single
-currency before plotting.
+currency before plotting. Also in case of hedging positions, they will be first netted before plotting.
 
 ```{code-cell} python
 _, ax = plt.subplots(figsize=(3, 3))
@@ -139,7 +141,7 @@ account.plot_allocation(include_cash=True, ax = ax);
 
 ### Custom Chart
 You can customize many of the plots by providing parameter arguments that will be passed on
-to matplotlib. You can also add some more lines to the plot.
+to the matplotlib functions. You can also add some more lines to the plot.
 
 ```{code-cell} python
 equity = journal.get_metrics("pnl/equity")
@@ -166,7 +168,7 @@ for ax, asset in zip(axs.flatten(), feed.assets()):
 
 ## Multi-run
 Rather that running a single back test, we can also run multiple back tests and plot the results on the same chart.
-This is useful to see how the strategy performs over different timeframes or with different parameters.
+This is useful to see how the strategy performs over different timeframes or with different hyper-parameters.
 
 One pattern we use to plot multiple runs on the same chart is:
 
