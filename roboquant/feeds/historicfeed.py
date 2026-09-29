@@ -101,15 +101,15 @@ class HistoricFeed(Feed, ABC):
             If no assets are provided, all assets in the feed will be used.
             """
             if not assets:
-                assets = tuple(self.assets())
+                s_assets: set[Asset] = self.assets()
             else:
-                assets = tuple(self.get_asset(asset) if isinstance(asset, str) else asset for asset in assets)
+                s_assets: set[Asset] = {self.get_asset(asset) if isinstance(asset, str) else asset for asset in assets}
 
             timeline: Timeline = Timeline()
-            result: dict[str, list[float]] = {asset.symbol: [] for asset in assets}
+            result: dict[str, list[float]] = {asset.symbol: [] for asset in s_assets}
             for evt in self.play(timeframe):
                 timeline.append(evt.time)
-                for asset in assets:
+                for asset in s_assets:
                     price = evt.get_price(asset, price_type)
                     if price is not None:
                         result[asset.symbol].append(price)
