@@ -92,7 +92,7 @@ class HistoricFeed(Feed, ABC):
         return items
 
     def to_timeseries(
-            self, *assets: Asset, timeframe: Timeframe | None = None, price_type: str = "DEFAULT"
+            self, *assets: Asset | str, timeframe: Timeframe | None = None, price_type: str = "DEFAULT"
         ) -> TimeSeries:
             """Return the prices of one or more assets as a multivariate TimeSeries.
             The name of each individual series is the symbol name.
@@ -102,6 +102,8 @@ class HistoricFeed(Feed, ABC):
             """
             if not assets:
                 assets = tuple(self.assets())
+            else:
+                assets = tuple(self.get_asset(asset) if isinstance(asset, str) else asset for asset in assets)
 
             timeline: Timeline = Timeline()
             result: dict[str, list[float]] = {asset.symbol: [] for asset in assets}

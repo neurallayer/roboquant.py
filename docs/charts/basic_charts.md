@@ -89,10 +89,9 @@ feed.plot("MSFT");
 Or plot multiple assets in the same chart as seperate series.
 
 ```{code-cell} python
-assets = {feed.get_asset(symbol) for symbol in ["F", "GLD", "LQD", "MSFT"]}
-ts = feed.to_timeseries(*assets)
+ts = feed.to_timeseries("F", "GLD", "LQD", "MSFT")
 
-# normalize all values so we can compare them
+# normalize all values so we can compare them in a chart
 ts.normalize()
 ts.plot();
 ```

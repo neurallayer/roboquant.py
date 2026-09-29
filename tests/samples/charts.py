@@ -31,8 +31,7 @@ feed.plot("MSFT");
 
 # %%
 # Compare multiple assets within a single line plot
-assets = {feed.get_asset(symbol) for symbol in ["F", "GLD", "LQD", "MSFT"]}
-ts = feed.to_timeseries(*assets)
+ts = feed.to_timeseries("F", "GLD", "LQD", "MSFT")
 
 # normalize all values so we can compare them
 ts.normalize()
