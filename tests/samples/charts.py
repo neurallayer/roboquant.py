@@ -29,6 +29,19 @@ feed = rq.feeds.YahooFeed("MSFT", "F", "GLD", "GSG", "BND", "LQD", "IBIT", "VIXY
 feed.plot("MSFT");
 
 
+# %%
+# Compare multiple assets within a single line plot
+assets = {feed.get_asset(symbol) for symbol in ["F", "GLD", "LQD", "MSFT"]}
+ts = feed.to_timeseries(*assets)
+
+# normalize all values so we can compare them
+ts.normalize()
+ts.plot();
+
+# %%
+# Compare same assets in 3-d plot
+ts.plot_3d();
+
 # %% [markdown]
 # Plot with BBands om the price chart
 tf = rq.Timeframe.fromisoformat("2022-01-01", "2024-01-01")

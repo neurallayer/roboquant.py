@@ -86,6 +86,23 @@ Plot a price and optionally the volume for one of the assets in the feed.
 feed.plot("MSFT");
 ```
 
+Or plot multiple assets in the same chart as seperate series.
+
+```{code-cell} python
+assets = {feed.get_asset(symbol) for symbol in ["F", "GLD", "LQD", "MSFT"]}
+ts = feed.to_timeseries(*assets)
+
+# normalize all values so we can compare them
+ts.normalize()
+ts.plot();
+```
+
+Or plot the same series in a 3-D chart.
+
+```{code-cell} python
+ts.plot_3d();
+```
+
 ### Correlation Chart
 Sometimes it is useful to inspect the correlation between the assets we want to trade in.
 There is a special plot method available that makes this visible.
@@ -217,6 +234,35 @@ for timeframe in timeframes:
     # warming up and the equity curve is flat during this period.
     equity = journal.get_metrics("pnl/equity")[13:]
 
-    ax = equity.plot_without_timeline(ax=ax, linewidth=2, color="grey", alpha=0.2, legend=False)
+    ax = equity.plot_without_timeline(
+            ax=ax, linewidth=2, color="grey", alpha=0.2, legend=False
+         )
 ```
 
+### Hyper Parameter Tuning
+Sometimes it can be helpful to visualize the results of different configurations for certain parameters. 
+
+In the code below we run back tests with different configuration for the EMACrossover strategy.
+At the end of each run we join the equity metric for that run with the ones from previous runs.
+
+it is important that the columns in the timeseries have unique names.
+
+```{code-cell} python
+feed = rq.feeds.YahooFeed.us_stocks_10(start_date="2010-01-01")
+
+params = [(2,5), (5,7), (7,11), (9,17), (13,26), (20, 50), (30, 70)]
+equities = rq.TimeSeries()
+for fast, slow in params:
+    strategy = rq.strategies.EMACrossover(fast, slow)
+    journal = rq.journals.MetricsJournal.pnl()
+    account = rq.run(feed, strategy, journal=journal)
+    column_name = f"ema-{fast}/{slow}"
+    equity = journal.get_metric("pnl/equity", column_name)
+    equities = equities.join(equity, how="outer")
+```
+
+Now we plot the equity curves of each run on a single 3-D chart.
+
+```{code-cell} python
+equities.plot_3d();
+```

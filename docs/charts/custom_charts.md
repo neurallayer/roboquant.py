@@ -7,7 +7,8 @@ kernelspec:
 # Custom Charts
 
 ## Introduction
-Often you want to visualize some metrics to are specific to your strategy and approach to developing algo-trading solutions.
+Often you want to visualize some metrics that are specific to your strategy and approach
+to developing algo-trading solutions.
 
 This example shows how to approach such a scenario. It is more meant as inspiration than a ready-to-use solution,
 but it should give you a good idea of how to use the *roboquant* framework to create your own highly customized charts.

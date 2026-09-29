@@ -42,7 +42,7 @@ class MetricsJournal(Journal):
             self._history.append((event.time, result))
 
     def get_metrics(self, *metric_names: str) -> TimeSeries:
-        """Return the captured metrics of oen or more metrics as a TimeSeries"""
+        """Return the captured metrics of one or more metrics as a TimeSeries"""
         timeline: Timeline = Timeline()
         values: dict[str, list[float]] = {name: [] for name in metric_names}
         for time, metrics in self._history:
@@ -52,6 +52,21 @@ class MetricsJournal(Journal):
             timeline.append(time)
 
         return TimeSeries.from_data(timeline, values)
+
+    def get_metric(self, metric_name: str, column_name: str | None = None) -> TimeSeries:
+        """Return the captured metric as a univatiate TimeSeries.
+        Optionlly, provide a different column_name than the metric_name to use for the TimeSeries.
+        """
+        timeline: Timeline = Timeline()
+        values: list[float] = []
+        for time, metrics in self._history:
+            value = metrics.get(metric_name)
+            if value is not None:
+                values.append(value)
+                timeline.append(time)
+
+        name = column_name if column_name is not None else metric_name
+        return TimeSeries.univariate(name, timeline, values)
 
     def get_metric_names(self) -> list[str]:
         """Return a list of the recorded metric names"""
@@ -69,6 +84,3 @@ class MetricsJournal(Journal):
             return ts.plot(ax=ax, **kwargs)
         else:
             return ts.reset_index(drop=True).plot(ax=ax, **kwargs)
-
-
-
