@@ -74,5 +74,6 @@ site:
     style: static/css/style.css
     folders: true
     favicon: static/images/favicon.png
+    # logo: static/images/favicon.png
     logo: static/images/logo.png
 

@@ -17,14 +17,15 @@ class Writer(Protocol):
 class TensorboardJournal(Journal):
     """Record metrics to a Tensorboard compatible file.
 
-    Overall it is similar to the `MetricsJournal`, but rather than keeping
-    it in memory for further inspection, it is saved to a file. You can use
-    Tensorboard to view this file while the `run` is executing.
+    Overall it is similar to the `MetricsJournal`, but rather than storing the
+    metric results in memory for further inspection, they are saved to a file.
+    You can use Tensorboard to view this file while the `run` is executing.
 
     The wall time is set to the event time, so with the right configuration
-    in the tensorboard UI, you can see the metrics evolve over the correct historic timeline.
+    in the tensorboard UI, you can see the metrics evolve over the
+    correct historic timeline.
 
-    This can be used outside the realm of machine learning, but requires
+    This journal be used outside the realm of machine learning, but requires
     the tensorboard library to be installed.
 
     Example:

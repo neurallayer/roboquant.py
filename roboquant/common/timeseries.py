@@ -41,12 +41,11 @@ class TimeSeries(pd.DataFrame):
     """A multivariate time-series that contains a timeline and named values.
     Values are always of the type float.
 
-    It is used in several places in roboquant, for example prices and metrics.
+    It is used in several places in roboquant, for example prices and metrics. It contains
+    convenience methods to plot the time series.
 
-    It contains convenience methods to plot the time series or to convert it to a Pandas dataframe.
-
-    Under the hood it is a Pandas DataFrame with the timeline as an index. So regular DataFrame
-    methods also work on TimeSeries objects.
+    Under the hood it extends a Pandas DataFrame with the timeline as an index. So regular
+    DataFrame methods also work on TimeSeries objects.
     """
 
     @property
@@ -116,12 +115,18 @@ class TimeSeries(pd.DataFrame):
 
 
     def standardize(self):
-        """Standardize all columns."""
+        """Standardize the values of the data columns using z-score scaling.
+
+        The used formula is: `(column - mean) / standard_deviation`
+        """
         for column in self.columns:
             self[column] = (self[column] - self[column].mean()) / self[column].std()
 
     def normalize(self):
-        """Normalize all columns."""
+        """Normalize the values of the data columns using min-max normalization.
+
+        The used formula is: `(column - min) / (max - min)`
+        """
         for column in self.columns:
             max = self[column].max()
             min = self[column].min()

@@ -12,8 +12,11 @@ from roboquant.feeds.memoryfeed import MemoryFeed
 
 
 class RandomWalk(MemoryFeed):
-    """This feed simulates a random-walk of stock prices.
-    It can generate `Trade`, `Quote`, or `Bar` prices."""
+    """This feed simulates a random-walk of asset prices.
+    It can generate `Trade`, `Quote`, or `Bar` prices.
+
+    The generated symbol names are random.
+    """
 
     def __init__(
         self,

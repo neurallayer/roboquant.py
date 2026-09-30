@@ -2,7 +2,6 @@
 # This example shows how to use the crypto feed with a simple EMA Crossover strategy.
 
 # %%
-from roboquant.common import utcnow
 from roboquant.common.trade import Trade
 import ccxt
 
@@ -28,7 +27,7 @@ print(account)
 
 # %%
 def sort(trade: Trade) -> float:
-    return trade.pnl_amount().convert_to(USDT, utcnow())
+    return trade.pnl_amount(USDT).value
 
 trades = sorted(account.trades, key=sort)
 if trades:

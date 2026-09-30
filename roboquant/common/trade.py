@@ -3,7 +3,7 @@ from datetime import datetime
 from decimal import Decimal
 
 from roboquant.common.asset import Asset
-from roboquant.common.monetary import Amount
+from roboquant.common.monetary import Amount, Currency
 
 
 @dataclass(slots=True, frozen=True)
@@ -20,10 +20,10 @@ class Trade:
         time (datetime): the time that the trade was executed.
         size (Decimal): The size of the trade, positive for buy trades, negative for sell trades.
         price (float): The price at which the trade was executed, in the currency of the asset.
-            So for a BUY, this is typically the asking price .
+            So for a BUY, this is typically the asking price.
         pnl (float): The total realized profit and loss of the trade, calculated as the
         difference between the execute price and the average paid price. This includes
-        any fee or commission.
+        any fee or commission and in the currency of the asset.
     """
 
     asset: Asset
@@ -36,5 +36,11 @@ class Trade:
         """Trade value in the currency of the asset"""
         return Amount(self.asset.currency, self.asset.value(self.size, self.price))
 
-    def pnl_amount(self) -> Amount:
-        return Amount(self.asset.currency, self.pnl)
+    def pnl_amount(self, to_currency: Currency | None = None) -> Amount:
+        """Return the realized P&L amount, optionally converted to the provided currency.
+        In that case, the conversion date used will be the time the trade was executed.
+        """
+        result = Amount(self.asset.currency, self.pnl)
+        if to_currency:
+            result = Amount(to_currency, result.convert_to(to_currency, self.time))
+        return result
